@@ -1,0 +1,13 @@
+"""Generic workflow for RNA-seq analysis.
+
+This workflow combines a series of rules generally required to ensure
+the conventional treatment of RNA-seq transcriptomic data. 
+
+- read mapping
+- quality control
+- estimation of gene abundance
+- detection of differentially expressed genes (DEG)
+- functional enrichment of DEG
+- ...
+"""
+
