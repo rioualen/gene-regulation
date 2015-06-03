@@ -1,0 +1,26 @@
+"""
+    Warning: for use this rule you have to trim your reads by quality score.
+    To identify the fastq file who are trim and work without ambiguity, 
+    you to rename after trimming your file '{gsm}_trimmed.fastq'.
+    
+    Map reads for each sample with Bowtie1
+    required some parameters such as:
+        -MAX_MISMATCHES
+        -READS_ISO
+        -BOWTIE_INDEX
+    these parameters have to be defined in the snakefile (workflow)
+
+"""
+
+# rule map_all:
+#     """Map trimmed reads for each sample"""
+#     input:expand('{read_dir}/{gsm}/{gsm}_bowtie.sam', gsm=GSM_LIST, read_dir=CHIP_READ_DIR)
+
+rule bowtie:
+    """Read mapping for one sample, using bowtie version 1"""
+    input: "{read_dir}/{gsm}/{gsm}_trimmed.fastq"
+    output: "{read_dir}/{gsm}/{gsm}_bowtie.sam"
+    log: "{read_dir}/{gsm}/{gsm}_bowtie.log"
+    benchmark: "{read_dir}/{gsm}/{gsm}_bowtie_benchmark.json"
+    params: max_mismatches = MAX_MISMATCHES, reads_iso = READS_ISO, index = BOWTIE_INDEX, qsub=QSUB_PARAM+" -e {read_dir}/{gsm}/{gsm}_bowtie_qsub.err -o {read_dir}/{gsm}/{gsm}_bowtie_qsub.out"
+    shell:"bowtie -q -S -n {params.max_mismatches} -m {params.reads_iso} --phred33-quals {params.index} {input} {output} 2> {log}"
