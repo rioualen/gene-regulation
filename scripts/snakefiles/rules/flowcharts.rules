@@ -1,0 +1,12 @@
+#================================================================#
+#                       Rules                                    #
+#================================================================#
+
+rule flowcharts:
+    """Draw flowcharts for the current snakefile: dag and rulegraph.
+   """
+	output: "dag.pdf", \
+		"rulegraph.pdf"
+	
+    	shell: "snakemake --forceall --dag | dot -Tpdf > {output[0]}; snakemake --forceall --rulegraph | dot -Tpdf > {output[1]}"
+

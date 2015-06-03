@@ -1,0 +1,22 @@
+#================================================================#
+#                       Rules                                    #
+#================================================================#
+
+rule peak_length:
+	"""Generates density graphs of the peaks length distributions.
+	"""
+	input: RESULTSDIR + "{peaks}_purge.fasta"
+	output: RESULTSDIR + "{peaks}_length.png"
+	benchmark: RESULTSDIR + "{peaks}_peak-length_benchmark.json"
+	run:
+		R("""library("Biostrings")
+
+		s = readDNAStringSet("{input}")
+
+		d <- density(width(s))	
+	
+		png("{output}")
+		plot(d)
+		dev.off()
+		""")
+

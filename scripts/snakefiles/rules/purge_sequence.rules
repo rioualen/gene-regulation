@@ -1,0 +1,13 @@
+#================================================================#
+#                       Rules                                    #
+#================================================================#
+
+rule purge_sequence:
+	"""Mask redundant fragments in a sequence. This perl script is no
+	more than a wrapper to facilitate this specific usage for two
+	programs developed by Stefan Kurtz : mkvtree and vmatch.
+	"""
+	input: RESULTSDIR + "{peaks}.fasta"
+	output: RESULTSDIR + "{peaks}_purge.fasta"
+	benchmark: RESULTSDIR + "{peaks}_purge-seq_benchmark.json"
+	shell: "purge-sequence -i {input} -o {output}"
