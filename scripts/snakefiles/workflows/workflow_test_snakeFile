@@ -1,0 +1,138 @@
+"""################################################################
+
+   Definition of rules to define workflows for the analysis of
+   chip-seq data.
+
+   ################################################################
+
+"""
+
+WDIR = "/home/lkhamvongsa/dr-chip-rna-seq"
+workdir: WDIR
+configfile: "scripts/snakefiles/config.json"
+
+from snakemake.utils import R
+import os
+import sys
+path = "scripts/python-scripts/"
+sys.path.append(path) # For find my module "read_analysis_table_lib"
+import read_analysis_table_lib # read_analysis_table_lib is a module where you can find two functions who give you several lists for peak-callers softwares
+
+
+
+## General parameters to use all the time with qsub.
+## Usage: snakemake -c "qsub {params.qsub}" -j 50
+## LUCIE: the option -q long could be defined for each rule separately, since some jobs are relatively short and others are long. To be evaluated.
+## We try to use the config.json file 
+
+"""
+  ************************
+  Definition of parameters
+  ************************
+
+Parameters are strore in the config.json, in snakemake this file are to use like a dictionnary
+and you can access at these parameters with the global value config .
+"""
+"""
+    ================================
+    Definition of CLUSTER parameters
+    ================================
+
+Cluster parameters required for running this workflow on cluster mode
+We use QSUB
+"""
+#QSUB_PARAM = " -V -m a -d /home/lkhamvongsa/dr-chip-rna-seq"
+QSUB_PARAM = config["qsub_parameters"]
+
+"""
+    ===============================
+    Definition of several directory
+    ===============================
+
+we need the directory of reads (where we can find them) and the directory
+where results will be store.
+"""
+#CHIP_READ_DIR = WDIR + "/data/chip-seq/reads"
+CHIP_READ_DIR = config["chip_read_directory"]
+#peaks directory not in the config file for the moment
+CHIP_PEAK_DIR = WDIR + "/results/chip-seq/peaks"
+
+"""
+    ===============================
+    Definition of SICKLE parameters
+    ===============================
+
+Sickle need to known the quality type for work
+(mettre sanger car illumina change trop souvent cf rapport Rmd)
+"""
+QUALITY_TYPE = config["sickle_parameters"]["quality_type"]
+
+"""
+    ===============================
+    Definition of BOWTIE parameters
+    ===============================
+
+"""
+#BOWTIE_GENOME_DIR = "/workspace/bowtie_genomes"
+#BOWTIE_INDEX = BOWTIE_GENOME_DIR + "/Drosophila_melanogaster/UCSC/dm3/Sequence/BowtieIndex/genome" #genome reference (dm3) required for mapping
+BOWTIE_INDEX = config["bowtie_parameters"]["bowtie_index"]
+#MAX_MISMATCHES = "1" #-n/--seedmms <int> max mismatches in seed (can be 0-3, default: -n 2)
+MAX_MISMATCHES = config["bowtie_parameters"]["max_mismatches"]
+#READS_ISO = "1" #-m <int> Suppress all alignments for a read if more than n reportable alignments exist 
+READS_ISO = config["bowtie_parameters"]["reads_iso"]
+
+"""
+    ===============================
+    Definition of SWEMBL parameters
+    ===============================
+
+Not final
+TO DO : reconsider some parameters like -m -f
+"""
+#SWEMBL_RELATIVE_BG = "0.005 0.007 0.01 0.02 0.05".split()
+SWEMBL_RELATIVE_BG = config["swembl_parameters"]["swembl_relative_bg"]
+
+"""
+    ===============================
+    Definition of Macs14 parameters
+    ===============================
+
+"""
+MACS14_PVALUE = config["macs14_parameters"]["macs_pvalue"]
+
+"""
+    ===========================
+    Definition of several lists
+    ===========================
+
+"""
+ANALYSIS_TABLE = "data/chip-seq/analysis_description.tab"
+GSM_LIST = read_analysis_table_lib.get_gsm_list(ANALYSIS_TABLE)
+list_treatment_swembl, list_control_swembl, list_swembl_r = read_analysis_table_lib.get_list_for_swembl(ANALYSIS_TABLE, SWEMBL_RELATIVE_BG)
+list_treatment_macs14, list_control_macs14, list_macs14_pvalue = read_analysis_table_lib.get_list_for_macs14(ANALYSIS_TABLE, MACS14_PVALUE)
+
+include: "rules/merge.rules"
+include: "rules/trimming.rules"
+include: "rules/bowtie.rules"
+include: "rules/convert_sam_to_bam.rules"
+include: "rules/sorted_bam.rules"
+include: "rules/convert_bam_to_bed.rules"
+include: "rules/swembl.rules"
+
+aligneur = "bowtie".split()
+
+rule all:
+    input:expand(CHIP_PEAK_DIR + "/{gsm_treatment}_vs_{gsm_control}_bowtie_swembl_R{swembl_r}/{gsm_treatment}_vs_{gsm_control}_bowtie_swembl_R{swembl_r}.bed", \
+    zip, \
+    gsm_treatment = list_treatment_swembl, \
+    gsm_control =  list_control_swembl, \
+    swembl_r = list_swembl_r)
+
+rule flowcharts:
+    """Draw flowcharts for the current snakefile: dag and rulegraph.
+   """
+    shell: "snakemake -s scripts/snakefiles/workflow_test_snakeFile --dag \
+    | perl -pe 's|graph\[|graph\[rankdir='LR', |' \
+    | dot -Tpdf -o scripts/snakefiles/workflow_test_dag.pdf; \
+snakemake -s scripts/snakefiles/workflow_test_snakeFile --rulegraph | dot -Tpdf -o scripts/snakefiles/workflow_test_rulegraph.pdf"
+    

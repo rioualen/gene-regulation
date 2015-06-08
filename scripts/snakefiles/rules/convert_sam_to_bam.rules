@@ -9,9 +9,9 @@
 #     input:expand('{read_dir}/{gsm}/{gsm}_bowtie.bam', gsm=GSM_LIST, read_dir=CHIP_READ_DIR)
 
 rule sam_to_bam:
-    input: "{read_dir}/{gsm}/{gsm}_{aligneur}.sam"
-    output: "{read_dir}/{gsm}/{gsm}_{aligneur}.bam"
-    log: "{read_dir}/{gsm}/{gsm}_sam_to_bam.log"
-    benchmark: "{read_dir}/{gsm}/{gsm}_sam_to_bam_benchmark.json"
-    params: qsub=QSUB_PARAM+" -e {read_dir}/{gsm}/{gsm}_sam_to_bam_qsub.err -o {read_dir}/{gsm}/{gsm}_sam_to_bam_qsub.out"
+    input: CHIP_READ_DIR + "/{gsm}/{gsm}_{aligneur}.sam"
+    output: CHIP_READ_DIR + "/{gsm}/{gsm}_{aligneur}.bam"
+    log: CHIP_READ_DIR + "/{gsm}/{gsm}_sam_to_bam.log"
+    benchmark: CHIP_READ_DIR + "/{gsm}/{gsm}_sam_to_bam_benchmark.json"
+    params: qsub=QSUB_PARAM+" -e " + CHIP_READ_DIR + "/{gsm}/{gsm}_sam_to_bam_qsub.err -o " + CHIP_READ_DIR + "/{gsm}/{gsm}_sam_to_bam_qsub.out"
     shell:"samtools view -bS -o {output} {input} 2> {log}"

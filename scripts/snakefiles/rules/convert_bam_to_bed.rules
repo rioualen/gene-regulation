@@ -9,9 +9,9 @@
 #     input:expand('{read_dir}/{gsm}/{gsm}_bowtie_sorted.bed', gsm=GSM_LIST, read_dir={CHIP_READ_DIR})
 
 rule bam_to_bed:
-    input: "{reads}_sorted.bam"
-    output: "{reads}_sorted.bed"
-    log: "{reads}_bam_to_bed.log"
-    benchmark: "{reads}_bam_to_bed_benchmark.json"
-    params: qsub=QSUB_PARAM+" -e {reads}_bam_to_bed_qsub.err -o {reads}_bam_to_bed_qsub.out"
+    input: CHIP_READ_DIR + "{reads}_sorted.bam"
+    output: CHIP_READ_DIR + "{reads}_sorted.bed"
+    log: CHIP_READ_DIR + "{reads}_bam_to_bed.log"
+    benchmark: CHIP_READ_DIR + "{reads}_bam_to_bed_benchmark.json"
+    params: qsub=QSUB_PARAM+" -e " + CHIP_READ_DIR + "{reads}_bam_to_bed_qsub.err -o " + CHIP_READ_DIR + "{reads}_bam_to_bed_qsub.out"
     shell:"bedtools bamtobed -i {input} > {output} 2> {log}"
