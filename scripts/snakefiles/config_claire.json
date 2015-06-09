@@ -1,0 +1,21 @@
+{
+    "__description__": "ChIP-seq workflow: testing on Dm data, implementing SPP & IDR.",
+    "__author__": "Claire Rioualen",
+    "workflow": "workflow_claire.py",
+    "data_source": "Gene Expression Omnibus (GEO)",
+    "organism": "Drosophila_melanogaster",
+    "genome_version": "dm3",
+    "chip_read_directory": "data/chip-seq/reads",
+    "analysis_description": [
+                { "treatment": "GSM570045", "control": "GSM570046" },
+                { "treatment": "GSM570045", "control": "GSM570047" }
+            ],
+    "sickle_parameters": {
+        "quality_type": "sanger"
+    },
+    "bowtie_parameters": {
+        "bowtie_index": "genomes/BowtieIndex/genome",
+        "max_mismatches": "1",
+        "reads_iso": "1"
+    }
+}

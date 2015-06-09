@@ -1,0 +1,12 @@
+"""TODO: implement BWA index
+
+"""
+
+rule bwa:
+    """Read mapping using BWA"""
+    input: RESULTSDIR + "{gsm}/{gsm}_trimmed.fastq"
+    output: RESULTSDIR + "{gsm}/{gsm}_bwa.sam"
+    log: RESULTSDIR + "{gsm}/{gsm}_bwa.log"
+    benchmark: RESULTSDIR + "{gsm}/{gsm}_bwa_benchmark.json"
+    params: index="genomes/BWAIndex/genome.fa"#, qsub=QSUB_PARAM+" -e " + CHIP_READ_DIR + "/{gsm}/{gsm}_bowtie_qsub.err -o " + CHIP_READ_DIR + "/{gsm}/{gsm}_bowtie_qsub.out"
+    shell:"bwa aln {params.index} {input} > {output} 2> {log}"
