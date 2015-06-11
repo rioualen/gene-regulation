@@ -1,0 +1,15 @@
+import os
+
+dag_file = "dag.pdf"
+rulegraph_file = "rulegraph.pdf"
+
+from snakemake.utils import read_job_properties
+
+rule flowcharts:
+    """Draw flowcharts for the current snakefile: dag and rulegraph.
+   """
+    shell: "snakemake --dag \
+    | perl -pe 's|graph\[|graph\[rankdir='LR', |' \
+    | dot -Tpdf -o  " + dag_file +"; \
+snakemake --rulegraph | dot -Tpdf -o " + rulegraph_file
+    
