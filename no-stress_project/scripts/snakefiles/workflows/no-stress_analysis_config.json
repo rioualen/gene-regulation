@@ -21,5 +21,14 @@
         "bowtie_index": "/home/desulfo-no/no-stress_project/genome/Desulfovibrio_desulfuricans_ATCC_27774",
         "max_mismatches": "1",
         "other_options": ""
+    },
+
+    "htseq_parameters": {
+        "ht_type": "bam",
+        "stranded": "no",
+        "minaqual": "10",
+        "idattr": "ID",
+        "gff_file": "/home/desulfo-no/no-stress_project/genome/Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27.gff3",
+        "other_options": ""
     }
 }

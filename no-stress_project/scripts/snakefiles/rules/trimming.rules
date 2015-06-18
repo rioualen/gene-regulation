@@ -3,7 +3,7 @@
 
 """
 
-rule trimmming_paired_end:
+rule trimming_paired_end:
     """Trim all raw paired-end read files (fastq.gz format) using sickle.
     The forward and the reverse read files have to be named respectively '{data_dir}_1.fastq.gz' and '{data_dir}_2.fastq.gz'.
     The quality threshold (threshold) and the quality type (seq_type) parameters have to be determined in the config file (json format) linked in the snakefile (workflow).

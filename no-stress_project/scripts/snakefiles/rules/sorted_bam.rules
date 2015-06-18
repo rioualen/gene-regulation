@@ -1,0 +1,17 @@
+"""
+    =======================================
+    Definition of the sorting rule bam file
+    =======================================
+"""
+
+# rule sorted_bam_all:
+#     """Sort each bamfiles"""
+#     input:expand('{read_dir}/{gsm}/{gsm}_bowtie_sorted.bam', gsm = GSM_LIST, read_dir = CHIP_READ_DIR) 
+
+rule sorted_bam:
+    input: "{reads}_bowtie2_mm" + MAX_MISMATCHES + ".bam"
+    output: "{reads}_bowtie2_mm" + MAX_MISMATCHES + "_sn.bam"
+    log: "{reads}_bowtie2_mm" + MAX_MISMATCHES + "_sn.log"
+    benchmark: "{reads}_bowtie2_mm" + MAX_MISMATCHES + "_sn_benchmark.json"
+    params: qsub=QSUB_PARAM + " -q long -e {reads}_bowtie2_mm" + MAX_MISMATCHES + "_sn_qsub.err -o {reads}_bowtie2_mm" + MAX_MISMATCHES + "_sn_qsub.out"
+    shell:"samtools sort -n {input} {wildcards.reads}_bowtie2_mm" + MAX_MISMATCHES + "_sn 2> {log}"

@@ -1,0 +1,16 @@
+"""
+    =======================================
+    Definition of the count rule file
+    =======================================
+"""
+
+
+
+rule count:
+    input: "{reads}_bowtie2_mm" + MAX_MISMATCHES + "_sn.bam"
+    output: "{reads}_bowtie2_mm" + MAX_MISMATCHES + "_count.txt"
+    log: "{reads}_bowtie2_mm" + MAX_MISMATCHES + "_count.log"
+    benchmark: "{reads}_bowtie2_mm" + MAX_MISMATCHES + "_count_benchmark.json"
+    params: ht_type = HT_TYPE , stranded = STRANDED, minaqual = MINAQUAL, idattr = IDATTR, gff_file = GFF_FILE, qsub=QSUB_PARAM + " -q long -e {reads}_bowtie2_mm" + MAX_MISMATCHES + "_count_qsub.err -o {reads}_bowtie2_mm" + MAX_MISMATCHES + "_count_qsub.out", options = OPTIONS_COUNT
+    # message: """--- Counting."""
+    shell: "htseq-count --format {params.ht_type} --stranded {params.stranded} --minaqual {params.minaqual} --idattr {params.idattr} {input} {params.gff_file} {params.options} > {output}"

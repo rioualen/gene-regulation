@@ -1,0 +1,17 @@
+"""
+    =======================================
+    Definition of the index rule bam file
+    =======================================
+"""
+
+# rule index_bam_all:
+#     """Index each bamfiles"""
+#     input:expand('{read_dir}/{gsm}/{gsm}_bowtie_sorted.bam', gsm = GSM_LIST, read_dir = CHIP_READ_DIR) 
+
+rule index_bam:
+    input: "{reads}_sn.bam"
+    output: "{reads}_index.bam"
+    log: "{reads}_index.log"
+    benchmark: "{reads}_index_benchmark.json"
+    params: qsub=QSUB_PARAM + " -q long -e {reads}_index_qsub.err -o {reads}_index_qsub.out"
+    shell:"samtools index {input} 2> {log}"
