@@ -48,8 +48,12 @@ INDEX = config["bowtie2_parameters"]["bowtie_index"]
 MAX_MISMATCHES = config["bowtie2_parameters"]["max_mismatches"]
 OPTIONS_BOWTIE2 = config["bowtie2_parameters"]["other_options"]
 
+# Variables for samtools (conversion, sort, index)
+SORT = config["samtools_parameters"]["sort_by_name"]
+
 # Variables for HTseq (count table)
 HT_TYPE = config["htseq_parameters"]["ht_type"]
+ORDER = config["htseq_parameters"]["order"]
 STRANDED = config["htseq_parameters"]["stranded"]
 MINAQUAL = config["htseq_parameters"]["minaqual"]
 IDATTR = config["htseq_parameters"]["idattr"]
@@ -67,8 +71,9 @@ include: "scripts/snakefiles/rules/trimming.rules"
 include: "scripts/snakefiles/rules/bowtie2.rules"
 include: "scripts/snakefiles/rules/convert_sam_to_bam.rules"
 include: "scripts/snakefiles/rules/sorted_bam.rules"
+# include: "scripts/snakefiles/rules/index_bam.rules" # to develop if needed for IGV
 include: "scripts/snakefiles/rules/count_table.rules"
-# include: "scripts/snakefiles/rules/index_bam.rules" # to devlopp if needed for IGV
+
 
 #================================================================#
 #                         Workflow                               #
@@ -83,8 +88,9 @@ rule all:
         # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_trimmed_thr" + THRESHOLD + ".fastq.gz", data_dir=DATA_DIRS), \
         # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + ".sam", data_dir=DATA_DIRS), \
         # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + ".bam", data_dir=DATA_DIRS), \
-        # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_sn.bam", data_dir=DATA_DIRS), \
+        # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_" + ORDER + ".bam", data_dir=DATA_DIRS), \
+        # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_index.bam", data_dir=DATA_DIRS), \ to develop if needed for IGV
         expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_count.txt", data_dir=DATA_DIRS), \
-        # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_index.bam", data_dir=DATA_DIRS), \ to devlopp if needed for IGV
+        
         
     shell: "echo 'job done'"
