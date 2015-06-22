@@ -23,8 +23,13 @@
         "other_options": ""
     },
 
+    "samtools_parameters": {
+        "sort_by_name": ""       # By position. "-n" if by name.    
+    },
+    
     "htseq_parameters": {
         "ht_type": "bam",
+        "order": "pos",
         "stranded": "no",
         "minaqual": "10",
         "idattr": "Parent",
@@ -32,3 +37,27 @@
         "other_options": ""
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

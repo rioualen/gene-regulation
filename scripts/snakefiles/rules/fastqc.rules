@@ -1,45 +1,11 @@
-#================================================================#
-#     Global variables (to include in config file instead?)      #
-#================================================================#
-
-READSDIR="reads/"
-FASTQ="ERR022523_1"
-QUALITY="quality/"
-
-#================================================================#
-#                       Rules                                    #
-#================================================================#
-
 rule fastqc:
 	"""Check the quality of fastq-formatted raw reads using the program fastQC (quality control).
 	"""
-	input: "reads/{FASTQ}.fastq"
-	output: "{QUALITY}/{FASTQ}_fastqc.html"
-	params: outdir="quality/"
-	log: "{FASTQ}_fastqc.log"
-	benchmark: "{FASTQ}_fastqc_benchmark.json"
-	shell:"fastqc --outdir {params.outdir} --format fastq {input} 2> {log} "
+	input: RESULTSDIR + "{gsm}/{gsm}_{step}.fastq"
+	output: RESULTSDIR + "{gsm}/{gsm}_{step}_fastqc.html"
+	params: outdir = RESULTSDIR + "{gsm}/"
+	log: RESULTSDIR + "{gsm}/{gsm}_{step}_fastqc.log"
+	benchmark: RESULTSDIR + "{gsm}/{gsm}_{step}_fastqc_benchmark.json"
+	shell:"fastqc --outdir {params.outdir} --format fastq {input} 2> {log}"
 
-
-
-#rule fastqc:
-#    """Check the quality of fastq-formatted raw reads using the program fastQC (quality control).
-#    """
-#    input: "{read_dir}/{reads}.fastq"
-#    output: outdir="{read_dir}/{reads}_fastqc/"
-#    log: "{read_dir}/{reads}_fastqc.log"
-#    benchmark: "{read_dir}/{reads}_fastqc_benchmark.json"
-#    params: qsub = config["qsub_parameters"] + " -q medium -e {read_dir}/{reads}_fastqc_qsub.err -o {read_dir}/{reads}_fastqc_qsub.out"
-#    shell:"fastqc --outdir {output.outdir} --format fastq {input} 2> {log} "
-
-
-# rule fastqc_from_bam:
-#     """Check the quality of bam-formatted raw reads using the program fastQC (quality control).
-#     """
-#     input: "{read_dir}/{reads}_bowtie.bam"
-#     output: "{read_dir}/{reads}_fastqc.html"
-#     log: "{read_dir}/{reads}_fastqc.log"
-#     benchmark: "{read_dir}/{reads}_fastqc_benchmark.json"
-#     params: qsub = QSUB_PARAM + " -q short -e {read_dir}/{reads}_fastqc_qsub.err -o {read_dir}/{reads}_fastqc_qsub.out"
-#     shell:"fastqc - o " + CHIP_READ_DIR + "/{wildcards.reads} -f bam  {input} 2> {log} "
 

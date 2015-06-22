@@ -1,0 +1,18 @@
+rule homer:
+	"""Peak-calling with HOMER software, findPeaks algorithm (!).
+	Can take .bed inputs or files coming directly from Bowtie or Eland alignement.
+	"""
+	input: 
+		chip = RESULTSDIR + "{CHIP}/{CHIP}_{ALIGNER}.bed" , \
+		inp = RESULTSDIR + "{INPUT}/{INPUT}_{ALIGNER}.bed"
+	output: 
+		RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_homer.bed"
+	params:
+		chip_tag=RESULTSDIR + "Homer_{CHIP}", \
+		input_tag=RESULTSDIR + "Homer_{INPUT}"
+
+	shell:"""makeTagDirectory {params.chip_tag} -genome {GENOME} -checkGC {input.chip}
+		makeTagDirectory {params.input_tag} -genome {GENOME} -checkGC {input.inp}
+		findPeaks {params.chip_tag} -style factor -o auto -i {params.input_tag}
+		pos2bed.pl {params.chip_tag}/peaks.txt > {output}
+		"""

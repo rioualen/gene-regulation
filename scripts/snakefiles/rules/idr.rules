@@ -1,0 +1,46 @@
+"""Calculating IDR across replicates. Optimized for SPP peak-caller.
+"""
+rule idr:
+	"""Calculating IDR across replicates. Optimized for SPP peak-caller.
+	
+	Outdir "IDR" has to be created outside the shell command, hence the output touch.
+
+	Only takes spp files for now.
+	"""
+	input: expand(expand("{wdir}results/{chip}_vs_{{inp}}/{chip}_{aligner}_spp.narrowPeak", zip, chip=CHIP, aligner=ALIGNER, wdir=WDIR), inp=INPUT)
+	output: touch("results/IDR/idr.done")
+#	log: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.idr.log"
+#	benchmark: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.idr_benchmark.json"
+	params: outdir=WDIR+"results/IDR/test"
+	shell: "cd ~/bin/idrCode ; \
+		Rscript batch-consistency-analysis.r {input} -1 {params.outdir} 0 F signal.value 2> test.log; \
+		Rscript batch-consistency-plot.r 1 {params.outdir} {params.outdir}; \
+		cd {WDIR}"
+
+
+## TODO emplacement idr code à automatiser ? 
+
+
+#	input:
+#		RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.narrowPeak"
+
+#	output:
+#		RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.idr.done"
+#	shell: """touch {output}"""
+
+#	input: 
+#		"results/GSM570045_vs_GSM570046/GSM570045_bowtie_spp.narrowPeak", \
+#		"results/GSM570045_vs_GSM570046/GSM570045_bwa.narrowPeak", \
+#		"results/GSM570045_vs_GSM570048/GSM570045_bowtie.narrowPeak", \
+#		"results/GSM570045_vs_GSM570048/GSM570045_bwa.narrowPeak",
+#	output: touch("idr.done")
+#	shell: """Rscript batch-consistency-analysis.r {input} -1 idr 0 F signal.value 2> {log}"""
+
+#Rscript batch-consistency-analysis.r results/GSM570045_vs_GSM570048/GSM570045_bowtie.narrowPeak results/GSM570045_vs_GSM570046/GSM570045_bowtie.narrowPeak -1 idr 0 F signal.value 2> test.log
+#Rscript batch-consistency-plot.r 1 plot idr
+
+
+
+#input: expand("{S}", S=["dir1/sample1.txt", "dir2/sample2.txt"])
+#output: "output.done"
+#shell: "cat {input} > {output}" 

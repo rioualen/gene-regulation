@@ -1,13 +1,10 @@
-#================================================================#
-#                       Rules                                    #
-#================================================================#
 
 rule peak_length:
 	"""Generates density graphs of the peaks length distributions.
 	"""
-	input: RESULTSDIR + "{peaks}_purge.fasta"
-	output: RESULTSDIR + "{peaks}_length.png"
-	benchmark: RESULTSDIR + "{peaks}_peak-length_benchmark.json"
+	input: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_purged.fasta"
+	output: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_length.png"
+	benchmark: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_peak-length_benchmark.json"
 	run:
 		R("""library("Biostrings")
 
@@ -20,3 +17,4 @@ rule peak_length:
 		dev.off()
 		""")
 
+## fonctions dans RSAT ??
