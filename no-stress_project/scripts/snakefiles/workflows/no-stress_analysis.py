@@ -78,8 +78,8 @@ include: "scripts/snakefiles/rules/count_table.rules"
 rule all:
     """Run workflow for each replica of each experience"""
     input:
-        expand(config["data_root_dir"] + "{data_dir}/{dataset}_fastqc_raw/", zip, dataset=DATASETS, data_dir=DATA_DIRS), \
-        expand(config["data_root_dir"] + "{data_dir}/{dataset}_fastqc_trimmed/", zip, dataset=DATASETS, data_dir=DATA_DIRS), \
+        expand(config["data_root_dir"] + "{data_dir}/{dataset}_fastqc/", zip, dataset=DATASETS, data_dir=DATA_DIRS), \
+        expand(config["data_root_dir"] + "{data_dir}/{dataset}_trimmed_thr20_fastqc/", zip, dataset=DATASETS, data_dir=DATA_DIRS), \
         # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_trimmed_thr" + THRESHOLD + ".fastq.gz", data_dir=DATA_DIRS), \
         # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + ".sam", data_dir=DATA_DIRS), \
         # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + ".bam", data_dir=DATA_DIRS), \
