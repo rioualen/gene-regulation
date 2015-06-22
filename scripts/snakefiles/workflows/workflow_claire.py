@@ -1,4 +1,9 @@
-"""Workflow from fastq data to SPP peak caller to IDR calculation...
+"""ChIP-seq workflow including: 
+	- normalization & QC: fastq merging, trimming, quality control...
+	- formatting rules: bed, bam, sam, narrowPeak, fasta...
+	- alignment: Bowtie, BWA
+	- peak-calling: SWEMBL, MACS, SPP, HOMER
+	- downstream analyses: IDR, sequence purge, peak length
 """
 
 #================================================================#
@@ -8,10 +13,13 @@
 from snakemake.utils import R
 import os
 import sys
+import time
 
 #================================================================#
-#                     Global variables                           #
+#              Configuration (global viariables)                 #
 #================================================================#
+
+#start_time = time.time()
 
 WDIR = "/home/rioualen/Desktop/workspace/fg-chip-seq/"
 workdir: WDIR
@@ -20,72 +28,78 @@ configfile: "scripts/snakefiles/config_claire.json"
 
 WORKFLOW = config["workflow"]
 
-RESULTSDIR = "results/"
+# Data
+CHIP = config["samples"]["chip"].split()
+INPUT = config["samples"]["input"].split()
+GSM_LIST = CHIP + INPUT
 
-# à automatiser, quand même...
-GSM_LIST = "GSM570045 GSM570047".split()
-SRR_LIST = "SRR063882 SRR063885".split() 
+GENOME= config["genome_version"]
 
+CHIP_READ_DIR = config["chip_read_directory"]
+RESULTSDIR = "results/"	
 
-#CHIP_READ_DIR = config["chip_read_directory"]
-CHIP_READ_DIR = "data/chip-seq/reads/"
+# QC
+QUALITY_STEP= config["fastQC_steps"].split()
 
-# Sickle
+# Trimming
 QUALITY_TYPE = config["sickle_parameters"]["quality_type"]
 
-# Bowtie
+# Alignment
+ALIGNER = config["aligners"].split()
 BOWTIE_INDEX = config["bowtie_parameters"]["bowtie_index"]
 MAX_MISMATCHES = config["bowtie_parameters"]["max_mismatches"]
 READS_ISO = config["bowtie_parameters"]["reads_iso"]
 
-ALIGNER = "bowtie".split()
-	
+# Peak-calling
+PEAK_CALLER = config["peak_callers"].split()
+
+# Motif analysis
+OLIGO_LENGTH = config["oligo_stats"].split()
+
 #================================================================#
 #                         Workflow                               #
 #================================================================#
 
-
-
 rule all:
-	"""Run the workflow on each peak set.
+	"""Run the workflow on Short Read Run data.
 	"""
-
 	input: 
 		expand("results/dag.pdf"), \
 		expand("results/rulegraph.pdf"), \
-		expand("results/{gsm}/{gsm}_merged.fastq", gsm=GSM_LIST), \
-		expand("results/{gsm}/{gsm}_merged_fastqc.html", gsm=GSM_LIST), \
-		expand("results/{gsm}/{gsm}_trimmed.fastq", gsm=GSM_LIST), \
-		expand("results/{gsm}/{gsm}_trimmed_fastqc.html", gsm=GSM_LIST), \
-		expand("results/{gsm}/{gsm}_bowtie.sam", gsm=GSM_LIST), \
-		expand("results/{gsm}/{gsm}_bwa.sam", gsm=GSM_LIST), \
-		expand("results/{gsm}/{gsm}_bowtie.bam", gsm=GSM_LIST)
+		expand("results/{gsm}/{gsm}_{step}_fastqc.html", gsm=GSM_LIST, step=QUALITY_STEP), \
+		expand("results/{chip}_vs_{inp}/{chip}_{aligner}_{caller}_{oligo}.txt", chip=CHIP, inp=INPUT, oligo=OLIGO_LENGTH, aligner=ALIGNER, caller=PEAK_CALLER), \			
+		expand("results/{chip}_vs_{inp}/{chip}_{aligner}_{caller}_length.png", chip=CHIP, inp=INPUT, aligner=ALIGNER, caller=PEAK_CALLER), \
+#		expand("results/{chip}_vs_{inp}/{chip}_{aligner}_{caller}.bed", chip=CHIP, inp=INPUT, aligner=ALIGNER, caller=PEAK_CALLER), \
+		expand("results/IDR/idr.done")
 
-#		expand("results/SWEMBL_mmus_{factor}_vs_mmus_Input_peaks_R{swembl_r}_nof_purge.fasta", factor=FACTORS, swembl_r=SWEMBL_R), \
-#		expand("results/SWEMBL_mmus_{factor}_vs_mmus_Input_peaks_R{swembl_r}_nof_{oligo}.txt", factor=FACTORS, swembl_r=SWEMBL_R, oligo=OLIGO_LENGTH), \
-#		expand("results/SWEMBL_mmus_{factor}_vs_mmus_Input_peaks_R{swembl_r}_nof_length.png", factor=FACTORS, swembl_r=SWEMBL_R), \
-
-#rule all:
-#    input:expand(CHIP_PEAK_DIR + "/{gsm_treatment}_vs_{gsm_control}_bowtie_swembl_R{swembl_r}/{gsm_treatment}_vs_{gsm_control}_bowtie_swembl_R{swembl_r}.bed", \
-#    zip, \
-#    gsm_treatment = list_treatment_swembl, \
-#    gsm_control =  list_control_swembl, \
-#    swembl_r = list_swembl_r)
 
 #================================================================#
 #                         Includes                               #
 #================================================================#
 
-
-include: "../rules/flowcharts.rules"
-include: "../rules/fastqc.rules"
-include: "../rules/fastqc_after.rules"
-include: "../rules/merge.rules"
-include: "../rules/trimming.rules"
+include: "../rules/bed_to_fasta.rules"
 include: "../rules/bowtie.rules"
 include: "../rules/bwa.rules"
+include: "../rules/convert_bam_to_bed.rules"
 include: "../rules/convert_sam_to_bam.rules"
-
-#include: "rules/convert_sam_to_bam.rules"
+include: "../rules/count_oligo.rules"
+include: "../rules/fastqc.rules"
+include: "../rules/flowcharts.rules"
+include: "../rules/homer.rules"
+include: "../rules/idr.rules"
+include: "../rules/macs14.rules"
+include: "../rules/merge.rules"
+include: "../rules/narrowpeak_to_bed.rules"
+include: "../rules/peak_length.rules"
+include: "../rules/purge_sequence.rules"
+include: "../rules/spp.rules"
+include: "../rules/swembl.rules"
+include: "../rules/trimming.rules"
 #include: "rules/sorted_bam.rules"
-#include: "rules/convert_bam_to_bed.rules"
+
+
+
+#print "Program took", time.time() - start_time, "to run"
+
+
+
