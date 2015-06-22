@@ -1,12 +1,8 @@
-#================================================================#
-#                       Rules                                    #
-#================================================================#
-
 rule flowcharts:
     """Draw flowcharts for the current snakefile: dag and rulegraph.
    """
-	output: "dag.pdf", \
-		"rulegraph.pdf"
-	
-    	shell: "snakemake --forceall --dag | dot -Tpdf > {output[0]}; snakemake --forceall --rulegraph | dot -Tpdf > {output[1]}"
+	input: "scripts/snakefiles/workflows/" + WORKFLOW
+	output: RESULTSDIR + "dag.pdf", \
+		RESULTSDIR + "rulegraph.pdf"
+    	shell: "snakemake -s {input} --forceall --dag | perl -pe 's/graph\[/graph\[rankdir='LR', /' | dot -Tpdf > {output[0]}; snakemake -s {input} --forceall --rulegraph | dot -Tpdf > {output[1]}"
 

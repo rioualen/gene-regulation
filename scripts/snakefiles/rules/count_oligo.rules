@@ -1,12 +1,9 @@
-#================================================================#
-#                       Rules                                    #
-#================================================================#
 
 rule count_oligo:
 	"""Counts occurences of oligonucleotides of length N, as specified in the parameters.
 	"""
-	input: RESULTSDIR + "{peaks}_purge.fasta"
+	input: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_purged.fasta"
 	params: oligo="{oligo}"
-	output: RESULTSDIR + "{peaks}_{oligo}.txt"
-	benchmark: RESULTSDIR + "{peaks}_count-seq_benchmark.json"
+	output: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_{oligo}.txt"
+	benchmark: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_count-seq_benchmark.json"
 	shell: "oligo-analysis -l {params.oligo} -i {input} -o {output}"
