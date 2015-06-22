@@ -1,0 +1,34 @@
+{
+    "__description__": "Parameters for the analysis of stress response in Desulfovibrio desulfuricans.",
+    "__author__": "Jeanne Cheneby, Justine Long & Jacques van Helden",
+    "data_source": "Jeff Cole",
+    "organism": "",
+    "genome_version": "",
+    "qsub_parameters": "-V -m a -d /home/desulfo-no/no-stress_project",
+    "data_root_dir": "data/1258-BRM/",
+    
+    "fastqc_parameters": {
+        "other_options": ""
+    },
+
+    "sickle_parameters": { 
+        "seq_type": "sanger",
+        "threshold": "20",
+        "other_options": ""
+    },
+    
+    "bowtie2_parameters": {
+        "bowtie_index": "/home/desulfo-no/no-stress_project/genome/Desulfovibrio_desulfuricans_ATCC_27774",
+        "max_mismatches": "1",
+        "other_options": ""
+    },
+
+    "htseq_parameters": {
+        "ht_type": "bam",
+        "stranded": "no",
+        "minaqual": "10",
+        "idattr": "ID",
+        "gff_file": "/home/desulfo-no/no-stress_project/genome/Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27.gff3",
+        "other_options": ""
+    }
+}
