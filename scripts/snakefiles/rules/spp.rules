@@ -1,0 +1,61 @@
+"""Peak calling with SPP R package, output in .narrowPeak format (bed-like format).
+"""
+
+rule spp:
+	"""Peak-calling with SPP.
+	"""
+	input:
+		chip = RESULTSDIR + "{CHIP}/{CHIP}_{ALIGNER}.bam" , \
+		inp = RESULTSDIR + "{INPUT}/{INPUT}_{ALIGNER}.bam"
+	log: RESULTSDIR + "{CHIP}_vs_{INPUT}/spp.log"
+#	benchmark: RESULTSDIR + {CHIP} + "_vs_" + {INPUT} + "/spp_benchmark.json"
+	output: 
+		RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.narrowPeak", \
+		RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.crosscorrelation.pdf", \
+		RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.smoothed.density.wig", \
+		RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.enrichment.estimates.wig", \
+		RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.broadPeak", \
+		RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.binding.positions.txt"
+	run:
+		R("""library(spp)
+
+		getwd()
+
+
+		chip.data <- read.bam.tags("{input.chip}")
+		input.data <- read.bam.tags("{input.inp}")
+
+		binding.characteristics <- get.binding.characteristics(chip.data,srange=c(50,500),bin=5, accept.all.tags = T) 
+
+		pdf(file="{output[5]}",width=5,height=5)
+		par(mar = c(3.5,3.5,1.0,0.5), mgp = c(2,0.65,0), cex = 0.8)
+		plot(binding.characteristics$cross.correlation,type='l',xlab="strand shift",ylab="cross-correlation")
+		abline(v=binding.characteristics$peak$x,lty=2,col=2)
+		dev.off()
+
+		chip.data.info <- select.informative.tags(chip.data)
+		input.data.info <- select.informative.tags(input.data)
+
+		chip.data.qua <- remove.local.tag.anomalies(chip.data.info)
+		input.data.qua <- remove.local.tag.anomalies(input.data.info)
+
+		tag.shift <- round(binding.characteristics$peak$x/2)
+		smoothed.density <- get.smoothed.tag.density(chip.data.qua,control.tags=input.data.qua,bandwidth=200,step=100,tag.shift=tag.shift)
+		writewig(smoothed.density,"{output[1]}","s_1 smoothed, background-subtracted tag density")
+
+		enrichment.estimates <- get.conservative.fold.enrichment.profile(chip.data.qua,input.data.qua,fws=500,step=100,alpha=0.01)
+		writewig(enrichment.estimates,"{output[2]}","conservative fold-enrichment/depletion estimates shown on log2 scale")
+
+		broad.clusters <- get.broad.enrichment.clusters(chip.data.qua, input.data.qua, window.size=1e3, z.thr=3,tag.shift=round(binding.characteristics$peak$x/2))
+		write.broadpeak.info(broad.clusters,"{output[3]}")
+
+		fdr <- 5e-2
+		detection.window.halfsize <- binding.characteristics$whs;
+		bp <- find.binding.positions(signal.data=chip.data.qua,control.data=input.data.qua,fdr=fdr,whs=detection.window.halfsize)
+		print(paste("detected",sum(unlist(lapply(bp$npl,function(d) length(d$x)))),"peaks"))
+		output.binding.results(bp,"{output[4]}");
+
+		bp <- add.broad.peak.regions(chip.data.qua, input.data.qua, bp, window.size=1000,z.thr=3)
+		write.narrowpeak.binding(bp,"{output[0]}")
+
+		""") 

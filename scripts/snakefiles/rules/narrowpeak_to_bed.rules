@@ -1,0 +1,7 @@
+rule narrowpeak_to_bed:
+	"""Converts narrowPeak to bed file format.
+	NB: narrowPeak is technically a bed file...
+	"""
+	input: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.narrowPeak"
+	output: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.bed"
+	shell: "cp {input} {output}"
