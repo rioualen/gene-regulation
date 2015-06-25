@@ -24,16 +24,17 @@
     },
 
     "samtools_parameters": {
-        "sort_by_name": ""       # By position. "-n" if by name.    
+        "sort_by_name": ""    
     },
     
     "htseq_parameters": {
         "ht_type": "bam",
-        "order": "pos",
+        "order": "name",
         "stranded": "no",
         "minaqual": "10",
-        "idattr": "Parent",
-        "gff_file": "genome/Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27.gff3",
+        "idattr": "gene_id",
+	"mode": "intersection-nonempty",
+        "gff_file": "genome/Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27.gtf",
         "other_options": ""
     }
 }

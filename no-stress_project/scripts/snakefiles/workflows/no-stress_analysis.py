@@ -58,6 +58,7 @@ STRANDED = config["htseq_parameters"]["stranded"]
 MINAQUAL = config["htseq_parameters"]["minaqual"]
 IDATTR = config["htseq_parameters"]["idattr"]
 GFF_FILE = config["htseq_parameters"]["gff_file"]
+MODE = config["htseq_parameters"]["mode"]
 OPTIONS_COUNT = config["htseq_parameters"]["other_options"]
 
 
@@ -71,8 +72,8 @@ include: "scripts/snakefiles/rules/trimming.rules"
 include: "scripts/snakefiles/rules/bowtie2.rules"
 include: "scripts/snakefiles/rules/convert_sam_to_bam.rules"
 include: "scripts/snakefiles/rules/sorted_bam.rules"
-# include: "scripts/snakefiles/rules/index_bam.rules" # to develop if needed for IGV
 include: "scripts/snakefiles/rules/count_table.rules"
+include: "scripts/snakefiles/rules/index_bam.rules"
 
 
 #================================================================#
@@ -89,8 +90,8 @@ rule all:
         # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + ".sam", data_dir=DATA_DIRS), \
         # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + ".bam", data_dir=DATA_DIRS), \
         # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_" + ORDER + ".bam", data_dir=DATA_DIRS), \
-        # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_index.bam", data_dir=DATA_DIRS), \ to develop if needed for IGV
-        expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_count.txt", data_dir=DATA_DIRS), \
+        expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_pos.bam.bai", data_dir=DATA_DIRS), \
+        expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_" + ORDER + "_count.txt", data_dir=DATA_DIRS)
         
         
     shell: "echo 'job done'"
