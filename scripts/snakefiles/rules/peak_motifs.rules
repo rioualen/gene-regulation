@@ -1,0 +1,14 @@
+rule peak-motifs:
+	input: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_{PEAK_CALLERS}.fasta"
+	output: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_{PEAK_CALLERS}.html"
+	log: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_{PEAK_CALLERS}_peak-motifs.log"
+	benchmark: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_{PEAK_CALLERS}_peak-motifs_bench.json"
+	shell: "peak-motifs  -v 1 \
+		-i  \
+		-max_seq_len {MAX_SEQ_LENGTH} -markov auto -disco oligos,positions -nmotifs {NMOTIFS} -minol {MINOL} -maxol {MAXOL} -no_merge_lengths -2str -origin center \
+		-motif_db {MOTIF_DB} \
+		-scan_markov 1 \
+		-task {PEAK_MOTIFS_TASKS} \
+		-prefix peak-motifs -noov -img_format png \
+		-outdir $RSAT/public_html/tmp/www-data/2015/06/25/peak-motifs.2015-06-25.152353_2015-06-25.152353_dbqQbx"
+
