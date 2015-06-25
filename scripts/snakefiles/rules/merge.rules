@@ -1,6 +1,7 @@
-"""
-	Rule to merge several raw read files (fastq format) sharing the same
-	sample (GSM identifier).
+"""Rule to merge several raw read files (fastq format) belonging to
+the same sample. The sequences of a same sample are generally split
+between severa fastq files corresponding to different sequencing
+lanes.
 """
 
 rule merge_short_reads:
