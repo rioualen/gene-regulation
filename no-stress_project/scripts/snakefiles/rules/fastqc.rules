@@ -4,10 +4,13 @@
 """
 
 
-rule fastqc_raw:
-    """Check the quality of the {dataset}.fastq.gz file containing fastq-formatted raw reads using the program fastQC (quality control).
-    You can add any wanted parameters in the "other options" of the config file.
-    The results are put into a folder named '{dataset}_fastqc'.
+rule fastqc:
+    """Check the quality of a file named {dataset}.fastq.gz, containing
+    fastq-formatted raw reads using the program fastQC (quality
+    control).  You can add any wanted parameters in the "other
+    options" of the config file.  The results are put into a folder
+    named '{dataset}_fastqc'.
+
     """
     
     input: "{data_dir}/{dataset}.fastq.gz"
