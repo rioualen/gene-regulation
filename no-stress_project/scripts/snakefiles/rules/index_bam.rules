@@ -5,9 +5,9 @@
 """
 
 rule index_bam:
-    input: "{reads}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_pos.bam"
-    output: "{reads}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_pos.bam.bai"
-    log: "{reads}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_pos_index.log"
-    benchmark: "{reads}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_pos_index_benchmark.json"
-    params: qsub = QSUB_PARAM + " -q long -e {reads}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_pos_index_qsub.err -o {reads}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_pos_index_qsub.out"
+    input: "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_pos.bam"
+    output: "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_pos.bam.bai"
+    log: "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_pos_index.log"
+    benchmark: "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_pos_index_benchmark.json"
+    params: qsub = QSUB_PARAM + " -q long -e {data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_pos_index_qsub.err -o {data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_pos_index_qsub.out"
     shell:"samtools index {input} 2> {log}"

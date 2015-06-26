@@ -36,6 +36,15 @@
 	"mode": "intersection-nonempty",
         "gff_file": "genome/Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27.gtf",
         "other_options": ""
+    },
+
+    "edgeR_parameters": {
+        "N": ["N1", "N2", "N4"],
+        "NN": ["NN2", "NN4", "NN5"], 
+        "S": ["S1", "S4", "S5"],
+        "SN": ["SN1", "SN2", "SN5"],
+        "cond1": ["N", "N", "S", "NN"],
+        "cond2": ["NN", "S", "SN", "SN"]
     }
 }
 

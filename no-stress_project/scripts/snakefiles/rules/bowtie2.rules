@@ -3,7 +3,7 @@
     To identify the fastq file who are trimmed and work without ambiguity, 
     you have to name your trimmed files: 
                 - '{data_dir}_1_trimmed.fastq.gz' and '{data_dir}_2_trimmed.fastq.gz' for paired-end reads
-                - '{reads}_trimmed.fastq.gz' for unpaired reads
+                - '{data_dir}/{data_dir}_trimmed.fastq.gz' for unpaired reads
 
     Map reads for each sample with Bowtie2 require some parameters such as:
         -max_mismatches
@@ -19,11 +19,11 @@
 rule bowtie2_paired_end:
     """Read mapping for a paired-end sample, using bowtie version 2 """
     
-    input: forward = "{reads}_1_trimmed_thr" + THRESHOLD + ".fastq.gz", reverse = "{reads}_2_trimmed_thr" + THRESHOLD + ".fastq.gz"
-    output: "{reads}_bowtie2_mm" + MAX_MISMATCHES + ".sam"
-    log: "{reads}_bowtie_mm" + MAX_MISMATCHES + ".log"
-    benchmark: "{reads}_bowtie_benchmark_mm" + MAX_MISMATCHES + ".json"
-    params: index = INDEX, max_mismatches = MAX_MISMATCHES, qsub=QSUB_PARAM + " -q long -e {reads}_bowtie_qsub.err -o {reads}_bowtie_qsub.out", options = OPTIONS_BOWTIE2
+    input: forward = "{data_dir}/{data_dir}_1_trimmed_thr" + THRESHOLD + ".fastq.gz", reverse = "{data_dir}/{data_dir}_2_trimmed_thr" + THRESHOLD + ".fastq.gz"
+    output: "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + ".sam"
+    log: "{data_dir}/{data_dir}_bowtie_mm" + MAX_MISMATCHES + ".log"
+    benchmark: "{data_dir}/{data_dir}_bowtie_benchmark_mm" + MAX_MISMATCHES + ".json"
+    params: index = INDEX, max_mismatches = MAX_MISMATCHES, qsub=QSUB_PARAM + " -q long -e {data_dir}/{data_dir}_bowtie_qsub.err -o {data_dir}/{data_dir}_bowtie_qsub.out", options = OPTIONS_BOWTIE2
     shell: "bowtie2 -x {params.index} -1 {input.forward} -2 {input.reverse} -S {output} --phred33 -N {params.max_mismatches} -t {params.options} 2> {log}"
  
     
