@@ -43,29 +43,47 @@ def read_sample_ids(file):
     return(samples)
     
 
-def glob_multi_dir(dir_list, pattern="", base_dir="."):
+def glob_multi_dir(dir_list, pattern="", base_dir=".", ext=""):
     """Given a list of directories, returns the list of files matching a
-    given pattern.
+    given pattern. In addition to the list of matching files, this
+    function returns the list of directories associated to each file,
+    and a list of basenames. An extension can optionally be removed
+    from the basename list.
 
     :param dir_list: list of directories
     :type dir_list: list of strings
     :param pattern: matching pattern for file names (default: ""). If not specified, all files found in the directories are returned.
     :type pattern: string
-    :param base_dir (default: "."). Base directory. All directories of dir_list are computed relative to base_dir.
+    :param base_dir: Base directory (default: "."). All directories of dir_list are computed relative to base_dir.
     :type base_dir: string
-    :return: a list of file paths, defined relative to base_dir.
+    :param ext: File extension to suppress in basename list (default: "").
+    :type ext: string
+    :return: thre lists of the same length, indicating the file paths, associated directories, and basenames, respectively.
     :rtype: list of strings
 
     """
-    files = []
+    files = [] ## List of paths to the files
+    file_dirs = [] ## List of directories associated to each file (same length as the "files" list)
+    basenames = [] ## List of file basenmes (same length as the "files" list
     print("\t".join(["glob_multi_dir()", "Listing files in", str(len(dir_list)), "directories", "pattern: " + pattern]))
     import glob
-    for dir in dir_list:
-        glob_pattern = base_dir + "/" + dir + "/" + pattern
-#        print ("glob pattern:\t"+glob_pattern)
-        dir_files = glob.glob(glob_pattern)
-#        print ("dir_files:\t"+"; ".join(dir_files))
-        files = files + dir_files
+    for current_dir in dir_list:
+        ## Find files matching the pattern in the current directory
+        glob_pattern = base_dir + "/" + current_dir + "/" + pattern
+        files_in_dir = glob.glob(glob_pattern)
+        files = files + files_in_dir
+
+        ## Handle the list of attributes of the matched files
+        for filename in files_in_dir:
+            ## Append current directory to the list of file-associated directories
+            file_dirs.append(current_dir)
+
+            basename = os.path.basename(filename)
+            if ext != "":
+                basename = basename.replace(ext, "")
+            basenames.append(basename)
+#            basenames = basenames + [basename]
+#        print ("files_in_dir:\t"+"; ".join(files_in_dir))
     print("\t".join(["glob_multi_dir()", "Result:", str(len(files)), "files"]))
-    return(files)
+    return(files, file_dirs, basenames)
 
