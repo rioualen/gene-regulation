@@ -10,10 +10,10 @@
     
     
 rule sorted_bam:
-    input: "{reads}_bowtie2_mm" + MAX_MISMATCHES + ".bam"
-    output: "{reads}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_" + ORDER + ".bam"
-    log: "{reads}_bowtie2_mm" + MAX_MISMATCHES + "_sorted.log"
-    benchmark: "{reads}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_benchmark.json"
-    params: sort_by_name = SORT, qsub=QSUB_PARAM + " -q long -e {reads}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_qsub.err -o {reads}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_qsub.out", 
-    shell:"samtools sort {params.sort_by_name} {input} {wildcards.reads}_bowtie2_mm" + MAX_MISMATCHES + "_sorted 2> {log}"
+    input: "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + ".bam"
+    output: "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_" + ORDER + ".bam"
+    log: "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_sorted.log"
+    benchmark: "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_benchmark.json"
+    params: sort_by_name = SORT, qsub = QSUB_PARAM + " -q long -e {data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_" + ORDER + "_qsub.err -o {data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_" + ORDER + "_qsub.out"
+    shell:"samtools sort{params.sort_by_name} {input} {wildcards.reads}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_" + ORDER + " 2> {log}"
     

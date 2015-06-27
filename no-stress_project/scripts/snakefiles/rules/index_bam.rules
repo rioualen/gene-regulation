@@ -4,14 +4,10 @@
     =======================================
 """
 
-# rule index_bam_all:
-#     """Index each bamfiles"""
-#     input:expand('{read_dir}/{gsm}/{gsm}_bowtie_sorted.bam', gsm = GSM_LIST, read_dir = CHIP_READ_DIR) 
-
 rule index_bam:
-    input: "{reads}_sn.bam"
-    output: "{reads}_index.bam"
-    log: "{reads}_index.log"
-    benchmark: "{reads}_index_benchmark.json"
-    params: qsub=QSUB_PARAM + " -q long -e {reads}_index_qsub.err -o {reads}_index_qsub.out"
+    input: "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_pos.bam"
+    output: "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_pos.bam.bai"
+    log: "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_pos_index.log"
+    benchmark: "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_pos_index_benchmark.json"
+    params: qsub = QSUB_PARAM + " -q long -e {data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_pos_index_qsub.err -o {data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_pos_index_qsub.out"
     shell:"samtools index {input} 2> {log}"

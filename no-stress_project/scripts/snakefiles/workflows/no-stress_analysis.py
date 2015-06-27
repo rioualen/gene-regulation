@@ -13,6 +13,7 @@ Data from : Jeff Cole
 #================================================================#
 
 import os
+from snakemake.utils import R
 configfile: "scripts/snakefiles/workflows/no-stress_analysis_config.json"
 
 
@@ -31,6 +32,7 @@ DATA_DIRS = "N1 N1 N2 N2 N4 N4 S1 S1 S4 S4 S5 S5 NN2 NN2 NN4 NN4 NN5 NN5 SN1 SN1
 # DATASETS = "N1_1 N1_2 NN2_1 NN2_2".split() # list of files
 # DATA_DIRS = "N1 N1 NN2 NN2".split() # list the directories for each file
 
+DATA_PATH = config["data_root_dir"]
 
 
 QSUB_PARAM = config["qsub_parameters"]
@@ -58,8 +60,13 @@ STRANDED = config["htseq_parameters"]["stranded"]
 MINAQUAL = config["htseq_parameters"]["minaqual"]
 IDATTR = config["htseq_parameters"]["idattr"]
 GFF_FILE = config["htseq_parameters"]["gff_file"]
+MODE = config["htseq_parameters"]["mode"]
 OPTIONS_COUNT = config["htseq_parameters"]["other_options"]
 
+# Variables for EdgeR (Differential expression) 
+COND_1 = config["edgeR_parameters"]["cond1"]
+COND_2 = config["edgeR_parameters"]["cond2"]
+LIST_ALL_COUNTS = "data/1258-BRM/N1/N1_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/N2/N2_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/N4/N4_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/NN2/NN2_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/NN4/NN4_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/NN5/NN5_bowtie2_mm1_sorted_name_count.txt"
 
 #================================================================#
 #                         Includes                               #
@@ -71,8 +78,9 @@ include: "scripts/snakefiles/rules/trimming.rules"
 include: "scripts/snakefiles/rules/bowtie2.rules"
 include: "scripts/snakefiles/rules/convert_sam_to_bam.rules"
 include: "scripts/snakefiles/rules/sorted_bam.rules"
-# include: "scripts/snakefiles/rules/index_bam.rules" # to develop if needed for IGV
 include: "scripts/snakefiles/rules/count_table.rules"
+include: "scripts/snakefiles/rules/index_bam.rules"
+include: "scripts/snakefiles/rules/differential_expressions.rules"
 
 
 #================================================================#
@@ -83,14 +91,15 @@ include: "scripts/snakefiles/rules/count_table.rules"
 rule all:
     """Run workflow for each replica of each experience"""
     input:
-        expand(config["data_root_dir"] + "{data_dir}/{dataset}_fastqc/", zip, dataset=DATASETS, data_dir=DATA_DIRS), \
-        expand(config["data_root_dir"] + "{data_dir}/{dataset}_trimmed_thr20_fastqc/", zip, dataset=DATASETS, data_dir=DATA_DIRS), \
+        expand(DATA_PATH + "{data_dir}/{dataset}_fastqc/", zip, dataset=DATASETS, data_dir=DATA_DIRS), \
+        expand(DATA_PATH + "{data_dir}/{dataset}_trimmed_thr20_fastqc/", zip, dataset=DATASETS, data_dir=DATA_DIRS), \
         # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_trimmed_thr" + THRESHOLD + ".fastq.gz", data_dir=DATA_DIRS), \
         # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + ".sam", data_dir=DATA_DIRS), \
         # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + ".bam", data_dir=DATA_DIRS), \
         # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_" + ORDER + ".bam", data_dir=DATA_DIRS), \
-        # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_index.bam", data_dir=DATA_DIRS), \ to develop if needed for IGV
-        expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_count.txt", data_dir=DATA_DIRS), \
+        expand(DATA_PATH + "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_pos.bam.bai", data_dir=DATA_DIRS), \
+        # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_" + ORDER + "_count.txt", data_dir=DATA_DIRS)
+        expand(DATA_PATH + "results/{cond_1}_VS_{cond_2}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_" + ORDER + ".csv", zip, cond_1=COND_1, cond_2=COND_2)
         
         
     shell: "echo 'job done'"
