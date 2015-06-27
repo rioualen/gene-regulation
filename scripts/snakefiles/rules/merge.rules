@@ -12,3 +12,4 @@ rule merge_short_reads:
     benchmark: CHIP_READ_DIR + "/{gsm}/{gsm}_merged_benchmark.json"
     message: "Merging short reads for sample {input}"
     shell: "ls -1 {wildcards.CHIP_READ_DIR}/{wildcards.gsm}/SRR*.fastq | xargs cat > {output};"
+
