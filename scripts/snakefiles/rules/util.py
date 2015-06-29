@@ -5,7 +5,7 @@ __maintainer__ = "Jacques van Helden"
 __email__ = "Jacques.van-Helden@univ-amu.fr"
 __status__ = "Embryonic"
 
-def read_sample_ids(file, verbose=0):
+def read_sample_ids(file, base_dir=".", column=1, verbose=0):
     """Read sample descriptions from a tab-delimited file. 
 
     The first column of the sample description file contains the
@@ -21,6 +21,8 @@ def read_sample_ids(file, verbose=0):
 
     :param file: path to the sample description file
     :type file: string
+    :param column: number of the column containing the sample ID (Default: 1)
+    :type column: Integer >= 1
     :param verbose: verbosity level
     :type verbose: Integer
     :return: a list of sample IDs, taken from the first column of the sample file.
@@ -30,7 +32,8 @@ def read_sample_ids(file, verbose=0):
     if verbose >= 1:
         print ("read_sample_ids()\t" +"Reading sample IDs from file\t" + file)
     samples = []
-    f = open(config["dir"]["base"] + "/" + file, "r")
+
+    f = open(file, "r")
     for line in f.readlines():
         line = line.rstrip("\n") ## Suppress carriage.return
         if line[0:1] != ';': ## Skip comment lines (starting by "--")
