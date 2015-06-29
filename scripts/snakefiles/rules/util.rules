@@ -43,7 +43,7 @@ rule sort_bam_by_pos:
     log: "{aligned_reads}_sorted_pos.log"
     benchmark: "{aligned_reads}_sorted_pos_benchmark.json"
     params: qsub = QSUB_PARAM + " -q long -e {aligned_reads}_sorted_pos_qsub.err -o {aligned_reads}_sorted_pos_qsub.out"
-    shell:"samtools sort {input} -f {output} + 2> {log}"
+    shell:"samtools sort -f {input} {output} 2> {log}"
     
 rule sort_bam_by_names:
     """
@@ -54,5 +54,5 @@ rule sort_bam_by_names:
     log: "{aligned_reads}_sorted_names.log"
     benchmark: "{aligned_reads}_sorted_names_benchmark.json"
     params: qsub = QSUB_PARAM + " -q long -e {aligned_reads}_sorted_names_qsub.err -o {aligned_reads}_sorted_names_qsub.out"
-    shell:"samtools sort -n {input} -f {output} + 2> {log}"
+    shell:"samtools sort -n -f {input} {output} 2> {log}"
     
