@@ -8,12 +8,12 @@ from snakemake.utils import read_job_properties
 rule flowcharts:
     """Draw flowcharts for the current snakefile: dag and rulegraph.
    """
-    output: dag=DAG_PDF, \
-            dag_png=DAG_PNG, \
-            rulegraph=RULEGRAPH_PDF, \
-            rulegraph_png=RULEGRAPH_PNG
-    shell: "snakemake --rulegraph | dot -Tpdf -o {output.rulegraph} " \
+    output: dag_pdf = config["reports"]["dag"] + ".pdf", \
+            dag_png = config["reports"]["dag"] + ".png", \
+            rulegraph_pdf = config["reports"]["rulegraph"] + ".pdf", \
+            rulegraph_png = config["reports"]["rulegraph"] + ".png"
+    shell: "snakemake --rulegraph | dot -Tpdf -o {output.rulegraph_pdf} " \
            + "; snakemake --rulegraph | dot -Tpng -o {output.rulegraph_png} " \
-           + "; snakemake --dag  | perl -pe 's/graph\[/graph\[rankdir='LR', /' | dot -Tpdf -o {output.dag} " \
+           + "; snakemake --dag  | perl -pe 's/graph\[/graph\[rankdir='LR', /' | dot -Tpdf -o {output.dag_pdf} " \
            + "; snakemake --dag  | perl -pe 's/graph\[/graph\[rankdir='LR', /' | dot -Tpng -o {output.dag_png} "
     
