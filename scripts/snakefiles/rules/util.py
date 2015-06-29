@@ -5,7 +5,7 @@ __maintainer__ = "Jacques van Helden"
 __email__ = "Jacques.van-Helden@univ-amu.fr"
 __status__ = "Embryonic"
 
-def read_sample_ids(file):
+def read_sample_ids(file, verbose=0):
     """Read sample descriptions from a tab-delimited file. 
 
     The first column of the sample description file contains the
@@ -21,11 +21,14 @@ def read_sample_ids(file):
 
     :param file: path to the sample description file
     :type file: string
+    :param verbose: verbosity level
+    :type verbose: Integer
     :return: a list of sample IDs, taken from the first column of the sample file.
     :rtype: list of strings
 
     """
-    print ("read_sample_ids()\t" +"Reading sample IDs from file\t" + file)
+    if verbose >= 1:
+        print ("read_sample_ids()\t" +"Reading sample IDs from file\t" + file)
     samples = []
     f = open(config["dir"]["base"] + "/" + file, "r")
     for line in f.readlines():
@@ -39,11 +42,12 @@ def read_sample_ids(file):
                 fields = line.split("\t")
                 samples.append(fields[0])
 #                print(fields[0])
-    print("\t".join(["read_sample_ids()", "Result:", str(len(samples)), "sample IDs"]))
+    if verbose >= 1:
+        print("\t".join(["read_sample_ids()", "Result:", str(len(samples)), "sample IDs"]))
     return(samples)
     
 
-def glob_multi_dir(dir_list, pattern="", base_dir=".", ext=""):
+def glob_multi_dir(dir_list, pattern="", base_dir=".", ext="", verbose=0):
     """Given a list of directories, returns the list of files matching a
     given pattern. In addition to the list of matching files, this
     function returns the list of directories associated to each file,
@@ -65,7 +69,8 @@ def glob_multi_dir(dir_list, pattern="", base_dir=".", ext=""):
     files = [] ## List of paths to the files
     file_dirs = [] ## List of directories associated to each file (same length as the "files" list)
     basenames = [] ## List of file basenmes (same length as the "files" list
-    print("\t".join(["glob_multi_dir()", "Listing files in", str(len(dir_list)), "directories", "pattern: " + pattern]))
+    if verbose >= 1:
+        print("\t".join(["glob_multi_dir()", "Listing files in", str(len(dir_list)), "directories", "pattern: " + pattern]))
     import glob
     for current_dir in dir_list:
         ## Find files matching the pattern in the current directory
@@ -84,6 +89,24 @@ def glob_multi_dir(dir_list, pattern="", base_dir=".", ext=""):
             basenames.append(basename)
 #            basenames = basenames + [basename]
 #        print ("files_in_dir:\t"+"; ".join(files_in_dir))
-    print("\t".join(["glob_multi_dir()", "Result:", str(len(files)), "files"]))
+    if verbose >= 1:
+        print("\t".join(["glob_multi_dir()", "Result:", str(len(files)), "files"]))
     return(files, file_dirs, basenames)
 
+def report_numbered_list(list):
+    """
+    Taking as input a list of strings, return a numbered list in
+    reStructured text for the snakemake report.
+
+    :param list: List of items to be numbered.
+    :type list: A list of strings.
+    :return: A numbered list in reStructured format
+    :rtype: String
+
+    """
+    result = ""
+    n = 0
+    for element in list:
+        n = n + 1
+        result = result + str(n) + ". " + element + "\n"
+    return(result)
