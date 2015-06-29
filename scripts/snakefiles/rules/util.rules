@@ -6,7 +6,41 @@ be used at different steps of a workflow.
 ruleorder: sort_bam_by_pos > sam2bam
 ruleorder: sort_bam_by_names > sam2bam
 
+rule sam2bam:
+    """
+    Convert reads from SAM (sequence alignment map) to BAM (binary
+    alignment map) format.
 
+    """
+    input: sam="{reads}.sam"
+    output: bam="{reads}.bam"
+    log: "{reads}_sam2bam.log"
+    benchmark: "{reads}_sam2bam_benchmark.json"
+    params: qsub = config["qsub"] + " -e {reads}_sam2bam_qsub.err -o {reads}_sam2bam_qsub.out"
+    shell: "samtools view -b -S {input.sam} > {output.bam} 2> {log}"
+
+rule sort_bam_by_pos:
+    """
+    Sort aligned reads (in bam format) by positions.
+    """
+    input: "{aligned_reads}.bam"
+    output: "{aligned_reads}_sorted_pos.bam"
+    log: "{aligned_reads}_sorted_pos.log"
+    benchmark: "{aligned_reads}_sorted_pos_benchmark.json"
+    params: qsub = config["qsub"] + " -q long -e {aligned_reads}_sorted_pos_qsub.err -o {aligned_reads}_sorted_pos_qsub.out"
+    shell:"samtools sort -f {input} {output} 2> {log}"
+    
+rule sort_bam_by_names:
+    """
+    Sort aligned reads (in bam format) by name.
+    """
+    input: "{aligned_reads}.bam"
+    output: "{aligned_reads}_sorted_names.bam"
+    log: "{aligned_reads}_sorted_names.log"
+    benchmark: "{aligned_reads}_sorted_names_benchmark.json"
+    params: qsub = config["qsub"] + " -q long -e {aligned_reads}_sorted_names_qsub.err -o {aligned_reads}_sorted_names_qsub.out"
+    shell:"samtools sort -n -f {input} {output} 2> {log}"
+    
 rule gzip_one_file:
     """Compress a file with the gzip program. The rule is very simple, but
     is convenient to use in a workflow: it can be used to fix some
@@ -18,41 +52,20 @@ rule gzip_one_file:
     output: "{file}.gz"
     log: "{file}_gzip.log"
     benchmark: "{file}_gzip_benchmark.json"
-    params: qsub = QSUB_PARAM + " -q short -e {file}_gzip_qsub.err -o {file}_gzip_qsub.out"
+    params: qsub = config["qsub"] + " -q short -e {file}_gzip_qsub.err -o {file}_gzip_qsub.out"
     shell:"gzip {input} 2> {log} "
 
-rule sam2bam:
-    """
-    Convert reads from SAM (sequence alignment map) to BAM (binary
-    alignment map) format.
+# rule gunzip_one_file:
+#     """Uncompress a file with the gunzip program. The rule is very simple,
+#     but is convenient to use in a workflow: it can be used to fix some
+#     dependencies on.gz extensions, and/or to send uncompression jobs
+#     to a queue.
 
-    """
-    input: sam="{reads}.sam"
-    output: bam="{reads}.bam"
-    log: "{reads}_sam2bam.log"
-    benchmark: "{reads}_sam2bam_benchmark.json"
-    params: qsub = config["qsub_parameters"] + " -e {reads}_sam2bam_qsub.err -o {reads}_sam2bam_qsub.out"
-    shell: "samtools view -b -S {input.sam} > {output.bam} 2> {log}"
+#     """
+#     input: "{file}.gz"
+#     output: "{file}"
+#     log: "{file}_gunzip.log"
+#     benchmark: "{file}_gunzip_benchmark.json"
+#     params: qsub = config["qsub"] + " -q short -e {file}_gunzip_qsub.err -o {file}_gunzip_qsub.out"
+#     shell:"gunzip {input} 2> {log} "
 
-rule sort_bam_by_pos:
-    """
-    Sort aligned reads (in bam format) by positions.
-    """
-    input: "{aligned_reads}.bam"
-    output: "{aligned_reads}_sorted_pos.bam"
-    log: "{aligned_reads}_sorted_pos.log"
-    benchmark: "{aligned_reads}_sorted_pos_benchmark.json"
-    params: qsub = QSUB_PARAM + " -q long -e {aligned_reads}_sorted_pos_qsub.err -o {aligned_reads}_sorted_pos_qsub.out"
-    shell:"samtools sort -f {input} {output} 2> {log}"
-    
-rule sort_bam_by_names:
-    """
-    Sort aligned reads (in bam format) by name.
-    """
-    input: "{aligned_reads}.bam"
-    output: "{aligned_reads}_sorted_names.bam"
-    log: "{aligned_reads}_sorted_names.log"
-    benchmark: "{aligned_reads}_sorted_names_benchmark.json"
-    params: qsub = QSUB_PARAM + " -q long -e {aligned_reads}_sorted_names_qsub.err -o {aligned_reads}_sorted_names_qsub.out"
-    shell:"samtools sort -n -f {input} {output} 2> {log}"
-    
