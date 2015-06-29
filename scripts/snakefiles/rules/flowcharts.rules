@@ -1,8 +1,19 @@
+import os
+
+# dag_file = config["dir"]["reports"] + "/" + "dag.pdf"
+# rulegraph_file = config["dir"]["reports"] + "/" + "rulegraph.pdf"
+
+from snakemake.utils import read_job_properties
+
 rule flowcharts:
     """Draw flowcharts for the current snakefile: dag and rulegraph.
    """
-	input: "scripts/snakefiles/workflows/" + WORKFLOW
-	output: RESULTSDIR + "dag.pdf", \
-		RESULTSDIR + "rulegraph.pdf"
-    	shell: "snakemake -s {input} --forceall --dag | perl -pe 's/graph\[/graph\[rankdir='LR', /' | dot -Tpdf > {output[0]}; snakemake -s {input} --forceall --rulegraph | dot -Tpdf > {output[1]}"
-
+    output: dag=DAG_PDF, \
+            dag_png=DAG_PNG, \
+            rulegraph=RULEGRAPH_PDF, \
+            rulegraph_png=RULEGRAPH_PNG
+    shell: "snakemake --rulegraph | dot -Tpdf -o {output.rulegraph} " \
+           + "; snakemake --rulegraph | dot -Tpng -o {output.rulegraph_png} " \
+           + "; snakemake --dag  | perl -pe 's/graph\[/graph\[rankdir='LR', /' | dot -Tpdf -o {output.dag} " \
+           + "; snakemake --dag  | perl -pe 's/graph\[/graph\[rankdir='LR', /' | dot -Tpng -o {output.dag_png} "
+    
