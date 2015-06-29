@@ -2,3 +2,12 @@
 *.bed
 *.bam
 *.pyc
+
+## Claire
+
+.snakemake/
+Rsession/
+data/
+genomes/
+results/
+
