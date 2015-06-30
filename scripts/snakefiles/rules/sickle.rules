@@ -8,51 +8,62 @@ rule sickle_paired_ends:
     This script requires to specify the following parameters in the
     snakemake config file.
 
-      config["suffix"]["threshold"]
+      config["sickle"]["qual_type"]
+      config["sickle"]["threshold"]
+      config["sickle"]["other_options"]
       config["suffix"]["reads_fwd"]
       config["suffix"]["reads_rev"]
       config["qsub"]
 
 
-    The quality threshold (threshold) and the quality type (seq_type)
+    The quality threshold (threshold) and the quality type (qual_type)
     parameters have to be determined in the config file (json format)
-    linked in the snakefile (workflow).
+    linked in the snakefile (workflow). Any other parameters in the
+    other_options will be passed to sickle.
 
-    You can add any other desired parameters in the "other options" of
-    the config file.
+    The rule produces three output read files in fastq format:
+    
+    forward reads
+    reverse reads
+    single reads: unmatched between the forward and reverse strands.
 
-    The result files are named '{data_dir}_1_sickle_pe.fastq.gz'
-    (forward reads), '{reads}_2_sickle_pe.fastq.gz' (reverse reads) and
-    '{data_dir}_sickle_pe.fastq.gz' (unmatched reads).
+    The sickle summary is stored in a separate file.
 
     """
     
     input: forward="{reads}" + config["suffix"]["reads_fwd"] + ".fastq.gz", reverse="{reads}" + config["suffix"]["reads_rev"] + ".fastq.gz"
-    output: forward = "{reads}" + config["suffix"]["reads_fwd"] + "_sickle_pe_thr" + config["sickle"]["threshold"] + ".fastq.gz", \
-            reverse = "{reads}" + config["suffix"]["reads_rev"] + "_sickle_pe_thr" + config["sickle"]["threshold"] + ".fastq.gz", \
-            single = "{reads}_single_sickle_pe_thr" + config["sickle"]["threshold"] + ".fastq.gz", \
-            summary = "{reads}_sickle_pe_thr" + config["sickle"]["threshold"] + "_summary.txt"
-    params: threshold = config["sickle"]["threshold"], seq_type=SEQ_TYPE, qsub=config["qsub"] + " -q long -e {reads}_sickle_pe_qsub.err -o {reads}_sickle_pe_qsub.out", options = OPTIONS_SICKLE
-    log: "{reads}_sickle_pe_thr" + config["sickle"]["threshold"] + ".log"
-    benchmark: "{reads}_sickle_pe_thr" + config["sickle"]["threshold"] + "_benchmark.json"
-    # message: "Trimming raw reads with sickle\n\tInput:\t{input}\n\tOutput:\t{output}\n\tLog:\t{log}"
-    shell: "sickle pe --gzip-output --pe-file1 {input.forward} --pe-file2 {input.reverse} --qual-type {params.seq_type} --qual-threshold {params.threshold} --output-pe1 {output.forward} --output-pe2 {output.reverse} --output-single {output.single} {params.options} > {output.summary} 2> {log}"
+    output: forward = "{reads}" + config["suffix"]["reads_fwd"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq.gz", \
+            reverse = "{reads}" + config["suffix"]["reads_rev"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq.gz", \
+            single = "{reads}_single_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq.gz", \
+            summary = "{reads}_sickle_pe_q" + config["sickle"]["threshold"] + "_summary.txt"
+    params: threshold = config["sickle"]["threshold"], \
+            qual_type=config["sickle"]["qual_type"], \
+            options = config["sickle"]["other_options"], \
+            qsub = config["qsub"] \
+            + " -e {reads}_sickle_pe_q" + config["sickle"]["threshold"] + "_qsub.err" \
+            + " -o {reads}_sickle_pe_q" + config["sickle"]["threshold"] + "_qsub.out"
+    log: "{reads}_sickle_pe_q" + config["sickle"]["threshold"] + ".log"
+    benchmark: "{reads}_sickle_pe_q" + config["sickle"]["threshold"] + "_benchmark.json"
+    message: "Trimming paired-ends raw reads with sickle\n\tInput:\t{input}\n\tOutput:\t{output}\n\tLog:\t{log}"
+    shell: "sickle pe --gzip-output --pe-file1 {input.forward} --pe-file2 {input.reverse} --qual-type {params.qual_type} --qual-threshold {params.threshold} --output-pe1 {output.forward} --output-pe2 {output.reverse} --output-single {output.single} {params.options} > {output.summary} 2> {log}"
 
 """
     Trim reads required before alignement 
 
 """
 
-# rule trim_all:
-#     """Trim short reads (after merging) for each sample"""
-#     input:expand('{read_dir}/{gsm}/{gsm}_trimmed.fastq', gsm=GSM_LIST, read_dir={CHIP_READ_DIR})
-
-rule trim_sickle:
-    """Trim one raw read file (fastq format) from SRR."""
-    input: "{reads}.fastq"
-    output: "{reads}_sickle_se_q" +  + ".fastq"
-    params: qsub = config["qsub"] + " -e " + CHIP_READ_DIR + "/{gsm}/{gsm}_trimmed_qsub.err -o " + CHIP_READ_DIR + "/{gsm}/{gsm}_trimmed_qsub.out"
-    log: CHIP_READ_DIR + "/{gsm}/{gsm}_trimmed.log"
-    benchmark: CHIP_READ_DIR +"/{gsm}/{gsm}_trimmed_benchmark.json"
-    message: "Trimming raw reads with sickle\n\tInput:\t{input}\n\tOutput:\t{output}\n\tLog:\t{log}"
-    shell: "sickle se --fastq-file {input} --qual-type {QUALITY_TYPE} --output-file {output} 2> {log}"
+rule sickle_single_end:
+    """Trim one a single end raw reads file with sickle."""
+    input: "{reads}.fastq.gz"
+    output: trimmed="{reads}_sickle_se_q" + config["sickle"]["threshold"] + ".fastq.gz", \
+            summary = "{reads}_sickle_se_q" + config["sickle"]["threshold"] + "_summary.txt"
+    params: threshold = config["sickle"]["threshold"], \
+            qual_type=config["sickle"]["qual_type"], \
+            options = config["sickle"]["other_options"], \
+            qsub = config["qsub"] \
+            + " -e {reads}_sickle_se_q" + config["sickle"]["threshold"] + "_qsub.err" \
+            + " -o {reads}_sickle_se_q" + config["sickle"]["threshold"] + "_qsub.out"
+    log: "{reads}_sickle_se_q" + config["sickle"]["threshold"] + ".log"
+    benchmark: "{reads}_sickle_se_q" + config["sickle"]["threshold"] + "_benchmark.json"
+    message: "Trimming single-end raw reads with sickle\n\tInput:\t{input}\n\tOutput:\t{output}\n\tLog:\t{log}"
+    shell: "sickle se --gzip-output --fastq-file {input} --qual-type {params.qual_type} --output-file {output}  {params.options} > {output.summary} 2> {log}"
