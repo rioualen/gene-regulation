@@ -14,5 +14,5 @@ rule fastqc_raw:
     output: config["results_directory"] + "/{dataset}/{dataset}_fastqc/"
     log: config["results_directory"] + "/{dataset}/{dataset}_fastqc/{dataset}_fastqc.log"
     benchmark: config["results_directory"] + "/{dataset}/{dataset}_fastqc/{dataset}_fastqc_benchmark.json"
-    params: qsub = config["qsub_parameters"] + " -q short -e " + config["results_directory"] + "/{dataset}/{dataset}_fastqc/{dataset}_fastqc_qsub.err -o " + config["results_directory"] + "/{dataset}/{dataset}_fastqc/{dataset}_fastqc_qsub.out", options = config["fastqc"]["other_options"]
+    params: qsub = config["qsub"] + " -q short -e " + config["results_directory"] + "/{dataset}/{dataset}_fastqc/{dataset}_fastqc_qsub.err -o " + config["results_directory"] + "/{dataset}/{dataset}_fastqc/{dataset}_fastqc_qsub.out", options = config["fastqc"]["other_options"]
     shell:"fastqc --outdir {output} --format fastq {input} {params.options} 2> {log} "

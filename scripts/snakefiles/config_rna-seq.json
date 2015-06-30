@@ -1,0 +1,41 @@
+{
+    "__description__": "Parameters for the analysis of ChIP-seq results for selected transcription factors.",
+    "__author__": "Lucie Khamvongsa & Jacques van Helden",
+    "data_source": "Gene Expression Omnibus (GEO)",
+    "organism": "Drosophila_melanogaster",
+    "genome_version": "dm3",
+    "qsub": "-V -m a -d /home/lkhamvongsa/dr-chip-rna-seq",
+    "read_directory": "data/rna-seq/Andy/reads",
+    "results_directory": "results-rna",
+    "fastqc": {
+        "other_options": ""
+    },
+    "sickle": {
+        "quality_type": "sanger"
+    },
+    "subread": {
+        "basename": "reference_index",
+        "reference_genome":"/workspace/genomes/Drosophila_melanogaster_UCSC_dm3/dm3/Sequence/WholeGenomeFasta/genome.fa"
+    },
+    "bowtie": {
+        "bowtie_index": "/workspace/bowtie_genomes/Drosophila_melanogaster/UCSC/dm3/Sequence/BowtieIndex/genome",
+        "max_mismatches": "1",
+        "reads_iso": "1"
+    },
+    "swembl": {
+        "swembl_relative_bg": [
+            "0.005",
+            "0.007",
+            "0.01",
+            "0.02",
+            "0.05"
+        ]
+    },
+    "macs14": {
+        "macs_pvalue": [
+            "1e-4",
+            "1e-5",
+            "1e-6"
+        ]
+    }
+}
