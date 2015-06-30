@@ -19,11 +19,11 @@
 rule bowtie2_paired_end:
     """Read mapping for a paired-end sample, using bowtie version 2 """
     
-    input: forward = "{data_dir}/{data_dir}_1_trimmed_thr" + THRESHOLD + ".fastq.gz", reverse = "{data_dir}/{data_dir}_2_trimmed_thr" + THRESHOLD + ".fastq.gz"
-    output: "{data_dir}/{data_dir}_bowtie2_mm" + MAX_MISMATCHES + ".sam"
-    log: "{data_dir}/{data_dir}_bowtie_mm" + MAX_MISMATCHES + ".log"
-    benchmark: "{data_dir}/{data_dir}_bowtie_benchmark_mm" + MAX_MISMATCHES + ".json"
-    params: index = INDEX, max_mismatches = MAX_MISMATCHES, qsub=QSUB_PARAM + " -q long -e {data_dir}/{data_dir}_bowtie_qsub.err -o {data_dir}/{data_dir}_bowtie_qsub.out", options = OPTIONS_BOWTIE2
+    input: forward = "{data_dir}/{data_dir}_1_trimmed_thr" + config["sickle"]["threshold"] + ".fastq.gz", reverse = "{data_dir}/{data_dir}_2_trimmed_thr" + config["sickle"]["threshold"] + ".fastq.gz"
+    output: "{data_dir}/{data_dir}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + ".sam"
+    log: "{data_dir}/{data_dir}_bowtie_mm" + config["bowtie2"]["max_mismatches"] + ".log"
+    benchmark: "{data_dir}/{data_dir}_bowtie_benchmark_mm" + config["bowtie2"]["max_mismatches"] + ".json"
+    params: index = config["bowtie2"]["index"], max_mismatches = config["bowtie2"]["max_mismatches"], qsub=config["qsub"] + " -q long -e {data_dir}/{data_dir}_bowtie_qsub.err -o {data_dir}/{data_dir}_bowtie_qsub.out", options = config["bowtie2"]["other_options"]
     shell: "bowtie2 -x {params.index} -1 {input.forward} -2 {input.reverse} -S {output} --phred33 -N {params.max_mismatches} -t {params.options} 2> {log}"
  
     

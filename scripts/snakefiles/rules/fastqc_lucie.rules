@@ -1,0 +1,18 @@
+"""
+	Check the quality of fastq-formatted raw reads using the program fastQC (quality control).
+
+"""
+
+
+rule fastqc_raw:
+    """Check the quality of the {dataset}.fastq file containing fastq-formatted raw reads using the program fastQC (quality control).
+    You can add any wanted parameters in the "other options" of the config file.
+    The results are put into a folder named '{dataset}_fastqc'.
+    """
+    
+    input: config["read_directory"] + "/{dataset}/{dataset}.fastq"
+    output: config["results_directory"] + "/{dataset}/{dataset}_fastqc/"
+    log: config["results_directory"] + "/{dataset}/{dataset}_fastqc/{dataset}_fastqc.log"
+    benchmark: config["results_directory"] + "/{dataset}/{dataset}_fastqc/{dataset}_fastqc_benchmark.json"
+    params: qsub = config["qsub"] + " -q short -e " + config["results_directory"] + "/{dataset}/{dataset}_fastqc/{dataset}_fastqc_qsub.err -o " + config["results_directory"] + "/{dataset}/{dataset}_fastqc/{dataset}_fastqc_qsub.out", options = config["fastqc"]["other_options"]
+    shell:"fastqc --outdir {output} --format fastq {input} {params.options} 2> {log} "

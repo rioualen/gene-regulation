@@ -11,13 +11,18 @@ rule flowcharts:
     config["reports"]["dag"]
     config["reports"]["rulegraph"]
 
+    We have to specify the snakefile that we want to use
+
+    config["reports"]["snakefile"]
+
     """
-    output: dag_pdf = config["reports"]["dag"] + ".pdf", \
-            dag_png = config["reports"]["dag"] + ".png", \
-            rulegraph_pdf = config["reports"]["rulegraph"] + ".pdf", \
-            rulegraph_png = config["reports"]["rulegraph"] + ".png"
-    shell: "snakemake --rulegraph | dot -Tpdf -o {output.rulegraph_pdf} " \
-           + "; snakemake --rulegraph | dot -Tpng -o {output.rulegraph_png} " \
-           + "; snakemake --dag  | perl -pe 's/graph\[/graph\[rankdir='LR', /' | dot -Tpdf -o {output.dag_pdf} " \
-           + "; snakemake --dag  | perl -pe 's/graph\[/graph\[rankdir='LR', /' | dot -Tpng -o {output.dag_png} "
+    output: dag_pdf = RESULTSDIR + config["reports"]["dag"] + ".pdf", \
+            dag_png = RESULTSDIR + config["reports"]["dag"] + ".png", \
+            rulegraph_pdf = RESULTSDIR + config["reports"]["rulegraph"] + ".pdf", \
+            rulegraph_png = RESULTSDIR + config["reports"]["rulegraph"] + ".png"
+    params: scripts = config["snakefile"]
+    shell: "snakemake -s {params.scripts} --rulegraph | dot -Tpdf -o {output.rulegraph_pdf} " \
+           + "; snakemake -s {params.scripts} --rulegraph | dot -Tpng -o {output.rulegraph_png} " \
+           + "; snakemake -s {params.scripts} --dag  | perl -pe 's/graph\[/graph\[rankdir='LR', /' | dot -Tpdf -o {output.dag_pdf} " \
+           + "; snakemake -s {params.scripts} --dag  | perl -pe 's/graph\[/graph\[rankdir='LR', /' | dot -Tpng -o {output.dag_png} "
     

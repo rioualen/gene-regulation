@@ -1,25 +1,41 @@
 {
 	"__description__": "ChIP-seq workflow: testing on Dm data, implementing SPP & IDR.",
 	"__author__": "Claire Rioualen",
-	"workflow": "workflow_claire.py",
 	"data_source": "Gene Expression Omnibus (GEO)",
 	"organism": "Drosophila_melanogaster",
 	"genome_version": "dm3",
 	"chip_read_directory": "data/chip-seq/reads/",
+	"results_directory": "results/",
+	"log_directory": "results/log/",
+	"snakefile":"scripts/snakefiles/workflows/workflow_claire.py",
+	"qsub": "",
 	"samples": {
 		"chip": "GSM570045", 
-		"input": "GSM570046 GSM570048" 
+		"input": "GSM570046" 
 	},
-	"fastQC_steps": "trimmed merged",
+	"fastQC_steps": "import trimmed",
 	"sickle_parameters": {
 		"quality_type": "sanger"
 	},
-	"aligners":"bowtie bwa",
+	"aligners":"bowtie",
 	"bowtie_parameters": {
-        "bowtie_index": "genomes/BowtieIndex/genome",
-        "max_mismatches": "1",
-        "reads_iso": "1"
+		"bowtie_index": "genomes/BowtieIndex/genome",
+		"max_mismatches": "3",
+		"reads_iso": "1"
 	},
-	"peak_callers": "spp homer",
-	"oligo_stats": "1 2 4 6"
+	"peak_callers": "spp homer swembl",
+	"oligo_stats": "1 2",
+	"peak-motifs_parameters": {
+		"tasks" : "purge,seqlen,composition,disco,collect_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan",
+		"max_seq_len" : "1000",
+		"nmotifs" : "",
+		"minol" : "",
+		"maxol" : "",
+		"motif_db jaspar_core_vertebrates" : "tf $RSAT/public_html/data/motif_databases/JASPAR/jaspar_core_vertebrates_2013-11.tf"
+	},
+	"reports" : {
+		"dag" : "dag",
+		"rulegraph" : "rule"
+	}
 }
+

@@ -6,10 +6,10 @@ lanes.
 
 rule merge_short_reads:
     """Merge the raw short read files (SRR) belonging to the same sample (GSM)"""
-    output: CHIP_READ_DIR + "/{gsm}/{gsm}_merged.fastq"
-    params: qsub = config["qsub"] + " -e " + CHIP_READ_DIR + "/{gsm}/{gsm}_merged_qsub.err -o " + CHIP_READ_DIR + "/{gsm}/{gsm}_merged_qsub.out"
-    log: CHIP_READ_DIR + "/{gsm}/{gsm}_merged.log"
-    benchmark: CHIP_READ_DIR + "/{gsm}/{gsm}_merged_benchmark.json"
+    output: RESULTSDIR + "{gsm}/{gsm}_merged.fastq"
+    params: qsub = config["qsub"] + " -e " + LOGS + "/{gsm}/{gsm}_merged_qsub.err -o " + LOGS + "/{gsm}/{gsm}_merged_qsub.out"
+    log: LOGS + "{gsm}/{gsm}_merged.log"
+    benchmark: LOGS + "{gsm}/{gsm}_merged_benchmark.json"
     message: "Merging short reads for sample {input}"
-    shell: "ls -1 {wildcards.CHIP_READ_DIR}/{wildcards.gsm}/SRR*.fastq | xargs cat > {output};"
+    shell: "ls -1 {READS}/{wildcards.gsm}/SRR*.fastq | xargs cat > {output};"
 
