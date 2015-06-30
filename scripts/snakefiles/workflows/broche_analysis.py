@@ -1,0 +1,230 @@
+"""Workflow for the analysis of transcriptomic RNA-seq data for
+beatrice Roche's project, treated by the TGML platform on June 2015.
+
+Reference genome: Escherichia_coli_K_12_substr__MG1655_uid57779
+
+Usage: snakemake -c "qsub {params.qsub}" -j 30
+
+"""
+
+#================================================================#
+#                        Imports/Configuration file              #
+#================================================================#
+
+import os
+import datetime
+configfile: "scripts/snakefiles/workflows/broche_analysis_config.json"
+workdir: config["dir"]["base"]
+#workdir: os.getcwd() # Local Root directoray for the project. Should be adapted for porting.
+
+################################################################
+## Define global variables
+################################################################
+NOW = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+
+
+## Respective suffixes for the forward and reverse files of the
+## paired-end sequences.
+##OK SUFFIX_FWD = config["suffix"]["reads_fwd"]
+##OK SUFFIX_REV = config["suffix"]["reads_rev"]
+
+## Parameters for the cluster
+QSUB_PARAM = config["qsub"]
+
+## Flowcharts
+DAG_PDF=config["dir"]["reports"] + "/" + "dag.pdf"
+DAG_PNG=config["dir"]["reports"] + "/" + "dag.png"
+RULEGRAPH_PDF=config["dir"]["reports"] + "/" + "rulegraph.pdf"
+RULEGRAPH_PNG=config["dir"]["reports"] + "/" + "rulegraph.png"
+
+# Variables for fastqc
+OPTIONS_FASTQC = config["fastqc"]["other_options"]
+
+# Variables for sickle.rules
+##OK## THRESHOLD = config["sickle"]["threshold"]
+##OK## QUAL_TYPE = config["sickle"]["qual_type"]
+##OK## OPTIONS_SICKLE = config["sickle"]["other_options"]
+
+# Variables for bowtie2 (alignement)
+INDEX = config["bowtie2"]["bowtie_index"]
+MAX_MISMATCHES = config["bowtie2"]["max_mismatches"]
+OPTIONS_BOWTIE2 = config["bowtie2"]["other_options"]
+
+################################################################
+## Import snakemake rules and python library
+include: "fg-chip-seq/scripts/snakefiles/rules/util.py"                ## Python utilities
+include: "fg-chip-seq/scripts/snakefiles/rules/util.rules"             ## Snakemake utilities
+include: "scripts/snakefiles/rules_jj/fastqc.rules"                    ## Quality control with fastqc
+include: "fg-chip-seq/scripts/snakefiles/rules/flowcharts.rules"       ## Draw flowcharts (dag and rule graph)
+include: "fg-chip-seq/scripts/snakefiles/rules/sickle.rules"           ## Trimming with sickle
+include: "scripts/snakefiles/rules/bowtie.rules"                       ## Read mapping with bowtie version 1 (no gap)
+
+################################################################
+## Define the lists of requested files
+################################################################
+
+## Read the list of sample IDs from the sample description file
+SAMPLE_IDS=read_sample_ids(config["files"]["samples"])
+
+## List the merged raw reads
+RAWR_L1R1, RAWR_L1R1_DIRS, RAWR_L1R1_BASENAMES=glob_multi_dir(SAMPLE_IDS, "*_L001" + config["suffix"]["reads_fwd"] + ".fastq.gz", config["dir"]["reads_source"], "_L001" + config["suffix"]["reads_fwd"] + ".fastq.gz")
+RAWR_MERGED_FWD=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_fwd"] + ".fastq.gz", zip, sample_dir=RAWR_L1R1_DIRS, sample_basename=RAWR_L1R1_BASENAMES)
+RAWR_MERGED_REV=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_rev"] + ".fastq.gz", zip, sample_dir=RAWR_L1R1_DIRS, sample_basename=RAWR_L1R1_BASENAMES)
+RAWR_MERGED=RAWR_MERGED_FWD + RAWR_MERGED_REV
+
+## List separately the FORWARD and REVERE raw read files, which will be submitted to quality control
+RAWR_FILES_FWD, RAWR_DIRS_FWD, RAWR_BASENAMES_FWD=glob_multi_dir(SAMPLE_IDS, "*" + config["suffix"]["reads_fwd"] + ".fastq.gz", config["dir"]["reads"], config["suffix"]["reads_fwd"] + ".fastq.gz")
+RAWR_FILES_REV, RAWR_DIRS_REV, RAWR_BASENAMES_REV=glob_multi_dir(SAMPLE_IDS, "*" + config["suffix"]["reads_rev"] + ".fastq.gz", config["dir"]["reads"], config["suffix"]["reads_rev"] + ".fastq.gz")
+
+
+## Merge trimmed reads I use a trick to obtain one directory name per
+## group of lanes: I only glob the first lane, and I use the list of
+## directories and basenames
+SAMPLE_L1R1, PAIRED_DIRS, PAIRED_BASENAMES=glob_multi_dir(SAMPLE_IDS, "*_L001" + config["suffix"]["reads_fwd"] + ".fastq.gz", config["dir"]["reads"], "_L001" + config["suffix"]["reads_fwd"] + ".fastq.gz")
+TRIMMED_MERGED_FWD=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_fwd"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq.gz", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+TRIMMED_MERGED_REV=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_rev"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq.gz", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+TRIMMED_MERGED=TRIMMED_MERGED_FWD + TRIMMED_MERGED_REV
+
+## Bowtie version 1 : paired-end read mapping
+MAPPED_PE_SAM=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe.sam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+MAPPED_PE_BAM=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe.bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+
+## List all the raw read files, which will be submitted to quality control
+RAWR_FILES, RAWR_DIRS, RAWR_BASENAMES=glob_multi_dir(SAMPLE_IDS, "*_R*_001.fastq.gz", config["dir"]["reads"], ".fastq.gz")
+
+## Quality control
+#RAWR_QC=expand(config["dir"]["reads"] + "/{sample_dir}/{reads}_fastqc/", zip, reads=RAWR_BASENAMES, sample_dir=RAWR_DIRS)
+MERGED_RAWR_QC=expand(config["dir"]["reads"] + "/{sample_dir}/{reads}_merged" + config["suffix"]["reads_fwd"] + "_fastqc/", zip, reads=PAIRED_BASENAMES, sample_dir=PAIRED_DIRS) + expand(config["dir"]["reads"] + "/{sample_dir}/{reads}_merged" + config["suffix"]["reads_rev"] + "_fastqc/", zip, reads=PAIRED_BASENAMES, sample_dir=PAIRED_DIRS)
+
+## Trimmed reads
+TRIMMED_SUMMARIES = expand(config["dir"]["reads"] + "/{sample_dir}/{reads}_trimmed_thr" + config["sickle"]["threshold"] + "_summary.txt", zip, reads=RAWR_BASENAMES_FWD, sample_dir=RAWR_DIRS_FWD)
+TRIMMED_FILES, TRIMMED_DIRS, TRIMMED_BASENAMES=glob_multi_dir(SAMPLE_IDS, "*_R*_001_trimmed_thr" + config["sickle"]["threshold"] + ".fastq.gz", config["dir"]["reads"], ".fastq.gz")
+TRIMMED_QC=expand(config["dir"]["reads"] + "/{sample_dir}/{reads}_fastqc/", zip, reads=TRIMMED_BASENAMES, sample_dir=TRIMMED_DIRS)
+
+## Mapped reads
+#MAPPED_FILES=expand(config["dir"]["reads"] + "/{sample_dir}/{reads}_trimmed_thr" + config["sickle"]["threshold"] + "_bowtie.sam", zip, reads=RAWR_BASENAMES, sample_dir=RAWR_DIRS)
+
+rule all: 
+    """
+    Run all the required analyses
+    """
+#    input: MERGED_RAWR_QC, TRIMMED_SUMMARIES, TRIMMED_QC, TRIMMED_MERGED, MAPPED_PE_SAM, MAPPED_PE_BAM
+    input: MERGED_RAWR_QC, RAWR_MERGED, TRIMMED_MERGED
+    params: qsub=config["qsub"]
+    shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
+
+
+ruleorder: sickle_paired_ends > merge_lanes
+
+rule merge_lanes:
+    """
+    Merge lanes of the same sample and end in a single file.  The input
+    files are compressed (.fastq.gz) but the output file is in
+    uncompressed fastq format, because bowtie version 1 does not
+    support gzipped files as input.
+
+    """
+    input: L1 = "{reads_prefix}_L001_{reads_suffix}.fastq.gz", \
+        L2 = "{reads_prefix}_L002_{reads_suffix}.fastq.gz", \
+        L3 = "{reads_prefix}_L003_{reads_suffix}.fastq.gz", \
+        L4 = "{reads_prefix}_L004_{reads_suffix}.fastq.gz"
+    output: "{reads_prefix}_merged_{reads_suffix}.fastq.gz" 
+    log: "{reads_prefix}_merged_{reads_suffix}.log" 
+    benchmark: "{reads_prefix}_merged_{reads_suffix}_benchmark.json" 
+    params: qsub = config["qsub"] + " -e {reads_prefix}__merged_{reads_suffix}_qsub.err  -o {reads_prefix}__merged_{reads_suffix}_qsub.out"
+    shell: "gunzip -c {input.L1} {input.L2} {input.L3} {input.L4} | gzip > {output}"
+
+################################################################
+## Build the report (including DAG and rulegraph flowcharts).
+from snakemake.utils import report
+
+## Bulleted list of samples for the report
+SAMPLE_IDS_OL=report_numbered_list(SAMPLE_IDS)
+RAWR_MERGED_OL=report_numbered_list(RAWR_MERGED)
+RAWR_MERGED_FWD_OL=report_numbered_list(RAWR_MERGED_FWD)
+RAWR_MERGED_REV_OL=report_numbered_list(RAWR_MERGED_REV)
+TRIMMED_MERGED_OL=report_numbered_list(TRIMMED_MERGED)
+
+rule report:
+    """
+    Generate a report with the list of datasets + summary of the results.
+    """
+    input:  dag=DAG_PDF, \
+            dag_png=DAG_PNG, \
+            rulegraph=RULEGRAPH_PDF, \
+            rulegraph_png=RULEGRAPH_PNG
+    output: html=config["dir"]["reports"] + "/report.html"
+    run:
+        report("""
+        =================================
+        RNA-seq analysis - Béatrice Roche
+        =================================
+        
+        :Date:                 {NOW}
+        :Project:              Béatrice Roche
+        :Analysis workflow:    Jacques van Helden
+        
+        Contents
+        ========
+        
+        - `Flowcharts`_
+        - `Datasets`_
+             - `Sample directories`_
+             - `Raw reads - Forward`_
+             - `Raw reads - Reverse`_
+             - `Trimmed`_
+
+        -----------------------------------------------------
+
+        Flowcharts
+        ==========
+
+        - Sample treatment: dag_
+        - Workflow: rulegraph_
+
+        .. image:: rulegraph.png
+
+        -----------------------------------------------------
+
+        Datasets
+        ========
+        
+        Sample directories
+        ------------------
+
+        {SAMPLE_IDS_OL} 
+
+        Raw reads 
+        ---------
+
+        (merged lanes per sample)
+
+        {RAWR_MERGED_OL}
+
+        Raw reads - Forward
+        -------------------
+
+        (merged lanes per sample)
+
+        {RAWR_MERGED_FWD_OL}
+
+        Raw reads - Reverse
+        -------------------
+
+        (merged lanes per sample)
+
+        {RAWR_MERGED_REV_OL}
+
+        Trimmed
+        -------
+
+        {TRIMMED_MERGED_OL}
+
+        -----------------------------------------------------
+
+        """, output.html, metadata="Jacques van Helden (Jacques.van-Helden@univ-amu.fr)", **input)
+
+
+## TO CHECK
+##   https://github.com/leipzig/snakemake-example/blob/master/Snakefile
+##   Report generated with R Sweave
