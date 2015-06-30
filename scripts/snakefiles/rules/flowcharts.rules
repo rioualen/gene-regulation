@@ -1,13 +1,17 @@
 import os
 
-# dag_file = config["dir"]["reports"] + "/" + "dag.pdf"
-# rulegraph_file = config["dir"]["reports"] + "/" + "rulegraph.pdf"
-
 from snakemake.utils import read_job_properties
 
 rule flowcharts:
     """Draw flowcharts for the current snakefile: dag and rulegraph.
-   """
+
+    Requires to specify the following entries in the config
+    dictionary.
+
+    config["reports"]["dag"]
+    config["reports"]["rulegraph"]
+
+    """
     output: dag_pdf = config["reports"]["dag"] + ".pdf", \
             dag_png = config["reports"]["dag"] + ".png", \
             rulegraph_pdf = config["reports"]["rulegraph"] + ".pdf", \
