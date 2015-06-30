@@ -5,9 +5,9 @@
 """
 
 rule rsync:
-	input: config ["read_directory"] + "{dataset}/{dataset}.fastq"
-	output: config["results_directory"] + "{dataset}/{dataset}.fastq"
-	log: config["results_directory"] + "{dataset}/{dataset}_rsync.log"
-	benchmark: config["results_directory"] + "{dataset}/{dataset}_rsync_benchmark.json"
-	params: qsub = config["qsub"] + " -q short -e " + config["results_directory"] + "{dataset}/{dataset}_rsync_qsub.err -o " + config["results_directory"] + "{dataset}/{dataset}_rsync_qsub.out"
+	input: config["dir"]["reads_source"] + "{dataset}/{dataset}.fastq"
+	output: config["dir"]["results"] + "{dataset}/{dataset}.fastq"
+	log: config["dir"]["log"] + "{dataset}/{dataset}_rsync.log"
+	benchmark: config["dir"]["log"] + "{dataset}/{dataset}_rsync_benchmark.json"
+	params: qsub = config["qsub"] + " -q short -e " + config["dir"]["results"] + "{dataset}/{dataset}_rsync_qsub.err -o " + config["dir"]["results"] + "{dataset}/{dataset}_rsync_qsub.out"
 	shell:"rsync -ruptvl {input} {output} 2> {log} "

@@ -36,13 +36,11 @@ GSM_LIST = read_analysis_table_lib.get_gsm_list(config["files"]["analyses"])
 include: "rules/flowcharts.rules"
 include: "rules/rsync.rules"
 include: "rules/fastqc_lucie.rules"
-include: "rules/sickle_se_lucie.rules"
+include: "rules/sickle_se.rules"
 include: "rules/subread_mapping.rules"
 
 
-config["read_directory"]
-
 rule all:
-    input:expand(config["results_directory"] + "{dataset}/{dataset}_fastqc/", dataset = GSM_LIST), \
-    expand(config["results_directory"] + "{dataset}/{dataset}_trimmed_fastqc/", dataset = GSM_LIST), \
-    expand(config["results_directory"] + "{dataset}/{dataset}_{aligneur}.bam", dataset = GSM_LIST, aligneur= "subread")
+    input:expand(config["dir"]["results"] + "{dataset}/{dataset}_fastqc/", dataset = GSM_LIST), \
+    expand(config["dir"]["results"] + "{dataset}/{dataset}_trimmed_fastqc/", dataset = GSM_LIST), \
+    expand(config["dir"]["results"] + "{dataset}/{dataset}_{aligneur}.bam", dataset = GSM_LIST, aligneur= "subread")

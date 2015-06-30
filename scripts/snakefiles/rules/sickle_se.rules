@@ -1,15 +1,13 @@
-"""Trimming is a mandatory first step before alignement.
-It improves reads quality and allows us to manage I/O files.
 """
-rule sickle_se:
-	"""Trim one raw read file (fastq format) from SRR."""
-	input: RESULTSDIR + "{gsm}/{gsm}_import.fastq"
-	output: RESULTSDIR + "{gsm}/{gsm}_trimmed.fastq"
-    	params: 
-		qual_type = config['sickle_parameters']['quality_type'], \
-		qsub = config["qsub"] + " -e " + LOGS + "{gsm}/{gsm}_trimmed_qsub.err -o " + LOGS + "{gsm}/{gsm}_trimmed_qsub.out"
-	log: LOGS + "{gsm}/{gsm}_trimmed.log"
-	benchmark: LOGS +"{gsm}/{gsm}_trimmed_benchmark.json"
-	message: "Trimming raw reads with sickle\n\tInput:\t{input}\n\tOutput:\t{output}\n\tLog:\t{log}"
-	shell: "sickle se --fastq-file {input} --qual-type {params.qual_type} --output-file {output} 2> {log}"
+    Trim reads required before alignement 
 
+"""
+
+rule trim_sickle:
+    """Trim one raw read file (fastq format) from SRR."""
+    input: config["dir"]["results"] + "{dataset}/{dataset}.fastq"
+    output: config["dir"]["results"] + "{dataset}/{dataset}_trimmed.fastq"
+    params: qual_type = config["sickle"]["quality_type"], qsub = config["qsub"] + " -e " + config["dir"]["log"] + "{dataset}/{dataset}_trimmed_qsub.err -o " + config["dir"]["log"] + "{dataset}/{dataset}_trimmed_qsub.out"
+    log: config["dir"]["log"] + "{dataset}/{dataset}_trimmed.log"
+    benchmark: config["dir"]["log"] + "{dataset}/{dataset}_trimmed_benchmark.json"
+    shell: "sickle se --fastq-file {input} --qual-type {params.qual_type} --output-file {output} 2> {log}"

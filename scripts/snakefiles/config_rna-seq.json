@@ -4,7 +4,7 @@
     "qsub": "-V -m a -d /home/lkhamvongsa/dr-chip-rna-seq",
     "genome": {
     "organism": "Drosophila_melanogaster",
-    "genome_version": "dm3",
+    "genome_version": "dm3"
     },
     "files": {
     "snakefile": "scripts/snakefiles/rna-seq_workflow.py",
@@ -16,7 +16,7 @@
     "reads_source": "data/rna-seq/Andy/reads/",
     "reads": "data/reads",
     "results":"results-rna/",
-    "log":"log/",
+    "log":"results-rna/log/",
     "reports": "reports"
     },
     "fastqc": {
@@ -31,7 +31,7 @@
     },
     "subread": {
         "basename": "reference_index",
-        "reference_genome":"/workspace/genomes/Drosophila_melanogaster_UCSC_dm3/dm3/Sequence/WholeGenomeFasta/genome.fa"
+        "reference_genome": "/workspace/genomes/Drosophila_melanogaster_UCSC_dm3/dm3/Sequence/WholeGenomeFasta/genome.fa"
     },
     "bowtie": {
         "bowtie_index": "/workspace/bowtie_genomes/Drosophila_melanogaster/UCSC/dm3/Sequence/BowtieIndex/genome",

@@ -9,10 +9,10 @@
 rule buildindex_mapping:
 	"""This rule build the index necessary to process the alignement"""
 	input: reference_genome = config["subread"]["reference_genome"]
-	output: config["results_directory"] + "control_buildindex.txt"
-	params: reference_index = config["results_directory"] + config["subread"]["basename"], qsub = config["qsub"] + " -q short -e " + config["results_directory"] + "buildindex_qsub.err -o " + config["results_directory"] + "buildindex_qsub.out"
-	log: config["results_directory"] + "buildindex.log"
-	benchmark: config["results_directory"] + "buildindex_benchmark.json"
+	output:config["dir"]["results"] + "control_buildindex.txt"
+	params: reference_index = config["dir"]["results"] + config["subread"]["basename"], qsub = config["qsub"] + " -q short -e " + config["dir"]["log"] + "buildindex_qsub.err -o " + config["dir"]["log"] + "buildindex_qsub.out"
+	log: config["dir"]["log"] + "buildindex.log"
+	benchmark: config["dir"]["log"] + "buildindex_benchmark.json"
 	run: 
 		R("""
 			library("Rsubread")
@@ -20,15 +20,13 @@ rule buildindex_mapping:
 			write("buildindex ok", file="{output}")
 		""")
 			
-		
-
 rule subread_mapping:
 	"""This rule execute the alignement with the subread tool"""
-	input: file_input = config["results_directory"] + "{dataset}/{dataset}_trimmed.fastq", control_txt = config["results_directory"] + "control_buildindex.txt"
-	output: config["results_directory"] + "{dataset}/{dataset}_{aligneur}.bam"
-	params: reference_index = config["results_directory"] + config["subread"]["basename"], qsub = config["qsub"] + " -q medium -e " + config["results_directory"] + "{dataset}/{dataset}_{aligneur}_qsub.err -o " + config["results_directory"] + "{dataset}/{dataset}_{aligneur}_qsub.out"
-	log: config["results_directory"] + "{dataset}/{dataset}_{aligneur}.log"
-	benchmark: config["results_directory"] + "{dataset}/{dataset}_{aligneur}_benchmark.json"
+	input: file_input = config["dir"]["results"] + "{dataset}/{dataset}_trimmed.fastq", control_txt = config["dir"]["results"] + "control_buildindex.txt"
+	output: config["dir"]["results"] + "{dataset}/{dataset}_{aligneur}.bam"
+	params: reference_index = config["dir"]["results"] + config["subread"]["basename"], qsub = config["qsub"] + " -q medium -e " + config["dir"]["log"] + "{dataset}/{dataset}_{aligneur}_qsub.err -o " + config["dir"]["log"] + "{dataset}/{dataset}_{aligneur}_qsub.out"
+	log: config["dir"]["log"] + "{dataset}/{dataset}_{aligneur}.log"
+	benchmark: config["dir"]["log"] + "{dataset}/{dataset}_{aligneur}_benchmark.json"
 	run: 
 		R(""" 
 			library("Rsubread")
