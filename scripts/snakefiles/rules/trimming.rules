@@ -10,4 +10,4 @@ rule trim_sickle:
     params: qual_type = config["sickle"]["quality_type"], qsub = config["qsub"] + " -e " + config["results_directory"] + "/{dataset}/{dataset}_trimmed_qsub.err -o " + config["results_directory"] + "/{dataset}/{dataset}_trimmed_qsub.out"
     log: config["results_directory"] + "/{dataset}/{dataset}_trimmed.log"
     benchmark: config["results_directory"] + "/{dataset}/{dataset}_trimmed_benchmark.json"
-    shell: "sickle se --fastq-file {input} --qual-type {qual_type.params} --output-file {output} 2> {log}"
+    shell: "sickle se --fastq-file {input} --qual-type {params.qual-type} --output-file {output} 2> {log}"

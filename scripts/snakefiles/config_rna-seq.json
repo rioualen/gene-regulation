@@ -13,6 +13,11 @@
     "sickle": {
         "quality_type": "sanger"
     },
+    "reports": {
+        "dag": "rna-seq_workflow_dag",
+        "rulegraph":"rna-seq_workflow_rulegraph",
+        "snakefile":"scripts/snakefiles/rna-seq_workflow.py"
+    },
     "subread": {
         "basename": "reference_index",
         "reference_genome":"/workspace/genomes/Drosophila_melanogaster_UCSC_dm3/dm3/Sequence/WholeGenomeFasta/genome.fa"
