@@ -5,6 +5,7 @@
     "organism": "Drosophila_melanogaster",
     "genome_version": "dm3",
     "qsub": "-V -m a -d /home/lkhamvongsa/dr-chip-rna-seq",
+    "snakefile":"scripts/snakefiles/rna-seq_workflow.py",
     "read_directory": "data/rna-seq/Andy/reads",
     "results_directory": "results-rna",
     "fastqc": {
@@ -15,8 +16,7 @@
     },
     "reports": {
         "dag": "rna-seq_workflow_dag",
-        "rulegraph":"rna-seq_workflow_rulegraph",
-        "snakefile":"scripts/snakefiles/rna-seq_workflow.py"
+        "rulegraph":"rna-seq_workflow_rulegraph"
     },
     "subread": {
         "basename": "reference_index",

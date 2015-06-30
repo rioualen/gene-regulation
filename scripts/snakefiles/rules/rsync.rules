@@ -1,0 +1,13 @@
+"""
+	Copy the raw data in the results folder, 
+	You have to use this rule where you don't merge your data.
+
+"""
+
+rule rsync:
+	input: config ["read_directory"] + "{dataset}/{dataset}.fastq"
+	output: config["results_directory"] + "{dataset}/{dataset}.fastq"
+	log: config["results_directory"] + "{dataset}/{dataset}_rsync.log"
+	benchmark: config["results_directory"] + "{dataset}/{dataset}_rsync_benchmark.json"
+	params: qsub = config["qsub"] + " -q short -e " + config["results_directory"] + "{dataset}/{dataset}_rsync_qsub.err -o " + config["results_directory"] + "{dataset}/{dataset}_rsync_qsub.out"
+	shell:"rsync -ruptvl {input} {output} 2> {log} "
