@@ -16,10 +16,17 @@ rule flowcharts:
     config["reports"]["snakefile"]
 
     """
+<<<<<<< HEAD
     output: dag_pdf = config["reports"]["dag"] + ".pdf", \
             dag_png = config["reports"]["dag"] + ".png", \
             rulegraph_pdf = config["reports"]["rulegraph"] + ".pdf", \
             rulegraph_png = config["reports"]["rulegraph"] + ".png"
+=======
+    output: dag_pdf = RESULTSDIR + config["reports"]["dag"] + ".pdf", \
+            dag_png = RESULTSDIR + config["reports"]["dag"] + ".png", \
+            rulegraph_pdf = RESULTSDIR + config["reports"]["rulegraph"] + ".pdf", \
+            rulegraph_png = RESULTSDIR + config["reports"]["rulegraph"] + ".png"
+>>>>>>> ed6fa29c5caaed0e32b56e9bb49e8ba39a95bed6
     params: scripts = config["snakefile"]
     shell: "snakemake -s {params.scripts} --rulegraph | dot -Tpdf -o {output.rulegraph_pdf} " \
            + "; snakemake -s {params.scripts} --rulegraph | dot -Tpng -o {output.rulegraph_png} " \

@@ -1,0 +1,15 @@
+"""Trimming is a mandatory first step before alignement.
+It improves reads quality and allows us to manage I/O files.
+"""
+rule sickle_se:
+	"""Trim one raw read file (fastq format) from SRR."""
+	input: RESULTSDIR + "{gsm}/{gsm}_import.fastq"
+	output: RESULTSDIR + "{gsm}/{gsm}_trimmed.fastq"
+    	params: 
+		qual_type = config['sickle_parameters']['quality_type'], \
+		qsub = config["qsub"] + " -e " + LOGS + "{gsm}/{gsm}_trimmed_qsub.err -o " + LOGS + "{gsm}/{gsm}_trimmed_qsub.out"
+	log: LOGS + "{gsm}/{gsm}_trimmed.log"
+	benchmark: LOGS +"{gsm}/{gsm}_trimmed_benchmark.json"
+	message: "Trimming raw reads with sickle\n\tInput:\t{input}\n\tOutput:\t{output}\n\tLog:\t{log}"
+	shell: "sickle se --fastq-file {input} --qual-type {params.qual_type} --output-file {output} 2> {log}"
+

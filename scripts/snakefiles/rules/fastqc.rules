@@ -3,9 +3,10 @@ rule fastqc:
 	"""
 	input: RESULTSDIR + "{gsm}/{gsm}_{step}.fastq"
 	output: RESULTSDIR + "{gsm}/{gsm}_{step}_fastqc.html"
-	params: outdir = RESULTSDIR + "{gsm}/"
-	log: RESULTSDIR + "{gsm}/{gsm}_{step}_fastqc.log"
-	benchmark: RESULTSDIR + "{gsm}/{gsm}_{step}_fastqc_benchmark.json"
+	params: outdir = RESULTSDIR + "{gsm}/", \
+		qsub = config["qsub"] + " -e " + LOGS + "{gsm}/{gsm}_fastqc_qsub.err -o " + LOGS + "{gsm}/{gsm}_fastqc_qsub.out"
+	log: LOGS + "{gsm}/{gsm}_{step}_fastqc.log"
+	benchmark: LOGS + "{gsm}/{gsm}_fastqc_benchmark.json"
 	shell:"fastqc --outdir {params.outdir} --format fastq {input} 2> {log}"
 
 
