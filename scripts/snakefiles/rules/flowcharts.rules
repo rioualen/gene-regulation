@@ -15,14 +15,18 @@ rule flowcharts:
 
     config["files"]["snakefile"]
 
+	Changements faits : 
+		- placé les graphes dans config["dir"]["results"]
+
     """
-    output: dag_pdf = config["reports"]["dag"] + ".pdf", \
-            dag_png = config["reports"]["dag"] + ".png", \
-            rulegraph_pdf = config["reports"]["rulegraph"] + ".pdf", \
-            rulegraph_png = config["reports"]["rulegraph"] + ".png"
+    output: dag_pdf = config["dir"]["results"] + config["reports"]["dag"] + ".pdf", \
+            dag_png = config["dir"]["results"] + config["reports"]["dag"] + ".png", \
+            rulegraph_pdf = config["dir"]["results"] + config["reports"]["rulegraph"] + ".pdf", \
+            rulegraph_png = config["dir"]["results"] + config["reports"]["rulegraph"] + ".png"
     params: scripts = config["files"]["snakefile"]
     shell: "snakemake -s {params.scripts} --rulegraph | dot -Tpdf -o {output.rulegraph_pdf} " \
            + "; snakemake -s {params.scripts} --rulegraph | dot -Tpng -o {output.rulegraph_png} " \
            + "; snakemake -s {params.scripts} --dag  | perl -pe 's/graph\[/graph\[rankdir='LR', /' | dot -Tpdf -o {output.dag_pdf} " \
            + "; snakemake -s {params.scripts} --dag  | perl -pe 's/graph\[/graph\[rankdir='LR', /' | dot -Tpng -o {output.dag_png} "
     
+

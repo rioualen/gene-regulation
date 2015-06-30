@@ -2,26 +2,53 @@
 	"__description__": "ChIP-seq workflow: testing on Dm data, implementing SPP & IDR.",
 	"__author__": "Claire Rioualen",
 	"data_source": "Gene Expression Omnibus (GEO)",
-	"organism": "Drosophila_melanogaster",
-	"genome_version": "dm3",
-	"chip_read_directory": "data/chip-seq/reads/",
-	"results_directory": "results/",
-	"log_directory": "results/log/",
-	"snakefile":"scripts/snakefiles/workflows/workflow_claire.py",
 	"qsub": "",
+	"genome": {
+		"organism": "Drosophila_melanogaster",
+		"genome_version": "dm3",
+		"base_url": "",
+		"sequence": "",
+		"features": "",
+        	"install_dir": ""
+	},
+	"files": {
+		"snakefile": "scripts/snakefiles/workflows/workflow_claire.py",
+		"samples": "",
+		"analyses": ""
+	},
+	"dir": {
+		"base": "/home/rioualen/Desktop/workspace/fg-chip-seq/",
+		"reads": "data/chip-seq/reads/",
+		"results": "results/",
+		"logs": "results/log/"
+	},
 	"samples": {
 		"chip": "GSM570045", 
 		"input": "GSM570046" 
 	},
-	"fastQC_steps": "import trimmed",
-	"sickle_parameters": {
-		"quality_type": "sanger"
+	"fastqc": {
+		"other_options": "",
+		"steps": "import sickle"
+	 },
+	"sickle":  { 
+       		"qual_type": "sanger",
+        	"threshold": "20",
+        	"other_options": ""
 	},
-	"aligners":"bowtie",
-	"bowtie_parameters": {
-		"bowtie_index": "genomes/BowtieIndex/genome",
+	"aligners":"bwa bowtie",
+	"bowtie": {
+		"index": "genomes/BowtieIndex/genome",
 		"max_mismatches": "3",
 		"reads_iso": "1"
+	},
+	"bowtie2": {
+        	"bowtie_index": "genome/Escherichia_coli_K_12_substr__MG1655_uid57779",
+        	"max_mismatches": "1",
+        	"other_options": ""
+	},
+
+	"bwa": {
+		"index": "genomes/BWAIndex/genome.fa"
 	},
 	"peak_callers": "spp homer swembl",
 	"oligo_stats": "1 2",
@@ -36,6 +63,16 @@
 	"reports" : {
 		"dag" : "dag",
 		"rulegraph" : "rule"
+	},
+	"samtools": {
+        	"sort_by_name": ""    
 	}
 }
+
+
+
+    
+ 
+
+
 

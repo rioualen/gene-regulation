@@ -16,46 +16,30 @@ import sys
 import time
 
 #================================================================#
-#              Configuration (global variables)                  #
+#                    Variables                                   #
 #================================================================#
 
-#start_time = time.time()
-
-WDIR = "/home/rioualen/Desktop/workspace/fg-chip-seq/"
-workdir: WDIR
-
-configfile: "scripts/snakefiles/config_claire.json"
+configfile: "/home/rioualen/Desktop/workspace/fg-chip-seq/scripts/snakefiles/config_claire.json"
+workdir: config["dir"]["base"] ## does not work?
 
 # Data
 CHIP = config["samples"]["chip"].split()
 INPUT = config["samples"]["input"].split()
-GSM_LIST = CHIP + INPUT
+SAMPLES = CHIP + INPUT
 
-READS = config["chip_read_directory"]
-RESULTSDIR = config["results_directory"]	
-LOGS = config["log_directory"]
+READS = config["dir"]["reads"]
+RESULTSDIR = config["dir"]["results"]	
+LOGS = config["dir"]["logs"]
+
+# Rules dir
+RULES = "/home/rioualen/Desktop/workspace/fg-chip-seq/scripts/snakefiles/rules/"
 
 # QC
-QUALITY_STEP= config["fastQC_steps"].split()
+QUALITY_STEP= config["fastqc"]["steps"].split()
 
-# Alignment
-#ALIGNER = config["aligners"].split()
-#BOWTIE_INDEX = config["bowtie_parameters"]["bowtie_index"]
-#MAX_MISMATCHES = config["bowtie_parameters"]["max_mismatches"]
-#READS_ISO = config["bowtie_parameters"]["reads_iso"]
+#ALN
+ALIGNER = config['aligners'].split()
 
-## Peak-calling
-#PEAK_CALLER = config["peak_callers"].split()
-
-## Motif analysis
-#OLIGO_LENGTH = config["oligo_stats"].split()
-## Peak-motifs params TODO
-#PEAK_MOTIFS_TASKS = config["peak-motifs_parameters"]["tasks"]
-#MAX_SEQ_LENGTH = config["peak-motifs_parameters"]["max_seq_length"]
-#NMOTIFS = config["peak-motifs_parameters"]["nmotifs"]
-#MINOL = config["peak-motifs_parameters"]["minol"]
-#MAXOL = config["peak-motifs_parameters"]["maxol"]
-#MOTIF_DB = config["peak-motifs_parameters"]["motif_db"]
 
 #================================================================#
 #                         Workflow                               #
@@ -67,10 +51,11 @@ rule all:
 	input: 
 		expand(RESULTSDIR + "dag.pdf"), \
 		expand(RESULTSDIR + "rule.pdf"), \
-		expand(RESULTSDIR + "{gsm}/{gsm}_trimmed.fastq", gsm=GSM_LIST), \
-		expand(RESULTSDIR + "{gsm}/{gsm}_{step}_fastqc.html", gsm=GSM_LIST, step=QUALITY_STEP)
-#		expand(RESULTSDIR + "{gsm}/{gsm}_{trimmer}.fastq", gsm=GSM_LIST, trimmer="sickle"), \
-#		expand(RESULTSDIR + "{gsm}/{gsm}_{trimmer}_fastqc.html", gsm=GSM_LIST, trimmer="sickle")
+		expand(RESULTSDIR + "{samples}/{samples}_sickle.fastq", samples=SAMPLES), \
+		expand(RESULTSDIR + "{samples}/{samples}_{step}_fastqc.html", samples=SAMPLES, step=QUALITY_STEP), \
+		expand(RESULTSDIR + "{samples}/{samples}_{aligner}.sam", samples=SAMPLES, aligner=ALIGNER)
+#		expand(RESULTSDIR + "{samples}/{samples}_{trimmer}.fastq", gsm=GSM_LIST, trimmer="sickle"), \
+#		expand(RESULTSDIR + "{samples}/{samples}_{trimmer}_fastqc.html", gsm=GSM_LIST, trimmer="sickle")
 ##		expand("results/{chip}_vs_{inp}/{chip}_{aligner}_{caller}_{oligo}.txt", chip=CHIP, inp=INPUT, oligo=OLIGO_LENGTH, aligner=ALIGNER, caller=PEAK_CALLER), \			
 #		expand("results/{chip}_vs_{inp}/{chip}_{aligner}_{caller}_length.png", chip=CHIP, inp=INPUT, aligner=ALIGNER, caller=PEAK_CALLER)
 #		expand("results/{chip}_vs_{inp}/{chip}_{aligner}_{caller}.bed", chip=CHIP, inp=INPUT, aligner=ALIGNER, caller=PEAK_CALLER)
@@ -81,11 +66,11 @@ rule all:
 #================================================================#
 
 rule merge_reads:
-    """Merge the raw short read files (SRR) belonging to the same sample (GSM)"""
-    output: RESULTSDIR + "{gsm}/{gsm}_import.fastq"
-    params: qsub = config["qsub"] + " -e " + LOGS + "/{gsm}/{gsm}_merged_qsub.err -o " + LOGS + "/{gsm}/{gsm}_merged_qsub.out"
-    log: LOGS + "{gsm}/{gsm}_merged.log"
-    benchmark: LOGS + "{gsm}/{gsm}_merged_benchmark.json"
+    """Merge the raw short read files (SRR) belonging to the same sample (GSM) before allowing the trimming."""
+    output: RESULTSDIR + "{samples}/{samples}_import.fastq"
+    params: qsub = config["qsub"] + " -e " + LOGS + "/{samples}/{samples}_merged_qsub.err -o " + LOGS + "/{samples}/{samples}_merged_qsub.out"
+    log: LOGS + "{samples}/{samples}_merged.log"
+    benchmark: LOGS + "{samples}/{samples}_merged_benchmark.json"
     message: "Merging short reads for sample {input}"
     shell: "ls -1 {READS}/{wildcards.gsm}/SRR*.fastq | xargs cat > {output};"
 
@@ -93,31 +78,24 @@ rule merge_reads:
 #                         Includes                               #
 #================================================================#
 
-#include: "../rules/bed_to_fasta.rules"
-#include: "../rules/bowtie.rules"
-#include: "../rules/bwa.rules"
-#include: "../rules/convert_bam_to_bed.rules"
-#include: "../rules/convert_sam_to_bam.rules"
-#include: "../rules/count_oligo.rules"
-include: "../rules/fastqc.rules"
-include: "../rules/flowcharts.rules"
-#include: "../rules/homer.rules"
-#include: "../rules/idr.rules"
-#include: "../rules/macs14.rules"
-#include: "../rules/merge.rules"
-#include: "../rules/narrowpeak_to_bed.rules"
-#include: "../rules/peak_length.rules"
-#include: "../rules/purge_sequence.rules"
-include: "../rules/sickle_se.rules"
-#include: "../rules/sorted_bam.rules"
-#include: "../rules/spp.rules"
-#include: "../rules/swembl.rules"
-#include: "../rules/trimming.rules"
-
-
-
-
-#print "Program took", time.time() - start_time, "to run"
-
-
+#include: RULES + "bed_to_fasta.rules"
+include: RULES + "bowtie.rules"
+include: RULES + "bwa.rules"
+#include: RULES + "convert_bam_to_bed.rules"
+#include: RULES + "convert_sam_to_bam.rules"
+#include: RULES + "count_oligo.rules"
+include: RULES + "fastqc.rules"
+include: RULES + "flowcharts.rules"
+#include: RULES + "homer.rules"
+#include: RULES + "idr.rules"
+#include: RULES + "macs14.rules"
+#include: RULES + "merge.rules"
+#include: RULES + "narrowpeak_to_bed.rules"
+#include: RULES + "peak_length.rules"
+#include: RULES + "purge_sequence.rules"
+include: RULES + "sickle_se.rules"
+#include: RULES + "sorted_bam.rules"
+#include: RULES + "spp.rules"
+#include: RULES + "swembl.rules"
+#include: RULES + "trimming.rules"
 

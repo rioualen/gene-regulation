@@ -3,11 +3,21 @@
 
 """
 
-rule trim_sickle:
-    """Trim one raw read file (fastq format) from SRR."""
-    input: config["dir"]["results"] + "{dataset}/{dataset}.fastq"
-    output: config["dir"]["results"] + "{dataset}/{dataset}_trimmed.fastq"
-    params: qual_type = config["sickle"]["quality_type"], qsub = config["qsub"] + " -e " + config["dir"]["log"] + "{dataset}/{dataset}_trimmed_qsub.err -o " + config["dir"]["log"] + "{dataset}/{dataset}_trimmed_qsub.out"
-    log: config["dir"]["log"] + "{dataset}/{dataset}_trimmed.log"
-    benchmark: config["dir"]["log"] + "{dataset}/{dataset}_trimmed_benchmark.json"
-    shell: "sickle se --fastq-file {input} --qual-type {params.qual_type} --output-file {output} 2> {log}"
+rule sickle_se:
+	"""Trim one raw read file (fastq format) from SRR.
+
+	Changement faits : 
+		- remplacé "trimmed" par "sickle" (au cas où on utilise d'autres algo de trimming)
+		- suffixe "import" pour les data (après synchronisation, merging ou autre -> data prêt à l'emploi != raw data)
+		- dans la config ultime de Jacques, 'quality_type' s'est transformé en 'qual_type'
+	"""
+	input: config['dir']['results'] + "{samples}/{samples}_import.fastq"
+	output: config['dir']['results'] + "{samples}/{samples}_sickle.fastq"
+    	params: 
+		qual_type = config['sickle']['qual_type'], \
+		qsub = config["qsub"] + " -e " + config['dir']['logs'] + "{samples}/{samples}_sickle_qsub.err -o " + config['dir']['logs'] + "{samples}/{samples}_sickle_qsub.out"
+	log: config['dir']['logs'] + "{samples}/{samples}_sickle.log"
+	benchmark: config['dir']['logs'] +"{samples}/{samples}_sickle_benchmark.json"
+	message: "Trimming raw reads with sickle\n\tInput:\t{input}\n\tOutput:\t{output}\n\tLog:\t{log}"
+	shell: "sickle se --fastq-file {input} --qual-type {params.qual_type} --output-file {output} 2> {log}"
+

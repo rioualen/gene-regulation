@@ -1,12 +1,12 @@
 rule fastqc:
 	"""Check the quality of fastq-formatted raw reads using the program fastQC (quality control).
 	"""
-	input: RESULTSDIR + "{gsm}/{gsm}_{step}.fastq"
-	output: RESULTSDIR + "{gsm}/{gsm}_{step}_fastqc.html"
-	params: outdir = RESULTSDIR + "{gsm}/", \
-		qsub = config["qsub"] + " -e " + LOGS + "{gsm}/{gsm}_fastqc_qsub.err -o " + LOGS + "{gsm}/{gsm}_fastqc_qsub.out"
-	log: LOGS + "{gsm}/{gsm}_{step}_fastqc.log"
-	benchmark: LOGS + "{gsm}/{gsm}_fastqc_benchmark.json"
+	input: config['dir']['results'] + "{samples}/{samples}_{step}.fastq"
+	output: config['dir']['results'] + "{samples}/{samples}_{step}_fastqc.html"
+	params: outdir = config['dir']['results'] + "{samples}/", \
+		qsub = config["qsub"] + " -e " + config['dir']['logs'] + "{samples}/{samples}_fastqc_qsub.err -o " + config['dir']['logs'] + "{samples}/{samples}_fastqc_qsub.out"
+	log: config['dir']['logs'] + "{samples}/{samples}_{step}_fastqc.log"
+	benchmark: config['dir']['logs'] + "{samples}/{samples}_fastqc_benchmark.json"
 	shell:"fastqc --outdir {params.outdir} --format fastq {input} 2> {log}"
 
 
