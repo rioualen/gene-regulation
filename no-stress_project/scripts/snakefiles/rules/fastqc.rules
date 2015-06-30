@@ -3,7 +3,6 @@
 
 """
 
-
 rule fastqc:
     """Check the quality of a file named {dataset}.fastq.gz, containing
     fastq-formatted raw reads using the program fastQC (quality
@@ -17,7 +16,7 @@ rule fastqc:
     output: outdir="{data_dir}/{dataset}_fastqc/"
     log: "{data_dir}/{dataset}_fastqc/{dataset}_fastqc.log"
     benchmark: "{data_dir}/{dataset}_fastqc/{dataset}_fastqc_benchmark.json"
-    params: qsub = QSUB_PARAM + " -q short -e {data_dir}/{data_dir}_fastqc_qsub.err -o {data_dir}/{data_dir}_fastqc_qsub.out", options = OPTIONS_FASTQC
+    params: qsub = config["qsub"] + " -q short -e {data_dir}/{data_dir}_fastqc_qsub.err -o {data_dir}/{data_dir}_fastqc_qsub.out", options = config["fastqc"]["other_options"]
     shell:"fastqc --outdir {output.outdir} --format fastq {input} {params.options} 2> {log} "
 
 
@@ -26,10 +25,10 @@ rule fastqc:
 #     You can add any wanted parameters in the "other options" of the config file.
 #     The results are put into a folder named '{dataset}_fastqc'.
 #     """    
-#     input: "{data_dir}/{dataset}_trimmed_thr" + THRESHOLD + ".fastq.gz"
-#     output: "{data_dir}/{dataset}_trimmed_thr" + THRESHOLD + "_fastqc"
+#     input: "{data_dir}/{dataset}_trimmed_thr" + config["sickle"]["threshold"] + ".fastq.gz"
+#     output: "{data_dir}/{dataset}_trimmed_thr" + config["sickle"]["threshold"] + "_fastqc"
 # #    output: outdir="{data_dir}/{dataset}_fastqc_trimmed/"
-#     log: "{data_dir}/{dataset}_fastqc/{dataset}_trimmed_thr" + THRESHOLD + "_fastqc.log"
-#     benchmark: "{data_dir}/{dataset}_fastqc/{dataset}_trimmed_thr" + THRESHOLD + "_fastqc_benchmark.json"
-#     params: qsub = QSUB_PARAM + " -q short -e {data_dir}/{data_dir}_trimmed_thr" + THRESHOLD + "_fastqc_qsub.err -o {data_dir}/{data_dir}_trimmed_thr" + THRESHOLD + "_fastqc_qsub.out", options = OPTIONS_FASTQC
+#     log: "{data_dir}/{dataset}_fastqc/{dataset}_trimmed_thr" + config["sickle"]["threshold"] + "_fastqc.log"
+#     benchmark: "{data_dir}/{dataset}_fastqc/{dataset}_trimmed_thr" + config["sickle"]["threshold"] + "_fastqc_benchmark.json"
+#     params: qsub = config["qsub"] + " -q short -e {data_dir}/{data_dir}_trimmed_thr" + config["sickle"]["threshold"] + "_fastqc_qsub.err -o {data_dir}/{data_dir}_trimmed_thr" + config["sickle"]["threshold"] + "_fastqc_qsub.out", options = config["fastqc"]["other_options"]
 #     shell:"fastqc --outdir {output.outdir} --format fastq {input} {params.options} 2> {log} "

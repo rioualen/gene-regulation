@@ -4,41 +4,60 @@
     "data_source": "Jeff Cole",
     "organism": "",
     "genome_version": "",
-    "qsub_parameters": "-V -m a -d ~/no-stress_project",
-    "data_root_dir": "data/1258-BRM/",
-    
-    "fastqc_parameters": {
+    "qsub": "-V -m a -d ~/no-stress_project",
+
+    "files": {
+        "samples": "data/no-stress_samples.tab",
+        "analyses": ""
+    },
+
+    "dir": {
+	   "data_root": "data/1258-BRM/",
+        "reports": "reports"
+    },
+
+    "suffix": {
+	   "reads_fwd": "_1",
+	   "reads_rev": "_2"
+    },
+
+    "reports": {
+	   "dag": "reports/dag",
+	   "rulegraph": "reports/rulegraph"
+    }, 
+
+    "fastqc": {
         "other_options": ""
     },
 
-    "sickle_parameters": { 
+    "sickle": { 
         "seq_type": "sanger",
         "threshold": "20",
         "other_options": ""
     },
     
-    "bowtie2_parameters": {
-        "bowtie_index": "genome/Desulfovibrio_desulfuricans_ATCC_27774",
+    "bowtie2": {
+        "index": "genome/Desulfovibrio_desulfuricans_ATCC_27774",
         "max_mismatches": "1",
         "other_options": ""
     },
 
-    "samtools_parameters": {
+    "samtools": {
         "sort_by_name": ""    
     },
     
-    "htseq_parameters": {
+    "htseq": {
         "ht_type": "bam",
         "order": "name",
         "stranded": "no",
         "minaqual": "10",
-        "idattr": "gene_id",
-	"mode": "intersection-nonempty",
+        "id_attr": "gene_id",
+        "mode": "intersection-nonempty",
         "gff_file": "genome/Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27.gtf",
         "other_options": ""
     },
 
-    "edgeR_parameters": {
+    "edgeR": {
         "N": ["N1", "N2", "N4"],
         "NN": ["NN2", "NN4", "NN5"], 
         "S": ["S1", "S4", "S5"],

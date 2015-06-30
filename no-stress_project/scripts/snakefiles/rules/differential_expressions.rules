@@ -1,90 +1,118 @@
-
-
 rule edgeR:
-    input: LIST_ALL_COUNTS
-    output: DATA_PATH + "results/{cond_1}_VS_{cond_2}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_" + ORDER + ".csv"
-    log: "results/{cond_1}_VS_{cond_2}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_" + ORDER + ".log"
-    benchmark: "results/{cond_1}_VS_{cond_2}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_" + ORDER + ".json"
-    params: qsub = QSUB_PARAM + " -q long -e results/{cond_1}_VS_{cond_2}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_" + ORDER + "_qsub.err -o results/{cond_1}_VS_{cond_2}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_" + ORDER + "_qsub.out", cond1="{cond_1}", cond2="{cond_2}"
+    """Run differential expression analysis on a table of counts per tag
+    (gene). 
+
+    This rule takes as input a tab-delimited text file containing gene
+    counts per sample (one row per gene, one column per sample) and a gene
+    annotation file (gtf).
+
+    Result files:
+
+    1. A tab-delimited file with with differential expression
+       statistics, sorted by significance (p-value of FDR).
+    2. A pdf file with various plots. 
+
+    """
+    input: COUNT_FILES
+    output: R_params = config["dir"]["data_root"] + "results/{cond_1}_VS_{cond_2}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + "_params.R", \
+            csv = config["dir"]["data_root"] + "results/{cond_1}_VS_{cond_2}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + ".csv"
+    log: "results/{cond_1}_VS_{cond_2}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + ".log"
+    benchmark: "results/{cond_1}_VS_{cond_2}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + ".json"
+    params: qsub = config["qsub"] + " -q long -e results/{cond_1}_VS_{cond_2}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + "_qsub.err -o results/{cond_1}_VS_{cond_2}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + "_qsub.out", \
+            cond1="{cond_1}", cond2="{cond_2}", \
+            data_root = config["dir"]["data_root"]
     run:
         cond_1 = params.cond1
         cond_2 = params.cond2
+        data_root = params.data_root
+        out_R_params = output.R_params
+        out_csv = output.csv
 
         #Get biological replicate list
-        R_1 = config["edgeR_parameters"][cond_1]
-        R_2 = config["edgeR_parameters"][cond_2]
+        R_1 = config["edgeR"][cond_1]
+        R_2 = config["edgeR"][cond_2]
 
-        ext = "_bowtie2_mm" + MAX_MISMATCHES + "_sorted_" + ORDER + "_count.txt" 
+        ext = "_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + "_count.txt" 
 
         #Create complete path for count files
         files_list = []
         for elt in R_1:
-            files_list.append(DATA_PATH + elt + "/" + elt + ext)
+            files_list.append('"' + config["dir"]["data_root"] + elt + "/" + elt + ext + '"')
 
         for elt in R_2:
-            files_list.append(DATA_PATH + elt + "/" + elt + ext)
+            files_list.append('"' + config["dir"]["data_root"] + elt + "/" + elt + ext + '"')
 
         #Separate the count files in string
         counts_f = ', '.join(files_list)
         #Get the list of condition 
-        xp_condition_py = (cond_1 + ",") * len(R_1) + (cond_2 + ",") * len(R_2)
+        xp_condition_py = ("'" + cond_1 + "',") * len(R_1) + ("'" +cond_2 + "',") * len(R_2)
         #remove the last coma
         xp_condition_py = xp_condition_py[:-1]
 
         #get list of replicate
-        xp_name_py = ",".join(R_1) + "," + ",".join(R_2)
+        xp_name_py = "'" + "','".join(R_1) + "','" + "','".join(R_2) + "'"
 
         #list of condition
-        xp_list = cond_1 + "," + cond_2
+        xp_list = "'" + cond_1 + "','" + cond_2 + "'"
 
         if len(R_1) >= len(R_2):
             n_rep = len(R_2)
         else:
             n_rep = len(R_1)
         
-        #out=open(str(output), 'w')
-        #out.write(counts_f + "\n" + xp_condition_py + "\n" + xp_name_py + "\n" + xp_list + "\n" + str(n_rep))                     
-        #out.close()
+        out_R=open(out_R_params, 'w')
+        out_R.write("counts.f = c(" + counts_f + ")\n" \
+        + "xp.condition = c(" + xp_condition_py + ")\n" \
+        + "xp.name = c(" +  xp_name_py + ")\n" \
+        + "xp.list = c(" + xp_list + ")\n" \
+        + "n.rep = " + str(n_rep) + "\n" \
+        + "data.root = '" +  config["dir"]["data_root"] + "' \n" \
+        + "output = '" + out_csv + "' \n" \
+        + "cond1 = '" + cond_1 + "' \n" \
+        + "cond2 = '" + cond_2 + "' \n" )     
+        out_R.close()
+        
+
         R("""
         library("edgeR")
         library("limma")
-        file_list = c({counts_f})
-        xp_name = c({xp_name_py})
-        xp_condition = c({xp_condition_py})
+
+        source("{output.R_params}")
+
         # get data from counts files
-        counts = readDGE(file_list)$counts
+        counts = readDGE(counts.f)$counts
 
         # Remove summary lines from HTseq files
         noint = rownames(counts) %in% c("no_feature","ambiguous","too_low_aQual", "not_aligned","alignment_not_unique")
         
         # Remove all features that have less than 1 reads per millions of reads
         cpms = cpm(counts)
-        keep = rowSums(cpms > 1) >= {n_rep} & !noint
+        keep = rowSums(cpms > 1) >= n.rep & !noint
         counts = counts[keep,]
 
         #tables preparation
-        colnames(counts) = xp_name
+        colnames(counts) = xp.name
         
-        d = DGEList(counts=counts, group=xp_condition)
+        d = DGEList(counts=counts, group=xp.condition)
         d = calcNormFactors(d)
         
-        pdf(file="{DATA_PATH}/results/plotMDS_{cond_1}_VS_{cond_2}.pdf") 
-        plotMDS(d, labels=samples$shortname, col=c("darkgreen","blue")[factor(samples$condition)])
+        pdf(file=paste(data.root, "/results/plotMDS_", cond1, "_VS_", cond2, ".pdf", sep="")) 
+        plotMDS(d, labels=xp.name, col=c("darkgreen","blue")[factor(xp.condition)])
         dev.off()
         
         d = estimateCommonDisp(d)
         d = estimateTagwiseDisp(d)
         
-        pdf(file="{DATA_PATH}/results/plotMeanVar_{cond_1}_VS_{cond_2}.pdf")
+        pdf(file= paste(data.root, "/results/plotMeanVar_", cond1, "_VS_", cond2, ".pdf", sep=""))
         plotMeanVar(d, show.tagwise.vars=TRUE, NBline=TRUE)
         dev.off()
 
-        pdf(file="{DATA_PATH}/results/plotBCV_{cond_1}_VS_{cond_2}.pdf")
+        pdf(file= paste(data.root, "/results/plotBCV_", cond1, "_VS_", cond2, ".pdf", sep=""))
         plotBCV(d)
         dev.off()
 
         #Differential expression
-        de = exactTest(d, pair=c({xp_list}))
+        de = exactTest(d, pair=c(xp.list))
 
         #tabular summary of the DE stats
         tt = topTags(de, n=nrow(d))
@@ -94,12 +122,10 @@ rule edgeR:
 
         deg = rn[tt$table$FDR < .05]
 
-        pdf(file="{DATA_PATH}/results/plotSmear_{cond_1}_VS_{cond_2}.pdf")
+        pdf(file=paste(data.root, "/results/plotSmear_", cond1, "_VS_", cond2, ".pdf", sep=""))
         plotSmear(d, de.tags=deg)
         dev.off()
 
-        write.csv(tt$table, file="{output}")
+        write.csv(tt$table, file=output)
         
         """)
-
-
