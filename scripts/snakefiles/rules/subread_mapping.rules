@@ -1,0 +1,36 @@
+"""
+	Align each sample with the R-package subread
+
+	For aligned each sample on the genome reference the R-package subread need to build a index by the function 
+	builindex(), and then we execute the alignement with the function align() who call the tool Subread.
+	Liao Y, Smyth GK and Shi W (2013). The Subread aligner: fast, accurate and scalable read mapping by seed-and-vote.
+	Nucleic Acids Research, 41(10):e108
+"""
+rule buildindex_mapping:
+	"""This rule build the index necessary to process the alignement"""
+	input: reference_genome = config["subread"]["reference_genome"]
+	output: config["results_directory"] + "/control_buildindex.txt"
+	params: reference_index = config["results_directory"] + "/" + config["subread"]["basename"], qsub = config["qsub_parameters"] + " -q short -e " + config["results_directory"] + "/buildindex_qsub.err -o " + config["results_directory"] + "/buildindex_qsub.out"
+	log: config["results_directory"] + "/buildindex.log"
+	benchmark: config["results_directory"] + "/buildindex_benchmark.json"
+	run: 
+		R("""
+			library("Rsubread")
+			buildindex(basename="{params.reference_index}",reference="{input.reference_genome}")
+			write("buildindex ok", file="{output}")
+		""")
+			
+		
+
+rule subread_mapping:
+	"""This rule execute the alignement with the subread tool"""
+	input: file_input = config["results_directory"] + "/{dataset}/{dataset}_trimmed.fastq", control_txt = config["results_directory"] + "/control_buildindex.txt"
+	output: config["results_directory"] + "/{dataset}/{dataset}_{aligneur}.bam"
+	params: reference_index = config["results_directory"] + "/" + config["subread"]["basename"], qsub = config["qsub_parameters"] + " -q medium -e " + config["results_directory"] + "/{dataset}/{dataset}_{aligneur}_qsub.err -o " + config["results_directory"] + "/{dataset}/{dataset}_{aligneur}_qsub.out"
+	log: config["results_directory"] + "/{dataset}/{dataset}_{aligneur}.log"
+	benchmark: config["results_directory"] + "/{dataset}/{dataset}_{aligneur}_benchmark.json"
+	run: 
+		R(""" 
+			library("Rsubread")
+			align(index="{params.reference_index}",readfile1="{input.file_input}",output_file="{output}")
+		""")
