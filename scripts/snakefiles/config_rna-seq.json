@@ -1,13 +1,24 @@
 {
     "__description__": "Parameters for the analysis of ChIP-seq results for selected transcription factors.",
     "__author__": "Lucie Khamvongsa & Jacques van Helden",
-    "data_source": "Gene Expression Omnibus (GEO)",
+    "qsub": "-V -m a -d /home/lkhamvongsa/dr-chip-rna-seq",
+    "genome": {
     "organism": "Drosophila_melanogaster",
     "genome_version": "dm3",
-    "qsub": "-V -m a -d /home/lkhamvongsa/dr-chip-rna-seq",
-    "snakefile":"scripts/snakefiles/rna-seq_workflow.py",
-    "read_directory": "data/rna-seq/Andy/reads",
-    "results_directory": "results-rna",
+    },
+    "files": {
+    "snakefile": "scripts/snakefiles/rna-seq_workflow.py",
+    "samples": "",
+    "analyses": "data/rna-seq/analysis_description.tab"
+    },
+    "dir": {
+    "base": "/home/lkhamvongsa/dr-chip-rna-seq",
+    "reads_source": "data/rna-seq/Andy/reads/",
+    "reads": "data/reads",
+    "results":"results-rna/",
+    "log":"log/",
+    "reports": "reports"
+    },
     "fastqc": {
         "other_options": ""
     },

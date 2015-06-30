@@ -30,13 +30,13 @@ import read_analysis_table_lib # read_analysis_table_lib is a module where you c
     ===========================
 
 """
-ANALYSIS_TABLE = "data/rna-seq/analysis_description.tab"
-GSM_LIST = read_analysis_table_lib.get_gsm_list(ANALYSIS_TABLE)
+
+GSM_LIST = read_analysis_table_lib.get_gsm_list(config["files"]["analyses"])
 
 include: "rules/flowcharts.rules"
 include: "rules/rsync.rules"
 include: "rules/fastqc_lucie.rules"
-include: "rules/trimming.rules"
+include: "rules/sickle_se_lucie.rules"
 include: "rules/subread_mapping.rules"
 
 
