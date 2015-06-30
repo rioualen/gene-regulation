@@ -11,7 +11,7 @@ rule trim_sickle:
     """Trim one raw read file (fastq format) from SRR."""
     input: CHIP_READ_DIR + "/{gsm}/{gsm}.fastq"
     output: CHIP_READ_DIR + "/{gsm}/{gsm}_trimmed.fastq"
-    params: qsub = QSUB_PARAM + " -e " + CHIP_READ_DIR + "/{gsm}/{gsm}_trimmed_qsub.err -o " + CHIP_READ_DIR + "/{gsm}/{gsm}_trimmed_qsub.out"
+    params: qsub = config["qsub"] + " -e " + CHIP_READ_DIR + "/{gsm}/{gsm}_trimmed_qsub.err -o " + CHIP_READ_DIR + "/{gsm}/{gsm}_trimmed_qsub.out"
     log: CHIP_READ_DIR + "/{gsm}/{gsm}_trimmed.log"
     benchmark: CHIP_READ_DIR +"/{gsm}/{gsm}_trimmed_benchmark.json"
     message: "Trimming raw reads with sickle\n\tInput:\t{input}\n\tOutput:\t{output}\n\tLog:\t{log}"

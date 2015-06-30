@@ -14,5 +14,5 @@ rule bed_to_fasta:
 	output: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_{PEAK_CALLERS}.fasta"
 	log: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_{PEAK_CALLERS}_fetch-seq.log"								## Empty files?
 	benchmark: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_{PEAK_CALLERS}_fetch-seq_benchmark.json"
-#	params: qsub = QSUB_PARAM + " -q short -e {reads}_bam_to_bed_qsub.err -o {reads}_bam_to_bed_qsub.out"
+#	params: qsub = config["qsub"] + " -q short -e {reads}_bam_to_bed_qsub.err -o {reads}_bam_to_bed_qsub.out"
 	shell:"fetch-sequences -i {input} -header_format galaxy -genome {GENOME} -o {output} 2> {log} "

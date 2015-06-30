@@ -14,7 +14,7 @@ rule swembl:
     """
     input:treatment = CHIP_READ_DIR + "/{gsm_treatment}/{gsm_treatment}_{aligneur}_sorted.bed", \
           control =  CHIP_READ_DIR + "/{gsm_control}/{gsm_control}_{aligneur}_sorted.bed"
-    params: qsub = QSUB_PARAM + " -q short -e {peak_dir}/{gsm_treatment}_vs_{gsm_control}_{aligneur}_swembl_R{swembl_r}/{gsm_treatment}_vs_{gsm_control}_{aligneur}_swembl_R{swembl_r}swembl_qsub.err -o {peak_dir}/{gsm_treatment}_vs_{gsm_control}_swembl_R{swembl_r}/{gsm_treatment}_vs_{gsm_control}_swembl_R{swembl_r}swembl_qsub.out"
+    params: qsub = config["qsub"] + " -q short -e {peak_dir}/{gsm_treatment}_vs_{gsm_control}_{aligneur}_swembl_R{swembl_r}/{gsm_treatment}_vs_{gsm_control}_{aligneur}_swembl_R{swembl_r}swembl_qsub.err -o {peak_dir}/{gsm_treatment}_vs_{gsm_control}_swembl_R{swembl_r}/{gsm_treatment}_vs_{gsm_control}_swembl_R{swembl_r}swembl_qsub.out"
     log: "{peak_dir}/{gsm_treatment}_vs_{gsm_control}_{aligneur}_swembl_R{swembl_r}/{gsm_treatment}_vs_{gsm_control}_{aligneur}_swembl_R{swembl_r}.log"
     benchmark: "{peak_dir}/{gsm_treatment}_vs_{gsm_control}_{aligneur}_swembl_R{swembl_r}/{gsm_treatment}_vs_{gsm_control}_{aligneur}_swembl_R{swembl_r}_benchmark.json"
     output: peaks_swembl = "{peak_dir}/{gsm_treatment}_vs_{gsm_control}_{aligneur}_swembl_R{swembl_r}/{gsm_treatment}_vs_{gsm_control}_{aligneur}_swembl_R{swembl_r}.swembl", \

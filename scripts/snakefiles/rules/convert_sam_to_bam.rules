@@ -13,5 +13,5 @@ rule sam_to_bam:
     output: CHIP_READ_DIR + "/{gsm}/{gsm}_{aligneur}.bam"
     log: CHIP_READ_DIR + "/{gsm}/{gsm}_sam_to_bam.log"
     benchmark: CHIP_READ_DIR + "/{gsm}/{gsm}_sam_to_bam_benchmark.json"
-    params: qsub=QSUB_PARAM+" -e " + CHIP_READ_DIR + "/{gsm}/{gsm}_sam_to_bam_qsub.err -o " + CHIP_READ_DIR + "/{gsm}/{gsm}_sam_to_bam_qsub.out"
+    params: qsub=config["qsub"]+" -e " + CHIP_READ_DIR + "/{gsm}/{gsm}_sam_to_bam_qsub.err -o " + CHIP_READ_DIR + "/{gsm}/{gsm}_sam_to_bam_qsub.out"
     shell:"samtools view -bS -o {output} {input} 2> {log}"

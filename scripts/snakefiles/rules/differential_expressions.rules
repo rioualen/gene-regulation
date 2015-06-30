@@ -17,7 +17,7 @@ rule edgeR:
     output: config["dir"]["data_root"] + "results/{cond_1}_VS_{cond_2}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_" + ORDER + ".csv"
     log: "results/{cond_1}_VS_{cond_2}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_" + ORDER + ".log"
     benchmark: "results/{cond_1}_VS_{cond_2}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_" + ORDER + ".json"
-    params: qsub = QSUB_PARAM + " -q long -e results/{cond_1}_VS_{cond_2}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_" + ORDER + "_qsub.err -o results/{cond_1}_VS_{cond_2}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_" + ORDER + "_qsub.out", cond1="{cond_1}", cond2="{cond_2}"
+    params: qsub = config["qsub"] + " -q long -e results/{cond_1}_VS_{cond_2}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_" + ORDER + "_qsub.err -o results/{cond_1}_VS_{cond_2}_bowtie2_mm" + MAX_MISMATCHES + "_sorted_" + ORDER + "_qsub.out", cond1="{cond_1}", cond2="{cond_2}"
     run:
         cond_1 = params.cond1
         cond_2 = params.cond2

@@ -27,7 +27,7 @@ rule peak_calling_macs14_all:
 
 rule macs_14:
     input: treatment = "{read_dir}/{gsm_treatment}/{gsm_treatment}_bowtie_sorted.bed", control = "{read_dir}/{gsm_control}/{gsm_control}_bowtie_sorted.bed"
-    params: name = "{read_dir}/{gsm_treatment}_vs_{gsm_control}/{gsm_treatment}_input_{gsm_control}_macs14", qsub = QSUB_PARAM + " -e {read_dir}/{gsm_treatment}_vs_{gsm_control}/{gsm_treatment}_input_{gsm_control}_macs14_qsub.err -o {read_dir}/{gsm_treatment}_vs_{gsm_control}/{gsm_treatment}_input_{gsm_control}_macs14_qsub.out"
+    params: name = "{read_dir}/{gsm_treatment}_vs_{gsm_control}/{gsm_treatment}_input_{gsm_control}_macs14", qsub = config["qsub"] + " -e {read_dir}/{gsm_treatment}_vs_{gsm_control}/{gsm_treatment}_input_{gsm_control}_macs14_qsub.err -o {read_dir}/{gsm_treatment}_vs_{gsm_control}/{gsm_treatment}_input_{gsm_control}_macs14_qsub.out"
     log: "{read_dir}/{gsm_treatment}_vs_{gsm_control}/{gsm_treatment}_input_{gsm_control}_macs14.log"
     benchmark: "{read_dir}/{gsm_treatment}_vs_{gsm_control}/{gsm_treatment}_input_{gsm_control}_macs14.json"
     output: "{read_dir}/{gsm_treatment}_vs_{gsm_control}/{gsm_treatment}_input_{gsm_control}_macs14_negative_peaks.xls", \

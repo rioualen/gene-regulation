@@ -27,5 +27,5 @@ rule bowtie:
     params: max_mismatches = MAX_MISMATCHES, \
             reads_iso = READS_ISO, \
             index = BOWTIE_INDEX, \
-            qsub=QSUB_PARAM+" -e {trimmed_reads}_bowtie_qsub.err -o {trimmed_reads}_bowtie_qsub.out"
+            qsub=config["qsub"]+" -e {trimmed_reads}_bowtie_qsub.err -o {trimmed_reads}_bowtie_qsub.out"
     shell:"bowtie -q -S -n {params.max_mismatches} -m {params.reads_iso} --phred33-quals {params.index} {input} {output} 2> {log}"
