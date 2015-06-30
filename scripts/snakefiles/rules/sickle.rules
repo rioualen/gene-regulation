@@ -1,13 +1,18 @@
-"""
-    Trim reads required before alignment 
+"""Trim reads required before alignment using the sickle software.
 
 """
 
-rule trimming_paired_end:
-    """Trim all raw paired-end read files (fastq.gz format) using sickle.
+rule sickle_paired_ends:
+    """Trim paired-end reads (fastq.gz format) using sickle.
 
-    The forward and the reverse read files have to be named
-    respectively '{data_dir}_1.fastq.gz' and '{data_dir}_2.fastq.gz'.
+    This script requires to specify the following parameters in the
+    snakemake config file.
+
+      config["suffix"]["threshold"]
+      config["suffix"]["reads_fwd"]
+      config["suffix"]["reads_rev"]
+      config["qsub"]
+
 
     The quality threshold (threshold) and the quality type (seq_type)
     parameters have to be determined in the config file (json format)
@@ -16,19 +21,38 @@ rule trimming_paired_end:
     You can add any other desired parameters in the "other options" of
     the config file.
 
-    The result files are named '{data_dir}_1_trimmed.fastq.gz'
-    (forward reads), '{reads}_2_trimmed.fastq.gz' (reverse reads) and
-    '{data_dir}_trimmed.fastq.gz' (unmatched reads).
+    The result files are named '{data_dir}_1_sickle_pe.fastq.gz'
+    (forward reads), '{reads}_2_sickle_pe.fastq.gz' (reverse reads) and
+    '{data_dir}_sickle_pe.fastq.gz' (unmatched reads).
 
     """
     
-    input: forward="{reads}" + SUFFIX_FWD + ".fastq.gz", reverse="{reads}" + SUFFIX_REV + ".fastq.gz"
-    output: forward = "{reads}" + SUFFIX_FWD + "_trimmed_thr" + THRESHOLD + ".fastq.gz", \
-            reverse = "{reads}" + SUFFIX_REV + "_trimmed_thr" + THRESHOLD + ".fastq.gz", \
-            single = "{reads}_single_trimmed_thr" + THRESHOLD + ".fastq.gz", \
-            summary = "{reads}_trimmed_thr" + THRESHOLD + "_summary.txt"
-    params: threshold = THRESHOLD, seq_type=SEQ_TYPE, qsub=QSUB_PARAM + " -q long -e {reads}_trimmed_qsub.err -o {reads}_trimmed_qsub.out", options = OPTIONS_SICKLE
-    log: "{reads}_trimmed_thr" + THRESHOLD + ".log"
-    benchmark: "{reads}_trimmed_thr" + THRESHOLD + "_benchmark.json"
+    input: forward="{reads}" + config["suffix"]["reads_fwd"] + ".fastq.gz", reverse="{reads}" + config["suffix"]["reads_rev"] + ".fastq.gz"
+    output: forward = "{reads}" + config["suffix"]["reads_fwd"] + "_sickle_pe_thr" + config["sickle"]["threshold"] + ".fastq.gz", \
+            reverse = "{reads}" + config["suffix"]["reads_rev"] + "_sickle_pe_thr" + config["sickle"]["threshold"] + ".fastq.gz", \
+            single = "{reads}_single_sickle_pe_thr" + config["sickle"]["threshold"] + ".fastq.gz", \
+            summary = "{reads}_sickle_pe_thr" + config["sickle"]["threshold"] + "_summary.txt"
+    params: threshold = config["sickle"]["threshold"], seq_type=SEQ_TYPE, qsub=config["qsub"] + " -q long -e {reads}_sickle_pe_qsub.err -o {reads}_sickle_pe_qsub.out", options = OPTIONS_SICKLE
+    log: "{reads}_sickle_pe_thr" + config["sickle"]["threshold"] + ".log"
+    benchmark: "{reads}_sickle_pe_thr" + config["sickle"]["threshold"] + "_benchmark.json"
     # message: "Trimming raw reads with sickle\n\tInput:\t{input}\n\tOutput:\t{output}\n\tLog:\t{log}"
     shell: "sickle pe --gzip-output --pe-file1 {input.forward} --pe-file2 {input.reverse} --qual-type {params.seq_type} --qual-threshold {params.threshold} --output-pe1 {output.forward} --output-pe2 {output.reverse} --output-single {output.single} {params.options} > {output.summary} 2> {log}"
+
+"""
+    Trim reads required before alignement 
+
+"""
+
+# rule trim_all:
+#     """Trim short reads (after merging) for each sample"""
+#     input:expand('{read_dir}/{gsm}/{gsm}_trimmed.fastq', gsm=GSM_LIST, read_dir={CHIP_READ_DIR})
+
+rule trim_sickle:
+    """Trim one raw read file (fastq format) from SRR."""
+    input: "{reads}.fastq"
+    output: "{reads}_sickle_se_q" +  + ".fastq"
+    params: qsub = config["qsub"] + " -e " + CHIP_READ_DIR + "/{gsm}/{gsm}_trimmed_qsub.err -o " + CHIP_READ_DIR + "/{gsm}/{gsm}_trimmed_qsub.out"
+    log: CHIP_READ_DIR + "/{gsm}/{gsm}_trimmed.log"
+    benchmark: CHIP_READ_DIR +"/{gsm}/{gsm}_trimmed_benchmark.json"
+    message: "Trimming raw reads with sickle\n\tInput:\t{input}\n\tOutput:\t{output}\n\tLog:\t{log}"
+    shell: "sickle se --fastq-file {input} --qual-type {QUALITY_TYPE} --output-file {output} 2> {log}"
