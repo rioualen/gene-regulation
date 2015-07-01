@@ -14,15 +14,18 @@
     },
     
     "files": {
-	"snakefile": "scripts/snakefiles/workflows/broche_analysis.py",
+	"snakefile": "~/fg-chip-seq/scripts/snakefiles/workflows/broche_analysis.py",
 	"samples": "data/broche_samples.tab",
 	"analyses": "data/broche_analyses.tab"
     },
 
     "dir": {
 	"base": "/home/jvanheld/BeatriceRoche",
-	"reads_source": "data/reads",
-	"reads": "data/reads",
+	"fg-chip-seq": "/home/jvanheld/fg-chip-seq",
+	"fg-rules": "/home/jvanheld/fg-chip-seq/scripts/snakefiles/rules",
+	"reads_source": "data/reads_ori",
+	"results": "results",
+	"reads": "results/reads",
 	"reports": "reports"
     },
 
