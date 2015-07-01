@@ -4,8 +4,8 @@
 """
 rule sickle_single_end:
     """Trim one a single end raw reads file with sickle."""
-    input: "{reads}.fastq.gz"
-    output: trimmed="{reads}_sickle_se_q" + config["sickle"]["threshold"] + ".fastq.gz", \
+    input: "{reads}.fastq"
+    output: trimmed="{reads}_sickle_se_q" + config["sickle"]["threshold"] + ".fastq", \
             summary = "{reads}_sickle_se_q" + config["sickle"]["threshold"] + "_summary.txt"
     params: threshold = config["sickle"]["threshold"], \
             qual_type=config["sickle"]["qual_type"], \

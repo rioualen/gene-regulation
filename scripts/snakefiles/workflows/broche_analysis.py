@@ -42,8 +42,8 @@ SAMPLE_IDS=read_sample_ids(config["files"]["samples"])
 
 ## List the merged raw reads
 RAWR_L1R1, RAWR_L1R1_DIRS, RAWR_L1R1_BASENAMES=glob_multi_dir(SAMPLE_IDS, "*_L001" + config["suffix"]["reads_fwd"] + ".fastq.gz", config["dir"]["reads_source"], "_L001" + config["suffix"]["reads_fwd"] + ".fastq.gz")
-RAWR_MERGED_FWD=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_fwd"] + ".fastq.gz", zip, sample_dir=RAWR_L1R1_DIRS, sample_basename=RAWR_L1R1_BASENAMES)
-RAWR_MERGED_REV=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_rev"] + ".fastq.gz", zip, sample_dir=RAWR_L1R1_DIRS, sample_basename=RAWR_L1R1_BASENAMES)
+RAWR_MERGED_FWD=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_fwd"] + ".fastq", zip, sample_dir=RAWR_L1R1_DIRS, sample_basename=RAWR_L1R1_BASENAMES)
+RAWR_MERGED_REV=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_rev"] + ".fastq", zip, sample_dir=RAWR_L1R1_DIRS, sample_basename=RAWR_L1R1_BASENAMES)
 RAWR_MERGED=RAWR_MERGED_FWD + RAWR_MERGED_REV
 
 ## List separately the FORWARD and REVERE raw read files, which will be submitted to quality control
@@ -177,19 +177,6 @@ rule report:
 
         {RAWR_MERGED_OL}
 
-        Raw reads - Forward
-        -------------------
-
-        (merged lanes per sample)
-
-        {RAWR_MERGED_FWD_OL}
-
-        Raw reads - Reverse
-        -------------------
-
-        (merged lanes per sample)
-
-        {RAWR_MERGED_REV_OL}
 
         Trimmed
         -------

@@ -31,10 +31,10 @@ rule sickle_paired_ends:
 
     """
     
-    input: forward="{reads}" + config["suffix"]["reads_fwd"] + ".fastq.gz", reverse="{reads}" + config["suffix"]["reads_rev"] + ".fastq.gz"
-    output: forward = "{reads}" + config["suffix"]["reads_fwd"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq.gz", \
-            reverse = "{reads}" + config["suffix"]["reads_rev"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq.gz", \
-            single = "{reads}_single_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq.gz", \
+    input: forward="{reads}" + config["suffix"]["reads_fwd"] + ".fastq", reverse="{reads}" + config["suffix"]["reads_rev"] + ".fastq"
+    output: forward = "{reads}" + config["suffix"]["reads_fwd"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq", \
+            reverse = "{reads}" + config["suffix"]["reads_rev"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq", \
+            single = "{reads}_single_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq", \
             summary = "{reads}_sickle_pe_q" + config["sickle"]["threshold"] + "_summary.txt"
     params: threshold = config["sickle"]["threshold"], \
             qual_type=config["sickle"]["qual_type"], \
