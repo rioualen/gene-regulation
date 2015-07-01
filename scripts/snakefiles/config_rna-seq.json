@@ -16,14 +16,15 @@
     "reads_source": "data/rna-seq/Andy/reads/",
     "reads": "data/reads",
     "results":"results-rna/",
-    "log":"results-rna/log/",
     "reports": "reports"
     },
     "fastqc": {
         "other_options": ""
     },
     "sickle": {
-        "quality_type": "sanger"
+        "qual_type": "sanger",
+        "threshold": "20",
+        "other_options": ""
     },
     "reports": {
         "dag": "rna-seq_workflow_dag",
