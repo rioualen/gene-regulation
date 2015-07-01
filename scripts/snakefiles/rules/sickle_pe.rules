@@ -52,18 +52,3 @@ rule sickle_paired_ends:
 
 """
 
-rule sickle_single_end:
-    """Trim one a single end raw reads file with sickle."""
-    input: "{reads}.fastq.gz"
-    output: trimmed="{reads}_sickle_se_q" + config["sickle"]["threshold"] + ".fastq.gz", \
-            summary = "{reads}_sickle_se_q" + config["sickle"]["threshold"] + "_summary.txt"
-    params: threshold = config["sickle"]["threshold"], \
-            qual_type=config["sickle"]["qual_type"], \
-            options = config["sickle"]["other_options"], \
-            qsub = config["qsub"] \
-            + " -e {reads}_sickle_se_q" + config["sickle"]["threshold"] + "_qsub.err" \
-            + " -o {reads}_sickle_se_q" + config["sickle"]["threshold"] + "_qsub.out"
-    log: "{reads}_sickle_se_q" + config["sickle"]["threshold"] + ".log"
-    benchmark: "{reads}_sickle_se_q" + config["sickle"]["threshold"] + "_benchmark.json"
-    message: "Trimming single-end raw reads with sickle\n\tInput:\t{input}\n\tOutput:\t{output}\n\tLog:\t{log}"
-    shell: "sickle se --gzip-output --fastq-file {input} --qual-type {params.qual_type} --output-file {output}  {params.options} > {output.summary} 2> {log}"
