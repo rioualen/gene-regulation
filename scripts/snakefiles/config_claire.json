@@ -18,13 +18,18 @@
 	},
 	"dir": {
 		"base": "/home/rioualen/Desktop/workspace/fg-chip-seq/",
-		"reads": "data/chip-seq/reads/",
+		"reads_source": "data/chip-seq/reads/",
 		"results": "results/",
-		"logs": "results/log/"
+		"reports": "results/"
+	},
+	"reports" : {
+		"dag" : "results/dag",
+		"rulegraph" : "results/rule"
 	},
 	"samples": {
 		"chip": "GSM570045", 
-		"input": "GSM570046" 
+		"input": "GSM570046",
+		"srr": "SRR063882.fastq SRR063883.fastq SRR063884.fastq"
 	},
 	"fastqc": {
 		"other_options": "",
@@ -37,7 +42,7 @@
 	},
 	"aligners":"bwa bowtie",
 	"bowtie": {
-		"index": "genomes/BowtieIndex/genome",
+		"bowtie_index": "genomes/BowtieIndex/genome",
 		"max_mismatches": "3",
 		"reads_iso": "1"
 	},
@@ -59,10 +64,6 @@
 		"minol" : "",
 		"maxol" : "",
 		"motif_db jaspar_core_vertebrates" : "tf $RSAT/public_html/data/motif_databases/JASPAR/jaspar_core_vertebrates_2013-11.tf"
-	},
-	"reports" : {
-		"dag" : "dag",
-		"rulegraph" : "rule"
 	},
 	"samtools": {
         	"sort_by_name": ""    

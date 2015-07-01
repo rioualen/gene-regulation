@@ -10,10 +10,10 @@ the conventional treatment of RNA-seq transcriptomic data.
 - functional enrichment of DEG
 - ...
 """
-
-WDIR = "/home/lkhamvongsa/dr-chip-rna-seq"
-workdir: WDIR
 configfile: "scripts/snakefiles/config_rna-seq.json"
+WDIR = config["dir"]["base"]
+workdir: WDIR
+
 
 from snakemake.utils import R
 import os
@@ -35,12 +35,12 @@ GSM_LIST = read_analysis_table_lib.get_gsm_list(config["files"]["analyses"])
 
 include: "rules/flowcharts.rules"
 include: "rules/rsync.rules"
-include: "rules/fastqc_lucie.rules"
+include: "rules/fastqc.rules"
 include: "rules/sickle_se.rules"
 include: "rules/subread_mapping.rules"
 
 
 rule all:
     input:expand(config["dir"]["results"] + "{dataset}/{dataset}_fastqc/", dataset = GSM_LIST), \
-    expand(config["dir"]["results"] + "{dataset}/{dataset}_trimmed_fastqc/", dataset = GSM_LIST), \
-    expand(config["dir"]["results"] + "{dataset}/{dataset}_{aligneur}.bam", dataset = GSM_LIST, aligneur= "subread")
+    expand(config["dir"]["results"] + "{dataset}/{dataset}_sickle_se_q" + config["sickle"]["threshold"] + "_fastqc/", dataset = GSM_LIST), \
+    expand(config["dir"]["results"] + "{dataset}/{dataset}_{trimmed}_{aligneur}.bam", dataset = GSM_LIST, aligneur= "subread", trimmed = "sickle_se_q" + config["sickle"]["threshold"] )

@@ -8,7 +8,8 @@
 
     "files": {
         "samples": "data/no-stress_samples.tab",
-        "analyses": ""
+        "analyses": "",
+        "snakefile": "~/no-stress_project/scripts/snakefiles/workflows/no-stress_analysis.py"
     },
 
     "dir": {
@@ -62,6 +63,7 @@
         "NN": ["NN2", "NN4", "NN5"], 
         "S": ["S1", "S4", "S5"],
         "SN": ["SN1", "SN2", "SN5"],
+        "conditions": ["N", "S", "NN", "SN"],
         "cond1": ["N", "N", "S", "NN"],
         "cond2": ["NN", "S", "SN", "SN"]
     }
