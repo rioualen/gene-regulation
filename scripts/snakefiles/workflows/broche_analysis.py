@@ -55,8 +55,8 @@ RAWR_FILES_REV, RAWR_DIRS_REV, RAWR_BASENAMES_REV=glob_multi_dir(SAMPLE_IDS, "*"
 ## group of lanes: I only glob the first lane, and I use the list of
 ## directories and basenames
 SAMPLE_L1R1, PAIRED_DIRS, PAIRED_BASENAMES=glob_multi_dir(SAMPLE_IDS, "*_L001" + config["suffix"]["reads_fwd"] + ".fastq.gz", config["dir"]["reads"], "_L001" + config["suffix"]["reads_fwd"] + ".fastq.gz")
-TRIMMED_MERGED_FWD=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_fwd"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq.gz", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
-TRIMMED_MERGED_REV=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_rev"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq.gz", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+TRIMMED_MERGED_FWD=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_fwd"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+TRIMMED_MERGED_REV=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_rev"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 TRIMMED_MERGED=TRIMMED_MERGED_FWD + TRIMMED_MERGED_REV
 
 ## Bowtie version 1 : paired-end read mapping
@@ -117,9 +117,9 @@ from snakemake.utils import report
 ## Bulleted list of samples for the report
 SAMPLE_IDS_OL=report_numbered_list(SAMPLE_IDS)
 RAWR_MERGED_OL=report_numbered_list(RAWR_MERGED)
-RAWR_MERGED_FWD_OL=report_numbered_list(RAWR_MERGED_FWD)
-RAWR_MERGED_REV_OL=report_numbered_list(RAWR_MERGED_REV)
 TRIMMED_MERGED_OL=report_numbered_list(TRIMMED_MERGED)
+MAPPED_PE_SAM_OL=report_numbered_list(MAPPED_PE_SAM)
+MAPPED_PE_BAM_OL=report_numbered_list(MAPPED_PE_BAM)
 
 rule report:
     """
@@ -146,9 +146,9 @@ rule report:
         - `Flowcharts`_
         - `Datasets`_
              - `Sample directories`_
-             - `Raw reads - Forward`_
-             - `Raw reads - Reverse`_
+             - `Raw reads`_
              - `Trimmed`_
+             - `Mapped`_
 
         -----------------------------------------------------
 
@@ -177,11 +177,21 @@ rule report:
 
         {RAWR_MERGED_OL}
 
-
         Trimmed
         -------
 
         {TRIMMED_MERGED_OL}
+
+        Mapped
+        ------
+
+        Sam format (uncompressed)
+
+        {MAPPED_PE_SAM_OL}
+
+        Bam format (compressed)
+
+        {MAPPED_PE_BAM_OL}
 
         -----------------------------------------------------
 
