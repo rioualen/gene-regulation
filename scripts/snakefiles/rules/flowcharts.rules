@@ -16,16 +16,8 @@ rule flowcharts:
 
     config["files"]["snakefile"]
 
-    Changements faits : 
-	  - placé les graphes dans config["dir"]["results"]
-    Changement défait (JvH)
-
-       - J'avais placé les flowcharts dans le dossier
-         config["dir"]["reports"] pour une bonne raison: il ne s'agit
-         pas de résultats, mais d'un rapport sur les analyses
-         effectuées. De plus, les flowcharts sont affichés dans mon
-         rapport HTML qui est généré par la règle "report", c'est donc
-         bien plus pratique de l'avoir dans le même dossier.
+    Usage example:
+    	expand(config["dir"]["reports"] + "dag.pdf") 
 
     """
     output: dag_pdf = config["reports"]["dag"] + ".pdf", \
