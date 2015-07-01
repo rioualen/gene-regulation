@@ -40,5 +40,5 @@ rule bowtie2_build:
     log:  config["bowtie"]["bowtie_index"] + "/bowtie-build_log.txt"
     message: "Building bowtie index in directory:\t{params.bowtie_index}"
     benchmark:  config["bowtie"]["bowtie_index"] + "/bowtie-build_benchmark.json"
-    shell: "bowtie-build {input.sequence} {params.bowtie_index} > {log}"
+    shell: "bowtie2-build {input.sequence} {params.bowtie_index} > {log}"
 
