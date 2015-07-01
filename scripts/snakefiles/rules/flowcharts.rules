@@ -28,10 +28,10 @@ rule flowcharts:
          bien plus pratique de l'avoir dans le même dossier.
 
     """
-    output: dag_pdf = config["dir"]["reports"] + config["reports"]["dag"] + ".pdf", \
-            dag_png = config["dir"]["reports"] + config["reports"]["dag"] + ".png", \
-            rulegraph_pdf = config["dir"]["reports"] + config["reports"]["rulegraph"] + ".pdf", \
-            rulegraph_png = config["dir"]["reports"] + config["reports"]["rulegraph"] + ".png"
+    output: dag_pdf = config["reports"]["dag"] + ".pdf", \
+            dag_png = config["reports"]["dag"] + ".png", \
+            rulegraph_pdf = config["reports"]["rulegraph"] + ".pdf", \
+            rulegraph_png = config["reports"]["rulegraph"] + ".png"
     params: scripts = config["files"]["snakefile"]
     shell: "snakemake -s {params.scripts} --rulegraph | dot -Tpdf -o {output.rulegraph_pdf} " \
            + "; snakemake -s {params.scripts} --rulegraph | dot -Tpng -o {output.rulegraph_png} " \
