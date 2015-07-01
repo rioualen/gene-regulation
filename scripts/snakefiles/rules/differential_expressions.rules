@@ -15,7 +15,8 @@ rule edgeR:
     """
     input: COUNT_FILES
     output: R_params = config["dir"]["data_root"] + "results/bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + "_params.R", \
-            csv = COUNT_RESULTS
+            csv = COUNT_RESULTS, \
+            all_counts_file = config["dir"]["data_root"] + "results/bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + "_allcounts.tab"
     # log: "results/{cond_1}_VS_{cond_2}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + ".log"
     # benchmark: "results/{cond_1}_VS_{cond_2}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + ".json"
     params: qsub = config["qsub"] + " -q short", \
@@ -48,7 +49,7 @@ rule edgeR:
             count_res.close()
 
         #Open and write in a file
-        all_counts = open(config["dir"]["data_root"] + "results/bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + "_allcounts.tab", 'w')
+        all_counts = open(output.all_counts_file, 'w')
         for elm in list_line:
             all_counts.write(elm + "\n")
         all_counts.close()
@@ -86,7 +87,7 @@ rule edgeR:
                 files_list.append('"' + config["dir"]["data_root"] + elt + "/" + elt + ext + '"')
 
             #Separate the count files in string
-            counts_f.append("c(" + ', '.join(files_list) + ")")
+            counts_f.append("c(" + ', \n '.join(files_list) + ")")
             #Get the list of condition 
             sample_condition_temp = ("'" + cond_1 + "',") * len(R_1) + ("'" +cond_2 + "',") * len(R_2)
             #remove the last coma
@@ -104,16 +105,27 @@ rule edgeR:
                 n_rep.append(str(len(R_1)))
         
         out_R=open(output.R_params, 'w')
-        out_R.write("counts.f = list(" + ','.join(counts_f) + ")\n" \
-        + "sample.condition = list(" + ','.join(sample_condition_py) + ")\n" \
-        + "sample.names = list(" +  ','.join(sample_names_py) + ")\n" \
-        + "conditions = list(" + ','.join(conditions) + ")\n" \
-        + "n.rep = c(" + ','.join(n_rep) + ")\n" \
-        + "output = c('" + "','".join(output_list) + "') \n" \
-        + "cond1 = list('" + "','".join(condition_1) + "'') \n" \
-        + "cond2 = list('" + "','".join(condition_2) + "'') \n" \
-        + "count_files = c('" + "','".join(COUNT_FILES) + "') \n"\
-        + "data.root = '" +  config["dir"]["data_root"] + "' \n" )     
+        out_R.write("## Root path \n" \
+        + "data.root <-'" +  config["dir"]["data_root"] + "' \n \n" \
+        + "## Table containing the counts of reads per gene (rows) for each sample (columns)  \n" \
+        + "all.counts.table <- '" + output.all_counts_file + "' \n \n" \
+        + "## Description of the conditions \n" \
+        + "conditions <- c('" + "','".join(config["edgeR"]["conditions"]) + "') \n" \
+        + "n.rep <-c(" + ','.join(n_rep) + ")\n \n" \
+        + "count.files <-c('" + "', \n '".join(COUNT_FILES) + "') \n \n \n"\
+        + "################################################################ \n" \
+        + "## Structure of the comparisons for edgeR \n \n" \
+        + "comparisons <-list(" + ','.join(conditions) + ")\n" \
+        + "comparisons.cond1 <-list('" + "','".join(condition_1) + "') \n" \
+        + "comparsions.cond2 <-list('" + "','".join(condition_2) + "') \n" \
+        + "counts.files.per.comparisons <- list(" + ', \n'.join(counts_f) + ")\n" \
+        + "condition.per.comparisons <-list(" + ', \n '.join(sample_condition_py) + ")\n" \
+        + "names.per.comparisons <-list(" +  ', \n '.join(sample_names_py) + ")\n \n" \
+        + "## List of cvs files that will be created by edgeR \n" \
+        + "output <-c('" + "', \n '".join(output_list) + "') \n \n" \
+        + "#### END OF THE CONFIG FILE \n" \
+        + "################################################################" \
+        )     
         out_R.close()
         
         out_path = config["dir"]["data_root"] + "results/test.txt"
