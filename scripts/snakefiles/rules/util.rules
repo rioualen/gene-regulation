@@ -41,20 +41,6 @@ rule sort_bam_by_names:
     params: qsub = config["qsub"] + " -q long -e {aligned_reads}_sorted_names_qsub.err -o {aligned_reads}_sorted_names_qsub.out"
     shell:"samtools sort -n -f {input} {output} 2> {log}"
     
-rule gzip_one_file:
-    """Compress a file with the gzip program. The rule is very simple, but
-    is convenient to use in a workflow: it can be used to fix some
-    dependencies on.gz extensions, and/or to send compression jobs to
-    a queue.
-
-    """
-    input: "{file}"
-    output: "{file}.gz"
-    log: "{file}_gzip.log"
-    benchmark: "{file}_gzip_benchmark.json"
-    params: qsub = config["qsub"] + " -q short -e {file}_gzip_qsub.err -o {file}_gzip_qsub.out"
-    shell:"gzip {input} 2> {log} "
-
 # rule gunzip_one_file:
 #     """Uncompress a file with the gunzip program. The rule is very simple,
 #     but is convenient to use in a workflow: it can be used to fix some
