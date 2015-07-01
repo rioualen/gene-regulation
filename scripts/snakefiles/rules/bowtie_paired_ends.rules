@@ -1,12 +1,12 @@
 rule bowtie_pe:
     """Read mapping with bowtie version 1 (no gap) in paired end."""
-    input: forward = "{reads_prefix}" + config["suffix"]["reads_fwd"] + "_trimmed_thr" + config["sickle"]["threshold"] + ".fastq", \
-           reverse = "{reads_prefix}" + config["suffix"]["reads_rev"] + "_trimmed_thr" + config["sickle"]["threshold"] + ".fastq", \
+    input: forward = "{reads_prefix}" + config["suffix"]["reads_fwd"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq", \
+           reverse = "{reads_prefix}" + config["suffix"]["reads_rev"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq", \
            index1 = config["bowtie"]["bowtie_index"] + ".1.ebwt"
-    output: sam = "{reads_prefix}_trimmed_thr" + config["sickle"]["threshold"] + "_bowtie_pe.sam", \
-            stdout =  "{reads_prefix}_trimmed_thr" + config["sickle"]["threshold"] + "_bowtie_pe.stdout"
-    log: "{reads_prefix}_trimmed_thr" + config["sickle"]["threshold"] + "_bowtie_pe.log"
-    benchmark: "{reads_prefix}_trimmed_thr" + config["sickle"]["threshold"] + "_bowtie_pe_benchmark.json"
+    output: sam = "{reads_prefix}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe.sam", \
+            stdout =  "{reads_prefix}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe.stdout"
+    log: "{reads_prefix}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe.log"
+    benchmark: "{reads_prefix}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe_benchmark.json"
     params: max_mismatches = config["bowtie"]["max_mismatches"], \
             reads_iso = config["bowtie"]["reads_iso"], \
             index = config["bowtie"]["bowtie_index"], \
