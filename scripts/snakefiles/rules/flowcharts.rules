@@ -10,19 +10,28 @@ rule flowcharts:
 
     config["reports"]["dag"]
     config["reports"]["rulegraph"]
+    config["dir"]["reports"]
 
     We have to specify the snakefile that we want to use
 
     config["files"]["snakefile"]
 
-	Changements faits : 
-		- placé les graphes dans config["dir"]["results"]
+    Changements faits : 
+	  - placé les graphes dans config["dir"]["results"]
+    Changement défait (JvH)
+
+       - J'avais placé les flowcharts dans le dossier
+         config["dir"]["reports"] pour une bonne raison: il ne s'agit
+         pas de résultats, mais d'un rapport sur les analyses
+         effectuées. De plus, les flowcharts sont affichés dans mon
+         rapport HTML qui est généré par la règle "report", c'est donc
+         bien plus pratique de l'avoir dans le même dossier.
 
     """
-    output: dag_pdf = config["dir"]["results"] + config["reports"]["dag"] + ".pdf", \
-            dag_png = config["dir"]["results"] + config["reports"]["dag"] + ".png", \
-            rulegraph_pdf = config["dir"]["results"] + config["reports"]["rulegraph"] + ".pdf", \
-            rulegraph_png = config["dir"]["results"] + config["reports"]["rulegraph"] + ".png"
+    output: dag_pdf = config["dir"]["reports"] + config["reports"]["dag"] + ".pdf", \
+            dag_png = config["dir"]["reports"] + config["reports"]["dag"] + ".png", \
+            rulegraph_pdf = config["dir"]["reports"] + config["reports"]["rulegraph"] + ".pdf", \
+            rulegraph_png = config["dir"]["reports"] + config["reports"]["rulegraph"] + ".png"
     params: scripts = config["files"]["snakefile"]
     shell: "snakemake -s {params.scripts} --rulegraph | dot -Tpdf -o {output.rulegraph_pdf} " \
            + "; snakemake -s {params.scripts} --rulegraph | dot -Tpng -o {output.rulegraph_png} " \
