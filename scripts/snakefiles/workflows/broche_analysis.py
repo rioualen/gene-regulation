@@ -27,6 +27,7 @@ NOW = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
 ## Import snakemake rules and python library
 include: config["dir"]["fg-rules"] + "/util.py"                   ## Python utilities
 include: config["dir"]["fg-rules"] + "/util.rules"                ## Snakemake utilities
+include: config["dir"]["fg-rules"] + "/count_reads.rules"         ## Count reads in different file formats
 include: config["dir"]["fg-rules"] + "/fastqc.rules"              ## Quality control with fastqc
 include: config["dir"]["fg-rules"] + "/flowcharts.rules"          ## Draw flowcharts (dag and rule graph)
 include: config["dir"]["fg-rules"] + "/sickle_paired_ends.rules"  ## Trimming with sickle
@@ -86,6 +87,7 @@ rule all:
     """
 #    input: TRIMMED_SUMMARIES, TRIMMED_QC
     input: MERGED_RAWR_QC, RAWR_MERGED, TRIMMED_MERGED, MAPPED_PE_SAM, MAPPED_PE_BAM
+#    input: MERGED_RAWR_QC, MAPPED_PE_BAM
     params: qsub=config["qsub"]
     shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
