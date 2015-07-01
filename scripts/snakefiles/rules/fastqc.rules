@@ -10,6 +10,13 @@ rule fastqc:
     options" of the config file.  The results are put into a folder
     named '{dataset}_fastqc'.
 
+	Required parameters:
+		config['fastqc']['other_options']
+		config['qsub']	
+
+	Usage:
+		QC = expand(config['dir']['results'] + "{data_dir}/{dataset}_fastqc/", dir_data=DIR_DATA, dataset=DATASETS)
+
     """
     input: "{data_dir}/{dataset}.fastq"
     output: outdir="{data_dir}/{dataset}_fastqc/"
