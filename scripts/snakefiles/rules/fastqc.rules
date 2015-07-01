@@ -1,12 +1,33 @@
+"""
+	Check the quality of fastq-formatted raw reads using the program fastQC (quality control).
+
+"""
+
 rule fastqc:
-	"""Check the quality of fastq-formatted raw reads using the program fastQC (quality control).
-	"""
-	input: config['dir']['results'] + "{samples}/{samples}_{step}.fastq"
-	output: config['dir']['results'] + "{samples}/{samples}_{step}_fastqc.html"
-	params: outdir = config['dir']['results'] + "{samples}/", \
-		qsub = config["qsub"] + " -e " + config['dir']['logs'] + "{samples}/{samples}_fastqc_qsub.err -o " + config['dir']['logs'] + "{samples}/{samples}_fastqc_qsub.out"
-	log: config['dir']['logs'] + "{samples}/{samples}_{step}_fastqc.log"
-	benchmark: config['dir']['logs'] + "{samples}/{samples}_fastqc_benchmark.json"
-	shell:"fastqc --outdir {params.outdir} --format fastq {input} 2> {log}"
+    """Check the quality of a file named {dataset}.fastq.gz, containing
+    fastq-formatted raw reads using the program fastQC (quality
+    control).  You can add any wanted parameters in the "other
+    options" of the config file.  The results are put into a folder
+    named '{dataset}_fastqc'.
+
+    """
+    
+    input: "{data_dir}/{dataset}.fastq.gz"
+    output: outdir="{data_dir}/{dataset}_fastqc/"
+    log: "{data_dir}/{dataset}_fastqc/{dataset}_fastqc.log"
+    benchmark: "{data_dir}/{dataset}_fastqc/{dataset}_fastqc_benchmark.json"
+    params: qsub = config["qsub"] + " -q short -e {data_dir}/{data_dir}_fastqc_qsub.err -o {data_dir}/{data_dir}_fastqc_qsub.out", options = config["fastqc"]["other_options"]
+    shell:"fastqc --outdir {output.outdir} --format fastq {input} {params.options} 2> {log} "
+
+# rule fastqc:
+# 	"""Check the quality of fastq-formatted raw reads using the program fastQC (quality control).
+# 	"""
+# 	input: config['dir']['results'] + "{samples}/{samples}_{step}.fastq"
+# 	output: config['dir']['results'] + "{samples}/{samples}_{step}_fastqc.html"
+# 	params: outdir = config['dir']['results'] + "{samples}/", \
+# 		qsub = config["qsub"] + " -e " + config['dir']['logs'] + "{samples}/{samples}_fastqc_qsub.err -o " + config['dir']['logs'] + "{samples}/{samples}_fastqc_qsub.out"
+# 	log: config['dir']['logs'] + "{samples}/{samples}_{step}_fastqc.log"
+# 	benchmark: config['dir']['logs'] + "{samples}/{samples}_fastqc_benchmark.json"
+# 	shell:"fastqc --outdir {params.outdir} --format fastq {input} 2> {log}"
 
 
