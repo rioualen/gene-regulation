@@ -4,20 +4,22 @@
 """
 
 rule fastqc:
-    """Check the quality of a file named {dataset}.fastq.gz, containing
+    """Check the quality of a file named {dataset}.fastq, containing
     fastq-formatted raw reads using the program fastQC (quality
     control).  You can add any wanted parameters in the "other
     options" of the config file.  The results are put into a folder
     named '{dataset}_fastqc'.
 
     """
-    
-    input: "{data_dir}/{dataset}.fastq.gz"
+    input: "{data_dir}/{dataset}.fastq"
     output: outdir="{data_dir}/{dataset}_fastqc/"
     log: "{data_dir}/{dataset}_fastqc/{dataset}_fastqc.log"
     benchmark: "{data_dir}/{dataset}_fastqc/{dataset}_fastqc_benchmark.json"
-    params: qsub = config["qsub"] + " -q short -e {data_dir}/{data_dir}_fastqc_qsub.err -o {data_dir}/{data_dir}_fastqc_qsub.out", options = config["fastqc"]["other_options"]
+    params: qsub = config["qsub"] + " -q short -e {data_dir}/{data_dir}_fastqc_qsub.err -o {data_dir}/{data_dir}_fastqc_qsub.out", \
+            options = config["fastqc"]["other_options"]
     shell:"fastqc --outdir {output.outdir} --format fastq {input} {params.options} 2> {log} "
+
+
 
 # rule fastqc:
 # 	"""Check the quality of fastq-formatted raw reads using the program fastQC (quality control).
