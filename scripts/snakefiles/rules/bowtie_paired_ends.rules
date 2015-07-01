@@ -4,7 +4,7 @@ rule bowtie_pe:
            reverse = "{reads_prefix}" + config["suffix"]["reads_rev"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq", \
            index1 = config["bowtie"]["bowtie_index"] + ".1.ebwt"
     output: sam = "{reads_prefix}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe.sam", \
-            stdout =  "{reads_prefix}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe.stdout"
+            summary =  "{reads_prefix}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe_summary.txt"
     log: "{reads_prefix}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe.log"
     benchmark: "{reads_prefix}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe_benchmark.json"
     params: max_mismatches = config["bowtie"]["max_mismatches"], \
@@ -12,4 +12,4 @@ rule bowtie_pe:
             index = config["bowtie"]["bowtie_index"], \
             qsub = config["qsub"] + " -q long -e {reads_prefix}_bowtie_qsub.err -o {reads_prefix}_bowtie_qsub.out"
     shell: "bowtie -t -q -S -n {params.max_mismatches} -m {params.reads_iso} --phred33-quals {params.index}" \
-           + " -1 {input.forward} -2 {input.reverse} {output.sam} > {output.stdout} 2> {log}"
+           + " -1 {input.forward} -2 {input.reverse} {output.sam} > {output.summary} 2> {log}"

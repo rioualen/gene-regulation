@@ -21,14 +21,14 @@
 rule bowtie:
     """Read mapping with bowtie version 1 (no gap) in single end."""
     input: reads = "{reads}.fastq", index1 = config["bowtie"]["bowtie_index"] + ".1.ebwt"
-    output: sam = "{reads}_bowtie.sam", stdout = "{reads}_bowtie_stdout.txt"
+    output: sam = "{reads}_bowtie.sam", summary = "{reads}_bowtie_summary.txt"
     log: "{reads}_bowtie.log"
     benchmark: "{reads}_bowtie_benchmark.json"
     params: max_mismatches = config["bowtie"]["max_mismatches"], \
             reads_iso = config["bowtie"]["reads_iso"], \
             index = config["bowtie"]["bowtie_index"], \
             qsub = config["qsub"] + " -q long -e {reads}_bowtie_qsub.err -o {reads}_bowtie_qsub.out"
-    shell: "bowtie -t -q -S -n {params.max_mismatches} -m {params.reads_iso} --phred33-quals {params.index} {input.reads} {output.sam} > {output.stdout} 2> {log}"
+    shell: "bowtie -t -q -S -n {params.max_mismatches} -m {params.reads_iso} --phred33-quals {params.index} {input.reads} {output.sam} > {output.summary} 2> {log}"
 
 
 # """
