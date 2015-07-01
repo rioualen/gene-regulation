@@ -30,15 +30,15 @@ rule bowtie_build:
     benchmark:  config["bowtie"]["bowtie_index"] + "/bowtie-build_benchmark.json"
     shell: "bowtie-build {input.sequence} {params.bowtie_index} > {log}"
 
-rule bowtie2_build:
-    """
-    Build index for bowtie2 (gapped read mapping).
-    """
-    input: sequence = config["genome"]["install_dir"] + "/" + config["genome"]["sequence"]
-    output: index1 = config["bowtie"]["bowtie_index"] + ".1.ebwt"
-    params: bowtie_index = config["bowtie"]["bowtie_index"]
-    log:  config["bowtie"]["bowtie_index"] + "/bowtie-build_log.txt"
-    message: "Building bowtie index in directory:\t{params.bowtie_index}"
-    benchmark:  config["bowtie"]["bowtie_index"] + "/bowtie-build_benchmark.json"
-    shell: "bowtie2-build {input.sequence} {params.bowtie_index} > {log}"
+# rule bowtie2_build:
+#     """
+#     Build index for bowtie2 (gapped read mapping).
+#     """
+#     input: sequence = config["genome"]["install_dir"] + "/" + config["genome"]["sequence"]
+#     output: index1 = config["bowtie"]["bowtie_index"] + ".1.ebwt"
+#     params: bowtie_index = config["bowtie"]["bowtie_index"]
+#     log:  config["bowtie"]["bowtie_index"] + "/bowtie-build_log.txt"
+#     message: "Building bowtie index in directory:\t{params.bowtie_index}"
+#     benchmark:  config["bowtie"]["bowtie_index"] + "/bowtie-build_benchmark.json"
+#     shell: "bowtie2-build {input.sequence} {params.bowtie_index} > {log}"
 
