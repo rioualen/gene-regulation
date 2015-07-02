@@ -38,9 +38,10 @@ include: "rules/rsync.rules"
 include: "rules/fastqc.rules"
 include: "rules/sickle_se.rules"
 include: "rules/subread_mapping.rules"
+include: "rules/featurecounts.rules"
 
 
 rule all:
     input:expand(config["dir"]["results"] + "{dataset}/{dataset}_fastqc/", dataset = GSM_LIST), \
     expand(config["dir"]["results"] + "{dataset}/{dataset}_sickle_se_q" + config["sickle"]["threshold"] + "_fastqc/", dataset = GSM_LIST), \
-    expand(config["dir"]["results"] + "{dataset}/{dataset}_{trimmed}_{aligneur}.bam", dataset = GSM_LIST, aligneur= "subread", trimmed = "sickle_se_q" + config["sickle"]["threshold"] )
+    expand(config["dir"]["results"] + "{dataset}/{dataset}_{trimmed}_{aligneur}_featurecounts.tab", dataset = GSM_LIST, aligneur= "subread", trimmed = "sickle_se_q" + config["sickle"]["threshold"] )
