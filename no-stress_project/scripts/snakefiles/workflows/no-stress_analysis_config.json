@@ -2,9 +2,16 @@
     "__description__": "Parameters for the analysis of stress response in Desulfovibrio desulfuricans.",
     "__author__": "Jeanne Cheneby, Justine Long & Jacques van Helden",
     "data_source": "Jeff Cole",
-    "organism": "",
-    "genome_version": "",
     "qsub": "-V -m a -d ~/no-stress_project",
+
+    "genome": {
+        "organism": "Desulfovibrio_desulfuricans_ATCC_27774_uid59213",
+        "genome_version": "Desulfovibrio_desulfuricans_ATCC_27774_uid59213",
+        "base_url": "ftp://ftp.ncbi.nlm.nih.gov/genomes/Bacteria/Desulfovibrio_desulfuricans_ATCC_27774_uid59213/",
+        "sequence": "NC_011883.fna",
+        "features": "NC_011883.gff",
+        "install_dir": "genome/"      
+    },
 
     "files": {
         "samples": "data/no-stress_samples.tab",
@@ -14,7 +21,8 @@
 
     "dir": {
 	   "data_root": "data/1258-BRM/",
-        "reports": "reports"
+       "reports": "reports",
+       "results": "results/"
     },
 
     "suffix": {
@@ -32,7 +40,7 @@
     },
 
     "sickle": { 
-        "seq_type": "sanger",
+        "qual_type": "sanger",
         "threshold": "20",
         "other_options": ""
     },
@@ -49,7 +57,7 @@
     
     "htseq": {
         "ht_type": "bam",
-        "order": "name",
+        "order": "pos",
         "stranded": "no",
         "minaqual": "10",
         "id_attr": "gene_id",
@@ -59,13 +67,15 @@
     },
 
     "edgeR": {
+        "script_R_path": "scripts/R-scripts/run_edgeR.R",
         "N": ["N1", "N2", "N4"],
         "NN": ["NN2", "NN4", "NN5"], 
         "S": ["S1", "S4", "S5"],
         "SN": ["SN1", "SN2", "SN5"],
         "conditions": ["N", "S", "NN", "SN"],
         "cond1": ["N", "N", "S", "NN"],
-        "cond2": ["NN", "S", "SN", "SN"]
+        "cond2": ["NN", "S", "SN", "SN"],
+        "FDR_threshold": ".05"
     }
 }
 

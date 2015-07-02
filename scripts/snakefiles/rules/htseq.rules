@@ -17,5 +17,5 @@ rule count:
             + " -o {reads}_sorted_" + config["htseq"]["order"] + "_count_qsub.out", \
             options = config["htseq"]["other_options"]
     # message: """--- Counting."""
-    shell: "htseq-count --format {params.ht_type} --order {params.order} --stranded {params.stranded} --minaqual {params.minaqual} --idattr {params.idattr} --mode {params.mode} {input} {params.gff_file} {params.options}> {output}"
+    shell: "htseq-count --format {params.ht_type} --order {params.order} --stranded {params.stranded} --minaqual {params.minaqual} --idattr {params.idattr} --mode {params.mode} {input} {params.gff_file} {params.options}> {output} 2> log"
 

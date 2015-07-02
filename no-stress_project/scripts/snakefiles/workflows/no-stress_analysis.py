@@ -13,6 +13,7 @@ Data from : Jeff Cole
 #================================================================#
 
 import os
+import subprocess
 from snakemake.utils import R
 configfile: "scripts/snakefiles/workflows/no-stress_analysis_config.json"
 
@@ -20,20 +21,28 @@ configfile: "scripts/snakefiles/workflows/no-stress_analysis_config.json"
 #LIST_ALL_COUNTS = "data/1258-BRM/N1/N1_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/N2/N2_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/N4/N4_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/NN2/NN2_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/NN4/NN4_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/NN5/NN5_bowtie2_mm1_sorted_name_count.txt"
 
 
+
 #================================================================#
 #                         Includes                               #
 #================================================================#
 
 include: "fg-chip-seq/scripts/snakefiles/rules/util.py"
-include: "fg-chip-seq/scripts/snakefiles/rules/util.rules"
+# include: "fg-chip-seq/scripts/snakefiles/rules/util.rules"
 include: "fg-chip-seq/scripts/snakefiles/rules/flowcharts.rules"
-include: "scripts/snakefiles/rules/fastqc.rules"
+include: "fg-chip-seq/scripts/snakefiles/rules/gunzip.rules"
+include: "fg-chip-seq/scripts/snakefiles/rules/fastqc.rules"
+# include: "scripts/snakefiles/rules/fastqc.rules"
+# include: "fg-chip-seq/scripts/snakefiles/rules/sickle_paired_ends.rules"
 include: "scripts/snakefiles/rules/trimming.rules"
-include: "scripts/snakefiles/rules/bowtie2.rules"
-include: "scripts/snakefiles/rules/convert_sam_to_bam.rules"
+# include: "fg-chip-seq/scripts/snakefiles/rules/bowtie_build.rules"
+include: "fg-chip-seq/scripts/snakefiles/rules/bowtie2_paired_ends.rules"
+include: "fg-chip-seq/scripts/snakefiles/rules/convert_sam_to_bam.rules"
+# include: "scripts/snakefiles/rules/convert_sam_to_bam.rules"
 include: "scripts/snakefiles/rules/sorted_bam.rules"
-include: "scripts/snakefiles/rules/count_table.rules"
-include: "scripts/snakefiles/rules/index_bam.rules"
+include: "fg-chip-seq/scripts/snakefiles/rules/htseq.rules"
+# include: "scripts/snakefiles/rules/count_table.rules"
+include: "fg-chip-seq/scripts/snakefiles/rules/index_bam.rules"
+# include: "scripts/snakefiles/rules/index_bam.rules"
 
 #================================================================#
 #     Global variables                                           #
@@ -96,9 +105,10 @@ COND_1 = config["edgeR"]["cond1"]
 COND_2 = config["edgeR"]["cond2"]
 
 # COUNT_FILES = "data/1258-BRM/N1/N1_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/N2/N2_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/N4/N4_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/NN2/NN2_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/NN4/NN4_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/NN5/NN5_bowtie2_mm1_sorted_name_count.txt"
-COUNT_FILES = expand("data/1258-BRM/{sample_id}/{sample_id}_bowtie2_mm1_sorted_name_count.txt", sample_id = SAMPLE_IDS)
-COUNT_RESULTS = expand(config["dir"]["data_root"] + "results/{cond_1}_VS_{cond_2}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + ".csv", zip, cond_1=COND_1, cond_2=COND_2)
-COUNT_LOG = expand(config["dir"]["data_root"] + "results/{cond_1}_VS_{cond_2}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + ".log", zip, cond_1=COND_1, cond_2=COND_2)
+# COUNT_FILES = expand("data/1258-BRM/{sample_id}/{sample_id}_bowtie2_mm1_sorted_name_count.txt", sample_id = SAMPLE_IDS)
+COUNT_FILES = expand(config["dir"]["results"] + "{sample_id}/{sample_id}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + "_count.txt", sample_id = SAMPLE_IDS)
+COUNT_RESULTS = expand(config["dir"]["results"] + "DEG/{cond_1}_vs_{cond_2}/{cond_1}_VS_{cond_2}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + ".csv", zip, cond_1=COND_1, cond_2=COND_2)
+COUNT_LOG = expand(config["dir"]["results"] + "{cond_1}_VS_{cond_2}_bowtie2_sorted_" + config["htseq"]["order"] + ".log", zip, cond_1=COND_1, cond_2=COND_2)
 
 include: "scripts/snakefiles/rules/differential_expressions.rules"
 
@@ -107,19 +117,27 @@ include: "scripts/snakefiles/rules/differential_expressions.rules"
 #================================================================#
 
 RAW_FASTQC=expand(config["dir"]["data_root"] + "{data_dir}/{dataset}_fastqc/", zip, dataset=DATASETS, data_dir=DATA_DIRS)
+# RAW_FASTQC=expand(config["dir"]["data_root"] + "{data_dir}/{dataset}_fastqc" + config["fastqc"]["extension"] + "/", zip, dataset=DATASETS, data_dir=DATA_DIRS)
+
 
 rule all:
     """Run workflow for each replica of each experience"""
     input: RAW_FASTQC, \
-        expand(config["dir"]["data_root"] + "{data_dir}/{dataset}_trimmed_thr20_fastqc/", zip, dataset=DATASETS, data_dir=DATA_DIRS), \
+        expand(config["dir"]["results"] + "{data_dir}/{dataset}_sickle_pe_q" + config["sickle"]["threshold"] + "_fastqc/", zip, dataset=DATASETS, data_dir=DATA_DIRS), \
         # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_trimmed_thr" + THRESHOLD + ".fastq.gz", data_dir=DATA_DIRS), \
         # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + ".sam", data_dir=DATA_DIRS), \
         # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + ".bam", data_dir=DATA_DIRS), \
         # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + ".bam", data_dir=DATA_DIRS), \
-        expand(config["dir"]["data_root"] + "{data_dir}/{data_dir}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_pos.bam.bai", data_dir=DATA_DIRS), \
+        # expand(config["dir"]["results"] + "{data_dir}/{data_dir}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_sorted_pos.bam.bai", data_dir=DATA_DIRS), \
         # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + "_count.txt", data_dir=DATA_DIRS)
         COUNT_RESULTS
     shell: "echo 'job done'"
+
+
+
+# ruleorder: bowtie2_paired_end > sorted_bam
+# ruleorder: sorted_bam > index_bam
+
 
 
 ################################################################
