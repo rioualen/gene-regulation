@@ -27,6 +27,7 @@ NOW = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
 ## Import snakemake rules and python library
 include: config["dir"]["fg-rules"] + "/util.py"                   ## Python utilities
 include: config["dir"]["fg-rules"] + "/util.rules"                ## Snakemake utilities
+include: config["dir"]["fg-rules"] + "/count_reads.rules"         ## Count reads in different file formats
 include: config["dir"]["fg-rules"] + "/fastqc.rules"              ## Quality control with fastqc
 include: config["dir"]["fg-rules"] + "/flowcharts.rules"          ## Draw flowcharts (dag and rule graph)
 include: config["dir"]["fg-rules"] + "/sickle_paired_ends.rules"  ## Trimming with sickle
@@ -62,6 +63,7 @@ TRIMMED_MERGED=TRIMMED_MERGED_FWD + TRIMMED_MERGED_REV
 ## Bowtie version 1 : paired-end read mapping
 MAPPED_PE_SAM=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe.sam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 MAPPED_PE_BAM=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe.bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+MAPPED_PE_SORTED=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe_sorted_pos.bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 
 ## List all the raw read files, which will be submitted to quality control
 RAWR_FILES, RAWR_DIRS, RAWR_BASENAMES=glob_multi_dir(SAMPLE_IDS, "*_R*_001.fastq.gz", config["dir"]["reads"], ".fastq.gz")
@@ -85,7 +87,8 @@ rule all:
     Run all the required analyses
     """
 #    input: TRIMMED_SUMMARIES, TRIMMED_QC
-    input: MERGED_RAWR_QC, RAWR_MERGED, TRIMMED_MERGED, MAPPED_PE_SAM, MAPPED_PE_BAM
+    input: MERGED_RAWR_QC, RAWR_MERGED, TRIMMED_MERGED, MAPPED_PE_SAM, MAPPED_PE_BAM, MAPPED_PE_SORTED
+#    input: MERGED_RAWR_QC, MAPPED_PE_BAM
     params: qsub=config["qsub"]
     shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 

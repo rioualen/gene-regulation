@@ -1,0 +1,11 @@
+rule index_bam:
+    """Index a bam file
+    """
+    input: "{reads}.bam"
+    output: "{reads}.bam.bai"
+    log: "{reads}.bam.bai.log"
+    benchmark: "{reads}.bam.bai_benchmark.log"
+    params: qsub = config["qsub"] + " -q long" \
+            + "-e {reads}.bam.bai_qsub.err" \
+            + "-o {reads}.bam.bai_qsub.err"
+    shell:"samtools index {input} 2> {log}"

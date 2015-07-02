@@ -4,14 +4,22 @@
 
 rule bwa:
 	"""Read mapping using BWA.
+
+	Required parameters:
+		config["bwa"]["index"]
+		config["qsub"]
+
+	Usage:
+		input:expand('{reads}/{data_dir}/{dataset}_bwa.sam', reads=READS, data_dir=DATA_DIR, dataset=DATASET)
 	"""
-	input: RESULTSDIR + "{gsm}/{gsm}_trimmed.fastq"
-	output: RESULTSDIR + "{gsm}/{gsm}_bwa.sam"
-	log: RESULTSDIR + "{gsm}/{gsm}_bwa.log"
-	benchmark: RESULTSDIR + "{gsm}/{gsm}_bwa_benchmark.json"
+	input: "{reads}.fastq"
+	output: "{reads}_bwa.sam"
+	log: "{reads}_bwa.log"
+	benchmark: "{reads}_bwa_benchmark.json"
 	params:
-		index="genomes/BWAIndex/genome.fa", \
-		sai=RESULTSDIR + "{gsm}/{gsm}_bwa.sai"
+		index = config["bwa"]["index"], \
+		sai= "{reads}_bwa.sai", \
+		qsub = config["qsub"] + " -e {reads}_bwa_qsub.err -o {reads}_bwa_qsub.out"
 	shell:
 		"bwa aln -t 12 {params.index} {input} > {params.sai} 2> {log}; \
-		bwa samse {params.index} {params.sai} {input} > {output} 2> {log} "
+		bwa samse {params.index} {params.sai} {input} > {output} 2> {log}"

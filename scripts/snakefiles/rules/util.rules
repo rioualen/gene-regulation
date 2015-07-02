@@ -19,39 +19,52 @@ rule sam2bam:
     params: qsub = config["qsub"] + " -e {reads}_sam2bam_qsub.err -o {reads}_sam2bam_qsub.out"
     shell: "samtools view -b -S {input.sam} > {output.bam} 2> {log}"
 
+"""
+    =======================================
+    Definition of the sorting rule bam file
+    =======================================
+"""
+
 rule sort_bam_by_pos:
     """
     Sort aligned reads (in bam format) by positions.
     """
     input: "{aligned_reads}.bam"
-    output: "{aligned_reads}_sorted_pos.bam"
+    output: sorted_bam="{aligned_reads}_sorted_pos.bam", sorted_index="{aligned_reads}_sorted_pos.bam.bai"
     log: "{aligned_reads}_sorted_pos.log"
     benchmark: "{aligned_reads}_sorted_pos_benchmark.json"
     params: qsub = config["qsub"] + " -q long -e {aligned_reads}_sorted_pos_qsub.err -o {aligned_reads}_sorted_pos_qsub.out"
-    shell:"samtools sort -f {input} {output} 2> {log}"
+    shell:"samtools sort -f {input} {output.sorted_bam} + 2> {log}; samtools index {output.sorted_bam} 2>> {log}"
     
 rule sort_bam_by_names:
     """
     Sort aligned reads (in bam format) by name.
     """
     input: "{aligned_reads}.bam"
-    output: "{aligned_reads}_sorted_names.bam"
+    output: sorted_bam="{aligned_reads}_sorted_names.bam", sorted_index="{aligned_reads}_sorted_names.bam.bai"
     log: "{aligned_reads}_sorted_names.log"
     benchmark: "{aligned_reads}_sorted_names_benchmark.json"
     params: qsub = config["qsub"] + " -q long -e {aligned_reads}_sorted_names_qsub.err -o {aligned_reads}_sorted_names_qsub.out"
-    shell:"samtools sort -n -f {input} {output} 2> {log}"
+    shell:"samtools sort -n -f {input} {output.sorted_bam} + 2> {log}; samtools index {output.sorted_bam} 2>> {log}"
     
-# rule gunzip_one_file:
-#     """Uncompress a file with the gunzip program. The rule is very simple,
-#     but is convenient to use in a workflow: it can be used to fix some
-#     dependencies on.gz extensions, and/or to send uncompression jobs
-#     to a queue.
-
+# rule sort_bam_by_pos:
 #     """
-#     input: "{file}.gz"
-#     output: "{file}"
-#     log: "{file}_gunzip.log"
-#     benchmark: "{file}_gunzip_benchmark.json"
-#     params: qsub = config["qsub"] + " -q short -e {file}_gunzip_qsub.err -o {file}_gunzip_qsub.out"
-#     shell:"gunzip {input} 2> {log} "
-
+#     Sort aligned reads (in bam format) by positions.
+#     """
+#     input: "{aligned_reads}.bam"
+#     output: "{aligned_reads}_sorted_pos.bam"
+#     log: "{aligned_reads}_sorted_pos.log"
+#     benchmark: "{aligned_reads}_sorted_pos_benchmark.json"
+#     params: qsub = config["qsub"] + " -q long -e {aligned_reads}_sorted_pos_qsub.err -o {aligned_reads}_sorted_pos_qsub.out"
+#     shell:"samtools sort -f {input} {output} 2> {log}"
+    
+# rule sort_bam_by_names:
+#     """
+#     Sort aligned reads (in bam format) by name.
+#     """
+#     input: "{aligned_reads}.bam"
+#     output: "{aligned_reads}_sorted_names.bam"
+#     log: "{aligned_reads}_sorted_names.log"
+#     benchmark: "{aligned_reads}_sorted_names_benchmark.json"
+#     params: qsub = config["qsub"] + " -q long -e {aligned_reads}_sorted_names_qsub.err -o {aligned_reads}_sorted_names_qsub.out"
+#     shell:"samtools sort -n -f {input} {output} 2> {log}"

@@ -1,0 +1,14 @@
+rule gunzip_one_file:
+    """Compress a file with the gunzip program. The rule is very simple, but
+    is convenient to use in a workflow: it can be used to fix some
+    dependencies on.gz extensions, and/or to send compression jobs to
+    a queue.
+
+    """
+    input: "{file}.gz"
+    output: "{file}"
+    log: "{file}_gunzip.log"
+    benchmark: "{file}_gunzip_benchmark.json"
+    params: qsub = config["qsub"] + " -q short -e {file}_gunzip_qsub.err -o {file}_gunzip_qsub.out"
+    shell:"gunzip {input} 2> {log} "
+
