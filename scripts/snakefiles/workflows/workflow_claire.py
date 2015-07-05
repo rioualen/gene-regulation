@@ -81,7 +81,7 @@ rule all:
     """
     Run all the required analyses
     """
-    input: expand(RESULTSDIR + "dag.pdf"), SICKLE_TRIMMING, BOWTIME_MAPPING, RAW_QC, TRIMMED_QC
+    input: expand(RESULTSDIR + "dag.pdf"), SICKLE_TRIMMING, BOWTIE_MAPPING, RAW_QC, TRIMMED_QC
     params: qsub=config["qsub"]
     shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 

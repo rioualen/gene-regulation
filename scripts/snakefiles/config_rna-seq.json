@@ -32,7 +32,8 @@
     },
     "subread": {
         "basename": "reference_index",
-        "reference_genome": "/workspace/genomes/Drosophila_melanogaster_UCSC_dm3/dm3/Sequence/WholeGenomeFasta/genome.fa"
+        "reference_genome": "/workspace/genomes/Drosophila_melanogaster_UCSC_dm3/dm3/Sequence/WholeGenomeFasta/genome.fa",
+        "annotations":"/workspace/genomes/Drosophila_melanogaster_UCSC_dm3/dm3/Annotation/Genes/genes.gtf"
     },
     "bowtie": {
         "bowtie_index": "/workspace/bowtie_genomes/Drosophila_melanogaster/UCSC/dm3/Sequence/BowtieIndex/genome",
