@@ -1,0 +1,25 @@
+rule DESeq2:
+    """Run differential expression analysis on a table of counts per tag
+    (gene). 
+
+    This rule takes as input a tab-delimited text file containing gene
+    counts per sample (one row per gene, one column per sample) and a gene
+    annotation file (gtf).
+
+    Result files:
+
+    1. A tab-delimited file with with differential expression
+       statistics, sorted by significance (p-value of FDR).
+    2. A pdf file with various plots. 
+
+    """
+    input:  r_script = config["DESeq2"]["script_R_path"], \
+            R_params = PARAMS_R
+    output: tab = RESULTS_DESEQ2
+    # log: LOGS_DESEQ2
+    # benchmark: "results/{cond_1}_VS_{cond_2}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + ".json"
+    params: qsub = config["qsub"] + " -q short", \
+            cond1 = config["Diff_Exp"]["cond1"], \
+            cond2=config["Diff_Exp"]["cond2"], \
+            dir_results = config["dir"]["results"]
+    shell: "Rscript {input.r_script} {input.R_params} "

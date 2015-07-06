@@ -21,6 +21,7 @@
 
     "dir": {
 	   "data_root": "data/1258-BRM/",
+       "reads_source" : "data/1258-BRM/",
        "reports": "reports",
        "results": "results/"
     },
@@ -66,16 +67,25 @@
         "other_options": ""
     },
 
-    "edgeR": {
-        "script_R_path": "scripts/R-scripts/run_edgeR.R",
+    "Diff_Exp": {
         "N": ["N1", "N2", "N4"],
         "NN": ["NN2", "NN4", "NN5"], 
         "S": ["S1", "S4", "S5"],
         "SN": ["SN1", "SN2", "SN5"],
         "conditions": ["N", "S", "NN", "SN"],
         "cond1": ["N", "N", "S", "NN"],
-        "cond2": ["NN", "S", "SN", "SN"],
-        "FDR_threshold": ".05"
+        "cond2": ["NN", "S", "SN", "SN"]
+    },
+
+    "edgeR": {
+        "script_R_path": "scripts/R-scripts/run_edgeR.R",
+        "FDR_threshold": ".05",
+        "software": "_edgeR"
+    },
+
+    "DESeq2": {
+        "script_R_path": "scripts/R-scripts/run_deseq2.R",
+        "software": "_DESeq2"
     }
 }
 

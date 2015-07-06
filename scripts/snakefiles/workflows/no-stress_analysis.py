@@ -16,7 +16,7 @@ import os
 import subprocess
 from snakemake.utils import R
 configfile: "scripts/snakefiles/workflows/no-stress_analysis_config.json"
-
+workdir: os.getcwd()
 ## A MODIFIER
 #LIST_ALL_COUNTS = "data/1258-BRM/N1/N1_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/N2/N2_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/N4/N4_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/NN2/NN2_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/NN4/NN4_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/NN5/NN5_bowtie2_mm1_sorted_name_count.txt"
 
@@ -30,16 +30,18 @@ include: "fg-chip-seq/scripts/snakefiles/rules/util.py"
 # include: "fg-chip-seq/scripts/snakefiles/rules/util.rules"
 include: "fg-chip-seq/scripts/snakefiles/rules/flowcharts.rules"
 include: "fg-chip-seq/scripts/snakefiles/rules/gunzip.rules"
+include: "fg-chip-seq/scripts/snakefiles/rules/rsync.rules"
 include: "fg-chip-seq/scripts/snakefiles/rules/fastqc.rules"
 # include: "scripts/snakefiles/rules/fastqc.rules"
-# include: "fg-chip-seq/scripts/snakefiles/rules/sickle_paired_ends.rules"
-include: "scripts/snakefiles/rules/trimming.rules"
+include: "fg-chip-seq/scripts/snakefiles/rules/sickle_paired_ends.rules"
+# include: "scripts/snakefiles/rules/trimming.rules"
 # include: "fg-chip-seq/scripts/snakefiles/rules/bowtie_build.rules"
 include: "fg-chip-seq/scripts/snakefiles/rules/bowtie2_paired_ends.rules"
 include: "fg-chip-seq/scripts/snakefiles/rules/convert_sam_to_bam.rules"
 # include: "scripts/snakefiles/rules/convert_sam_to_bam.rules"
 include: "scripts/snakefiles/rules/sorted_bam.rules"
 include: "fg-chip-seq/scripts/snakefiles/rules/htseq.rules"
+# include: "fg-chip-seq/scripts/snakefiles/rules/featurecounts.rules"
 # include: "scripts/snakefiles/rules/count_table.rules"
 include: "fg-chip-seq/scripts/snakefiles/rules/index_bam.rules"
 # include: "scripts/snakefiles/rules/index_bam.rules"
@@ -48,7 +50,7 @@ include: "fg-chip-seq/scripts/snakefiles/rules/index_bam.rules"
 #     Global variables                                           #
 #================================================================#
 
-# Usage: snakemake -c "qsub {params.qsub}" -j 25
+# Usage: snakemake -c "qsub {params.qsub}" -j 25 --allow-ambiguit
 # workdir:"/home/desulfo-no" # Root directory for the project. Should be adapted for porting.
 # workdir: "/home/desulfo-no/no-stress_project/data/1258-BRM" # Root directory for the project. Should be adapted for porting.
 # workdir:"/home/no-stress/Documents/no-stress_project/data/1258-BRM" # Local Root directory for the project. Should be adapted for porting.
@@ -66,58 +68,33 @@ RAWR_FILES_FWD, RAWR_DIRS_FWD, RAWR_BASENAMES_FWD = glob_multi_dir(SAMPLE_IDS, "
 
 RAWR_FILES, RAWR_DIRS, RAWR_BASENAMES = glob_multi_dir(SAMPLE_IDS, "*_?" + ".fastq.gz", config["dir"]["data_root"], ".fastq.gz")
 
-
-# DATASETS = "N1_1 N1_2 NN2_1 NN2_2".split() # list of files
-# DATA_DIRS = "N1 N1 NN2 NN2".split() # list the directories for each file
-
-##OK## DATA_PATH = config["dir"]["data_root"]
-
-##OK## QSUB_PARAM = config["qsub"]
-
-# Variable for fastqc
-##OK## OPTIONS_FASTQC = config["fastqc"]["other_options"]
-
-# Variables for sickle (trimming)
-##OK## THRESHOLD = config["sickle"]["threshold"]
-##OK## SEQ_TYPE = config["sickle"]["seq_type"]
-##OK## OPTIONS_SICKLE = config["sickle"]["other_options"]
-
-# Variables for bowtie2 (alignement)
-##OK## INDEX = config["bowtie2"]["bowtie_index"]
-##OK???## MAX_MISMATCHES = config["bowtie2"]["max_mismatches"]
-##OK## OPTIONS_BOWTIE2 = config["bowtie2"]["other_options"]
-
-# Variables for samtools (conversion, sort, index)
-## A ELIMINER ## SORT = config["samtools"]["sort_by_name"]
-
-# Variables for HTseq (count table)
-##OK## HT_TYPE = config["htseq"]["ht_type"]
-##OK## ORDER = config["htseq"]["order"]
-##OK## STRANDED = config["htseq"]["stranded"]
-##OK?## MINAQUAL = config["htseq"]["minaqual"]
-##OK## IDATTR = config["htseq"]["idattr"]
-##OK## GFF_FILE = config["htseq"]["gff_file"]
-##OK## MODE = config["htseq"]["mode"]
-##OK## OPTIONS_COUNT = config["htseq"]["other_options"]
-
 # Variables for EdgeR (Differential expression) 
-COND_1 = config["edgeR"]["cond1"]
-COND_2 = config["edgeR"]["cond2"]
+COND_1 = config["Diff_Exp"]["cond1"]
+COND_2 = config["Diff_Exp"]["cond2"]
 
 # COUNT_FILES = "data/1258-BRM/N1/N1_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/N2/N2_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/N4/N4_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/NN2/NN2_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/NN4/NN4_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/NN5/NN5_bowtie2_mm1_sorted_name_count.txt"
 # COUNT_FILES = expand("data/1258-BRM/{sample_id}/{sample_id}_bowtie2_mm1_sorted_name_count.txt", sample_id = SAMPLE_IDS)
 COUNT_FILES = expand(config["dir"]["results"] + "{sample_id}/{sample_id}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + "_count.txt", sample_id = SAMPLE_IDS)
-COUNT_RESULTS = expand(config["dir"]["results"] + "DEG/{cond_1}_vs_{cond_2}/{cond_1}_VS_{cond_2}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + ".csv", zip, cond_1=COND_1, cond_2=COND_2)
-COUNT_LOG = expand(config["dir"]["results"] + "{cond_1}_VS_{cond_2}_bowtie2_sorted_" + config["htseq"]["order"] + ".log", zip, cond_1=COND_1, cond_2=COND_2)
+COUNT_RESULTS_EDGER = expand(config["dir"]["results"] + "DEG/{cond_1}_vs_{cond_2}/{cond_1}_VS_{cond_2}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + config["edgeR"]["software"] +".tab", zip, cond_1=COND_1, cond_2=COND_2)
 
-include: "scripts/snakefiles/rules/differential_expressions.rules"
+RESULTS_DESEQ2 = expand(config["dir"]["results"] + "DEG/{cond_1}_vs_{cond_2}/{cond_1}_VS_{cond_2}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + config["DESeq2"]["software"] + ".tab", zip, cond_1=COND_1, cond_2=COND_2)
+LOGS_DESEQ2 = expand(config["dir"]["results"] + "DEG/{cond_1}_VS_{cond_2}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + config["DESeq2"]["software"] + ".log", zip, cond_1=COND_1, cond_2=COND_2)
+
+PARAMS_R = config["dir"]["results"] + "DEG/sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + "_params.R"
+ALL_COUNTS = config["dir"]["results"] + "DEG/sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + "_allcounts.tab"
+
+include: "scripts/snakefiles/rules/HTseq_allcount_params.rules"
+include: "scripts/snakefiles/rules/edgeR.rules"
+include: "scripts/snakefiles/rules/DESeq2.rules"
 
 #================================================================#
 #                         Workflow                               #
 #================================================================#
 
-RAW_FASTQC=expand(config["dir"]["data_root"] + "{data_dir}/{dataset}_fastqc/", zip, dataset=DATASETS, data_dir=DATA_DIRS)
+RAW_FASTQC=expand(config["dir"]["results"] + "{data_dir}/{dataset}_fastqc/", zip, dataset=DATASETS, data_dir=DATA_DIRS)
 # RAW_FASTQC=expand(config["dir"]["data_root"] + "{data_dir}/{dataset}_fastqc" + config["fastqc"]["extension"] + "/", zip, dataset=DATASETS, data_dir=DATA_DIRS)
+
+
 
 
 rule all:
@@ -130,13 +107,21 @@ rule all:
         # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + ".bam", data_dir=DATA_DIRS), \
         # expand(config["dir"]["results"] + "{data_dir}/{data_dir}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_sorted_pos.bam.bai", data_dir=DATA_DIRS), \
         # expand(config["data_root_dir"] + "{data_dir}/{data_dir}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + "_count.txt", data_dir=DATA_DIRS)
-        COUNT_RESULTS
+        PARAMS_R, \
+        ALL_COUNTS, \
+        COUNT_RESULTS_EDGER, \
+        RESULTS_DESEQ2
+
+
     shell: "echo 'job done'"
 
 
 
 # ruleorder: bowtie2_paired_end > sorted_bam
 # ruleorder: sorted_bam > index_bam
+
+ruleorder: rsync > sickle_paired_ends
+
 
 
 
