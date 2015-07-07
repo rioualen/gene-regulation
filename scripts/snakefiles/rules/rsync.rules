@@ -5,18 +5,12 @@
 """
 # This rule doesn't work if the files have a different name than the directory (ex: paired-end)
 
-# rule rsync:
-# 	input: config["dir"]["reads_source"] + "{dataset}/{dataset}.fastq"
-# 	output: config["dir"]["results"] + "{dataset}/{dataset}.fastq"
-# 	log: config["dir"]["results"] + "{dataset}/{dataset}_rsync.log"
-# 	benchmark: config["dir"]["results"] + "{dataset}/{dataset}_rsync_benchmark.json"
-# 	params: qsub = config["qsub"] + " -q short -e " + config["dir"]["results"] + "{dataset}/{dataset}_rsync_qsub.err -o " + config["dir"]["results"] + "{dataset}/{dataset}_rsync_qsub.out"
-# 	shell:"rsync -ruptvl {input} {output} 2> {log} "
-
 rule rsync:
-	input: config["dir"]["reads_source"] + "{data_dir}/{dataset}.fastq"
-	output: config["dir"]["results"] + "{data_dir}/{dataset}.fastq"
-	log: config["dir"]["results"] + "{data_dir}/{dataset}_rsync.log"
-	benchmark: config["dir"]["results"] + "{data_dir}/{dataset}_rsync_benchmark.json"
-	params: qsub = config["qsub"] + " -q short -e " + config["dir"]["results"] + "{data_dir}/{dataset}_rsync_qsub.err -o " + config["dir"]["results"] + "{data_dir}/{dataset}_rsync_qsub.out"
+	input: config["dir"]["reads_source"] + "{data_dir}/{data_dir}.fastq"
+	output: config["dir"]["results"] + "{data_dir}/{data_dir}.fastq"
+	log: config["dir"]["results"] + "{data_dir}/{data_dir}_rsync.log"
+	benchmark: config["dir"]["results"] + "{data_dir}/{data_dir}_rsync_benchmark.json"
+	params: qsub = config["qsub"] + " -q short -e " + config["dir"]["results"] + "{data_dir}/{data_dir}_rsync_qsub.err -o " + config["dir"]["results"] + "{data_dir}/{data_dir}_rsync_qsub.out"
 	shell:"rsync -ruptvl {input} {output} 2> {log} "
+
+
