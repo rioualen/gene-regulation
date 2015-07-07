@@ -15,11 +15,11 @@
 
 rule featurecounts:
 	"""Assign sequence reads to genomic features"""
-	input: "{data_dir}/{dataset}_{trimmed}_{aligneur}.bam"
-	output: count_table = "{data_dir}/{dataset}_{trimmed}_{aligneur}_featurecounts.tab", stat_table = "{data_dir}/{dataset}_{trimmed}_{aligneur}_featurecounts_stat.tab"
-	params: annotation = config["subread"]["annotations"], qsub = config["qsub"] + " -q short -e {data_dir}/{dataset}_{trimmed}_{aligneur}_featurecounts_qsub.err -o {data_dir}/{dataset}_{trimmed}_{aligneur}_featurecounts_qsub.out"
-	log: "{data_dir}/{dataset}_{trimmed}_{aligneur}_featurecounts.log"
-	benchmark: "{data_dir}/{dataset}_{trimmed}_{aligneur}_featurecounts_benchmark.json"
+	input: "{data_dir}/{reads}.bam"
+	output: count_table = "{data_dir}/{reads}_featurecounts.tab", stat_table = "{data_dir}/{reads}_featurecounts_stat.tab"
+	params: annotation = config["subread"]["annotations"], qsub = config["qsub"] + " -q short -e {data_dir}/{reads}_featurecounts_qsub.err -o {data_dir}/{reads}_featurecounts_qsub.out"
+	log: "{data_dir}/{reads}_featurecounts.log"
+	benchmark: "{data_dir}/{reads}_featurecounts_benchmark.json"
 	run: 
 		R(""" 
 			library("Rsubread")
