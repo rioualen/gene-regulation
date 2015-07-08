@@ -30,7 +30,7 @@ RESULTSDIR = config["dir"]["results"]
 RULES = "/home/rioualen/Desktop/workspace/fg-chip-seq/scripts/snakefiles/rules/"
 
 #ALN
-ALIGNER = config['aligners'].split()
+ALIGNERS = config['aligners'].split()
 
 # Raw data, non auto
 CHIP = config["samples"]["chip"].split()
@@ -54,11 +54,15 @@ SICKLE_TRIMMING = expand(config['dir']['results'] + "{samples}/{samples}_merged_
 
 # Quality control
 RAW_QC = expand(config["dir"]["results"] + "{samples}/{samples}_merged_fastqc/", samples=SAMPLES)
-TRIMMED_QC = expand(config["dir"]["results"] + "{samples}/{samples}_fastqc/", samples=SAMPLES)
+TRIMMED_QC = expand(config["dir"]["results"] + "{samples}/{samples}_merged_sickle_se_q" + config['sickle']['threshold'] + "_fastqc/", samples=SAMPLES)
 
 # Mapping Bowtie
 BOWTIE_MAPPING = expand(config["dir"]["results"] + "{samples}/{samples}_merged_sickle_se_q" + config["sickle"]["threshold"] + "_bowtie.sam", samples=SAMPLES)
 BWA_MAPPING = expand(config["dir"]["results"] + "{samples}/{samples}_merged_sickle_se_q" + config["sickle"]["threshold"] + "_bwa.sam", samples=SAMPLES)
+
+# File conversion
+SAM_TO_BAM = expand('{sample}/{sample}/{sample}_{aligner}.bam', sample=SAMPLES, aligner=ALIGNERS)
+BAM_TO_BED = expand('{sample}/{sample}/{sample}_{aligner}.bed', sample=SAMPLES, aligner=ALIGNERS)
 
 ### List all the raw read files, which will be submitted to quality control
 #RAWR_FILES, RAWR_DIRS, RAWR_BASENAMES=glob_multi_dir(SAMPLE_IDS, "*_R*_001.fastq.gz", config["dir"]["reads"], ".fastq.gz")
@@ -81,7 +85,9 @@ rule all:
     """
     Run all the required analyses
     """
-    input: expand(RESULTSDIR + "dag.pdf"), SICKLE_TRIMMING, BOWTIE_MAPPING, RAW_QC, TRIMMED_QC
+    input: 
+		expand(RESULTSDIR + "dag.pdf"), \
+		SICKLE_TRIMMING, BOWTIE_MAPPING, RAW_QC, TRIMMED_QC, BWA_MAPPING, SAM_TO_BAM, BAM_TO_BED
     params: qsub=config["qsub"]
     shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
