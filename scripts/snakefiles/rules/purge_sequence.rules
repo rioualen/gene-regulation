@@ -2,8 +2,15 @@ rule purge_sequence:
 	"""Mask redundant fragments in a sequence. This perl script is no
 	more than a wrapper to facilitate this specific usage for two
 	programs developed by Stefan Kurtz : mkvtree and vmatch.
+
+	Required parameters:
+		config["qsub"]
+
+	Usage example: 
+		input:expand()
 	"""
-	input: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}.fasta"
-	output: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_purged.fasta"
-	benchmark: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_purge-seq_benchmark.json"
+	input: "{seq}.fasta"
+	output: "{seq}_purged.fasta"
+	benchmark: "{seq}_purge-seq_benchmark.json"
+	params:	qsub = config["qsub"] + " -q short -e {seq}_purge_qsub.err -o {seq}_purge_qsub.out"
 	shell: "purge-sequence -i {input} -o {output}"
