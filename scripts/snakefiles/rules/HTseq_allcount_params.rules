@@ -31,7 +31,7 @@ rule HTseq_allcount_params:
 
         # Get extention of count file
         complet_path_count = COUNT_FILES[0].rsplit("/", maxsplit=1)
-        count_ext = complet_path_count[-1].rsplit(config["htseq"]["order"])[-1]
+        count_ext = complet_path_count[-1].rsplit("_")[-1]
 
         # Initilizing headers for all_count file
         header = "gene_id"

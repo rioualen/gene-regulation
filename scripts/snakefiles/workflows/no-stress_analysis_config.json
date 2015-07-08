@@ -6,14 +6,14 @@
 
     "genome": {
         "organism": "Desulfovibrio_desulfuricans_ATCC_27774_uid59213",
-        "genome_version": "Desulfovibrio_desulfuricans_ATCC_27774_uid59213",
+        "genome_version": "Desulfovibrio_desulfuricans_atcc_27774.GCA_000022125.1.27",
         "base_url_fasta": "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-27/fasta/bacteria_1_collection/desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774/dna/",
         "sequence": "Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27.dna.genome",
-        "base_url_gtf": "fftp://ftp.ensemblgenomes.org/pub/bacteria/release-27/gtf/bacteria_1_collection/desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774/",
+        "sequence_top": "Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27.dna.toplevel",
+        "base_url_gtf": "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-27/gtf/bacteria_1_collection/desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774/",
         "features_gtf": "Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27",
-        "base_url_gff3": "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-27/gff3/desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774/"
-        "features_gff3": "Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27",
-        "install_dir": "genome/"      
+        "base_url_gff3": "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-27/gff3/desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774/",
+        "features_gff3": "Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27"   
     },
 
     "files": {
@@ -27,7 +27,8 @@
         "data_root": "data/1258-BRM/",
         "reads_source" : "data/1258-BRM/",
         "reports": "reports",
-        "results": "results/"
+        "results": "results/",
+        "genome": "genome/"
     },
 
     "suffix": {
