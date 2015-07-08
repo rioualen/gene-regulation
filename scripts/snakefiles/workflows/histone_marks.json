@@ -1,0 +1,48 @@
+{
+	"__description__": "Differential analysis of histone marks on several human tissues.",
+	"__author__": "Claire Rioualen",
+	"data_source": "Roadmap Epigenomics",
+	"qsub": "",
+	"genome": {
+		"organism": "Homo_sapiens",
+		"genome_version": "hg19",
+		"base_url": "",
+		"sequence": "",
+		"features": "",
+        	"install_dir": ""
+	},
+	"files": {
+		"snakefile": "scripts/snakefiles/workflows/histone_marks.py",
+		"samples": "",
+		"analyses": ""
+	},
+	"dir": {
+		"base": "/home/rioualen/Desktop/workspace/fg-chip-seq/",
+		"reads_source": "data/roadmap-histone-marks/",
+		"results": "results/",
+		"reports": "results/"
+	},
+	"reports" : {
+		"dag": "results/dag",
+		"rulegraph": "results/rule"
+	},
+	"samples": {
+		"H3K27me3": {
+			"liver": "GSM537698",
+			"heart": "GSM910562"
+		},
+		"H3K27ac": {
+			"liver": "GSM1112809",
+			"heart": "GSM906396"
+		}
+	},
+	"oligo_stats": "1 2 6",
+	"peak-motifs_parameters": {
+		"tasks" : "purge,seqlen,composition,disco,collect_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan",
+		"max_seq_len" : "1000",
+		"nmotifs" : "",
+		"minol" : "",
+		"maxol" : "",
+		"motif_db jaspar_core_vertebrates" : "tf $RSAT/public_html/data/motif_databases/JASPAR/jaspar_core_vertebrates_2013-11.tf"
+	}
+}

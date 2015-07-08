@@ -1,9 +1,32 @@
 
 rule count_oligo:
 	"""Counts occurences of oligonucleotides of length N, as specified in the parameters.
+
+	Required parameters:
+		config['qsub']
+		config['oligo_stats']
+
+	Usage example: 
+		input:expand(config["dir"]["results"] + '{{histonemark}}/{tissue}/{sample}_oligo{{oligo}}.png', zip, tissue=TISSUES, sample=SAMPLES), histonemark=MARKS, oligo=OLIGO_ANALYSIS)
 	"""
-	input: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_purged.fasta"
-	params: oligo="{oligo}"
-	output: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_{oligo}.txt"
-	benchmark: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_count-seq_benchmark.json"
-	shell: "oligo-analysis -l {params.oligo} -i {input} -o {output}"
+	input: "{peaks}.fasta"
+	params: 
+		oligo="{oligo}", \
+		qsub=config['qsub']
+	output: "{peaks}_oligo{params.oligo}.txt"
+	log: "{peaks}_oligo{params.oligo}.log"
+	benchmark: "{peaks}_oligo{params.oligo}.json"
+	shell: "oligo-analysis -l {params.oligo} -i {input} -o {output} 2> {log}"
+
+
+
+
+#rule count_oligo:
+#	"""Counts occurences of oligonucleotides of length N, as specified in the parameters.
+#	"""
+#	input: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_purged.fasta"
+#	params: oligo="{oligo}"
+#	output: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_{oligo}.txt"
+#	benchmark: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_count-seq_benchmark.json"
+#	shell: "oligo-analysis -l {params.oligo} -i {input} -o {output}"
+
