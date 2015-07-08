@@ -16,47 +16,41 @@ rule HTseq_allcount_params:
             dir_results = config["dir"]["results"]
 
     run:
+        # Create lists containing tested condition at the same index
         condition_1 = params.cond1
         condition_2 = params.cond2
 
-        # data_root = params.data_root
+
         dir_results  = params.dir_results
-        gene_ids_ok = True
+    
+        # Get name of R_params file without path
+        params_R_file = output.R_params.split("/")[-1]
+
+        # Get extention of align files from name of R_params
+        ext_align = params_R_file.replace("_params.R", "")
+
+        # Get extention of count file
+        complet_path_count = COUNT_FILES[0].rsplit("/", maxsplit=1)
+        count_ext = complet_path_count[-1].rsplit(config["htseq"]["order"])[-1]
+
+        # Initilizing headers for all_count file
         header = "gene_id"
-
-        # first_count_f = COUNT_FILES[0]
-        
-        # to_rm = first_count_f.split("_")[0]
-        # ext_count_txt = first_count_f.replace(to_rm, "")
-        # ext_tab = ext_count_txt.replace("_count.txt", ".tab")
-
-        
-        params_R_file = output.R_params.split("/")[2]
-
-        ext_count_txt = params_R_file.replace("params.R", "count.txt")
-        ext_count_txt = "_" + ext_count_txt
-        ext_tab = params_R_file.replace("_params.R",".tab")
-        ext_tab = "_" + ext_tab
-
+        # Add to header the name of the replicates in the same order as COUNT_FILES
         for count_file in COUNT_FILES:
-            count_file = count_file.replace(ext_count_txt, "")
-            header += "\t" + count_file.split("/")[-1]
-        
-        # all_conditions = config["Diff_Exp"][cond_1] + config["Diff_Exp"][cond_2]
-        # for count_file in COUNT_FILES:
-        #     for cond in all_conditions:
-        #         if cond in count_file:
-        #             header += "\t" + cond
-            
-        
+            # Remove path of count table files
+            header += "\t" + count_file.rsplit("/")[-1].rsplit("_", maxsplit=1)[0]
+
+        # Condition only true on the first loop
+        gene_ids_ok = True
         list_line = []
 
         #Creating a count file with all replicates of all conditions
         for i in range(len(COUNT_FILES)):
             count_res = open(COUNT_FILES[i])
-            #Check if gene_ids already exist 
+            #Check if first loop
             if gene_ids_ok:
                 for line in count_res:
+                    # Create the list of ids
                     gene_counts_ids = line.split("\t")
                     list_line.append(gene_counts_ids[0] + "\t" + gene_counts_ids[1].strip("\n"))
                 gene_ids_ok = False
@@ -90,21 +84,30 @@ rule HTseq_allcount_params:
 
             cond_1 = condition_1[i]
             cond_2 = condition_2[i]
-            output_list.append(dir_results + "DEG/" + cond_1 + "_vs_" + cond_2 + "/" + cond_1 + "_VS_" + cond_2 + ext_tab)
+            output_list.append(dir_results + "DEG/" + cond_1 + "_vs_" + cond_2 + "/" + cond_1 + "_VS_" + cond_2 + ext_align + ".tab")
             
 
             #Get biological replicate list
             R_1 = config["Diff_Exp"][cond_1]
             R_2 = config["Diff_Exp"][cond_2]
 
-
-            #Create complete path for count files
             files_list = []
-            for elt in R_1:
-                files_list.append('"' + config["dir"]["results"] + elt + "/" + elt + ext_count_txt + '"')
+            files_list_R1 = []
+            files_list_R2 = []
+            # List path + name of replicats
+            for i in range(len(R_1)) :
+                files_list_R1.append('"' + config["dir"]["reads_source"] + R_1[i]+ "/" + R_1[i] + count_ext + '"')
+                files_list_R2.append('"' + config["dir"]["reads_source"] + R_2[i]+ "/" + R_2[i] + count_ext + '"')
 
-            for elt in R_2:
-                files_list.append('"' + config["dir"]["results"] + elt + "/" + elt + ext_count_txt + '"')
+            files_list = files_list_R1 + files_list_R2
+            
+            # #Create complete path for count files
+            # files_list = []
+            # for elt in R_1:
+            #     files_list_R1.append().append('"' + config["dir"]["results"] + elt + "/" + elt + ext_align + '"')
+
+            # for elt in R_2:
+            #     files_list.append('"' + config["dir"]["results"] + elt + "/" + elt + ext_align + '"')
 
             #Separate the count files in string
             counts_f.append("c(" + ', \n '.join(files_list) + ")")
