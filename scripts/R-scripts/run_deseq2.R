@@ -60,10 +60,11 @@ pdf(file=file.path(dir.figures, paste(sep="", comparisons.cond1[i], "_VS_", comp
 print(plotPCA(rld, intgroup=c("condition")))
 dev.off()
 
-# col_names <- names(res)
-# col_names <- c("# gene_id", col_names)
-# colnames(res) <- col_names
-# print(names(res))
+col_names <- colnames(res)
+col_names[1] <- paste(sep='', "#gene_id\t", col_names[1])
+colnames(res) <- col_names
+print(colnames(res))
+print(as.data.frame(res)[1,])
 
 ## adding "_DESeq2" to the output files
 temp_output <- strsplit(output[i], "[.]")

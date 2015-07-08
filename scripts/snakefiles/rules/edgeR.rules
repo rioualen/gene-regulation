@@ -15,7 +15,7 @@ rule edgeR:
     """
     input:  r_script = config["edgeR"]["script_R_path"], \
             R_params = PARAMS_R
-    output: tab = COUNT_RESULTS_EDGER
+    output: tab = RESULTS_EDGER
     # log: "results/{cond_1}_VS_{cond_2}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + ".log"
     # benchmark: "results/{cond_1}_VS_{cond_2}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + ".json"
     params: qsub = config["qsub"] + " -q short", \

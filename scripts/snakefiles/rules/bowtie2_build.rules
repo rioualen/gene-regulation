@@ -1,0 +1,37 @@
+"""Snakemake rules to download a refrence genome and build the index
+   for bowtie version 2.
+
+"""
+
+rule bowtie_download_genome:
+    """
+    Download and index the reference genome for the Bowtie read-mapping software.
+    """
+    output: sequence = config["genome"]["install_dir"] + "/" + config["genome"]["sequence"] + ".fa", \
+            features_gtf = config["genome"]["install_dir"] + "/" + config["genome"]["features_gtf"] + ".gtf", \
+            features_gff3 = config["genome"]["install_dir"] + "/" + config["genome"]["features_gff3"] + ".gff3"
+    log: config["genome"]["install_dir"] + "/wget_log.txt"
+    params: sequence_url = config["genome"]["base_url_fasta"]  + "/" + config["genome"]["sequence"] + ".fa.gz", \
+            features_gtf_url = config["genome"]["base_url_gtf"]  + "/" + config["genome"]["features_gtf"] + ".gtf.gz", \
+            features_gff3_url = config["genome"]["base_url_gtf"]  + "/" + config["genome"]["features_gff3"] + ".gff3.gz"                          
+    shell: "wget --timestamping --no-directories " \
+        + " --directory-prefix " + config["genome"]["install_dir"] \
+        + " {params.sequence_url}" \
+        + " {params.features_gtf_url}" \
+        + " {params.features_gff3_url}" \
+        + " | find"
+        +  config["genome"]["install_dir"]
+        + "-name '*.gz' -exec gunzip {} \;"
+        + " 2> {log}"
+
+rule bowtie_build:
+    """
+    Build index for bowtie version 2 (gapped read mapping).
+    """
+    input: sequence = config["genome"]["install_dir"] + "/" + config["genome"]["sequence"] + ".fa"
+    output: index1 = config["bowtie"]["bowtie_index"] + ".1.bt2"
+    params: bowtie_index = config["bowtie"]["bowtie_index"]
+    log:  config["bowtie"]["bowtie_index"] + "/bowtie-build_log.txt"
+    message: "Building bowtie index in directory:\t{params.bowtie_index}"
+    benchmark:  config["bowtie"]["bowtie_index"] + "/bowtie-build_benchmark.json"
+    shell: "bowtie-build {input.sequence} {params.bowtie_index} > {log}"
