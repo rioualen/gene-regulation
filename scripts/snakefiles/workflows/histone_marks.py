@@ -68,6 +68,9 @@ rule all:
 
 #, PEAK_LENGTH, OLIGO_ANALYSIS
 
+# BED_TO_FASTA -> PURGED_SEQUENCE -> (OLIGO_ANALYSIS, PEAK_LENGTH, PEAK_MOTIFS) -> all
+# GRAPHICS -> all
+
 #================================================================#
 #                         Includes                               #
 #================================================================#
