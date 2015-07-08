@@ -4,14 +4,31 @@
     =======================================
 """
 
+
+
+
 # rule sorted_bam_all:
 #     """Sort each bamfiles"""
 #     input:expand('{read_dir}/{gsm}/{gsm}_bowtie_sorted.bam', gsm = GSM_LIST, read_dir = CHIP_READ_DIR) 
 
 rule sorted_bam:
-    input: CHIP_READ_DIR + "{reads}.bam"
-    output: CHIP_READ_DIR + "{reads}_sorted.bam"
-    log: CHIP_READ_DIR + "{reads}_sorted.log"
-    benchmark: CHIP_READ_DIR + "{reads}_sorted_benchmark.json"
-    params: qsub = config["qsub"]+" -e " + CHIP_READ_DIR + "{reads}_sorted_qsub.err -o " + CHIP_READ_DIR + "{reads}_sorted_qsub.out"
-    shell:"samtools sort {input} {wildcards.reads}_sorted 2> {log}"
+    input: "{reads}.bam"
+    output: "{reads}_sorted_" + config["htseq"]["order"] + ".bam"
+    log: "{reads}_sorted.log"
+    benchmark: "{reads}_sorted_benchmark.json"
+    params: sort_by_name = config["samtools"]["sort_by_name"], \
+    		qsub = config["qsub"]+" -e {reads}_sorted_qsub.err -o {reads}_sorted_qsub.out"
+    shell:"samtools sort{params.sort_by_name} {input} {wildcards.reads}_sorted 2> {log}"
+
+
+
+
+
+# rule sorted_bam:
+#     input: "{data_dir}/{data_dir}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + ".bam"
+#     output: "{data_dir}/{data_dir}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + ".bam"
+#     log: "{data_dir}/{data_dir}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted.log"
+#     benchmark: "{data_dir}/{data_dir}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_benchmark.json"
+#     params: sort_by_name = config["samtools"]["sort_by_name"], qsub = config["qsub"] + " -q long -e {data_dir}/{data_dir}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + "_qsub.err -o {data_dir}/{data_dir}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + "_qsub.out"
+#     shell:"samtools sort{params.sort_by_name} {input} {wildcards.reads}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + " 2> {log}"
+    

@@ -7,28 +7,33 @@
     "genome": {
         "organism": "Desulfovibrio_desulfuricans_ATCC_27774_uid59213",
         "genome_version": "Desulfovibrio_desulfuricans_ATCC_27774_uid59213",
-        "base_url": "ftp://ftp.ncbi.nlm.nih.gov/genomes/Bacteria/Desulfovibrio_desulfuricans_ATCC_27774_uid59213/",
-        "sequence": "NC_011883.fna",
-        "features": "NC_011883.gff",
+        "base_url_fasta": "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-27/fasta/bacteria_1_collection/desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774/dna/",
+        "sequence": "Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27.dna.genome",
+        "base_url_gtf": "fftp://ftp.ensemblgenomes.org/pub/bacteria/release-27/gtf/bacteria_1_collection/desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774/",
+        "features_gtf": "Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27",
+        "base_url_gff3": "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-27/gff3/desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774/"
+        "features_gff3": "Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27",
         "install_dir": "genome/"      
     },
 
     "files": {
         "samples": "data/no-stress_samples.tab",
         "analyses": "",
-        "snakefile": "~/no-stress_project/scripts/snakefiles/workflows/no-stress_analysis.py"
+        "snakefile": "scripts/snakefiles/workflows/no-stress_analysis.py"
     },
 
     "dir": {
-	   "data_root": "data/1258-BRM/",
-       "reads_source" : "data/1258-BRM/",
-       "reports": "reports",
-       "results": "results/"
+        "base": "/home/desulfo-no/no-stress_project/",
+        "data_root": "data/1258-BRM/",
+        "reads_source" : "data/1258-BRM/",
+        "reports": "reports",
+        "results": "results/"
     },
 
     "suffix": {
-	   "reads_fwd": "_1",
-	   "reads_rev": "_2"
+        "reads_fwd": "_1",
+        "reads_rev": "_2",
+        "both_reads": ["_1","_2"]
     },
 
     "reports": {
@@ -65,6 +70,12 @@
         "mode": "intersection-nonempty",
         "gff_file": "genome/Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27.gtf",
         "other_options": ""
+    },
+
+    "subread": {
+        "basename": "reference_index",
+        "reference_genome": "genome/Desulfovibrio_desulfuricans_ATCC_27774_uid59213_genome.fasta",
+        "annotations": "genome/Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27.gtf"
     },
 
     "Diff_Exp": {
