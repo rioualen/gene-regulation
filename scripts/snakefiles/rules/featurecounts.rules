@@ -24,6 +24,6 @@ rule featurecounts:
 		R(""" 
 			library("Rsubread")
 			count.features <- featureCounts(files="{input}",annot.ext="{params.annotation}",isGTFAnnotationFile=TRUE,GTF.featureType="exon",GTF.attrType="gene_id")
-			write.table(count.features$counts, file="{output.count_table}", sep="\t")
+			write.table(count.features$counts, file="{output.count_table}", sep="\t", col.names = FALSE)
 			write.table(count.features$stat, file="{output.stat_table}", sep="\t")
 		""")
