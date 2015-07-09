@@ -31,7 +31,8 @@ rule HTseq_allcount_params:
 
         # Get extention of count file
         complet_path_count = COUNT_FILES[0].rsplit("/", maxsplit=1)
-        count_ext = complet_path_count[-1].rsplit("_")[-1]
+        #count_ext = complet_path_count[-1].rsplit("_")[-1]
+        count_ext = complet_path_count[-1].rsplit(".")[-1]
 
         # Initilizing headers for all_count file
         header = "gene_id"
@@ -84,7 +85,7 @@ rule HTseq_allcount_params:
 
             cond_1 = condition_1[i]
             cond_2 = condition_2[i]
-            output_list.append(dir_results + "DEG/" + cond_1 + "_vs_" + cond_2 + "/" + cond_1 + "_VS_" + cond_2 + ext_align + ".tab")
+            output_list.append(dir_results + "DEG/" + cond_1 + "_vs_" + cond_2 + "/" + cond_1 + "_VS_" + cond_2 + "_" + ext_align + ".tab")
             
 
             #Get biological replicate list
@@ -96,8 +97,10 @@ rule HTseq_allcount_params:
             files_list_R2 = []
             # List path + name of replicats
             for i in range(len(R_1)) :
-                files_list_R1.append('"' + config["dir"]["reads_source"] + R_1[i]+ "/" + R_1[i] + "_" + ext_align + count_ext + '"')
-                files_list_R2.append('"' + config["dir"]["reads_source"] + R_2[i]+ "/" + R_2[i] + "_" + ext_align + count_ext + '"')
+                #files_list_R1.append('"' + config["dir"]["reads_source"] + R_1[i]+ "/" + R_1[i] + "_" + ext_align + count_ext + '"')
+                #files_list_R2.append('"' + config["dir"]["reads_source"] + R_2[i]+ "/" + R_2[i] + "_" + ext_align + count_ext + '"')
+                files_list_R1.append('"' + config["dir"]["results"] + R_1[i]+ "/" + R_1[i] + "_" + ext_align + "." + count_ext + '"')
+                files_list_R2.append('"' + config["dir"]["results"] + R_2[i]+ "/" + R_2[i] + "_" + ext_align + "." + count_ext + '"')
 
             files_list = files_list_R1 + files_list_R2
             
