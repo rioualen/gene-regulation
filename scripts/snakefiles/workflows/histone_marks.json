@@ -38,11 +38,13 @@
 	},
 	"oligo_stats": "1 2 6",
 	"peak-motifs_parameters": {
-		"tasks" : "purge,seqlen,composition,disco,collect_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan",
-		"max_seq_len" : "1000",
-		"nmotifs" : "",
-		"minol" : "",
-		"maxol" : "",
-		"motif_db jaspar_core_vertebrates" : "tf $RSAT/public_html/data/motif_databases/JASPAR/jaspar_core_vertebrates_2013-11.tf"
+		"tasks": "purge,seqlen,composition,disco,collect_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan",
+		"max_seq_len": "1000",
+		"nmotifs": "",
+		"minol": "",
+		"maxol": "",
+		"motif_db jaspar_core_vertebrates": "tf $RSAT/public_html/data/motif_databases/JASPAR/jaspar_core_vertebrates_2013-11.tf",
+		"disco": "oligos,positions",
+		"outdir": "results/peak-motifs"
 	}
 }
