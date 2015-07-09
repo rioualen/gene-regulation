@@ -40,20 +40,21 @@
         "max_mismatches": "1",
         "reads_iso": "1"
     },
-    "swembl": {
-        "swembl_relative_bg": [
-            "0.005",
-            "0.007",
-            "0.01",
-            "0.02",
-            "0.05"
-        ]
+    "Diff_Exp": {
+        "S2": ["S2_1","S2_2"],
+        "WT": ["WT1","WT2"],
+        "conditions": ["S2", "WT"],
+        "cond1": ["S2"],
+        "cond2": ["WT"]
     },
-    "macs14": {
-        "macs_pvalue": [
-            "1e-4",
-            "1e-5",
-            "1e-6"
-        ]
+    "edgeR": {
+        "script_R_path": "/home/lkhamvongsa/dr-chip-rna-seq/scripts/R-scripts/run_edgeR.R",
+        "FDR_threshold": ".05",
+        "software": "_edgeR"
+    },
+    "DESeq2": {
+        "script_R_path": "/home/lkhamvongsa/dr-chip-rna-seq/scripts/R-scripts/run_deseq2.R",
+        "software": "_DESeq2"
     }
+    
 }

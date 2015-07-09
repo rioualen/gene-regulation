@@ -16,7 +16,7 @@ dir.main <- "."
 for (i in 1:length(comparisons)){
 
 ## Create a specific result directory for this differential analysis
-dir.results <- file.path(dir.main, "results", "DEG", paste(sep="", comparisons.cond1[i], "_vs_", comparsions.cond2[i]))
+dir.results <- file.path(dir.main, data.root, "DEG", paste(sep="", comparisons.cond1[i], "_vs_", comparsions.cond2[i]))
 dir.create(path = dir.results, showWarnings = FALSE, recursive = TRUE)
 dir.figures <- file.path(dir.results, "figures")
 dir.create(path = dir.figures, showWarnings = FALSE, recursive = TRUE)
