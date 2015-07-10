@@ -32,8 +32,8 @@ import util # read_analysis_table_lib is a module where you can find two functio
 #================================================================#
 
 include: "../rules/flowcharts.rules"
-include: "../rules/gunzip.rules"
-include: "../rules/rsync.rules"
+# include: "../rules/gunzip.rules"
+# include: "../rules/rsync.rules"
 include: "../rules/fastqc.rules"
 include: "../rules/sickle_paired_ends.rules"
 include: "../rules/bowtie2_build.rules"
@@ -48,11 +48,11 @@ include: "../rules/index_bam.rules"
 #     Global variables                                           #
 #================================================================#
 
-# Usage: snakemake -c "qsub {params.qsub}" -j 25 --allow-ambiguit
+# Usage: snakemake -c "qsub {params.qsub}" -j 25
 # workdir:"/home/desulfo-no" # Root directory for the project. Should be adapted for porting.
 # workdir: "/home/desulfo-no/no-stress_project/data/1258-BRM" # Root directory for the project. Should be adapted for porting.
 # workdir:"/home/no-stress/Documents/no-stress_project/data/1258-BRM" # Local Root directory for the project. Should be adapted for porting.
-workdir: os.getcwd() # Local Root directory for the project. Should be adapted for porting.
+# workdir: os.getcwd() # Local Root directory for the project. Should be adapted for porting.
 SAMPLE_IDS=util.read_sample_ids(config["files"]["samples"], column=1, verbose=0)
 
 #DATASETS_FWD = expand("{sample_id}" + config["suffix"]["reads_fwd"], sample_id=SAMPLE_IDS)

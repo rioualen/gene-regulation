@@ -13,6 +13,6 @@ rule index_bam:
     log: "{reads}.bam.bai.log"
     benchmark: "{reads}_sorted_pos.bam.bai_benchmark.log"
     params: qsub = config["qsub"] + " -q long" \
-            + "-e {reads}_sorted_pos.bam.bai_qsub.err" \
-            + "-o {reads}_sorted_pos.bam.bai_qsub.err"
+            + " -e {reads}_sorted_pos.bam.bai_qsub.err" \
+            + " -o {reads}_sorted_pos.bam.bai_qsub.err"
     shell:"samtools index {input} 2> {log}"

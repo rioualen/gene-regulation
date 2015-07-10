@@ -43,7 +43,7 @@ rule sickle_paired_ends:
             qsub = config["qsub"] \
             + " -e {reads}_sickle_pe_q" + config["sickle"]["threshold"] + "_qsub.err" \
             + " -o {reads}_sickle_pe_q" + config["sickle"]["threshold"] + "_qsub.out"
-    log: config["dir"]["results"] + config["dir"]["results"] + "{reads}_sickle_pe_q" + config["sickle"]["threshold"] + ".log"
+    log: config["dir"]["results"] + "{reads}_sickle_pe_q" + config["sickle"]["threshold"] + ".log"
     benchmark: config["dir"]["results"] + "{reads}_sickle_pe_q" + config["sickle"]["threshold"] + "_benchmark.json"
     message: "Trimming paired-ends raw reads with sickle\n\tInput:\t{input}\n\tOutput:\t{output}\n\tLog:\t{log}"
     shell: "sickle pe --pe-file1 {input.forward} --pe-file2 {input.reverse} --qual-type {params.qual_type} --qual-threshold {params.threshold} --output-pe1 {output.forward} --output-pe2 {output.reverse} --output-single {output.single} {params.options} > {output.summary} 2> {log}"

@@ -17,6 +17,6 @@ rule sorted_bam:
     benchmark: "{reads}_sorted_" + config["htseq"]["order"] + "_benchmark.json"
     params: sort_by_name = config["samtools"]["sort_by_name"], \
     		qsub = config["qsub"]+" -e {reads}_sorted_qsub.err -o {reads}_sorted_qsub.out"
-    shell:"samtools sort{params.sort_by_name} -f {input} {output} 2> {log}"
+    shell:"samtools sort{params.sort_by_name} {input} {wildcards.reads}_sorted_" + config["htseq"]["order"] + " 2> {log}"
 
 
