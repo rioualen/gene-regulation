@@ -1,0 +1,15 @@
+rule genome_coverage:
+    """Compute genome coverage with bedtools, i.e. count the number of
+    reads overlapping each genome position.
+
+    Required parameters:
+
+    config["qsub"]
+
+    """
+    input: "{reads}.bam"
+    output: "{reads}_coverage.txt"
+    log: "{reads}_coverage.log"
+    benchmark: "{reads}_coverage_benchmark.json"
+    params: qsub=config["qsub"]+" -e {reads}_coverage_qsub.err -o {reads}_coverage_qsub.out"
+    shell:"bedtools genomecov -ibam {input} > {output} 2> {log}"
