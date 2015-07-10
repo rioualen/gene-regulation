@@ -38,9 +38,24 @@ include: "rules/rsync.rules"
 include: "rules/fastqc.rules"
 include: "rules/sickle_se.rules"
 include: "rules/subread_mapping.rules"
+include: "rules/featurecounts.rules"
+
+COUNT_FILES = expand(config["dir"]["results"] + "{dataset}/{dataset}_{trimmed}_{aligneur}_featurecounts.tab", dataset = GSM_LIST, aligneur= "subread", trimmed = "sickle_se_q" + config["sickle"]["threshold"] )
+PARAMS_R = config["dir"]["results"] + "DEG/sickle_se_q" + config["sickle"]["threshold"] + "_subread_featurecounts_params.R"
+ALL_COUNTS = config["dir"]["results"] + "DEG/sickle_se_q" + config["sickle"]["threshold"] + "_subread_featurecounts_allcounts.tab"
+
+include: "rules/HTseq_allcount_params.rules"
+
+RESULTS_EDGER = expand(config["dir"]["results"] + "DEG/{cond_1}_vs_{cond_2}/{cond_1}_VS_{cond_2}_{trimmed}_{aligneur}_{count}" + config["edgeR"]["software"] +".tab", zip, cond_1 = config["Diff_Exp"]["cond1"], cond_2 = config["Diff_Exp"]["cond2"], aligneur= "subread", trimmed = "sickle_se_q" + config["sickle"]["threshold"], count = "featurecounts")
+
+include: "rules/edgeR.rules"
+
+RESULTS_DESEQ2 = expand(config["dir"]["results"] + "DEG/{cond_1}_vs_{cond_2}/{cond_1}_VS_{cond_2}_{trimmed}_{aligneur}_{count}" + config["DESeq2"]["software"] +".tab", zip, cond_1 = config["Diff_Exp"]["cond1"], cond_2 = config["Diff_Exp"]["cond2"], aligneur= "subread", trimmed = "sickle_se_q" + config["sickle"]["threshold"], count = "featurecounts")
+include: "rules/DESeq2.rules"
 
 
 rule all:
     input:expand(config["dir"]["results"] + "{dataset}/{dataset}_fastqc/", dataset = GSM_LIST), \
     expand(config["dir"]["results"] + "{dataset}/{dataset}_sickle_se_q" + config["sickle"]["threshold"] + "_fastqc/", dataset = GSM_LIST), \
-    expand(config["dir"]["results"] + "{dataset}/{dataset}_{trimmed}_{aligneur}.bam", dataset = GSM_LIST, aligneur= "subread", trimmed = "sickle_se_q" + config["sickle"]["threshold"] )
+    expand(config["dir"]["results"] + "{dataset}/{dataset}_{trimmed}_{aligneur}_featurecounts.tab", dataset = GSM_LIST, aligneur= "subread", trimmed = "sickle_se_q" + config["sickle"]["threshold"] ), \
+    RESULTS_EDGER, RESULTS_DESEQ2

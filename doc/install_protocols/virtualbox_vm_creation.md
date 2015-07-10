@@ -1,3 +1,6 @@
+---
+output: html_document
+---
 
 # Creating an NGS VM under Virtualbox
 
@@ -127,225 +130,70 @@ See information at: [https://www.virtualbox.org/manual/ch06.html#network_bridged
 Note: you can also activate a third adapter, for example to support both an ethernet card (Adapter 2) and a Wi-Fi connection (Adapter 3). This is particularly interesting for laptop computers. 
 
 
+### Storage
 
-================================================================
-Ubuntu operating system installation
-================================================================
+Click on the **Empty** disc icon in the storage tree.  Select the disc icon on the right and fetch the downloaded \*.iso image  (see **Requirements**)
+Click on *OK*
 
-Desktop version
----------------
+You can now start the VM. 
 
-The desktop version of Ubuntu presents the advantage of letting users
-work directly in the graphical environment of the Ubuntu virtual
-machine, which is convenient to open non-text result files for
-visualization (web pages, images) and to analyze the results in other
-graphical packages (R, openOffice, CytoScape, ...).
+## Operating system installation
 
-Ubuntu install disk downloaded from
-       http://releases.ubuntu.com/14.04.1/ubuntu-14.04.1-desktop-amd64.iso
+* Welcome 
+    - check the language settings and click on *Install Ubuntu*.
 
-Started the default installation. Steps:
-	- click the button: install Ubuntu
+* Preparing to install Ubuntu
+	  - leave all default parameters and click *Continue*.
 
-Preparing to install Ubuntu
-	  - leave all default parameters and click GO
+* Installation type
+	  - (leave the default) Erase disk and install Ubuntu, click *Install Now*.
 
-Installation type
-	- (leave the default) Erase disk and install Ubuntu, click "Install Ubuntu"
+* Where are you (automatic)
+      - Paris
 
-Where are you (automatic)
-      - 2015-02 I was in Mexico
+* Keyboard layout
 
-Keyboard layout
+      - French - French
 
-      - I have a French - French Macintosh, so I use it for
-        installation, but I will then add an English keybord.
+* Who are you ?
+      - Your name			        Regulatory Genomics
+      - Your computer's name	reg-genomics
+      - Pick a username 		  rg
+      - Choose a password     reg-genomics
+      - (Activate the option Log in automatically)
+      
+Restart once installation is completed. 
 
-NOTE CLAVIER FRANÇAIS: for the French Macintosh keyboard, I spent a
-lot of time to find the solution to use the 3-component keys
-(e.g. alt-shit-L for the pipe character |). The simplest solution: use
-the alt key on the RIGHT side of the space bar.
+Once on the desktop, go to the VM menu: select *Devices* then *Install Guest Additions CD image*.
+Run it. 
 
-Who are you ?
-    Your name			RSAT admin
-    Your computer's name	rsat-vm-2015-02
-    Pick a username 		rsat
-
-    Change since 2015-02: 
-    	   I activate the option Log in automatically
-	   This will greatly facilitate the use of the Destkop version
-
-# I should think about the possibility to activate "Log in
-# automatically", in order to facilitate the distribution without
-# providing a password to the users.
+The VirtualBox Guest Additions will provide closer integration between host and guest and improve the interactive performance of guest systems.
+Reboot again to see the new display.
 
 
+## Connection to VM through the host machine. 
 
-================================================================
-Screen resolution (for the Desktop version)
-================================================================
+In the VM terminal: 
 
-At first log in, screen resolution is restricted to 640x480 pixels. 
+```
+apt-get install --quiet --assume-yes ssh ## install ssh
+ifconfig ## get the IP
+```
 
-I found the solution here:
+In the host's terminal: 
 
-http://www.juanrubio.me/2014/02/ubuntu-trusty-virtualbox-guest-additions/
+```
+ssh rsat@192.168.56.101 ## access the VM by ssh using its IP address
+```
 
-I run the following commands: 
-
-  sudo bash
-  apt-get install virtualbox-guest-additions-iso
-  software-properties-gtk --open-tab=4
-
-In the dialog box, 
-   - check the option "Using x86 Virtualization ..."
-   - click "Apply changes" 
-   - click "Close"
-Reboot
-
-
-================================================================
-====
-==== Server version
-====
-================================================================
-
-The server version is less comfortable than the desktop version, but
-it should be more economic in terms of hard drive (and CPU/RAM for
-graphical resources ?).
-
-Language  English
-
-Home page: choose "Install Ubuntu Server"
-
-Language (again): English
-
-Country, territory or area: other > Europe > France
-
-Country to base the default locale setting: United Kingdom 
-	(there is apparently no setting for France !)
-
-Detect keyboard layout: No > French > French - French (Macintosh)
-
-Your system has multiple network interfaces (I guess this corresponds
-tothe 3 adapters specified in VirtualBox preferences).
-      Primary network interface: eth0
-
-host name: rsat-vb-ub14s
-
-Full name of new user:	RSAT admin
-
-Username for your account: rsat
-
-Password for new user: the classical (only for RSAT team members)
-
-Encrypt home directory ? No
-
-Time: Europe/Paris
-
-Partitioning method: (default) Guided - use entire disk and set up LVM
-
-     Next partitioning options: I say "continue" to all with default values
-
- ... Installing the sysem ... (takes some time)
-
-Configure the package manager
-	  Leave the HTTP proxy blank
-  -> ... configuring apt (takes some time)
-
-Configuration taskse1
-   Install security updates automatically
-
-Software selection : I just install the OpenSSH server, in order to be
-able connecting, but I don't install anything else since I want to use
-the RSAT bash file with apt-get packages etc.
-    -> ... Select and install software (takes some time)
-
-Install the GRUB boot loader
-	Yes
-
-================================================================
-Login in in the VM
-================================================================
-
-At this stage, the machine is able to boot and get a dynamic IP from
-the network. I login as rsat user and type
-    ifconfig
-to get the IP address. I then open a terminal on the host machine, and run
-   ssh rsat@[IP_OF_MY_VM]
-so I can run the rest of the installation in my familiar environment
-(terminal, keyboard, ...)
-
-
-ssh rsat[myvm]
-
-## Transfer my screenrc preferences
-rsync -ruptvl rsat@rsat.ulb.ac.be:.screenrc .
-
-## Transfer RSAT ssh parameters + open an agent that will manage my
-## password for future ssh communications.
-rsync -ruptvl rsat@rsat.ulb.ac.be:.ssh .
+```
+rsync -ruptvl {me}@{myIP}:.ssh .
 ssh-agent > ~/agent
 source ~/agent
 ssh-add
+```
+#### OK til here
 
-================================================================
-Network specification
-================================================================
-
-
-## We need to install the ssh package in order to enable connection
-## from the host terminal
-apt-get install --quiet --assume-yes ssh
-
-
-## We can now access the VM by ssh to its static IP address
-ssh rsat@192.168.56.101
-
-################################################################
-### ### NOT NECESSARY ANYMORE
-
-### ## I need emacs to edit the network configuration file
-### sudo bash
-### df -h
-### apt-get install  --quiet --assume-yes  emacs
-
-### ## Since this is the first installation of an apt-get package, it
-### ## takes some time to install dependencies.
-### df -h
-
-### emacs -nw /etc/network/interfaces
-
-### ## I edit the file /etc/network/interfaces
-
-### ## Host-only network interface for the VirtualBox VM
-### auto eth0
-### iface eth0 inet static
-### address 192.168.56.114
-### netmask 255.255.255.0
-### network 192.168.56.0
-### broadcast 192.168.56.255
-### gateway 192.168.56.1
-
-### ## Let the second interface automatically ask an IP address to the
-### ## DHCP server (this was by default the first interface eth0, but we
-### ## want to impose the static address as first interface).
-### autho eth1
-### iface eth1 inet dhcp
-
-### ## Re-activate the interface, this seems to be the best way withb ubuntu 14.04
-### ifdown eth1 ## Stop the eth1 interface
-### ifup eth1 ## Start the eth1 interface with its new configuration
-### ifconfig ## Check that eth1 is specified as expected
-
-### ## This should display something like this
-### ## ...
-### ## eth1      Link encap:Ethernet  HWaddr 08:00:27:9e:3d:cd  
-### ##           inet addr:192.168.56.114  Bcast:192.168.56.255  Mask:255.255.255.0
-### ## ...
-
-### ## reboot
-### ## (Note: I am not sure if we still need to reboot here, to be checked)
 
 ================================================================
 Install ubuntu packages
@@ -448,33 +296,23 @@ PROBLEMS TO BE FIXED
    packs).
 
 
-################################################################
-##
-## Customizing your instance of the VM
-##
-################################################################
 
+#### Customizing your instance of the VM
 
-## Set up time zone, date and time (source:
-## https://help.ubuntu.com/community/UbuntuTime).
+Set up time zone, date and time (source:
+https://help.ubuntu.com/community/UbuntuTime).
 sudo dpkg-reconfigure tzdata
 
 
-################################################################
-## To set up the keyboard (may vary between users who download the
-## VirtualBox VM)
+To set up the keyboard (may vary between users who download the VirtualBox VM)
 sudo dpkg-reconfigure console-data
-## (for my laptop, mac / Unknown / French /Standard / New)
+(for my laptop, mac / Unknown / French /Standard / New)
 
-
-################################################################
-## For the Virtualbox VM: mount the virtual disk rsat_data
+For the Virtualbox VM: mount the virtual disk rsat_data
 
 
 
-================================================================
-Export appliance
-================================================================
+### Export appliance
 
 Once the Virtual Machine is working fine, it can be exported to an
 appliance.
