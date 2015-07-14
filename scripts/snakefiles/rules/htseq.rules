@@ -1,9 +1,9 @@
 rule count:
-    """Count reads per gene in a bam file.
+    """Count reads per gene in a bam file using htseq-count.
     """
     input: "{reads}_sorted_" + config["htseq"]["order"] + ".bam"
     output: "{reads}_sorted_" + config["htseq"]["order"] + "_count.txt"
-    log: "{reads}_sorted_" + config["htseq"]["order"] + ".log"
+    log: "{reads}_sorted_" + config["htseq"]["order"] + "_count.log"
     benchmark: "{reads}_sorted_" + config["htseq"]["order"] + "_count_benchmark.json"
     params: ht_type = config["htseq"]["ht_type"] , \
             order = config["htseq"]["order"], \
