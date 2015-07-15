@@ -1,5 +1,5 @@
 """This file regroups snakemake targets of general utility, which may
-be used at different steps of a workflow.
+   be used at different steps of a workflow.
 
 """
 
@@ -24,47 +24,27 @@ rule sam2bam:
     Definition of the sorting rule bam file
     =======================================
 """
-
+    
 rule sort_bam_by_pos:
     """
     Sort aligned reads (in bam format) by positions.
     """
     input: "{aligned_reads}.bam"
-    output: sorted_bam="{aligned_reads}_sorted_pos.bam" #, sorted_index="{aligned_reads}_sorted_pos.bam.bai"
+    output: "{aligned_reads}_sorted_pos.bam"
     log: "{aligned_reads}_sorted_pos.log"
     benchmark: "{aligned_reads}_sorted_pos_benchmark.json"
-    params: qsub = config["qsub"] + " -q long -e {aligned_reads}_sorted_pos_qsub.err -o {aligned_reads}_sorted_pos_qsub.out"
-    shell:"samtools sort -f {input} {output.sorted_bam} 2> {log}; samtools index {output.sorted_bam} 2>> {log}"
+    params: prefix = "{aligned_reads}_sorted_pos", \
+            qsub = config["qsub"] + " -q long -e {aligned_reads}_sorted_pos_qsub.err -o {aligned_reads}_sorted_pos_qsub.out"
+    shell:"samtools sort  {input} {params.prefix} 2> {log}; samtools index {output} 2>> {log}"
     
 rule sort_bam_by_names:
     """
     Sort aligned reads (in bam format) by name.
     """
     input: "{aligned_reads}.bam"
-    output: sorted_bam="{aligned_reads}_sorted_names.bam" #, sorted_index="{aligned_reads}_sorted_names.bam.bai"
+    output: "{aligned_reads}_sorted_names.bam"
     log: "{aligned_reads}_sorted_names.log"
     benchmark: "{aligned_reads}_sorted_names_benchmark.json"
-    params: qsub = config["qsub"] + " -q long -e {aligned_reads}_sorted_names_qsub.err -o {aligned_reads}_sorted_names_qsub.out"
-    shell:"samtools sort -n -f {input} {output.sorted_bam} 2> {log}; samtools index {output.sorted_bam} 2>> {log}"
-    
-# rule sort_bam_by_pos:
-#     """
-#     Sort aligned reads (in bam format) by positions.
-#     """
-#     input: "{aligned_reads}.bam"
-#     output: "{aligned_reads}_sorted_pos.bam"
-#     log: "{aligned_reads}_sorted_pos.log"
-#     benchmark: "{aligned_reads}_sorted_pos_benchmark.json"
-#     params: qsub = config["qsub"] + " -q long -e {aligned_reads}_sorted_pos_qsub.err -o {aligned_reads}_sorted_pos_qsub.out"
-#     shell:"samtools sort -f {input} {output} 2> {log}"
-    
-# rule sort_bam_by_names:
-#     """
-#     Sort aligned reads (in bam format) by name.
-#     """
-#     input: "{aligned_reads}.bam"
-#     output: "{aligned_reads}_sorted_names.bam"
-#     log: "{aligned_reads}_sorted_names.log"
-#     benchmark: "{aligned_reads}_sorted_names_benchmark.json"
-#     params: qsub = config["qsub"] + " -q long -e {aligned_reads}_sorted_names_qsub.err -o {aligned_reads}_sorted_names_qsub.out"
-#     shell:"samtools sort -n -f {input} {output} 2> {log}"
+    params: prefix = "{aligned_reads}_sorted_names", \
+            qsub = config["qsub"] + " -q long -e {aligned_reads}_sorted_names_qsub.err -o {aligned_reads}_sorted_names_qsub.out"
+    shell:"samtools sort -n {input} {params.prefix} 2> {log}; samtools index {output} 2>> {log}"
