@@ -31,8 +31,9 @@ include: config["dir"]["fg-rules"] + "/count_reads.rules"         ## Count reads
 include: config["dir"]["fg-rules"] + "/fastqc.rules"              ## Quality control with fastqc
 include: config["dir"]["fg-rules"] + "/flowcharts.rules"          ## Draw flowcharts (dag and rule graph)
 include: config["dir"]["fg-rules"] + "/sickle_paired_ends.rules"  ## Trimming with sickle
-include: config["dir"]["fg-rules"] + "/bowtie_paired_ends.rules"  ## Paired-ends read mapping with bowtie version 1 (no gap)
-include: config["dir"]["fg-rules"] + "/bowtie_build.rules"        ## Read mapping with bowtie version 1 (no gap)
+include: config["dir"]["fg-rules"] + "/bowtie2_build.rules"        ## Read mapping with bowtie version 1 (no gap)
+include: config["dir"]["fg-rules"] + "/bowtie2_paired_ends.rules"  ## Paired-ends read mapping with bowtie version 1 (no gap)
+include: config["dir"]["fg-rules"] + "/htseq.rules"        ## Read mapping with bowtie version 1 (no gap)
 
 ################################################################
 ## Define the lists of requested files
@@ -65,6 +66,11 @@ MAPPED_PE_SAM=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_m
 MAPPED_PE_BAM=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe.bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 MAPPED_PE_SORTED=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe_sorted_pos.bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 
+## Problem with HTSeq and position-sorted bam files ? To be chacked later
+## HTSEQ_COUNTS=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe_sorted_pos_HTSeqcount.tab", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+HTSEQ_COUNTS=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe_sorted_names_HTSeqcount.tab", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+
+
 ## List all the raw read files, which will be submitted to quality control
 RAWR_FILES, RAWR_DIRS, RAWR_BASENAMES=glob_multi_dir(SAMPLE_IDS, "*_R*_001.fastq.gz", config["dir"]["reads"], ".fastq.gz")
 
@@ -87,8 +93,8 @@ rule all:
     Run all the required analyses
     """
 #    input: TRIMMED_SUMMARIES, TRIMMED_QC
-    input: MERGED_RAWR_QC, RAWR_MERGED, TRIMMED_MERGED, MAPPED_PE_SAM, MAPPED_PE_BAM, MAPPED_PE_SORTED
-#    input: MERGED_RAWR_QC, MAPPED_PE_BAM
+#    input: MERGED_RAWR_QC, RAWR_MERGED, TRIMMED_MERGED, MAPPED_PE_SAM, MAPPED_PE_BAM, MAPPED_PE_SORTED
+    input: HTSEQ_COUNTS
     params: qsub=config["qsub"]
     shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
