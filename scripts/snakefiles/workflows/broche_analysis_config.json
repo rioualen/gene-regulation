@@ -6,17 +6,24 @@
 
     "genome": {
 	"organism": "Escherichia_coli_K_12_substr__MG1655_uid57779",
-	"genome_version": "Escherichia_coli_K_12_substr__MG1655_uid57779",
-	"base_url": "ftp://ftp.ncbi.nlm.nih.gov/genomes/Bacteria/Escherichia_coli_K_12_substr__MG1655_uid57779/",
-	"sequence": "NC_000913.fna",
-	"features": "NC_000913.gff",
-    "install_dir": "genome/Escherichia_coli_K_12_substr__MG1655_uid57779"
+        "genome_version": "Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27",
+        "base_url_fasta": "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-27/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655/dna/",
+        "sequence": "Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27.dna.genome",
+        "sequence_top": "Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27.dna.toplevel",
+        "base_url_gtf": "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-27/gtf/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655/",
+        "features_gtf": "Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27",
+        "base_url_gff3": "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-27/gff3/escherichia_coli_str_k_12_substr_mg1655/",
+        "features_gff3": "Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27"   
     },
-    
+
     "files": {
 	"snakefile": "~/fg-chip-seq/scripts/snakefiles/workflows/broche_analysis.py",
 	"samples": "data/broche_samples.tab",
 	"analyses": "data/broche_analyses.tab"
+    },
+
+    "rsat": {
+	"verbosity": "1"
     },
 
     "dir": {
@@ -26,7 +33,9 @@
 	"reads_source": "data/reads_ori",
 	"results": "results",
 	"reads": "results/reads",
-	"reports": "reports"
+        "reports": "reports",
+        "results": "results/",
+        "genome": "genome/"
     },
 
     "reports": {
@@ -56,10 +65,11 @@
     },
 
     "bowtie2": {
-        "bowtie_index": "genome/Escherichia_coli_K_12_substr__MG1655_uid57779",
+        "index": "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27",
         "max_mismatches": "1",
         "other_options": ""
     },
+
 
     "samtools": {
         "sort_by_name": ""    
@@ -70,32 +80,10 @@
         "order": "pos",
         "stranded": "no",
         "minaqual": "10",
-        "idattr": "gene_id",
-        "gff_file": "genome/Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27.gtf",
+        "id_attr": "gene_id",
+        "mode": "intersection-nonempty",
+        "gff_file": "genome/from_ensembl/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27.gtf",
         "other_options": ""
     }
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
