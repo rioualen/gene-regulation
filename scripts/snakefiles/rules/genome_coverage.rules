@@ -1,0 +1,24 @@
+"""Compute genome coverage from aligned reads. 
+"""
+
+rule genome_coverage_bedgraph:
+    """Compute genome coverage from a bam-formatteed file with aligned reads.
+
+    Parameters:
+    config["genome"]["chromsizes"] File describing chromosome sizes
+    
+    """
+    input: "{reads}.bam"
+    output: bw="{reads}_genomecov.bw"
+    log:  "{reads}_genomecov.log"
+    benchmark:  "{reads}_genomecov_benchmark.json"
+    params: chrom_sizes = config["genome"]["chromsizes"], \
+            intervals = config["genome_coverage"]["intervals"], \
+            qsub = config["qsub"] + " -q long -e {reads}_genomecov_qsub.err -o {reads}_genomecov_qsub.out"
+    shell: "bedtools genomecov -bg -scale {params.intervals} -ibam {input} " \
+        + " | bedGraphToBigWig  2> {log}"
+
+
+rule install_bedgraphtobigwig:
+    params: url="http://hgdownload.cse.ucsc.edu/admin/exe/userApps.src.tgz"
+    shell: "wget {params.url}"
