@@ -17,19 +17,19 @@
 
 rule featurecounts:
 	"""Assign sequence reads to genomic features"""
-	input: "{data_dir}/{dataset}_{trimmed}_{aligneur}.bam"
-	output: count_table = "{data_dir}/{dataset}_{trimmed}_{aligneur}_featurecounts.tab", \
-                stat_table = "{data_dir}/{dataset}_{trimmed}_{aligneur}_featurecounts_stat.tab"
+	input: "{data_dir}/{reads}.bam"
+	output: count_table = "{data_dir}/{reads}_featurecounts.tab", \
+                stat_table = "{data_dir}/{reads}_featurecounts_stat.tab"
 	params: annotation = config["subread"]["annotations"], \
                 qsub = config["qsub"] \
-                + " -q short -e {data_dir}/{dataset}_{trimmed}_{aligneur}_featurecounts_qsub.err " \
-                + "-o {data_dir}/{dataset}_{trimmed}_{aligneur}_featurecounts_qsub.out"
-	log: "{data_dir}/{dataset}_{trimmed}_{aligneur}_featurecounts.log"
-	benchmark: "{data_dir}/{dataset}_{trimmed}_{aligneur}_featurecounts_benchmark.json"
+                + " -q short -e {data_dir}/{reads}_featurecounts_qsub.err" \
+                + " -o {data_dir}/{reads}_featurecounts_qsub.out"
+	log: "{data_dir}/{reads}_featurecounts.log"
+	benchmark: "{data_dir}/{reads}_featurecounts_benchmark.json"
 	run: 
 		R(""" 
 			library("Rsubread")
 			count.features <- featureCounts(files="{input}",annot.ext="{params.annotation}",isGTFAnnotationFile=TRUE,GTF.featureType="exon",GTF.attrType="gene_id")
-			write.table(count.features$counts, file="{output.count_table}", sep="\t")
+			write.table(count.features$counts, file="{output.count_table}", sep="\t", col.names = FALSE)
 			write.table(count.features$stat, file="{output.stat_table}", sep="\t")
 		""")

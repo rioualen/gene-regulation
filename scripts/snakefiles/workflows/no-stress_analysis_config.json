@@ -6,28 +6,35 @@
 
     "genome": {
         "organism": "Desulfovibrio_desulfuricans_ATCC_27774_uid59213",
-        "genome_version": "Desulfovibrio_desulfuricans_ATCC_27774_uid59213",
-        "base_url": "ftp://ftp.ncbi.nlm.nih.gov/genomes/Bacteria/Desulfovibrio_desulfuricans_ATCC_27774_uid59213/",
-        "sequence": "NC_011883.fna",
-        "features": "NC_011883.gff",
-        "install_dir": "genome/"      
+        "genome_version": "Desulfovibrio_desulfuricans_atcc_27774.GCA_000022125.1.27",
+        "base_url_fasta": "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-27/fasta/bacteria_1_collection/desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774/dna/",
+        "sequence": "Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27.dna.genome",
+        "sequence_top": "Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27.dna.toplevel",
+        "base_url_gtf": "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-27/gtf/bacteria_1_collection/desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774/",
+        "features_gtf": "Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27",
+        "base_url_gff3": "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-27/gff3/desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774/",
+        "features_gff3": "Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27"   
     },
 
     "files": {
         "samples": "data/no-stress_samples.tab",
         "analyses": "",
-        "snakefile": "~/no-stress_project/scripts/snakefiles/workflows/no-stress_analysis.py"
+        "snakefile": "scripts/snakefiles/workflows/no-stress_analysis.py"
     },
 
     "dir": {
-	   "data_root": "data/1258-BRM/",
-       "reports": "reports",
-       "results": "results/"
+        "base": "/home/desulfo-no/no-stress_project/",
+        "data_root": "data/1258-BRM/",
+        "reads_source" : "data/1258-BRM/",
+        "reports": "reports",
+        "results": "results/",
+        "genome": "genome/"
     },
 
     "suffix": {
-	   "reads_fwd": "_1",
-	   "reads_rev": "_2"
+        "reads_fwd": "_1",
+        "reads_rev": "_2",
+        "both_reads": ["_1","_2"]
     },
 
     "reports": {
@@ -66,16 +73,31 @@
         "other_options": ""
     },
 
-    "edgeR": {
-        "script_R_path": "scripts/R-scripts/run_edgeR.R",
+    "subread": {
+        "basename": "reference_index",
+        "reference_genome": "genome/Desulfovibrio_desulfuricans_ATCC_27774_uid59213_genome.fasta",
+        "annotations": "genome/Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27.gtf"
+    },
+
+    "Diff_Exp": {
         "N": ["N1", "N2", "N4"],
         "NN": ["NN2", "NN4", "NN5"], 
         "S": ["S1", "S4", "S5"],
         "SN": ["SN1", "SN2", "SN5"],
         "conditions": ["N", "S", "NN", "SN"],
         "cond1": ["N", "N", "S", "NN"],
-        "cond2": ["NN", "S", "SN", "SN"],
-        "FDR_threshold": ".05"
+        "cond2": ["NN", "S", "SN", "SN"]
+    },
+
+    "edgeR": {
+        "script_R_path": "scripts/R-scripts/run_edgeR.R",
+        "FDR_threshold": ".05",
+        "software": "_edgeR"
+    },
+
+    "DESeq2": {
+        "script_R_path": "scripts/R-scripts/run_deseq2.R",
+        "software": "_DESeq2"
     }
 }
 

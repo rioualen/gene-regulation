@@ -32,7 +32,7 @@ rule edgeR:
         # data_root = params.data_root
         dir_results  = params.dir_results
         gene_ids_ok = True
-        header = "gene_id"
+        header = "# gene_id"
         
         for count_file in COUNT_FILES:
             count_file = count_file.replace("_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + "_count.txt", "")

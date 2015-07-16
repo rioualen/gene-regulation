@@ -1,36 +1,12 @@
+"""
+    Snakemake rule to produce a count matrix from a sorted alignment file.
+"""
+
 rule count:
     """Count reads per gene in a bam file using htseq-count. 
 
-    For the options, see the htseq-count manual: 
-    http://www-huber.embl.de/users/anders/HTSeq/doc/count.html
-
-    """
-    input: "{reads}_sorted_" + config["htseq"]["order"] + ".bam"
-    output: "{reads}_sorted_" + config["htseq"]["order"] + "_count.txt"
-    log: "{reads}_sorted_" + config["htseq"]["order"] + "_count.log"
-    benchmark: "{reads}_sorted_" + config["htseq"]["order"] + "_count_benchmark.json"
-    params: ht_type = config["htseq"]["ht_type"] , \
-            order = config["htseq"]["order"], \
-            stranded = config["htseq"]["stranded"], \
-            minaqual = config["htseq"]["minaqual"], \
-            idattr = config["htseq"]["id_attr"], \
-            mode = config["htseq"]["mode"], \
-            gff_file = config["htseq"]["gff_file"], \
-            qsub = config["qsub"] + " -q long" \
-            + " -e {reads}_sorted_" + config["htseq"]["order"] + "_count_qsub.err" \
-            + " -o {reads}_sorted_" + config["htseq"]["order"] + "_count_qsub.out", \
-            options = config["htseq"]["other_options"]
-    # message: """--- Counting."""
-    shell: "htseq-count --format {params.ht_type} --order {params.order} --stranded {params.stranded} --minaqual {params.minaqual} --idattr {params.idattr} --mode {params.mode} {input} {params.gff_file} {params.options}> {output} 2> {log}"
-
-
-
-rule htseq_count:
-    """Count reads per gene in a bam file using htseq-count. 
-
-    Bam files can be sorted by name or position.  If sorted by
-    position the parameter config["htseq"]["order"] must be "pos",
-    else it must be "name".
+    Bam files can be sorted by name or position. If sorted by position
+    config["htseq"]["order"] must be "pos", else it must be "name".
 
     For the options, see the htseq-count manual: 
     http://www-huber.embl.de/users/anders/HTSeq/doc/count.html
@@ -38,7 +14,7 @@ rule htseq_count:
     """
     input: "{reads}_sorted_" + config["htseq"]["order"] + ".bam"
     output: "{reads}_sorted_" + config["htseq"]["order"] + "_HTSeqcount.tab"
-    log: "{reads}_sorted_" + config["htseq"]["order"] + "_HTSeqcount.log"
+    log: "{reads}_sorted_" + config["htseq"]["order"] + "HTSeqcount.log"
     benchmark: "{reads}_sorted_" + config["htseq"]["order"] + "_HTSeqcount_benchmark.json"
     params: ht_type = config["htseq"]["ht_type"] , \
             order = config["htseq"]["order"], \
@@ -53,3 +29,34 @@ rule htseq_count:
             options = config["htseq"]["other_options"]
     # message: """--- Counting."""
     shell: "htseq-count --format {params.ht_type} --order {params.order} --stranded {params.stranded} --minaqual {params.minaqual} --idattr {params.idattr} --mode {params.mode} {input} {params.gff_file} {params.options}> {output} 2> {log}"
+
+
+
+# rule htseq_count:
+#     """Count reads per gene in a bam file using htseq-count. 
+
+#     Bam files can be sorted by name or position.  If sorted by
+#     position the parameter config["htseq"]["order"] must be "pos",
+#     else it must be "name".
+
+#     For the options, see the htseq-count manual: 
+#     http://www-huber.embl.de/users/anders/HTSeq/doc/count.html
+
+#     """
+#     input: "{reads}_sorted_" + config["htseq"]["order"] + ".bam"
+#     output: "{reads}_sorted_" + config["htseq"]["order"] + "_HTSeqcount.tab"
+#     log: "{reads}_sorted_" + config["htseq"]["order"] + "_HTSeqcount.log"
+#     benchmark: "{reads}_sorted_" + config["htseq"]["order"] + "_HTSeqcount_benchmark.json"
+#     params: ht_type = config["htseq"]["ht_type"] , \
+#             order = config["htseq"]["order"], \
+#             stranded = config["htseq"]["stranded"], \
+#             minaqual = config["htseq"]["minaqual"], \
+#             idattr = config["htseq"]["id_attr"], \
+#             mode = config["htseq"]["mode"], \
+#             gff_file = config["htseq"]["gff_file"], \
+#             qsub = config["qsub"] + " -q long" \
+#             + " -e {reads}_sorted_" + config["htseq"]["order"] + "_HTSeqcount_qsub.err" \
+#             + " -o {reads}_sorted_" + config["htseq"]["order"] + "_HTSeqcount_qsub.out", \
+#             options = config["htseq"]["other_options"]
+#     # message: """--- Counting."""
+#     shell: "htseq-count --format {params.ht_type} --order {params.order} --stranded {params.stranded} --minaqual {params.minaqual} --idattr {params.idattr} --mode {params.mode} {input} {params.gff_file} {params.options}> {output} 2> {log}"

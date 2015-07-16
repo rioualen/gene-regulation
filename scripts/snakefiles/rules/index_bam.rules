@@ -1,11 +1,18 @@
+"""
+    Snakemake rule to index BAM file 
+    in order to view them in a visualization software
+"""
+
 rule index_bam:
-    """Index a bam file
     """
-    input: "{reads}.bam"
-    output: "{reads}.bam.bai"
+        Index a bam file by creating a .bai file with Samtools
+        The input bam MUST be sorted by position !
+    """
+    input: "{reads}_sorted_pos.bam"
+    output: "{reads}_sorted_pos.bam.bai"
     log: "{reads}.bam.bai.log"
-    benchmark: "{reads}.bam.bai_benchmark.log"
+    benchmark: "{reads}_sorted_pos.bam.bai_benchmark.log"
     params: qsub = config["qsub"] + " -q long" \
-            + "-e {reads}.bam.bai_qsub.err" \
-            + "-o {reads}.bam.bai_qsub.err"
+            + " -e {reads}_sorted_pos.bam.bai_qsub.err" \
+            + " -o {reads}_sorted_pos.bam.bai_qsub.err"
     shell:"samtools index {input} 2> {log}"

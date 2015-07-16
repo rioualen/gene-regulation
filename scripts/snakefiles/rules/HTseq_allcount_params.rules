@@ -1,58 +1,58 @@
-rule edgeR:
-    """Run differential expression analysis on a table of counts per tag
-    (gene). 
-
-    This rule takes as input a tab-delimited text file containing gene
-    counts per sample (one row per gene, one column per sample) and a gene
-    annotation file (gtf).
-
-    Result files:
-
-    1. A tab-delimited file with with differential expression
-       statistics, sorted by significance (p-value of FDR).
-    2. A pdf file with various plots. 
-
+rule HTseq_allcount_params:
     """
-    input:  COUNT_FILES, \
-            r_script = config["edgeR"]["script_R_path"]
-    output: R_params = config["dir"]["results"] + "DEG/sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + "_params.R", \
-            csv = COUNT_RESULTS, \
-            all_counts_file = config["dir"]["results"] + "DEG/sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + "_allcounts.tab"
+        Creates a file containing all count from given HTseq count file, 
+        and extracts all useful data into a R_params file for differential expression 
+        with edgeR and DESeq2
+    """
+
+    input:  COUNT_FILES
+    output: R_params = PARAMS_R, \
+            all_counts_file = ALL_COUNTS
     # log: "results/{cond_1}_VS_{cond_2}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + ".log"
     # benchmark: "results/{cond_1}_VS_{cond_2}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + ".json"
     params: qsub = config["qsub"] + " -q short", \
-            cond1 = config["edgeR"]["cond1"], \
-            cond2=config["edgeR"]["cond2"], \
+            cond1 = config["Diff_Exp"]["cond1"], \
+            cond2=config["Diff_Exp"]["cond2"], \
             dir_results = config["dir"]["results"]
 
     run:
+        # Create lists containing tested condition at the same index
         condition_1 = params.cond1
         condition_2 = params.cond2
 
-        # data_root = params.data_root
+
         dir_results  = params.dir_results
-        gene_ids_ok = True
+    
+        # Get name of R_params file without path
+        params_R_file = output.R_params.split("/")[-1]
+
+        # Get extention of align files from name of R_params
+        ext_align = params_R_file.replace("_params.R", "")
+
+        # Get extention of count file
+        complet_path_count = COUNT_FILES[0].rsplit("/", maxsplit=1)
+        #count_ext = complet_path_count[-1].rsplit("_")[-1]
+        count_ext = complet_path_count[-1].rsplit(".")[-1]
+
+        # Initilizing headers for all_count file
         header = "gene_id"
-        
+        # Add to header the name of the replicates in the same order as COUNT_FILES
         for count_file in COUNT_FILES:
-            count_file = count_file.replace("_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + "_count.txt", "")
-            header += "\t" + count_file.split("/")[-1]
-        
-        # all_conditions = config["edgeR"][cond_1] + config["edgeR"][cond_2]
-        # for count_file in COUNT_FILES:
-        #     for cond in all_conditions:
-        #         if cond in count_file:
-        #             header += "\t" + cond
-            
-        
+            # Remove path of count table files
+            head = count_file.split("/")[-1]
+            header += "\t" + head.split("_" + ext_align)[0]
+
+        # Condition only true on the first loop
+        gene_ids_ok = True
         list_line = []
 
-        #Creating a count file with all replicates of all conditions
+        #Parse a count files of all replicates of all conditions
         for i in range(len(COUNT_FILES)):
             count_res = open(COUNT_FILES[i])
-            #Check if gene_ids already exist 
+            #Check if first loop
             if gene_ids_ok:
                 for line in count_res:
+                    # Create gene_ids
                     gene_counts_ids = line.split("\t")
                     list_line.append(gene_counts_ids[0] + "\t" + gene_counts_ids[1].strip("\n"))
                 gene_ids_ok = False
@@ -64,7 +64,7 @@ rule edgeR:
                 list_line[j] += "\t" + gene_counts[1].strip("\n")
             count_res.close()
 
-        #Open and write in a file
+        #Open and write all_count in a file
         all_counts = open(output.all_counts_file, 'w')
         all_counts.write(header + "\n")
         for elm in list_line:
@@ -73,7 +73,6 @@ rule edgeR:
 
 
         # Initializing variables
-
         counts_f = []
         sample_condition_py = []
         sample_names_py = []
@@ -86,23 +85,25 @@ rule edgeR:
 
             cond_1 = condition_1[i]
             cond_2 = condition_2[i]
-            output_list.append(dir_results + "DEG/" + cond_1 + "_vs_" + cond_2 + "/" + cond_1 + "_VS_" + cond_2 + "_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + ".csv")
+            output_list.append(dir_results + "DEG/" + cond_1 + "_vs_" + cond_2 + "/" + cond_1 + "_VS_" + cond_2 + "_" + ext_align + ".tab")
             
 
             #Get biological replicate list
-            R_1 = config["edgeR"][cond_1]
-            R_2 = config["edgeR"][cond_2]
+            R_1 = config["Diff_Exp"][cond_1]
+            R_2 = config["Diff_Exp"][cond_2]
 
-            ext = "_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + "_count.txt"
-
-            #Create complete path for count files
             files_list = []
-            for elt in R_1:
-                files_list.append('"' + config["dir"]["results"] + elt + "/" + elt + ext + '"')
+            files_list_R1 = []
+            files_list_R2 = []
+            # List path + name of replicats
+            for i in range(len(R_1)) :
+                #files_list_R1.append('"' + config["dir"]["reads_source"] + R_1[i]+ "/" + R_1[i] + "_" + ext_align + count_ext + '"')
+                #files_list_R2.append('"' + config["dir"]["reads_source"] + R_2[i]+ "/" + R_2[i] + "_" + ext_align + count_ext + '"')
+                files_list_R1.append('"' + config["dir"]["results"] + R_1[i]+ "/" + R_1[i] + "_" + ext_align + "." + count_ext + '"')
+                files_list_R2.append('"' + config["dir"]["results"] + R_2[i]+ "/" + R_2[i] + "_" + ext_align + "." + count_ext + '"')
 
-            for elt in R_2:
-                files_list.append('"' + config["dir"]["results"] + elt + "/" + elt + ext + '"')
-
+            files_list = files_list_R1 + files_list_R2
+            
             #Separate the count files in string
             counts_f.append("c(" + ', \n '.join(files_list) + ")")
             #Get the list of condition 
@@ -127,7 +128,7 @@ rule edgeR:
         + "## Table containing the counts of reads per gene (rows) for each sample (columns)  \n" \
         + "all.counts.table <- '" + output.all_counts_file + "' \n \n" \
         + "## Description of the conditions \n" \
-        + "conditions <- c('" + "','".join(config["edgeR"]["conditions"]) + "') \n" \
+        + "conditions <- c('" + "','".join(config["Diff_Exp"]["conditions"]) + "') \n" \
         + "n.rep <-c(" + ','.join(n_rep) + ")\n \n" \
         + "count.files <-c('" + "', \n '".join(COUNT_FILES) + "') \n \n"\
         + "FDR.threshold <- " + config["edgeR"]["FDR_threshold"] + "\n \n \n"\
@@ -145,6 +146,3 @@ rule edgeR:
         + "################################################################" \
         )     
         out_R.close()
-
-        # Runing R script with generated R params
-        os.system("Rscript " + input.r_script + ' ' + output.R_params)

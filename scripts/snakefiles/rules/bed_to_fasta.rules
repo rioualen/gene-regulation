@@ -1,5 +1,3 @@
-
-
 rule bed_to_fasta:
 	"""Fetch sequences from UCSC to obtain a fasta file from a set of
 	genomic coordinates described in a bed file.

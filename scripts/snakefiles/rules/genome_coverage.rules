@@ -1,5 +1,8 @@
 """Compute genome coverage from aligned reads. 
 """
+rule install_bedgraphtobigwig:
+    params: url="http://hgdownload.cse.ucsc.edu/admin/exe/userApps.src.tgz"
+    shell: "wget {params.url}"
 
 rule genome_coverage_bedgraph:
     """Compute genome coverage from a bam-formatteed file with aligned reads.
@@ -19,6 +22,3 @@ rule genome_coverage_bedgraph:
         + " | bedGraphToBigWig  2> {log}"
 
 
-rule install_bedgraphtobigwig:
-    params: url="http://hgdownload.cse.ucsc.edu/admin/exe/userApps.src.tgz"
-    shell: "wget {params.url}"

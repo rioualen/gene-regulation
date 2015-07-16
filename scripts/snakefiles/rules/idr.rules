@@ -8,10 +8,10 @@ rule idr:
 	Only takes spp files for now.
 	"""
 	input: expand(expand("{wdir}results/{chip}_vs_{{inp}}/{chip}_{aligner}_spp.narrowPeak", zip, chip=CHIP, aligner=ALIGNER, wdir=WDIR), inp=INPUT)
-	output: touch("results/IDR/idr.done")
+	output: touch("results/IDR/{ALIGNER}_idr.done")
 #	log: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.idr.log"
 #	benchmark: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.idr_benchmark.json"
-	params: outdir=WDIR+"results/IDR/test"
+	params: outdir=WDIR+"results/IDR/{ALIGNER}"
 	shell: "cd ~/bin/idrCode ; \
 		Rscript batch-consistency-analysis.r {input} -1 {params.outdir} 0 F signal.value 2> test.log; \
 		Rscript batch-consistency-plot.r 1 {params.outdir} {params.outdir}; \
@@ -19,6 +19,7 @@ rule idr:
 
 
 ## TODO emplacement idr code à automatiser ? 
+## TODO include other peak-callers > arborescence ?
 
 
 #	input:
