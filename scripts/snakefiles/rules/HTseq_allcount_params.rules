@@ -8,9 +8,9 @@ rule HTseq_allcount_params:
     input:  COUNT_FILES
     output: R_params = PARAMS_R, \
             all_counts_file = ALL_COUNTS
-    # log: "results/{cond_1}_VS_{cond_2}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + ".log"
-    # benchmark: "results/{cond_1}_VS_{cond_2}_bowtie2_mm" + config["bowtie2"]["max_mismatches"] + "_sorted_" + config["htseq"]["order"] + ".json"
-    params: qsub = config["qsub"] + " -q short", \
+    log: config["dir"]["results"] + "DEG/all_count.log"
+    benchmark: config["dir"]["results"] + "DEG/all_count_benchmark.json"
+    params: qsub = config["qsub"] + " -q short -e " + config["dir"]["results"] + "DEG/all_count_qsub.err -o " + config["dir"]["results"] + "DEG/all_count_qsub.out", \
             cond1 = config["Diff_Exp"]["cond1"], \
             cond2=config["Diff_Exp"]["cond2"], \
             dir_results = config["dir"]["results"]

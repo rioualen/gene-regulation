@@ -1,7 +1,7 @@
 """Assign sequence reads to genomic features with the R-package
    subread
 
-   This rule excecutes the couting step of RNA-Seq analysis.
+   This rule excecutes the counting step of RNA-Seq analysis.
    The program featureCounts requires two files :
 
    -the Sam or Bam file containing mapping reads
@@ -21,6 +21,7 @@ rule featurecounts:
 	output: count_table = "{data_dir}/{reads}_featurecounts.tab", \
                 stat_table = "{data_dir}/{reads}_featurecounts_stat.tab"
 	params: annotation = config["subread"]["annotations"], \
+			attr_type = config["subread"]["gtf_attrtype"], \
                 qsub = config["qsub"] \
                 + " -q short -e {data_dir}/{reads}_featurecounts_qsub.err" \
                 + " -o {data_dir}/{reads}_featurecounts_qsub.out"
@@ -29,7 +30,7 @@ rule featurecounts:
 	run: 
 		R(""" 
 			library("Rsubread")
-			count.features <- featureCounts(files="{input}",annot.ext="{params.annotation}",isGTFAnnotationFile=TRUE,GTF.featureType="exon",GTF.attrType="gene_id")
+			count.features <- featureCounts(files="{input}",annot.ext="{params.annotation}",isGTFAnnotationFile=TRUE,GTF.featureType="exon",GTF.attrType="{params.attr_type}")
 			write.table(count.features$counts, file="{output.count_table}", sep="\t", col.names = FALSE)
 			write.table(count.features$stat, file="{output.stat_table}", sep="\t")
 		""")

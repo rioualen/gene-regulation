@@ -11,11 +11,11 @@ rule bowtie2_download_genome:
     read-mapping software from ensembl.
 
     """
-    output: sequence = config["dir"]["genome"] + config["genome"]["sequence"] + ".fa", \
-            features_gtf = config["dir"]["genome"] + config["genome"]["features_gtf"] + ".gtf"
-    log: config["dir"]["genome"] + "wget_log.txt"
-    params: sequence_url = config["genome"]["base_url_fasta"] + config["genome"]["sequence"] + ".fa.gz", \
-            features_gtf_url = config["genome"]["base_url_gtf"] + config["genome"]["features_gtf"] + ".gtf.gz"
+    # output: sequence = config["dir"]["genome"] + config["genome"]["sequence"] + ".fa", \
+    #         features_gtf = config["dir"]["genome"] + config["genome"]["features_gtf"] + ".gtf"
+    # log: config["dir"]["genome"] + "wget_log.txt"
+    # params: sequence_url = config["genome"]["base_url_fasta"] + config["genome"]["sequence"] + ".fa.gz", \
+    #         features_gtf_url = config["genome"]["base_url_gtf"] + config["genome"]["features_gtf"] + ".gtf.gz"
     output: sequence = config["dir"]["genome"] + config["genome"]["sequence"] + ".fa", \
             features_gtf = config["dir"]["genome"] + config["genome"]["features_gtf"] + ".gtf"
     log: config["dir"]["genome"] + "wget_log.txt"
