@@ -9,7 +9,7 @@
 		"base_url": "",
 		"sequence": "",
 		"features": "",
-        	"install_dir": ""
+        "install_dir": ""
 	},
 	"files": {
 		"snakefile": "scripts/snakefiles/workflows/histone_marks.py",

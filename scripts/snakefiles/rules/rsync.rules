@@ -1,6 +1,6 @@
 """
 	Copy the raw data in the results folder, 
-	You have to use this rule where you don't merge your data.
+	You have to use this rule where you don't merge your data and if your data are in fastq file.
 
 """
 # This rule doesn't work if the files have a different name than the directory (ex: paired-end)

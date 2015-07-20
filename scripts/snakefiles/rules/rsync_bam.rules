@@ -1,0 +1,14 @@
+"""
+	Copy the raw data in the results folder, 
+	You have to use this rule where you don't merge your data and if your data are in fastq file.
+
+"""
+# This rule doesn't work if the files have a different name than the directory (ex: paired-end)
+
+rule rsync_bam:
+	input: config["dir"]["reads_source"] + "{data_dir}/{dataset}.bam"
+	output: config["dir"]["results"] + "{data_dir}/{dataset}.bam"
+	log: config["dir"]["results"] + "{data_dir}/{dataset}_rsync.log"
+	benchmark: config["dir"]["results"] + "{data_dir}/{dataset}_rsync_benchmark.json"
+	params: qsub = config["qsub"] + " -q short -e " + config["dir"]["results"] + "{data_dir}/{dataset}_rsync_qsub.err -o " + config["dir"]["results"] + "{data_dir}/{dataset}_rsync_qsub.out"
+	shell:"rsync -ruptvl {input} {output} 2> {log} "

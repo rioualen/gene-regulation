@@ -14,6 +14,9 @@ rule sorted_bam:
         If you want to sort by position sort_by_name must be "" and config["htseq"]["order"] "pos".
         If you want to sort by name sort_by_name must be " -n" and config["htseq"]["order"] "name".
 
+        Lucie to all develloper: why the name config["htseq"]["order"] is used ? some people can sorted 
+        their bam files without used htseq.
+
     """
     input: "{reads}.bam"
     output: "{reads}_sorted_" + config["htseq"]["order"] + ".bam"
