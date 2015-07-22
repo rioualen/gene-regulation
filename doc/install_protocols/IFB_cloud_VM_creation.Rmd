@@ -15,7 +15,9 @@ The disk has to be attached to the VM when it is being created, thus it has to b
 See [link](http://www.france-bioinformatique.fr/?q=fr/gestion-des-donn%C3%A9es) for more details.
 
 1. Click *New vDisk* button.
-2. Enter a name and a size (whole number equating to GiB).
+2. Enter a name and a size (whole number equating to GiB). 
+
+**/?\\** I'm guessing RSAT proper install & use require a good 20Go. Is there a limit imposed by the cloud?
 
 ## Appliance creation
 
