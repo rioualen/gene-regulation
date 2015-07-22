@@ -1,0 +1,120 @@
+---
+title: "Creation of an appliance on the IFB cloud"
+output:
+  html_document:
+    css: /packages/rsat/public_html/course.css
+    fig_caption: yes
+  pdf_document:
+    toc: yes
+---
+
+## Virtual disk creation
+
+Optionnal but recommended? Allows you to store data outside the VM, for instance. When the virtual disk is attached to your VM, you can access the data whenever the instance is running.
+The disk has to be attached to the VM when it is being created, thus it has to be created prior to the VM. 
+See [link](http://www.france-bioinformatique.fr/?q=fr/gestion-des-donn%C3%A9es) for more details.
+
+1. Click *New vDisk* button.
+2. Enter a name and a size (whole number equating to GiB).
+
+## Appliance creation
+
+Useful documents:
+
+[Utilisation avancée du Cloud IFB](http://www.france-bioinformatique.fr/?q=fr/core/cellule-infrastructure/documentation-cloud)
+
+[Cumulo Numbio worksheet](http://www.france-bioinformatique.fr/sites/default/files/fascicule-ibi3_0.pdf)
+
+1. In order to create a virtual machine on the IFB cloud, you need to have a developper account.
+You should also make sure that you registered your ssh public key in your user profile: [see FAQ](http://www.france-bioinformatique.fr/?q=fr/profil-dutilisateur-cloud])
+
+2. Log in on the [IFB cloud](http://cloud.france-bioinformatique.fr). Click on *New Instance* button. 
+
+* Choose the appliance **Ubuntu 14.04 IFB**
+
+    * **/!\\** As of July 2015, there are four options for the Ubuntu base of a new VM:
+
+        * Ubuntu 14.04 IFB
+        * Ubuntu 14.04 IFB-10GB
+        * Ubuntu 14.04 IFB-X2Go
+        * Ubuntu v12.02 (base)
+
+    * For some reason, *Ubuntu 14.04 IFB-10GB* raises an *Internal Server Error*.
+
+* Name your instance.
+* Check **Create appliance**. 
+* Select the disk of your choice (should be created prior to the appliance creation).
+* Click *Run*.
+
+3. Refresh the page. Your instance should appear in orange because of the creation mode you selected. You can now click on the **ssh** column to see the ssh parameters. It should look like this:
+
+```
+Parameters:
+host = 192.54.201.177
+port = 22
+identifiant = root
+
+Command-line connection:
+ssh -A -p 22 root@192.54.201.177
+
+Command-line file transfers:
+scp -P 22 ${localfile} root@192.54.201.177:
+sftp -oPort=22 root@192.54.201.177
+```
+
+4. Connect to the VM using the ssh command in a terminal. 
+
+`ssh -A -p 22 root@192.54.201.177`
+
+5. Import your ssh keys from host machine. 
+
+`rsync -ruptvl {me}@{myIP}:.ssh .`
+
+**/!\\** Does not seem to work. Permission-related problem?
+```
+ssh: connect to host 10.1.1.133 port 22: Connection timed out
+rsync: connection unexpectedly closed (0 bytes received so far) [Receiver]
+rsync error: error in rsync protocol data stream (code 12) at io.c(226) [Receiver=3.1.0]
+```
+
+Using scp from host machine instead.
+
+```
+rioualen@dell3b31852 ~/.ssh $ scp -r id_rsa.pub  id_rsa root@192.54.201.177:.ssh/
+```
+
+Back to the VM:
+```
+ssh-agent > ~/agent
+source ~/agent
+ssh-add
+```
+
+
+
+## Configuration
+
+1. Create user account.
+
+Followed procedure [here](https://www.digitalocean.com/community/tutorials/how-to-add-and-delete-users-on-an-ubuntu-14-04-vps).
+
+User: user
+
+Password: user01
+
+## Software installation
+
+### RSAT suite  
+
+See *$RSAT/doc/howto/install_rsat_ubuntu14.04.bash*
+
+### Snakemake
+
+### ...
+
+
+## VM export / submission ?
+
+
+
+
