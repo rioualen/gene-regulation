@@ -1,11 +1,11 @@
 ---
 title: "Installation of RSAT on an Ubuntu device"
 output:
-  pdf_document:
-    toc: yes
   html_document:
     css: /packages/rsat/public_html/course.css
     fig_caption: yes
+    toc: yes
+  pdf_document:
     toc: yes
 ---
 **/!\\ NB** If you are trying to install RSAT on an IFB appliance, it is assumed that it has a root account and a standard user account with granted sudoer privileges (see IFB_cloud_VM_creation.Rmd for details).
@@ -809,7 +809,7 @@ Set the following values: `hostlist              localhost`
 
 Take all default parameters BUT for the SGE master parameter, type `localhost` (it must be the hostname)
 
-Test that jobs canbe sent to the job scheduler.
+Test that jobs can be sent to the job scheduler.
 
 
 ## 15. OPTIONAL

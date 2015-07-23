@@ -66,11 +66,15 @@ sftp -oPort=22 root@192.54.201.177
 
 4. Connect to the VM using the ssh command in a terminal. 
 
-`ssh -A -p 22 root@192.54.201.177`
+```
+sh -A -p 22 root@192.54.201.177
+```
 
 5. Import your ssh keys from host machine. 
 
-`rsync -ruptvl {me}@{myIP}:.ssh .`
+```
+rsync -ruptvl {me}@{myIP}:.ssh .
+```
 
 **/!\\** Does not seem to work. Permission-related problem?
 ```
