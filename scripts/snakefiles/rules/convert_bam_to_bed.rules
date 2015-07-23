@@ -1,9 +1,3 @@
-"""
-    ============================================
-    Definition of the convertion bam to bed rule
-    ============================================
-"""
-
 rule bam_to_bed:
     """Converts sam files into bam files.
 

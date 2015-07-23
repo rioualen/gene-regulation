@@ -27,22 +27,3 @@ rule sickle_single_end:
     message: "Trimming single-end raw reads with sickle\n\tInput:\t{input}\n\tOutput:\t{output}\n\tLog:\t{log}"
     shell: "sickle se --fastq-file {input} --qual-type {params.qual_type} --output-file {output.trimmed}  {params.options} > {output.summary} 2> {log}"
 
-
-# rule sickle_se:
-# 	"""Trim one raw read file (fastq format) from SRR.
-
-# 	Changement faits : 
-# 		- remplacé "trimmed" par "sickle" (au cas où on utilise d'autres algo de trimming)
-# 		- suffixe "import" pour les data (après synchronisation, merging ou autre -> data prêt à l'emploi != raw data)
-# 		- dans la config ultime de Jacques, 'quality_type' s'est transformé en 'qual_type'
-# 	"""
-# 	input: config['dir']['results'] + "{samples}/{samples}_import.fastq"
-# 	output: config['dir']['results'] + "{samples}/{samples}_sickle.fastq"
-#     	params: 
-# 		qual_type = config['sickle']['qual_type'], \
-# 		qsub = config['qsub'] + " -e " + config['dir']['logs'] + "{samples}/{samples}_sickle_qsub.err -o " + config['dir']['logs'] + "{samples}/{samples}_sickle_qsub.out"
-# 	log: config['dir']['logs'] + "{samples}/{samples}_sickle.log"
-# 	benchmark: config['dir']['logs'] +"{samples}/{samples}_sickle_benchmark.json"
-# 	message: "Trimming raw reads with sickle\n\tInput:\t{input}\n\tOutput:\t{output}\n\tLog:\t{log}"
-# 	shell: "sickle se --fastq-file {input} --qual-type {params.qual_type} --output-file {output} 2> {log}"
-

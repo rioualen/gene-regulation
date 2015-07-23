@@ -1,9 +1,3 @@
-"""
-    =============================
-    Definition of sam to bam rule
-    =============================
-"""
-
 rule sam_to_bam:
 	"""Converts sam files into bam files.
 
@@ -11,11 +5,17 @@ rule sam_to_bam:
 		config["qsub"]
 
 	Usage: 
-		 input:expand('{read_dir}/{sample}/{sample}_{aligner}.bam', sample=SAMPLES, read_dir=READS, aligner=ALIGNERS)
+		 input:expand('{read_dir}/{sample}_{aligner}.bam', sample=SAMPLES, read_dir=READS, aligner=ALIGNERS)
 	"""
 	input: "{data}.sam"
 	output: "{data}.bam"
 	log: "{data}_sam_to_bam.log"
 	benchmark: "{data}_sam_to_bam_benchmark.json"
 	params: qsub=config["qsub"]+" -e {data}_sam_to_bam_qsub.err -o {data}_sam_to_bam_qsub.out"
-	shell: "samtools view -bS -o {output} {input} 2> {log}"
+	shell: "samtools view -bSh -o {output} {input} 2> {log}"
+
+
+#	params: qsub=config["qsub"]+" -e {data}_sam_to_bam_qsub.err -o {data}_sam_to_bam_qsub.out"
+#		genome= config["bwa"]["index"]
+#	shell: "samtools faidx all_sequences.fa; \
+#		samtools view -bS -t all_sequences.fai -o {output} {input} 2> {log}"

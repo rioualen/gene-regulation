@@ -1,7 +1,9 @@
 rule bed_to_fasta:
 	"""Converts SRA files in fastq format with SRA toolkit. 
 	
-	TODO: Include --outdir option (output is in working dir by default).
+	TODO locally in workflow: 
+		- import/merging local rule before conversion, as the output is in working dir by default (or consider including --outdir option)
+		- rename files to sample name even if no merging (input & output files have the same name though sample & raw file can have different names eg. GSM vs SRR)
 	
 	Parameters required:
 		config['qsub']
