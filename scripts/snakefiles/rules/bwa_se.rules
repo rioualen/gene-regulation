@@ -1,8 +1,4 @@
-"""TODO: implement BWA index
-
-"""
-
-rule bwa:
+rule bwa_se:
 	"""Read mapping using BWA.
 
 	Required parameters:
