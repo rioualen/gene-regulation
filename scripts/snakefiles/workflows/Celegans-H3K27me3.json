@@ -1,0 +1,80 @@
+{
+	"__description__": "Analysis of histone marks in C.elegans.",
+	"__author__": "Claire Rioualen",
+	"data_source": "Gene Expression Omnibus, modENCODE",
+	"qsub": "",
+	"genome": {
+		"organism": "Caenorhabditis_elegans",
+		"genome_version": "ce10",
+		"base_url": "",
+		"sequence": "",
+		"features": "",
+        "install_dir": ""
+	},
+	"files": {
+		"snakefile": "scripts/snakefiles/workflows/Celegans-H3K27me3.py",
+		"samples": "",
+		"analyses": ""
+	},
+	"dir": {
+		"base": "/home/rioualen/Desktop/workspace/fg-chip-seq/",
+		"reads_source": "data/Celegans-H3K27me3/",
+		"results": "results/",
+		"reports": "results/",
+		"genome": "genomes/"
+	},
+	"reports" : {
+		"dag": "results/dag",
+		"rulegraph": "results/rule"
+	},
+	"samples": {
+		"input": "GSM1217457 GSM1217458",
+		"chip": "GSM1217459 GSM1217460"
+	},
+	"sickle":  { 
+       		"qual_type": "sanger",
+        	"threshold": "20",
+        	"other_options": ""
+	},
+	"fastqc": {
+		"other_options": ""
+	 },
+	"bowtie": {
+		"bowtie_index": "genomes/BowtieIndex/ce10/ce10",
+		"max_mismatches": "1",
+		"reads_iso": "1"
+	},
+	"bowtie2": {
+        	"bowtie_index": "genome/",
+        	"max_mismatches": "1",
+        	"other_options": ""
+	},
+	"bwa": {
+		"index": "genomes/BWAIndex/ce10/ce10.fa"
+	},
+	"peak_callers": "homer",
+	"oligo_stats": "1 2 6",
+	"peak-motifs_parameters": {
+		"tasks" : "purge,seqlen,composition,disco,collect_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan",
+		"max_seq_len" : "1000",
+		"nmotifs" : "",
+		"minol" : "",
+		"maxol" : "",
+		"motif_db jaspar_core_vertebrates" : "tf $RSAT/public_html/data/motif_databases/JASPAR/jaspar_core_vertebrates_2013-11.tf"
+	},
+	"samtools": {
+        	"sort_by_name": ""    
+	},
+	"oligo_stats": "1 2 6",
+	"peak-motifs_parameters": {
+		"tasks": "purge,seqlen,composition,disco,collect_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan",
+		"max_seq_len": "1000",
+		"nmotifs": "",
+		"minol": "",
+		"maxol": "",
+		"motif_db jaspar_core_vertebrates": "tf $RSAT/public_html/data/motif_databases/JASPAR/jaspar_core_vertebrates_2013-11.tf",
+		"disco": "oligos,positions",
+		"outdir": "results/peak-motifs"
+	}
+
+}
