@@ -1,9 +1,11 @@
-"""ChIP-seq workflow including: 
+"""This workflow was originally developped for the comprehensive analysis of Drosophila melanogaster ChIP-seq data.
+It includes: 
 	- normalization & QC: fastq merging, trimming, quality control...
 	- formatting rules: bed, bam, sam, narrowPeak, fasta...
 	- alignment: Bowtie, BWA
 	- peak-calling: SWEMBL, MACS, SPP, HOMER
 	- downstream analyses: IDR, sequence purge, peak length
+
 """
 
 #================================================================#

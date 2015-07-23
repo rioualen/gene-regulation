@@ -1,6 +1,0 @@
-{
-    "__description__": "General parameters for the snakemake rules.",
-    "__author__": "TAGC snakemake force task",
-    "__contact__": "Claire Rioualen <claire.rioualen@inserm.fr>, Jacques van Helden <Jacques.van-helden@univ-amu.fr>"
-    "qsub_parameters": "-V -m a "
-}
