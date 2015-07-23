@@ -1,0 +1,20 @@
+rule bwa_index:
+	"""Read mapping using BWA.
+
+	Required parameters:
+		config["bwa"]["index"]
+		config["qsub"]
+
+	Usage:
+		input:expand()
+	"""
+	input: "{genome}.fa"
+	output: "{genome}.fa.bwt"
+	log: "{reads}_bwa-index.log"
+	benchmark: "{reads}_bwa-index_benchmark.json"
+	params:
+		index = config["bwa"]["index"], \
+		qsub = config["qsub"] + " -e {reads}_bwa_qsub.err -o {reads}_bwa_qsub.out"
+	shell: "bwa index {params.index} 2> {log}"
+
+###### TODO
