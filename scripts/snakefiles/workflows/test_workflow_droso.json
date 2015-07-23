@@ -42,7 +42,7 @@
 	},
 	"aligners":"bwa bowtie",
 	"bowtie": {
-		"bowtie_index": "genomes/BowtieIndex/genome",
+		"bowtie_index": "genomes/BowtieIndex/dm3/genome",
 		"max_mismatches": "3",
 		"reads_iso": "1"
 	},
