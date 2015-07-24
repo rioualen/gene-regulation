@@ -1,14 +1,18 @@
-"""Peak calling with SPP R package, output in .narrowPeak format (bed-like format).
-"""
-
 rule spp:
 	"""Peak-calling with SPP.
+	Output in .narrowPeak format (bed-like format).
+
+	Required parameters:
+		config["qsub"]
+
+	Usage: TODO
 	"""
 	input:
 		chip = RESULTSDIR + "{CHIP}/{CHIP}_{ALIGNER}.bam" , \
 		inp = RESULTSDIR + "{INPUT}/{INPUT}_{ALIGNER}.bam"
 	log: RESULTSDIR + "{CHIP}_vs_{INPUT}/spp.log"
-#	benchmark: RESULTSDIR + {CHIP} + "_vs_" + {INPUT} + "/spp_benchmark.json"
+	benchmark: RESULTSDIR + {CHIP} + "_vs_" + {INPUT} + "/spp_benchmark.json"
+	params: qsub = config["qsub"] + " -e {input.chip}_homer_qsub.err -o {input.chip}_homer_qsub.out"
 	output: 
 		RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.narrowPeak", \
 		RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.crosscorrelation.pdf", \

@@ -1,14 +1,17 @@
 rule bwa_se:
-	"""Read mapping using BWA.
+	"""Read mapping using BWA. 
+	Requires the indexing to have been done already. 
+	This is checked by testing the presence of file {genome}.done
 
 	Required parameters:
 		config["bwa"]["index"]
 		config["qsub"]
 
 	Usage:
-		input:expand('{reads}/{data_dir}/{dataset}_bwa.sam', reads=READS, data_dir=DATA_DIR, dataset=DATASET)
+		input:expand("{dataset}/{dataset}_bwa.sam", dataset=DATASET)
 	"""
-	input: "{reads}.fastq"
+	input: 	reads="{reads}.fastq", \
+		index=config["bwa"]["index"] + ".index"
 	output: "{reads}_bwa.sam"
 	log: "{reads}_bwa.log"
 	benchmark: "{reads}_bwa_benchmark.json"
@@ -17,5 +20,5 @@ rule bwa_se:
 		sai= "{reads}_bwa.sai", \
 		qsub = config["qsub"] + " -e {reads}_bwa_qsub.err -o {reads}_bwa_qsub.out"
 	shell:
-		"bwa aln -t 12 {params.index} {input} > {params.sai} 2> {log}; \
-		bwa samse {params.index} {params.sai} {input} > {output} 2> {log}"
+		"bwa aln -t 12 {params.index} {input.reads} > {params.sai} 2> {log}; \
+		bwa samse {params.index} {params.sai} {input.reads} > {output} 2> {log}"

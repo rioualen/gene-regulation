@@ -1,5 +1,6 @@
 rule bwa_index:
-	"""Read mapping using BWA.
+	"""Rule for the creation of BWA index. Has to be done only once. 
+	The output file is used to test whether the index already exists when aligning. 
 
 	Required parameters:
 		config["bwa"]["index"]
@@ -9,12 +10,11 @@ rule bwa_index:
 		input:expand()
 	"""
 	input: "{genome}.fa"
-	output: "{genome}.fa.bwt"
-	log: "{reads}_bwa-index.log"
-	benchmark: "{reads}_bwa-index_benchmark.json"
+	output: "{genome}.fa.index"
+	log: "{genome}_bwa-index.log"
+	benchmark: "{genome}_bwa-index_benchmark.json"
 	params:
 		index = config["bwa"]["index"], \
-		qsub = config["qsub"] + " -e {reads}_bwa_qsub.err -o {reads}_bwa_qsub.out"
-	shell: "bwa index {params.index} 2> {log}"
-
-###### TODO
+		qsub = config["qsub"] + " -e {genome}_bwa-index_qsub.err -o {genome}_bwa-index_qsub.out"
+	shell: "bwa index {params.index} 2> {log}; \
+		touch {output}"

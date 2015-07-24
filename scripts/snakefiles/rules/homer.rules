@@ -1,22 +1,24 @@
 rule homer:
 	"""Peak-calling with HOMER software, findPeaks algorithm (!).
-	Can take .bed inputs or files coming directly from Bowtie or Eland alignement.
+	Input formats: .sam, .bam, .bed 
 
 	Required parameters:
 		config["genome"]["genome_version"]
+		config["qsub"]
 
 	Usage:
-		expand("results/{chip}_vs_{inp}/{chip}_{aligner}_{caller}.bed", chip=CHIP, inp=INPUT, aligner=ALIGNER, caller=homer)
+HOMER = expand(RESULTSDIR + "{chip}_vs_{inp}/{chip}_vs_{inp}_" + TRIMMING + "_{aligner}_homer.bed", chip=CHIP, inp=INPUT, aligner=ALIGNERS)
 	"""
 	input: 
-		chip = "{CHIP}/{CHIP}_{ALIGNER}.bed" , \
-		inp = "{INPUT}/{INPUT}_{ALIGNER}.bed"
+		chip = "GSM1217459/GSM1217459_sickle_se_q20_bwa.bed", \
+		inp = "GSM1217457/GSM1217457_sickle_se_q20_bwa.bed".split()
 	output: 
-		"{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_homer.bed"
+		"GSM1217459_vs_GSM1217457/GSM1217459_vs_GSM1217457_homer.bed"
 	params:
-		chip_tag="Homer_{CHIP}", \
-		input_tag="Homer_{INPUT}", \
-		genome=config['genome']['genome_version']
+		chip_tag="Homer_GSM1217459", \
+		input_tag="Homer_GSM1217457", \
+		genome=config['genome']['genome_version'], \
+		qsub = config["qsub"] + " -e {input.chip}_homer_qsub.err -o {input.chip}_homer_qsub.out"
 
 	shell:"""makeTagDirectory {params.chip_tag} -genome {params.genome} -checkGC {input.chip}
 		makeTagDirectory {params.input_tag} -genome {params.genome} -checkGC {input.inp}
