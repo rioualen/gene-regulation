@@ -21,7 +21,8 @@
 		"reads_source": "data/Celegans-H3K27me3/",
 		"results": "results/",
 		"reports": "results/",
-		"genome": "genomes/"
+		"genome": "genomes/",
+		"rules": "/home/rioualen/Desktop/workspace/fg-chip-seq/scripts/snakefiles/rules/"
 	},
 	"reports" : {
 		"dag": "results/dag",
@@ -52,7 +53,9 @@
 	"bwa": {
 		"index": "genomes/BWAIndex/ce10/ce10.fa"
 	},
-	"peak_callers": "homer",
+	"macs2": {
+		"genome": "ce"
+	},
 	"oligo_stats": "1 2 6",
 	"peak-motifs_parameters": {
 		"tasks" : "purge,seqlen,composition,disco,collect_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan",
