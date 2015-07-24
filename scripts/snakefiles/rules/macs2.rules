@@ -1,0 +1,24 @@
+rule macs2:
+	"""Peak-calling with MACS2.
+	Input: sam, bam, bed...
+	Output: bed
+
+	To be refined...
+
+	Required parameters:
+		config["qsub"]
+		config['macs2']['genome']
+
+	Usage: TODO
+	"""
+	input: 	chip = RESULTSDIR + "{chip}/{chip}_" + TRIMMING + "_{aligner}.bam" , \
+		inp = RESULTSDIR + "{inp}/{inp}_" + TRIMMING + "_{aligner}.bam"
+#	log: RESULTSDIR + "{CHIP}_vs_{INPUT}/spp.log"
+#	benchmark: RESULTSDIR + {CHIP} + "_vs_" + {INPUT} + "/spp_benchmark.json"
+#	params: qsub = config["qsub"] + " -e {input.chip}_homer_qsub.err -o {input.chip}_homer_qsub.out"
+	params: prefix = RESULTSDIR + "{chip}_vs_{inp}/{chip}_vs_{inp}_" + TRIMMING + "_{aligner}", \
+		outdir = RESULTSDIR + "{chip}_vs_{inp}/", \
+		genome = config['macs2']['genome']
+	output: "{params.prefix}_summits.bed"
+	run: "macs2 callpeak -t {input.chip} -c {input.inp} -g {params.genome} -n {params.prefix} --outdir {params.outdir}"
+
