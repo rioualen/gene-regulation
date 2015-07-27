@@ -1,0 +1,15 @@
+rule clean:
+	"""Cleaning resultsdir by moving benchmarks & logfiles into a specific directory.
+
+	Required parameters:
+		config['dir']['logs']
+		config['dir']['results']
+
+	Usage example: expand(RESULTSDIR + "cleaning.done")
+	"""
+	params: logdir = config['dir']['logs'], \
+		resdir = config['dir']['results']
+	output: "cleaning.done"
+	shell: "find {params.resdir} -type f -name *benchmark* -print0 | xargs -0r mv -t {params.logdir}; \
+		find {params.resdir} -type f -name *.log -print0 | xargs -0r mv -t {params.logdir}; \
+		touch {output}"
