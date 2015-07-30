@@ -1,0 +1,31 @@
+digraph G {  
+	compound=true;
+	node [color=black,style=filled,shape=rectangle,color=lightblue];
+	subgraph cluster_creation {
+		"IFB_cloud_VM_creation.Rmd";
+                "virtualbox_vm_creation.Rmd";
+		label = "VM creation";
+		fillcolor=aliceblue;
+		style=filled;
+		color=white;
+	}
+	subgraph cluster_customization {
+                "install_rsat_ubuntu14.04.Rmd";
+                "install_snakemake_workflows.Rmd";
+		label = "VM customization";
+		fillcolor=aliceblue;
+		style=filled;
+		color=white;
+	}
+	subgraph cluster_export {
+                "export_appliance.Rmd";
+		label = "VM export";
+		fillcolor=aliceblue;
+		style=filled;
+		color=white;
+	}
+	"IFB_cloud_VM_creation.Rmd" -> "install_snakemake_workflows.Rmd" [lhead=cluster_customization,ltail=cluster_creation];
+	"virtualbox_vm_creation.Rmd" -> "install_rsat_ubuntu14.04.Rmd" [lhead=cluster_customization,ltail=cluster_creation];
+        "install_rsat_ubuntu14.04.Rmd" -> "export_appliance.Rmd" [lhead=cluster_export,ltail=cluster_customization];
+        "install_snakemake_workflows.Rmd" -> "export_appliance.Rmd" [lhead=cluster_export,ltail=cluster_customization];
+}
