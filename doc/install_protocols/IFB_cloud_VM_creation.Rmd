@@ -1,5 +1,7 @@
 ---
 title: "Creation of an appliance on the IFB cloud"
+author: "Claire Rioualen & Jacques van Helden"
+date: "July 30, 2015"
 output:
   html_document:
     css: /packages/rsat/public_html/course.css
@@ -78,7 +80,7 @@ rsync -ruptvl {me}@{myIP}:.ssh .
 
 **/!\\** Does not seem to work. Permission-related problem?
 ```
-ssh: connect to host 10.1.1.133 port 22: Connection timed out
+ssh: connect to host 01.1.1.133 port 22: Connection timed out
 rsync: connection unexpectedly closed (0 bytes received so far) [Receiver]
 rsync error: error in rsync protocol data stream (code 12) at io.c(226) [Receiver=3.1.0]
 ```
@@ -100,26 +102,29 @@ ssh-add
 
 ## Configuration
 
-1. Create user account.
+### Create user account.
 
 Followed procedure [here](https://www.digitalocean.com/community/tutorials/how-to-add-and-delete-users-on-an-ubuntu-14-04-vps).
-
 User: user
-
 Password: user01
+
+# Then
 
 ## Software installation
 
 ### RSAT suite  
 
-See *$RSAT/doc/howto/install_rsat_ubuntu14.04.bash*
+See *$project_home/doc/install_protocols/install_rsat_ubuntu14.04.Rmd*
 
-### Snakemake
+### Snakemake workflows
 
-### ...
+See *$project_home/doc/install_protocols/instal_snakemake_workflows.Rmd*
 
 
-## VM export / submission ?
+## VM export / submission 
+
+See *$project_home/doc/install_protocols/export_appliance.Rmd*
+
 
 
 
