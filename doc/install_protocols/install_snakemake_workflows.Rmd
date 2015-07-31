@@ -7,9 +7,18 @@ output:
     css: /packages/rsat/public_html/course.css
     fig_caption: yes
     toc: yes
+    number_sections: true
   pdf_document:
     toc: yes
 ---
+
+### **TODO**
+
+* Include map of possible "bricks" of worflows (like general rulegraph) with each step's requirement/dependencies
+* Beware of paths
+    - ~/Desktop/workspace
+    - ~/bin
+* Test all of this in IFB appliance
 
 ## Requirements
 
@@ -20,48 +29,85 @@ See one of these:
 * IFB_cloud_VM_creation.Rmd
 * virtualbox_VM_creation.Rmd
 
-## TODO
+# General requirements 
 
-* Include map of possible "bricks" of worflows (like general rulegraph) with each step's requirement/dependencies
-* Beware of paths
-    - ~/Desktop/workspace
-    - ~/Desktop/programs
-* Test all of this in IFB appliance
+## Tools to install (in the event they're not)
 
-# Install/develop Snakemake workflows
+## ssh
+```
+sudo apt-get install ssh
+```
+If you have followed one of the previous tutorials, you should have copied your ssh parameters onto your VM, and have an ssh public key like `~/.ssh/id_rsa.pub`. If not, you can generate keys using `ssh-keygen` (see manual [here](https://help.github.com/articles/generating-ssh-keys/)).
 
-## General requirements 
+## rsync
 
-### Tools to install (in the event they're not)
+rsync is an open source utility that provides fast incremental file transfer. 
 
-#### git
+* [rsync page](https://rsync.samba.org/)
+
+```
+sudo apt-get install rsync
+```
+
+## git
+
+* Create an account on [GitHub](https://github.com).
+* Install git on your machine.
 
 ```
 sudo apt-get install git
 ```
-#### ssh
+
+* Add your ssh public key to your GitHub account settings (account > settings > SSH keys > add SSH key).
+
 ```
-sudo apt-get install ssh
+less ~/.ssh/id_rsa.pub
 ```
 
-### Create own bin
+## zlib
+
+Several tools require this dependency (e.g. sickle, bamtools...).
+```
+sudo apt-get install libz-dev
+```
+
+## Create own bin
 
 While some programs will be installed completely automatically... some will not. Here we create a directory that will be kept for manual installations. 
 ```
-mkdir $HOME/Desktop/programs
+mkdir $HOME/bin
 ```
 You might then have to edit your `$PATH` manually (see next section).
 
-### Edit `$PATH`
+## Edit `$PATH`
 
-#### TODO
+In order to use manually installed programs and make them executable, you may have to update your `$PATH` environment variable. 
+You can do so by editing the `~/.profile` file.
 
+```
+nano ~/.profile
+```
 
-## Snakemake **mandatory** stuff to install
+Fetch this paragraph and add your new tool:
+
+```
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/bin" ] ; then
+    PATH="$HOME/bin/sickle:$PATH"
+fi
+```
+
+Execute the file to validate the change. 
+
+```
+source ~/.profile
+```
+
+# Snakemake
 
 /!\\ check R versions, python versions, etc...
 
-### Python 3
+## Python 3
 
 Snakemake requires to have Python 3 installed. If you have installed Ubuntu14.04 on your machine by following on of the previous tutorials, you should have both Python 2.7 and Python 3.4 installed for starters. You can check this by issuing the following commands in a terminal: 
 ```
@@ -74,7 +120,7 @@ sudo apt-get install python3
 sudo apt-get install python3-pip
 ```
 
-### Snakemake
+## Snakemake
 
 * General documentation about snakemake: [click](https://bitbucket.org/johanneskoester/snakemake/wiki/Documentation)
 * Snakemake FAQ/forum: [click](https://groups.google.com/forum/#!forum/snakemake)
@@ -109,11 +155,20 @@ rule bye:
 * Issue the command `cd ~/Desktop/workspace ; snakemake -s hello.py`.
 * 2 files shoudl be created: `hello.txt` and `bye.txt`.
 
+## Graphviz
+
+Snakemake can generate useful graphviz outputs. 
+
+```
+sudo apt-get install graphviz
+```
+
+
 Now if we want to use snakemake to develop NGS workflows, we have to install a number of programs depending on what we want to achieve.
 
-## NGS analysis (optional) software to install
+# NGS analysis (optional) software to install
 
-### SRA toolkit
+## SRA toolkit
 
 This toolkit includes a number of programs, allowing the conversion of \*.sra files. `fastq-dump` translates \*.sra files to \*.fastq files.
 
@@ -130,33 +185,116 @@ In case:
 * [Download archive](http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software)
 * [Installation manual](http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=toolkit_doc&f=std)
 
-### Sickle
+## FastQC
 
-[Main page](https://github.com/najoshi/sickle)
+FastQC aims to provide a simple way to do some quality control checks on raw sequence data coming from high throughput sequencing pipelines. It provides a modular set of analyses which you can use to give a quick impression of whether your data has any problems of which you should be aware before doing any further analysis. 
+
+* [FastQC main page](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 
 ```
-git clone git+ssh://git@github.com:najoshi/sickle.git
+sudo apt-get install fastqc
 ```
 
-### TODO
+## Sickle
 
+Sickle is a trimming tool which better the quality of NGS reads.
 
+* [Sickle main page](https://github.com/najoshi/sickle)
 
-### BWA
+* Pre-requisite: install `zlib` (see section XX).
+* Clone the git repository into your bin (see section XX) and run `make`.
 
-### Bowtie
+```
+cd $HOME/bin
+git clone https://github.com/najoshi/sickle.git
+cd sickle
+make
+```
 
-### Samtools
+* Add sickle to your `$PATH` (see section XX).
 
-### Bedtools
+```
+PATH="$HOME/bin/sickle:$PATH"
+```
 
-### MACS2
+## BWA
 
-### RSAT suite
+BWA is a software package for mapping low-divergent sequences against a large reference genome, such as the human genome.
+
+* [Main page](http://bio-bwa.sourceforge.net/)
+* [Manual](http://bio-bwa.sourceforge.net/bwa.shtml)
+
+```
+sudo apt-get install bwa
+````
+
+## Bowtie
+
+## Samtools
+
+SAM (Sequence Alignment/Map) format is a generic format for storing large nucleotide sequence alignments. 
+
+* [SAMtools main page](http://samtools.sourceforge.net/)
+
+```
+sudo apt-get install samtools
+````
+
+## Bedtools
+
+The bedtools utilities are a swiss-army knife of tools for a wide-range of genomics analysis tasks. For example, bedtools allows one to intersect, merge, count, complement, and shuffle genomic intervals from multiple files in widely-used genomic file formats such as BAM, BED, GFF/GTF, VCF. 
+
+* [bedtools main page](http://bedtools.readthedocs.org/en/latest/)
+
+```
+sudo apt-get install bedtools
+````
+
+## MACS2
+
+## RSAT suite
 
 See *$RSAT/doc/howto/install_rsat_ubuntu14.04.bash*
 
+# France Génomique ChIP-seq project - Celegans H3K27me3
 
-## VM export / submission 
+## Cloning the repository
+
+Cloning the repository from GitHub requires access rights. 
+Contact: claire.rioualen@inserm.fr
+```
+cd ~/Desktop/workspace
+git clone git+ssh://git@git.renater.fr:2222/fg-chip-seq.git
+```
+Note: commit 3e1434c9942a2c7899b135f1a4be99d8f4aa68cf
+
+## Data transfer
+
+## Raw data
+
+```
+rsync -ruptvl rioualen@10.1.1.133:~/Desktop/workspace/fg-chip-seq/data/Celegans-H3K27me3 data/
+```
+
+## Genome
+
+```
+rsync -ruptvl rioualen@10.1.1.133:~/Desktop/workspace/fg-chip-seq/genomes/ce10/BWAIndex/ce10.fa genomes/ce10/BWAIndex/
+```
+
+## Running the pipeline
+
+```
+cd ~/Desktop/workspace/fg-chip-seq
+snakemake -s scripts/snakefiles/workflows/Celegans-H3K27me3.py -j 4
+```
+
+/!\\ path of files should be changed from /home/rioualen to /home/rg in both .py and .json files.
+
+## Increase virtual disk space
+
+You may need to expand your virtual disk space. For VBox users, see `virtualbox_vm_creation.Rmd`, section XX (VirtualBox hacks and tricks).
+
+# VM export / submission 
 
 See *$project_home/doc/install_protocols/export_appliance.Rmd*

@@ -178,6 +178,24 @@ Run it.
 The VirtualBox Guest Additions will provide closer integration between host and guest and improve the interactive performance of guest systems.
 Reboot again to see the new display.
 
+## Ubuntu tips
+
+### Shell coloring
+
+```
+nano ~/.bashrc
+```
+Fetch following paragraph and uncomment command `force-color`.
+```
+# uncomment for a colored prompt, if the terminal has the capability; turned
+# off by default to not distract the user: the focus in a terminal window
+# should be on the output of commands, not on the prompt
+force_color_prompt=yes
+```
+```
+source ~/.bashrc
+```
+
 
 ## Connection to VM through the host machine. 
 
@@ -188,7 +206,7 @@ ifconfig ## get the IP
 ```
 **In the host's terminal:**
 ```
-ssh reg-genomics@192.168.56.101 ## access the VM by ssh using its IP address
+ssh rg@192.168.56.101 ## access the VM by ssh using its IP address
 ```
 **Note:** If you're running or have been running several virtual machines, you might encounter problems with the host's known keys
 when trying to connect to your VM via `ssh`, such as: 
@@ -212,35 +230,7 @@ ssh-add
 ```
 # VirtualBox hacks and tricks
 
-## Useful commands to manage VirtualBox
-
-* List running VMs
-
-  `VBoxManage list runningvms`
-
-* Get the IDs of the virtual machines
-
-  `VBoxManage list runningvms | awk -F"[{}]" '{print $2}'`
-
-* For convenience, we store the IP of the machine of interest in an environment variable VMID
-
-  `VMID=\`VBoxManage list runningvms | awk -F"[{}]" '{print $2}'\``
-
-* Get properties of the VM
-
-  `VBoxManage guestproperty enumerate ${VMID}`
-
-* List information about a given virtual machine
-
-  `VBoxManage showvminfo ${VMID}`
-
-* Note: that command fives the MAC address, but no IP address
-
-  `VBoxManage showvminfo ${VMID} | grep '^NIC'`
-
-## Convenient settings
-
-### Clipboard sharing between guest and host
+## Clipboard sharing between guest and host
 
 For the desktop version of Ubuntu, it is convenient to enable copy-paste between the guest and the host.
 
@@ -248,6 +238,51 @@ For the desktop version of Ubuntu, it is convenient to enable copy-paste between
 - In the VirtualBox menu, select *Machine* -> *Settings*
 - In panel *General*, select the tab *Advanced*
 - Set *Shared clipboard* to *Bidirectional*
+
+## Useful commands to manage VirtualBox
+
+### List running VMs
+
+  `VBoxManage list runningvms`
+
+### Get the IDs of the virtual machines
+
+`VBoxManage list runningvms | awk -F"[{}]" '{print $2}'`
+
+### For convenience, we store the IP of the machine of interest in an environment variable VMID
+
+`VMID=\`VBoxManage list runningvms | awk -F"[{}]" '{print $2}'\``
+
+### Get properties of the VM
+
+`VBoxManage guestproperty enumerate ${VMID}`
+
+### List information about a given virtual machine
+
+`VBoxManage showvminfo ${VMID}`
+
+ Note: that command fives the MAC address, but no IP address
+
+`VBoxManage showvminfo ${VMID} | grep '^NIC'`
+
+### Resize your virtual disk
+
+* vdi 
+
+```
+cd ~/Virtual Box\ VMs/reg-genomics
+VBoxManage modifyhd YOUR_HARD_DISK.vdi --resize SIZE_IN_MB
+```
+
+* vmdk
+
+Note: tried and failed, got iot from [this link](http://stackoverflow.com/questions/11659005/how-to-resize-a-virtualbox-vmdk-file)
+
+```
+VBoxManage clonehd "reg-genomics-150730-hdd.vmdk" "cloned.vdi" --format vdi
+VBoxManage modifyhd "cloned.vdi" --resize 100000
+VBoxManage clonehd "cloned.vdi" "resized-reg-genomics-150730-hdd.vmdk" --format vmdk
+```
 
 
 # Then...
