@@ -17,12 +17,14 @@ rule bed_to_fasta:
         config["genome"]["ucsc_id"] identifier of the genome of interest on UCSC genome browser
 
 	"""
-	input: "{regions}.bed"
-	output: "{regions}.fasta"
-	log: "{regions}_fetchseq.log"  ## Log content depends on fetch-sequences verbosity option
+	input: "{regions}.calling.bed"
+	output: "{regions}.calling.fasta"
+	log: "{regions}_fetchseq.log"
 	benchmark: "{regions}_fetchseq_benchmark.json"
 	params: verbosity = config["rsat"]["verbosity"], \
-                genome = config["genome"]["ucsc_id"], \
+                genome = config["genome"]["genome_version"], \
                 qsub = config["qsub"] + " -q short -e {regions}_fetchseq_qsub.err -o {regions}_fetchseq_qsub.out"
-	shell:"fetch-sequences -v {params.verbosity} -i {input} -header_format galaxy " \
-            + " -genome {params.genome} -o {output} 2> {log}"
+	shell:"fetch-sequences -v {params.verbosity} -i {input} -header_format galaxy -genome {params.genome} -o {output} 2> {log}"
+
+
+#fetch-sequences -v 1 -i GSM1217459_vs_GSM1217457_sickle-se-q20_bwa_macs2_summits.bed -header_format galaxy -genome ce10 -o GSM1217459_vs_GSM1217457_sickle-se-q20_bwa_macs2_summits.fasta 2> test.log

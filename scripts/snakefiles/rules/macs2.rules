@@ -1,24 +1,154 @@
 rule macs2:
 	"""Peak-calling with MACS2.
-	Input: sam, bam, bed...
+	Input: sam, bam, bed... automatically detected by macs' callpeak algorithm. Bed format was used here. 
 	Output: bed
 
 	To be refined...
+	TODO:
+		Add qsub, log, bench, message keywords.
+		Generalize rule... And clean up this mess of a file once it's done.
 
 	Required parameters:
-		config["qsub"]
+		config['qsub']
 		config['macs2']['genome']
+		config['dir']['results']
 
-	Usage: TODO
+	Usage: 
+		MACS2 = expand(RESULTSDIR + "{chip}_vs_{inp}/{chip}_vs_{inp}_{trimming}_{aligner}_{caller}_peaks.xls", chip=CHIP, inp=INPUT, trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
 	"""
-	input: 	chip = RESULTSDIR + "{chip}/{chip}_" + TRIMMING + "_{aligner}.bam" , \
-		inp = RESULTSDIR + "{inp}/{inp}_" + TRIMMING + "_{aligner}.bam"
-#	log: RESULTSDIR + "{CHIP}_vs_{INPUT}/spp.log"
-#	benchmark: RESULTSDIR + {CHIP} + "_vs_" + {INPUT} + "/spp_benchmark.json"
-#	params: qsub = config["qsub"] + " -e {input.chip}_homer_qsub.err -o {input.chip}_homer_qsub.out"
-	params: prefix = RESULTSDIR + "{chip}_vs_{inp}/{chip}_vs_{inp}_" + TRIMMING + "_{aligner}", \
-		outdir = RESULTSDIR + "{chip}_vs_{inp}/", \
-		genome = config['macs2']['genome']
-	output: "{params.prefix}_summits.bed"
-	run: "macs2 callpeak -t {input.chip} -c {input.inp} -g {params.genome} -n {params.prefix} --outdir {params.outdir}"
+	input: "{stuff}.bed"
+	output: "{stuff}.calling"
+	shell: "cp {input} {output}"
+
+
+#	input: 	chip = "results/{CHIP}/{CHIP}_{TRIMMING}_{ALIGNER}.converted.bed", \
+#		inp = "results/{INPUT}/{INPUT}_{TRIMMING}_{ALIGNER}.converted.bed"
+#	params: resdir = config['dir']['results'], \
+#		genome = config['macs2']['genome'], \
+#		outdir = "results/{CHIP}_vs_{INPUT}/", \
+#		prefix = "{CHIP}_vs_{INPUT}_{TRIMMING}_{ALIGNER}_{CALLER}"
+#	output: "results/{CHIP}_vs_{INPUT}/{CHIP}_vs_{INPUT}_{TRIMMING}_{ALIGNER}_{CALLER}_summits.bed"
+#	shell: "macs2 callpeak -t {input.chip} -c {input.inp} -g {params.genome} -n {params.prefix} --outdir {params.outdir}"
+###############
+
+#	input: 	"{stuff}.bed"
+#	params: resdir = config['dir']['results'], \
+#		genome = config['macs2']['genome'], \
+#		outdir = "results/{CHIP}_vs_{INPUT}/", \
+#		prefix = "{CHIP}_vs_{INPUT}_{TRIMMING}_{ALIGNER}_{CALLER}"
+#	output: "{stuff}_peaks.xls"
+#	shell: "macs2 callpeak -t {input.chip} -c {input.inp} -g {params.genome} -n {params.prefix}"
+
+
+
+#	input: 	c = config['samples']['chip'].split(), \
+#		i = config['samples']['input'].split(), \
+#		chip = "results/{c}/{c}_{trimming}_{aligner}.bed", \
+#		inp = "results/{i}/{i}_{trimming}_{aligner}.bed"
+#	params: resdir = config['dir']['results'], \
+#		genome = config['macs2']['genome'], \
+#		chip = config['samples']['chip'].split(), \
+#		inp = config['samples']['input'].split()
+#	output: "results/{c}_vs_{i}/{c}_vs_{i}_{trimming}_{aligner}_{caller}_peaks.xls"
+#	shell: "macs2 callpeak -t {input.chip} -c {input.inp} -g {params.genome}"
+
+
+
+
+
+# --outdir {params.resdir}"
+
+
+
+
+
+#macs2 callpeak -t {input.chip} -c {input.inp} -g {params.genome} --outdir {params.resdir}
+
+#	input: "{sample}.bed"
+#	params: resdir = config['dir']['results'], \
+#		genome = config['macs2']['genome'], \
+#		chip = config['samples']['chip'].split(), \
+#		inp = config['samples']['input'].split()
+#	output: "{files}_something.bed"
+#	shell: "samples=$(find {params.resdir} -type f -name *bwa.bed)\
+#		inp={params.inp}\
+#		chip={params.chip}\
+#		declare -A chip_aa\
+#		declare -A input_aa\
+#		for s in ${samples[@]} ; do\
+#		for c in ${chip[@]} ; do\
+#		if [[ -n $(echo $s | grep $c) ]] ; then\
+#		chip_aa[$c]=$s\
+#		fi\
+#		done\
+#		for i in ${inp[@]} ; do\
+#		if [[ -n $(echo $s | grep $i) ]] ; then\
+#		input_aa[$i]=$s\
+#		fi\
+#		done\
+#		done\
+#		for i in ${!input_aa[@]} ; do\
+#		for c in ${!chip_aa[@]} ; do\
+#		macs2 callpeak -t ${chip_aa[$c]} -c ${input_aa[$i]} -g ce -n $c'_vs_'$i --outdir 'results/'$c\
+#		done\
+#		done\
+#		touch {params.resdir}macs2.done"
+
+
+
+
+#samples=( "results/GSM1217458/GSM1217458_sickle_se_q20_bwa.bed" "results/GSM1217460/GSM1217460_sickle_se_q20_bwa.bed" "results/GSM1217457/GSM1217457_sickle_se_q20_bwa.bed" "results/GSM1217459/GSM1217459_sickle_se_q20_bwa.bed" )
+#inp=( "GSM1217457" "GSM1217458" )
+#chip=( "GSM1217459" "GSM1217460" )
+
+#samples=$(find results/ -type f -name *bwa.bed)
+#inp=( "GSM1217457" "GSM1217458" )
+#chip=( "GSM1217459" "GSM1217460" )
+#declare -A chip_aa
+#declare -A input_aa
+#for s in ${samples[@]} ; do
+#for c in ${chip[@]} ; do
+#if [[ -n $(echo $s | grep $c) ]] ; then
+#chip_aa[$c]=$s
+#fi
+#done
+#for i in ${inp[@]} ; do
+#if [[ -n $(echo $s | grep $i) ]] ; then
+#input_aa[$i]=$s
+#fi
+#done
+#done
+#for i in ${!input_aa[@]} ; do
+#for c in ${!chip_aa[@]} ; do
+#macs2 callpeak -t ${chip_aa[$c]} -c ${input_aa[$i]} -g ce -n $c"_vs_"$i --outdir "results/"$c
+#done
+#done
+
+
+#	input: 	chip = "results/GSM1217459/GSM1217459_sickle_se_q20_bwa.bed" , \
+#		inp = "results/GSM1217457/GSM1217457_sickle_se_q20_bwa.bed"
+##	log: RESULTSDIR + "{CHIP}_vs_{INPUT}/macs2.log"
+##	benchmark: RESULTSDIR + {CHIP} + "_vs_" + {INPUT} + "/macs2_benchmark.json"
+##	params: qsub = config["qsub"] + " -e {input.chip}_macs2_qsub.err -o {input.chip}_macs2_qsub.out"
+##	params: prefix = RESULTSDIR + "{chip}_vs_{inp}/{chip}_vs_{inp}_" + TRIMMING + "_{aligner}_macs2_", \
+##		outdir = RESULTSDIR + "{chip}_vs_{inp}/", \
+##		genome = config['macs2']['genome']
+##	output: "test_peaks.xls"
+#	shell: "macs2 callpeak -t {input.chip} -c {input.inp} -g ce -n test --outdir results/"
+
+
+
+#	input: 	chip = RESULTSDIR + "{chip}/{chip}_" + TRIMMING + "_{aligner}.bed" , \
+#		inp = RESULTSDIR + "{inp}/{inp}_" + TRIMMING + "_{aligner}.bed"
+###	log: RESULTSDIR + "{CHIP}_vs_{INPUT}/macs2.log"
+###	benchmark: RESULTSDIR + {CHIP} + "_vs_" + {INPUT} + "/macs2_benchmark.json"
+###	params: qsub = config["qsub"] + " -e {input.chip}_macs2_qsub.err -o {input.chip}_macs2_qsub.out"
+#	params: prefix = "test", \
+#		outdir = "results/{chip}_vs_{inp}/", \
+#		genome = config['macs2']['genome']
+##	output: "{params.prefix}_peaks.xls"
+#	shell: "macs2 callpeak -t {input.chip} -c {input.inp} -g {params.genome} -n {params.prefix} --outdir {params.outdir}"
+##prefix = RESULTSDIR + "{chip}_vs_{inp}/{chip}_vs_{inp}_" + TRIMMING + "_{aligner}_macs2_", \
+##outdir = RESULTSDIR + "{chip}_vs_{inp}/", \
+
 
