@@ -9,7 +9,8 @@
 		"base_url": "",
 		"sequence": "",
 		"features": "",
-        "install_dir": ""
+		"RefSeq_to_std": "genomes/ce10/RefSeq_to_std.tab",
+        	"install_dir": ""
 	},
 	"files": {
 		"snakefile": "scripts/snakefiles/workflows/Celegans-H3K27me3.py",
@@ -22,7 +23,8 @@
 		"results": "results/",
 		"reports": "results/",
 		"genome": "genomes/",
-		"rules": "/home/rioualen/Desktop/workspace/fg-chip-seq/scripts/snakefiles/rules/"
+		"rules": "/home/rioualen/Desktop/workspace/fg-chip-seq/scripts/snakefiles/rules/",
+		"logs": "logs/"
 	},
 	"reports" : {
 		"dag": "results/dag",
@@ -41,7 +43,7 @@
 		"other_options": ""
 	 },
 	"bowtie": {
-		"bowtie_index": "genomes/BowtieIndex/ce10/ce10",
+		"bowtie_index": "genomes/ce10/BowtieIndex/ce10",
 		"max_mismatches": "1",
 		"reads_iso": "1"
 	},
@@ -51,7 +53,7 @@
         	"other_options": ""
 	},
 	"bwa": {
-		"index": "genomes/BWAIndex/ce10/ce10.fa"
+		"index": "genomes/ce10/BWAIndex/ce10.fa"
 	},
 	"macs2": {
 		"genome": "ce"
@@ -67,6 +69,9 @@
 	},
 	"samtools": {
         	"sort_by_name": ""    
+	},
+	"rsat": {
+		"verbosity": "1"
 	},
 	"oligo_stats": "1 2 6",
 	"peak-motifs_parameters": {
