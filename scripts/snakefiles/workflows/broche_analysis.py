@@ -1,9 +1,9 @@
 """Workflow for the analysis of transcriptomic RNA-seq data for
 Beatrice Roche's project, treated by the TGML platform on June 2015.
 
-Reference genome: Escherichia_coli_K_12_substr__MG1655_uid57779
+Reference genome: Escherichia_coli_str_k_12_substr_mg1655
 
-Usage: snakemake -c "qsub {params.qsub}" -j 30
+Usage: snakemake -p -c "qsub {params.qsub}" -j 30
 
 """
 
@@ -13,6 +13,7 @@ Usage: snakemake -c "qsub {params.qsub}" -j 30
 
 import os
 import datetime
+from snakemake.utils import R
 configfile: "/home/jvanheld/fg-chip-seq/scripts/snakefiles/workflows/broche_analysis_config.json"
 workdir: config["dir"]["base"]
 #workdir: os.getcwd() # Local Root directoray for the project. Should be adapted for porting.
@@ -22,7 +23,6 @@ workdir: config["dir"]["base"]
 ################################################################
 NOW = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
 
-
 ################################################################
 ## Import snakemake rules and python library
 include: config["dir"]["fg-rules"] + "/util.py"                   ## Python utilities
@@ -31,9 +31,12 @@ include: config["dir"]["fg-rules"] + "/count_reads.rules"         ## Count reads
 include: config["dir"]["fg-rules"] + "/fastqc.rules"              ## Quality control with fastqc
 include: config["dir"]["fg-rules"] + "/flowcharts.rules"          ## Draw flowcharts (dag and rule graph)
 include: config["dir"]["fg-rules"] + "/sickle_paired_ends.rules"  ## Trimming with sickle
-include: config["dir"]["fg-rules"] + "/bowtie2_build.rules"        ## Read mapping with bowtie version 1 (no gap)
-include: config["dir"]["fg-rules"] + "/bowtie2_paired_ends.rules"  ## Paired-ends read mapping with bowtie version 1 (no gap)
-include: config["dir"]["fg-rules"] + "/htseq.rules"        ## Read mapping with bowtie version 1 (no gap)
+#include: config["dir"]["fg-rules"] + "/bowtie_build.rules"        ## Read mapping with bowtie version 1 (no gap)
+#include: config["dir"]["fg-rules"] + "/bowtie_paired_ends.rules"  ## Paired-ends read mapping with bowtie version 1 (no gap)
+include: config["dir"]["fg-rules"] + "/bowtie2_build.rules"        ## Read mapping with bowtie version 2 (suports gaps)
+include: config["dir"]["fg-rules"] + "/bowtie2_paired_ends.rules"  ## Paired-ends read mapping with bowtie version 2 (support gaps)
+include: config["dir"]["fg-rules"] + "/htseq.rules"        ## Count reads per gene with htseq-count
+include: config["dir"]["fg-rules"] + "/featurecounts.rules"        ## Count reads per gene with R subread::featurecounts
 
 ################################################################
 ## Define the lists of requested files
@@ -48,7 +51,7 @@ RAWR_MERGED_FWD=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}
 RAWR_MERGED_REV=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_rev"] + ".fastq", zip, sample_dir=RAWR_L1R1_DIRS, sample_basename=RAWR_L1R1_BASENAMES)
 RAWR_MERGED=RAWR_MERGED_FWD + RAWR_MERGED_REV
 
-## List separately the FORWARD and REVERE raw read files, which will be submitted to quality control
+## List separately the FORWARD and REVERSE raw read files, which will be submitted to quality control
 RAWR_FILES_FWD, RAWR_DIRS_FWD, RAWR_BASENAMES_FWD=glob_multi_dir(SAMPLE_IDS, "*" + config["suffix"]["reads_fwd"] + ".fastq.gz", config["dir"]["reads"], config["suffix"]["reads_fwd"] + ".fastq.gz")
 RAWR_FILES_REV, RAWR_DIRS_REV, RAWR_BASENAMES_REV=glob_multi_dir(SAMPLE_IDS, "*" + config["suffix"]["reads_rev"] + ".fastq.gz", config["dir"]["reads"], config["suffix"]["reads_rev"] + ".fastq.gz")
 
@@ -61,15 +64,17 @@ TRIMMED_MERGED_FWD=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basena
 TRIMMED_MERGED_REV=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_rev"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 TRIMMED_MERGED=TRIMMED_MERGED_FWD + TRIMMED_MERGED_REV
 
-## Bowtie version 1 : paired-end read mapping
-MAPPED_PE_SAM=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe.sam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
-MAPPED_PE_BAM=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe.bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
-MAPPED_PE_SORTED=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe_sorted_pos.bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+## Bowtie version 1: paired-end read mapping without gap
+## Bowtie version 2: paired-end read mapping with gap
+MAPPED_PE_SAM=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe.sam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+MAPPED_PE_BAM=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe.bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+MAPPED_PE_SORTED=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_pos.bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+
+MAPPED_PE_SORTED_BY_NAMES=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_names.bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 
 ## Problem with HTSeq and position-sorted bam files ? To be chacked later
-## HTSEQ_COUNTS=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe_sorted_pos_HTSeqcount.tab", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
-HTSEQ_COUNTS=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe_sorted_names_HTSeqcount.tab", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
-
+## HTSEQ_COUNTS=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_pos_HTSeqcount.tab", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+HTSEQ_COUNTS=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_names_HTSeqcount.tab", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 
 ## List all the raw read files, which will be submitted to quality control
 RAWR_FILES, RAWR_DIRS, RAWR_BASENAMES=glob_multi_dir(SAMPLE_IDS, "*_R*_001.fastq.gz", config["dir"]["reads"], ".fastq.gz")
@@ -86,7 +91,7 @@ MERGED_RAWR_QC=expand(config["dir"]["reads"] + "/{sample_dir}/{reads}_merged" + 
 # TRIMMED_QC=expand(config["dir"]["reads"] + "/{sample_dir}/{reads}_fastqc/", zip, reads=TRIMMED_BASENAMES, sample_dir=TRIMMED_DIRS)
 
 ## Mapped reads
-#MAPPED_FILES=expand(config["dir"]["reads"] + "/{sample_dir}/{reads}_trimmed_thr" + config["sickle"]["threshold"] + "_bowtie.sam", zip, reads=RAWR_BASENAMES, sample_dir=RAWR_DIRS)
+#MAPPED_FILES=expand(config["dir"]["reads"] + "/{sample_dir}/{reads}_trimmed_thr" + config["sickle"]["threshold"] + "_bowtie2.sam", zip, reads=RAWR_BASENAMES, sample_dir=RAWR_DIRS)
 
 rule all: 
     """
@@ -94,10 +99,10 @@ rule all:
     """
 #    input: TRIMMED_SUMMARIES, TRIMMED_QC
 #    input: MERGED_RAWR_QC, RAWR_MERGED, TRIMMED_MERGED, MAPPED_PE_SAM, MAPPED_PE_BAM, MAPPED_PE_SORTED
-    input: HTSEQ_COUNTS
+#    input: MAPPED_PE_SORTED_BY_NAMES, HTSEQ_COUNTS
+    input: MAPPED_PE_SAM, MAPPED_PE_BAM, MAPPED_PE_SORTED
     params: qsub=config["qsub"]
     shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
-
 
 ruleorder: sickle_paired_ends > merge_lanes
 
