@@ -5,7 +5,7 @@
     "qsub": "-V -m a -d ~/BeatriceRoche/",
 
     "genome": {
-	"organism": "Escherichia_coli_K_12_substr__MG1655_uid57779",
+	"organism": "Escherichia_coli_str_k_12_substr_mg1655",
         "genome_version": "Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27",
         "base_url_fasta": "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-27/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655/dna/",
         "sequence": "Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27.dna.genome",
@@ -59,7 +59,10 @@
     },
 
     "bowtie": {
-        "bowtie_index": "genome/Escherichia_coli_K_12_substr__MG1655_uid57779",
+	"genome_dir": "genome",
+        "reference_genome": "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27.dna.genome.fa",
+        "annotations":"genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27.gtf",
+        "bowtie_index": "genome/Escherichia_coli_str_k_12_substr_mg1655",
         "max_mismatches": "2",
         "reads_iso": "1"
     },
@@ -88,6 +91,7 @@
 
     "subread": {
         "basename": "reference_index",
+        "gtf_attrtype": "gene_id",
         "reference_genome": "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27.dna.genome.fa",
         "annotations":"genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27.gtf"
     }
