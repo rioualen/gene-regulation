@@ -20,6 +20,10 @@ output:
     - ~/bin
 * Test all of this in IFB appliance
 
+* **VBox issues**:
+    - '/etc/init.d/vboxdrv setup' error when restarting
+    - disparition vboxnet0
+ 
 ## Requirements
 
 ### VM creation
@@ -33,13 +37,13 @@ See one of these:
 
 ## Tools to install (in the event they're not)
 
-## ssh
+### ssh
 ```
 sudo apt-get install ssh
 ```
 If you have followed one of the previous tutorials, you should have copied your ssh parameters onto your VM, and have an ssh public key like `~/.ssh/id_rsa.pub`. If not, you can generate keys using `ssh-keygen` (see manual [here](https://help.github.com/articles/generating-ssh-keys/)).
 
-## rsync
+### rsync
 
 rsync is an open source utility that provides fast incremental file transfer. 
 
@@ -49,7 +53,7 @@ rsync is an open source utility that provides fast incremental file transfer.
 sudo apt-get install rsync
 ```
 
-## git
+### git
 
 * Create an account on [GitHub](https://github.com).
 * Install git on your machine.
@@ -64,12 +68,18 @@ sudo apt-get install git
 less ~/.ssh/id_rsa.pub
 ```
 
-## zlib
+### zlib
 
 Several tools require this dependency (e.g. sickle, bamtools...).
 ```
 sudo apt-get install libz-dev
 ```
+
+### qsub
+
+TODO 
+sudo apt-get install slurm-wlm-torque
+! munge
 
 ## Create own bin
 

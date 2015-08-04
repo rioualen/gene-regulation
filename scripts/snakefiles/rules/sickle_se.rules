@@ -9,7 +9,7 @@ rule sickle_se:
 	Usage:
 		SICKLE_TRIMMING = expand(config['dir']['results'] + "{dir_data}/{dataset}_merged_sickle-se-q" + config['sickle']['threshold'] + ".fastq", dir_data=DIR_DATA, dataset=DATASETS)
 
-	/!\ Claire to all: I replaced sickle_se_q by sickle-se-q in order to keep underscores only between distinct steps, so maybe we avoid confusions with wildcards?
+	/!\ Claire to all: I replaced sickle_se_q by sickle-se-q in order to keep underscores only between distinct steps, so maybe we avoid confusions in wildcards?
 
 	"""
     input: "{reads}.fastq"	

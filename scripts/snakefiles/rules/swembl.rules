@@ -23,3 +23,15 @@ rule swembl:
     shell: "SWEMBL -i {input.treatment} -r {input.control} -B -R {wildcards.swembl_r} -o {output.peaks_swembl} 2> {log} ; \
 convert-features -from swembl -to bed -i {output.peaks_swembl} -o {output.peaks_bed}; \
 sequence-lengths -i {output.peaks_bed} -in_format bed | classfreq -ci 10 -v 1 -o {output.peak_len}"
+
+
+
+#rule swembl:
+#	"""Peak-calling using SWEMBL algorithm.
+#	"""
+#	input:
+#		chip = RESULTSDIR + "{CHIP}/{CHIP}_{ALIGNER}.bed" , \
+#		inp = RESULTSDIR + "{INPUT}/{INPUT}_{ALIGNER}.bed"
+#	output:
+#		RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_swembl.bed"
+#	shell: "SWEMBL -B -m 10 -f 150 -x 1.5 -i {input.chip} -r {input.inp} -o {output}"

@@ -12,7 +12,7 @@ rule bwa_se:
 	"""
 	input: 	reads="{reads}.fastq", \
 		index=config["bwa"]["index"] + ".index"
-	output: "{reads}_bwa.sam"
+	output: "{reads}_bwa.aligned.sam"
 	log: "{reads}_bwa.log"
 	benchmark: "{reads}_bwa_benchmark.json"
 	params:

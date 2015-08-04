@@ -70,22 +70,19 @@ SICKLE_TRIMMING = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + ".fast
 RAW_QC = expand(RESULTSDIR + "{samples}/{samples}_fastqc/", samples=SAMPLES)
 TRIMMED_QC = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_fastqc/", samples=SAMPLES)
 
-# Mapping (can be automatized if several aligners)
-#BOWTIE_INDEX = expand(TODO)
-#BOWTIE_MAPPING = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_bowtie.sam", samples=SAMPLES)
-
+# Mapping
 BWA_INDEX = expand(config["dir"]["genome"] + "BWAIndex/{genome}/{genome}.fa.bwt", genome=GENOME)
-BWA_MAPPING = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_bwa.sam", samples=SAMPLES)
+BWA_MAPPING = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_bwa.aligned.sam", samples=SAMPLES)
 
 # File conversion
-SAM_TO_BAM = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.bam", sample=SAMPLES, aligner=ALIGNER)
-BAM_TO_BED = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.bed", sample=SAMPLES, aligner=ALIGNER)
+SAM_TO_BAM = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.aligned.bam", sample=SAMPLES, aligner=ALIGNER)
+BAM_TO_BED = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.aligned.bed", sample=SAMPLES, aligner=ALIGNER)
 CONVERTED_BED = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.converted.bed", sample=SAMPLES, aligner=ALIGNER)
 
 # Peak-calling
 # ! In case of use of several peak-callers, beware of specific prefixes or such...
 #MACS2 = expand(RESULTSDIR + "{chip}_vs_{inp}/{chip}_vs_{inp}_{trimming}_{aligner}_{caller}_peaks.narrowPeak", chip="GSM121459", inp="GSM1217457", trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
-#MACS2 = expand(RESULTSDIR + "{chip}_vs_{inp}/{chip}_vs_{inp}_{trimming}_{aligner}_{caller}._summits.bed", chip=CHIP, inp=INPUT, trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
+MACS2 = expand(RESULTSDIR + "{chip}_vs_{inp}/{chip}_vs_{inp}_{trimming}_{aligner}_{caller}._summits.bed", chip=CHIP, inp=INPUT, trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
 
 # File conversion
 #NARROWPEAK_TO_BED = expand(RESULTSDIR + "{chip}_vs_{inp}/{chip}_vs_{inp}_{trimming}_{aligner}_{caller}_peaks.bed", chip=CHIP, inp=INPUT, trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
@@ -111,17 +108,10 @@ rule all:
     """
     Run all the required analyses
     """
-    input: GRAPHICS, RAW_QC, TRIMMED_QC, BAM_TO_BED
+    input: GRAPHICS, RAW_QC, TRIMMED_QC, BAM_TO_BED, CONVERTED_BED, ASSIGNED_SAMPLES
     params: qsub=config["qsub"]
     shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
-#, RAW_QC, TRIMMED_QC, CLEANING
-
-# GRAPHICS -> all
-# RAW_QC ?
-# IMPORT -> SICKLE_TRIMMING -> TRIMMED_QC -> all
-# BWA_INDEX -> BWA_MAPPING, BOWTIE_MAPPING -> SAM_TO_BAM -> BAM_TO_BED -> all
-# BED_TO_FASTA -> PURGED_SEQUENCE -> (OLIGO_ANALYSIS, PEAK_LENGTH, PEAK_MOTIFS) -> all
 
 #================================================================#
 #                       Local rules                              #
@@ -140,7 +130,7 @@ rule raw_data:
 
 
 rule bed_chr_id_conversion:
-	input: "{file}.bed"
+	input: "{file}.aligned.bed"
 	output:	"{file}.converted.bed"
 	shell:"awk '{{gsub(\"NC_003279.8\",\"chrI\"); gsub(\"NC_003280.10\",\"chrII\"); gsub(\"NC_003281.10\",\"chrIII\"); gsub(\"NC_003282.8\",\"chrIV\"); gsub(\"NC_003283.11\",\"chrV\"); gsub(\"NC_003284.9\",\"chrX\"); print}}' {input} > {output[0]}"
 
@@ -161,6 +151,7 @@ rule bed_chr_id_conversion:
 #                         Includes                               #
 #================================================================#
 
+include: RULES + "assign_samples.rules"
 include: RULES + "bed_to_fasta.rules"
 #include: RULES + "bowtie.rules"
 include: RULES + "bwa_index.rules"
