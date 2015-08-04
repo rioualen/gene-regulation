@@ -106,7 +106,8 @@ rule all:
 
 ruleorder: sickle_paired_ends > merge_lanes
 ruleorder: bowtie2_paired_end > merge_lanes
-ruleorder: bowtie_paired_end > merge_lanes
+
+# ruleorder: bowtie_paired_end > merge_lanes
 
 rule merge_lanes:
     """
