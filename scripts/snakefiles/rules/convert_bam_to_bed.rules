@@ -9,8 +9,8 @@ rule bam_to_bed:
 
     input:expand('{read_dir}/{sample}/{sample}_{aligner}.bed', sample=SAMPLES, read_dir=READS, aligner=ALIGNERS)
 	"""
-    input: "{reads}.bam"
-    output: "{reads}.bed"
+    input: "{reads}.aligned.bam"
+    output: "{reads}.aligned.bed"
     log: "{reads}_bam_to_bed.log"
     benchmark: "{reads}_bam_to_bed_benchmark.json"
     params: qsub=config["qsub"]+" -e {reads}_bam_to_bed_qsub.err -o {reads}_bam_to_bed_qsub.out"

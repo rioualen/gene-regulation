@@ -16,8 +16,9 @@ rule macs2:
 	Usage: 
 		MACS2 = expand(RESULTSDIR + "{chip}_vs_{inp}/{chip}_vs_{inp}_{trimming}_{aligner}_{caller}_peaks.xls", chip=CHIP, inp=INPUT, trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
 	"""
-	input: "{stuff}.bed"
-	output: "{stuff}.calling"
+	input: 	inp="{stuff}.input.bed", \
+		chip="{stuff}.chip.bed", \
+	output: "{stuff}.calling.bed"
 	shell: "cp {input} {output}"
 
 

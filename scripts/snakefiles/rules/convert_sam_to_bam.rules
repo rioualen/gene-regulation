@@ -7,8 +7,8 @@ rule sam_to_bam:
 	Usage: 
 		 input:expand('{read_dir}/{sample}_{aligner}.bam', sample=SAMPLES, read_dir=READS, aligner=ALIGNERS)
 	"""
-	input: "{data}.sam"
-	output: "{data}.bam"
+	input: "{data}.aligned.sam"
+	output: "{data}.aligned.bam"
 	log: "{data}_sam_to_bam.log"
 	benchmark: "{data}_sam_to_bam_benchmark.json"
 	params: qsub=config["qsub"]+" -e {data}_sam_to_bam_qsub.err -o {data}_sam_to_bam_qsub.out"
