@@ -10,7 +10,14 @@ The workflows should include:
 	- peak-calling: SWEMBL, MACS, SPP, HOMER
 	- downstream analyses: IDR, sequence purge, peak length
 
-Usage: snakemake -s scripts/snakefiles/workflows/Scerevisiae-Pho4.py -p  -c "qsub {params.qsub}" -j 12 --force flowcharts
+Usage: 
+    snakemake -p  -c "qsub {params.qsub}" -j 12 \
+        -s scripts/snakefiles/workflows/Scerevisiae-Pho4.py \
+        [targets]
+
+Flowcharts:
+    snakemake -p -s scripts/snakefiles/workflows/Scerevisiae-Pho4.py \
+        --force flowcharts
 
 Organism: 		Saccharomyces cerevisiae
 Reference genome:	
@@ -67,6 +74,7 @@ include: config["dir"]["python_lib"] + "util.py"
 #include: RULES + "assign_samples.rules"
 #include: RULES + "bed_to_fasta.rules"
 #include: RULES + "bowtie.rules"
+include: RULES + "count_reads.rules"
 include: RULES + "bwa_index.rules"
 include: RULES + "bwa_se.rules"
 include: RULES + "clean.rules"
@@ -134,6 +142,7 @@ SICKLE_TRIMMING = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + ".fast
 
 # Quality control
 RAW_QC = expand(RESULTSDIR + "{samples}/{samples}_fastqc/", samples=SAMPLES)
+RAW_READNB = expand(RESULTSDIR + "{samples}/{samples}_fastq_readnb.txt", samples=SAMPLES)
 TRIMMED_QC = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_fastqc/", samples=SAMPLES)
 
 # Mapping
@@ -142,8 +151,9 @@ BWA_MAPPING = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_{aligner
 
 # File conversion
 SAM_TO_BAM = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.bam", sample=SAMPLES, aligner=ALIGNER)
-#BAM_COUNTS = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}_bam_reandb.txt", samples=SAMPLES, aligner=ALIGNER)
+BAM_READNB = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}_bam_readnb.txt", samples=SAMPLES, aligner=ALIGNER)
 BAM_TO_BED = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.bed", sample=SAMPLES, aligner=ALIGNER)
+BED_READNB = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}_bed_nb.txt", samples=SAMPLES, aligner=ALIGNER)
 print("BAM_TO_BED\n\t" + "\n\t".join(BAM_TO_BED))
 #CONVERTED_BED = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.converted.bed", sample=SAMPLES, aligner=ALIGNER)
 
@@ -178,8 +188,8 @@ rule all:
     """
     Run all the required analyses
     """
-#    input: GRAPHICS, RAW_QC, TRIMMED_QC, BAM_TO_BED
-    input: MACS2
+    input: GRAPHICS, RAW_READNB, RAW_QC, TRIMMED_QC, BAM_READNB, BAM_TO_BED, BED_READNB
+#    input: MACS2
     params: qsub=config["qsub"]
     shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
