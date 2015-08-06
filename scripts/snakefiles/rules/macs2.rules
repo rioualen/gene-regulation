@@ -1,52 +1,26 @@
-# rule macs2:
-# 	"""Peak-calling with MACS2.
-# 	Input: sam, bam, bed...
-# 	Output: bed
-
-# 	To be refined...
-
-# 	Required parameters:
-# 		config["qsub"]
-# 		config['macs2']['genome']
-
-# 	Usage: TODO
-# 	"""
-# 	input: 	chip = RESULTSDIR + "{chip}/{chip}_" + TRIMMING + "_{aligner}.bam" , \
-# 		inp = RESULTSDIR + "{inp}/{inp}_" + TRIMMING + "_{aligner}.bam"
-# #	log: RESULTSDIR + "{CHIP}_vs_{INPUT}/spp.log"
-# #	benchmark: RESULTSDIR + {CHIP} + "_vs_" + {INPUT} + "/spp_benchmark.json"
-# #	params: qsub = config["qsub"] + " -e {input.chip}_homer_qsub.err -o {input.chip}_homer_qsub.out"
-# 	params: prefix = RESULTSDIR + "{chip}_vs_{inp}/{chip}_vs_{inp}_" + TRIMMING + "_{aligner}", \
-# 		outdir = RESULTSDIR + "{chip}_vs_{inp}/", \
-# 		genome = config['macs2']['genome']
-# 	output: "{params.prefix}_summits.bed"
-# 	run: "macs2 callpeak -t {input.chip} -c {input.inp} -g {params.genome} -n {params.prefix} --outdir {params.outdir}"
-
 rule macs2:
 	"""Peak-calling with MACS2.
-	Input: sam, bam, bed...
+	Input: sam, bam, bed... automatically detected by macs' callpeak algorithm. Bed format was used here. 
 	Output: bed
 
 	To be refined...
+	TODO:
+		Add qsub, log, bench, message keywords.
+		Generalize rule... And clean up this mess of a file once it's done.
 
 	Required parameters:
-		config["qsub"]
+		config['qsub']
 		config['macs2']['genome']
+		config['dir']['results']
 
-	Usage: TODO
-	pval = config["macs2"]["macs_pvalue"], 
+	Usage: 
+		MACS2 = expand(RESULTSDIR + "{chip}_vs_{inp}/{chip}_vs_{inp}_{trimming}_{aligner}_{caller}_peaks.xls", chip=CHIP, inp=INPUT, trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
 	"""
-	input: treatment = config["dir"]["results"] + "{gsm_treatment}/{gsm_treatment}_{aligneur}_sorted_" + config["htseq"]["order"] + ".bed", \
-          control =  config["dir"]["results"] + "{gsm_control}/{gsm_control}_{aligneur}_sorted_" + config["htseq"]["order"] + ".bed"
-	params: qsub = config["qsub"] + " -q short -e "+ config["dir"]["results"] + "{gsm_treatment}_vs_{gsm_control}_{aligneur}_MACS2_{pval}/{gsm_treatment}_vs_{gsm_control}_{aligneur}_MACS2_{pval}_qsub.err -o " + config["dir"]["results"] + "{gsm_treatment}_vs_{gsm_control}_MACS2_{pval}/{gsm_treatment}_vs_{gsm_control}_MACS2_{pval}_qsub.out", \
-		prefix = "{gsm_treatment}_vs_{gsm_control}_{aligneur}_MACS2_{pval}", \
-		outdir = config["dir"]["results"] + "{gsm_treatment}_vs_{gsm_control}_{aligneur}_MACS2_{pval}/",\
-		genome = config["macs2"]["genome"]
-	log: config["dir"]["results"] + "{gsm_treatment}_vs_{gsm_control}_{aligneur}_MACS2_{pval}/{gsm_treatment}_vs_{gsm_control}_{aligneur}_MACS2_{pval}.log"
-	benchmark: config["dir"]["results"] +"{gsm_treatment}_vs_{gsm_control}_{aligneur}_MACS2_{pval}/{gsm_treatment}_vs_{gsm_control}_{aligneur}_MACS2_{pval}_benchmark.json"
-	output: bed = config["dir"]["results"] + "{gsm_treatment}_vs_{gsm_control}_{aligneur}_MACS2_{pval}/{gsm_treatment}_vs_{gsm_control}_{aligneur}_MACS2_{pval}_summits.bed",\
-			model = config["dir"]["results"] + "{gsm_treatment}_vs_{gsm_control}_{aligneur}_MACS2_{pval}/{gsm_treatment}_vs_{gsm_control}_{aligneur}_MACS2_{pval}_model.r", \
-			narrowPeak = config["dir"]["results"] + "{gsm_treatment}_vs_{gsm_control}_{aligneur}_MACS2_{pval}/{gsm_treatment}_vs_{gsm_control}_{aligneur}_MACS2_{pval}_peaks.narrowPeak", \
-			peak = config["dir"]["results"] + "{gsm_treatment}_vs_{gsm_control}_{aligneur}_MACS2_{pval}/{gsm_treatment}_vs_{gsm_control}_{aligneur}_MACS2_{pval}_peaks.xls"
-	shell: "macs2 callpeak -t {input.treatment} -c {input.control} -g {params.genome} -n {params.prefix} --outdir {params.outdir} -p {wildcards.pval} 2> {log}"
+        input: treatment="{result_dir}/{treatment}/{treatment}" + config["suffixes"]["mapped"] + ".bed", \
+            control="{result_dir}/{control}/{control}" + config["suffixes"]["mapped"] + ".bed"
+	output: "{result_dir}/{treatment}_vs_{control}/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2._summits.bed"
+        params: outdir="{result_dir}/{treatment}_vs_{control}", \
+            name="{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2._summits",\
+            genome_size = config["genome"]["size"]
+	shell: "macs2 callpeak -t {input.treatment} -c {input.control} --gsize {params.genome_size} --outdir {params.outdir} --name {params.name}"
 
