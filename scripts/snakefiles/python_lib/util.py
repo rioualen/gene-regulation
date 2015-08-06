@@ -5,6 +5,7 @@ __maintainer__ = "Jacques van Helden"
 __email__ = "Jacques.van-Helden@univ-amu.fr"
 __status__ = "Embryonic"
 
+################################################################
 def read_sample_ids(file, base_dir=".", column=1, verbose=0):
     """Read sample descriptions from a tab-delimited file. 
 
@@ -43,13 +44,68 @@ def read_sample_ids(file, base_dir=".", column=1, verbose=0):
 #                print("\t".join(keys))
             else:
                 fields = line.split("\t")
-                samples.append(fields[0])
-#                print(fields[0])
+                samples.append(fields[column-1])
+#                print(fields[column -1])
     if verbose >= 1:
         print("\t".join(["read_sample_ids()", "Result:", str(len(samples)), "sample IDs"]))
     return(samples)
     
+################################################################
+def read_chipseq_design(file, test_column=1, input_column=2, verbose=0):
+    """Read ChIP-seq analysis design from a tab-delimited file. 
 
+    Each row describes one analysis, which requires to define two
+    samples: (1) test sample (generally, the ChIP result); (2) input
+    sample (can be of different types: mock, genomic input, a ChIP
+    result in control conditions, or any other relevant input).
+
+    Lines starting with a semicolumn (;) are considered as comment
+    lines, and thus ignored.
+
+    A line starting with a # can optionally be used at the beginning
+    of the file to specify column headers (still not taken in
+    consideration, but should be treated in future versions of this
+    function).
+
+    :param file: path to the sample description file
+    :type file: string
+    :param test_column: number of the column containing the test ID (Default: 1)
+    :type test_column: Integer >= 1
+    :param input_column: number of the column containing the input ID (Default: 1)
+    :type input_column: Integer >= 1
+    :param verbose: verbosity level
+    :type verbose: Integer
+    :return: two lists giving respectively test and input sample IDs.
+    :rtype: lists of strings
+
+    """
+    if verbose >= 1:
+        print ("read_sample_ids()\t" +"Reading ChIP-seq design from file\t" + file)
+    test_ids = []
+    input_ids = []
+
+    f = open(file, "r")
+    for line in f.readlines():
+        line = line.rstrip("\n") ## Suppress carriage.return
+        if line[0:1] != ';': ## Skip comment lines (starting by "--")
+            if line[0:1] == '#': ## Line containing column headers
+                line = line.lstrip("#")
+                keys = line.split("\t")
+#                print("\t".join(keys))
+            else:
+                fields = line.split("\t")
+                test = fields[test_column-1]
+                test_ids.append(test)
+                input = fields[input_column-1]
+                input_ids.append(input)
+                if verbose >= 2:
+                    print("\t".join(["\tanalysis", test, "versus", input]))
+    if verbose >= 1:
+        print("\t".join(["read_chipseq_design()", "Result:", str(len(test_ids)), "analyses"]))
+    return(test_ids, input_ids)
+    
+
+################################################################
 def glob_multi_dir(dir_list, pattern="", base_dir=".", ext="", verbose=0):
     """Given a list of directories, returns the list of files matching a
     given pattern. In addition to the list of matching files, this
@@ -97,6 +153,8 @@ def glob_multi_dir(dir_list, pattern="", base_dir=".", ext="", verbose=0):
         print("\t".join(["glob_multi_dir()", "Result:", str(len(files)), "files"]))
     return(files, file_dirs, basenames)
 
+
+################################################################
 def report_numbered_list(list):
     """
     Taking as input a list of strings, return a numbered list in
