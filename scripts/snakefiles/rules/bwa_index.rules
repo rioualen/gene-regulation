@@ -10,11 +10,10 @@ rule bwa_index:
 		input:expand()
 	"""
 	input: "{genome}.fa"
-	output: "{genome}.fa.index"
+	output: "{genome}.fa.bwt"
 	log: "{genome}_bwa-index.log"
 	benchmark: "{genome}_bwa-index_benchmark.json"
 	params:
 		index = config["bwa"]["index"], \
 		qsub = config["qsub"] + " -e {genome}_bwa-index_qsub.err -o {genome}_bwa-index_qsub.out"
-	shell: "bwa index {params.index} 2> {log}; \
-		touch {output}"
+	shell: "bwa index {params.index} 2> {log}"

@@ -10,4 +10,6 @@ Rsession/
 data/
 genomes/
 results/
+logs/
 
+.Rproj.user

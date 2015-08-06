@@ -14,9 +14,11 @@ Usage: snakemake -p -c "qsub {params.qsub}" -j 30
 import os
 import datetime
 from snakemake.utils import R
-configfile: "/home/jvanheld/fg-chip-seq/scripts/snakefiles/workflows/broche_analysis_config.json"
+configfile: "/Users/jvanheld/fg-chip-seq/scripts/snakefiles/workflows/broche_analysis_config.json"
 workdir: config["dir"]["base"]
 #workdir: os.getcwd() # Local Root directoray for the project. Should be adapted for porting.
+
+debug = True
 
 ################################################################
 ## Define global variables
@@ -45,6 +47,11 @@ include: config["dir"]["fg-rules"] + "/featurecounts.rules"        ## Count read
 ## Read the list of sample IDs from the sample description file
 SAMPLE_IDS=read_sample_ids(config["files"]["samples"])
 
+## DEBUG ##
+if debug:
+    print ("Sample description file:\t" + config["files"]["samples"])
+    print ("Sample IDs:\t" + ";".join(SAMPLE_IDS))
+
 ## List the merged raw reads
 RAWR_L1R1, RAWR_L1R1_DIRS, RAWR_L1R1_BASENAMES=glob_multi_dir(SAMPLE_IDS, "*_L001" + config["suffix"]["reads_fwd"] + ".fastq.gz", config["dir"]["reads_source"], "_L001" + config["suffix"]["reads_fwd"] + ".fastq.gz")
 RAWR_MERGED_FWD=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_fwd"] + ".fastq", zip, sample_dir=RAWR_L1R1_DIRS, sample_basename=RAWR_L1R1_BASENAMES)
@@ -71,10 +78,15 @@ MAPPED_PE_BAM=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_m
 MAPPED_PE_SORTED=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_pos.bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 
 MAPPED_PE_SORTED_BY_NAME=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_name.bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+if (debug):
+    print ("MAPPED_PE_SORTED_BY_NAME:\n\t" + "\n\t".join(MAPPED_PE_SORTED_BY_NAME))
 
 ## Problem with HTSeq and position-sorted bam files ? To be chacked later
 ## HTSEQ_COUNTS=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_pos_HTSeqcount.tab", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 HTSEQ_COUNTS=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_name_HTSeqcount.tab", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+
+if (debug):
+    print ("HTSEQ_COUNTS:\n\t" + "\n\t".join(HTSEQ_COUNTS))
 
 ## List all the raw read files, which will be submitted to quality control
 RAWR_FILES, RAWR_DIRS, RAWR_BASENAMES=glob_multi_dir(SAMPLE_IDS, "*_R*_001.fastq.gz", config["dir"]["reads"], ".fastq.gz")
@@ -98,9 +110,9 @@ rule all:
     Run all the required analyses
     """
 #    input: TRIMMED_SUMMARIES, TRIMMED_QC
-#    input: MERGED_RAWR_QC, RAWR_MERGED, TRIMMED_MERGED, MAPPED_PE_SAM, MAPPED_PE_BAM, MAPPED_PE_SORTED
-    input: MAPPED_PE_SAM, MAPPED_PE_BAM, MAPPED_PE_SORTED
-#    input: MAPPED_PE_SORTED_BY_NAME, HTSEQ_COUNTS
+#    input: MAPPED_PE_SAM, MAPPED_PE_BAM, MAPPED_PE_SORTED
+    input: MAPPED_PE_SORTED_BY_NAME, HTSEQ_COUNTS
+#    input: MERGED_RAWR_QC, RAWR_MERGED, TRIMMED_MERGED, MAPPED_PE_SAM, MAPPED_PE_BAM, MAPPED_PE_SORTED, MAPPED_PE_SORTED_BY_NAME, HTSEQ_COUNTS
     params: qsub=config["qsub"]
     shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 

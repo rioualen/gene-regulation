@@ -1,17 +1,15 @@
 rule bam_to_bed:
-    """Converts sam files into bam files.
+	"""Converts sam files into bam files.
+	
+	Required parameters:
+		config["qsub"]
 
-    Required parameters:
-
-    config["qsub"]
-
-    Usage: 
-
-    input:expand('{read_dir}/{sample}/{sample}_{aligner}.bed', sample=SAMPLES, read_dir=READS, aligner=ALIGNERS)
+	Usage: 
+		input:expand('{read_dir}/{sample}/{sample}_{aligner}.bed', sample=SAMPLES, read_dir=READS, aligner=ALIGNERS)
 	"""
-    input: "{reads}.aligned.bam"
-    output: "{reads}.aligned.bed"
-    log: "{reads}_bam_to_bed.log"
-    benchmark: "{reads}_bam_to_bed_benchmark.json"
-    params: qsub=config["qsub"]+" -e {reads}_bam_to_bed_qsub.err -o {reads}_bam_to_bed_qsub.out"
-    shell:"bedtools bamtobed -i {input} > {output} 2> {log}"
+	input: "{reads}.bam"
+	output: "{reads}.bed"
+	log: "{reads}_bam_to_bed.log"
+	benchmark: "{reads}_bam_to_bed_benchmark.json"
+	params: qsub=config["qsub"]+" -e {reads}_bam_to_bed_qsub.err -o {reads}_bam_to_bed_qsub.out"
+	shell:"bedtools bamtobed -i {input} > {output} 2> {log}"

@@ -1,0 +1,85 @@
+---
+title: "Differential Gene Expression analysis report"
+author: "Lucie Khamvongsa & Jacques van Helden"
+date: "6 August 2015"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, eval=TRUE, cache=TRUE)
+```
+
+```{r load libraries}
+library("knitr")
+library("org.Dm.eg.db")
+```
+
+
+## Parameters
+
+```{r parameters}
+
+## Parameters
+dir.main <- "~/dr-chip-rna-seq"
+
+
+## TEMPORARY: hard-coded parameters. Should be adapted to read file path from the command-line arguments. 
+parameters <- list(
+  deg.file = "results/rna-seq/DEG/S2_vs_WT/S2_VS_WT_sickle_se_q20_subread_featurecounts_DESeq2.tab",
+  "deg.software" = "DESeq2",
+  "threshold" = 0.05,
+  "threshold.column" = "padj")
+
+kable(data.frame(unlist(parameters)))
+```
+
+
+
+## Selection of significant genes
+
+
+```{r load data}
+setwd(dir.main)
+
+## Load the DEG analysis result table
+deg.table <- read.table(parameters$deg.file,row.names=1)
+#dim(deg.table)
+
+## Select genes according to the user-specified threshold
+deg.table$positive <- deg.table[,parameters$threshold.column] < parameters$threshold
+#summary(selected)
+deg.table$positive[is.na(deg.table$positive)] <- FALSE ## Replace the NA values by FALSE to avoid problems with selection
+
+## Select up- and down-regulated genes
+deg.table$up <- deg.table$positive & deg.table$log2FoldChange > 0
+deg.table$down <- deg.table$positive & deg.table$log2FoldChange < 0
+
+## Summarize the results
+my.summary <- data.frame("nb.genes" = nrow(deg.table),
+                         "threshold" = parameters$threshold,
+                         "threshold column" = parameters$threshold.column,
+                         "NA" = sum(is.na(deg.table[,parameters$threshold.column])),
+                         "Negatives" = sum(deg.table$positive == FALSE) - sum(is.na(deg.table[,parameters$threshold.column])),
+                         "Positives" = sum(deg.table$positive == TRUE),
+                         "Up-regulated" = sum(deg.table$up),
+                         "Down-regulated" = sum(deg.table$down)
+)
+
+
+
+kable(data.frame(t(my.summary)), format = "markdown")
+```
+
+From the `r parameters$deg.software` result table `r sum(deg.table$positive)` genes were selected as significant with a threshold of `r parameters$threshold` on the colum `r parameters$threshold.column`.
+
+
+## Conversion of gene names to Entrez IDs
+
+
+```{r IDs}
+library('clusterProfiler')
+gg <- bitr(row.names(deg.table), fromType="SYMBOL", toType="ENTREZID", annoDb="org.Dm.eg.db")
+deg.table[gg[,1], "entrez.id"] = gg[,2]
+
+```
+

@@ -30,8 +30,20 @@ output:
 
 See one of these:
 
-* IFB_cloud_VM_creation.Rmd
-* virtualbox_VM_creation.Rmd
+* `IFB_cloud_VM_creation.Rmd`
+* `virtualbox_VM_creation.Rmd`
+
+### VM customization
+
+Make sure to provide the right amount of RAM and CPU, according to the amount of data, the tools you want to use, and what you actually have on your local.
+
+Regarding the size of the virtual disk, see `virtualbox_VM_creation.Rmd`.
+
+Here we used these settings:
+
+* RAM: 40Go
+* HD: 120Go
+* CPU: 10
 
 # General requirements 
 

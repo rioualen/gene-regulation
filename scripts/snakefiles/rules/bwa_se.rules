@@ -5,20 +5,22 @@ rule bwa_se:
 
 	Required parameters:
 		config["bwa"]["index"]
+		config["bwa"]["threads"]
 		config["qsub"]
 
 	Usage:
 		input:expand("{dataset}/{dataset}_bwa.sam", dataset=DATASET)
 	"""
 	input: 	reads="{reads}.fastq", \
-		index=config["bwa"]["index"] + ".index"
-	output: "{reads}_bwa.aligned.sam"
+		index=config["bwa"]["index"] + ".bwt"
+	output: "{reads}_bwa.sam"
 	log: "{reads}_bwa.log"
 	benchmark: "{reads}_bwa_benchmark.json"
 	params:
 		index = config["bwa"]["index"], \
 		sai= "{reads}_bwa.sai", \
-		qsub = config["qsub"] + " -e {reads}_bwa_qsub.err -o {reads}_bwa_qsub.out"
+		qsub = config["qsub"] + " -e {reads}_bwa_qsub.err -o {reads}_bwa_qsub.out", \
+		threads = config["bwa"]["threads"]
 	shell:
-		"bwa aln -t 12 {params.index} {input.reads} > {params.sai} 2> {log}; \
+		"bwa aln -t {params.threads} {params.index} {input.reads} > {params.sai} 2> {log}; \
 		bwa samse {params.index} {params.sai} {input.reads} > {output} 2> {log}"

@@ -1,0 +1,26 @@
+rule assign_samples:
+	"""
+	assign suffix to sample according to whether it is chip or input: avoid confusion when generating bedfiles for peak-calling
+	"""
+	input: "{stuff}.converted.bed"
+	output: "{stuff}.assigned"
+	params: chip = config['samples']['chip'].split(), \
+		inp = config['samples']['input'].split(), \
+		resdir = config['dir']['results']
+	shell: "samples=$(find {params.resdir} -type f -name *.converted.bed)\
+		inp={params.inp}\
+		chip={params.chip}\
+		for sample in ${{samples[@]}} ; do\
+		for i in ${{inp[@]}} ; do\
+		if [[ -n $(echo $sample | grep $i) ]] ; then\
+		rename 's/converted/input/' $sample\
+		fi\
+		done\
+		for c in ${{chip[@]}} ; do\
+		if [[ -n $(echo $sample | grep $c) ]] ; then\
+		rename 's/converted/chip/' $sample\
+		fi\
+		done\
+		done\
+		touch {output}"
+
