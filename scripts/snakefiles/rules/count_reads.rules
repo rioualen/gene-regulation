@@ -1,7 +1,6 @@
 """Rules to count the number of reads in NGS files with different
 formats
 """
-
 rule count_reads_fastq:
     """Count number of reads in a fastq-formatted file (unaligned reads)."""
     input: "{file}.fastq"
@@ -37,4 +36,4 @@ rule count_features_bed:
     output: "{file}_bed_nb.txt"
     log: "{file}_bed_nb.log"
     params: qsub = config["qsub"] + " -q long -e {file}_bed_nb_qsub.err -o {file}_bed_nb_qsub.out"
-    shell: "grep -v '^#' {input} | wc -l | perl -pe 's|\s+||g' > {output} 2> {log}"
+    shell: "grep -v '^#' {input} | wc -l | perl -pe 's| +||g' > {output} 2> {log}"
