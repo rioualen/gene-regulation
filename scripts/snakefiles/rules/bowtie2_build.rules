@@ -1,4 +1,4 @@
-"""Snakemake rules to download a refrence genome and build the index
+"""Snakemake rules to download a reference genome and build the index
    for bowtie version 2.
 """
 

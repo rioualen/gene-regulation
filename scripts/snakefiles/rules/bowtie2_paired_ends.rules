@@ -1,23 +1,50 @@
-"""
-    Warning: This rule works on reads trimmed by quality score.
-    To identify the fastq file who are trimmed and work without ambiguity, 
-    you have to name your trimmed files: 
-                - '{data_dir}_1_trimmed.fastq.gz' and '{data_dir}_2_trimmed.fastq.gz' for paired-end reads
-                - '{data_dir}/{data_dir}_trimmed.fastq.gz' for unpaired reads
-
-    Map reads for each sample with Bowtie2 require some parameters such as:
-        -max_mismatches
-        -bowtie_index
-    These parameters have to be defined in the config file.
-    You can add any other wanted parameters in the "other options" of the config file.
-    
-    The result file's name is '{data_dir}_bowtie2.sam'
-
-"""
-
+ruleorder:  bowtie2_paired_end_trimmed > bowtie2_paired_end
 
 rule bowtie2_paired_end:
-    """Read mapping for a paired-end sample, using bowtie version 2 """
+    """Read mapping for a paired-end sample, using bowtie version 2.
+
+    """
+    
+    input:  index = config["dir"]["genome"] + config["genome"]["organism"] + ".1.bt2", \
+            forward = "{reads}" + config["suffix"]["reads_fwd"] + "{reads_suffix}" + ".fastq", \
+            reverse = "{reads}" + config["suffix"]["reads_rev"] + "{reads_suffix}" + ".fastq" 
+    output: sam = "{reads}{reads_suffix}_bowtie2_pe.sam", \
+            summary = "{reads}{reads_suffix}_bowtie2_pe_summary.txt"
+    log: "{reads}{reads_suffix}_bowtie2_pe.log"
+    benchmark: "{reads}{reads_suffix}_bowtie2_pe_benchmark.json"
+    params: max_mismatches = config["bowtie2"]["max_mismatches"], \
+            index = config["dir"]["genome"] + config["genome"]["organism"], \
+            qsub=config["qsub"] + " -q long -e {reads}_bowtie_qsub.err -o {reads}_bowtie_qsub.out", \
+            options = config["bowtie2"]["other_options"]
+    shell: "bowtie2 -x {params.index} -1 {input.forward} -2 {input.reverse} -S {output.sam} --phred33 -N {params.max_mismatches} -t {params.options} > {output.summary} 2> {log}"
+
+
+################################################################
+## Note by JvH (AUgust 4, 2015): I renamed the previous rule from
+## bowtie2_paired_end to bowtie2_paired_end_trimmed, because this rule
+## was requiring the trimmed suffix to work. I wrote a more general
+## rule bowtie2_paired_end, which only requires to have a file with
+## forward and another one with reverse reads, without any assumption
+## about the particular suffix after the orientation suffix. In
+## principle the rule bowtie2_paired_end_trimmed shoudl not be require
+## anymore. After hacing checked this with the other workflows, we
+## should suppress it.
+################################################################
+rule bowtie2_paired_end_trimmed:
+    """Read mapping for trimmed reads of a paired-end sample, using bowtie version 2.
+
+    Warning: This rule works on reads trimmed by quality score.  To
+    identify the fastq file which are trimmed and work without
+    ambiguity, you have to name your trimmed files:
+
+    - '{data_dir}_1_trimmed.fastq.gz' and '{data_dir}_2_trimmed.fastq.gz' for paired-end reads
+    - '{data_dir}/{data_dir}_trimmed.fastq.gz' for unpaired reads
+
+    The following parameters should be defined in the configuration file: 
+    -max_mismatches
+    -bowtie_index
+
+    """
     
     input:  index = config["dir"]["genome"] + config["genome"]["organism"] + ".1.bt2", \
             forward = "{reads}" + config["suffix"]["reads_fwd"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq", \

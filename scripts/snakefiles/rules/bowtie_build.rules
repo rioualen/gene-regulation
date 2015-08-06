@@ -7,14 +7,14 @@ rule bowtie_download_genome:
     """
     Download and index the reference genome for the Bowtie read-mapping software.
     """
-    output: sequence = config["genome"]["install_dir"] + "/" + config["genome"]["sequence"], \
-            features = config["genome"]["install_dir"] + "/" + config["genome"]["features"]
-    log: config["genome"]["install_dir"] + "/wget_log.txt"
-    params: sequence_url = config["genome"]["base_url"]  + "/" + config["genome"]["sequence"], \
-            features_url = config["genome"]["base_url"]  + "/" + config["genome"]["features"]                           
+    output: reference_genome = config["bowtie"]["genome_dir"] + "/" + config["bowtie"]["reference_genome"], \
+            features = config["bowtie"]["genome_dir"] + "/" + config["bowtie"]["annotations"]
+    log: config["bowtie"]["genome_dir"] + "/wget_log.txt"
+    params: reference_genome_url = config["config["bowtie"]["reference_genome"], \
+            features_url = config["bowtie"]["annotations"]                           
     shell: "wget --timestamping --no-directories " \
-        + " --directory-prefix " + config["genome"]["install_dir"] \
-        + " {params.sequence_url}" \
+        + " --directory-prefix " + config["bowtie"]["genome_dir"] \
+        + " {params.reference_genome_url}" \
         + " {params.features_url}" \
         + " 2> {log}"
 
@@ -22,23 +22,23 @@ rule bowtie_build:
     """
     Build index for bowtie version 1 (ungapped read mapping).
     """
-    input: sequence = config["genome"]["install_dir"] + "/" + config["genome"]["sequence"]
+    input: reference_genome = config["bowtie"]["genome_dir"] + "/" + config["bowtie"]["reference_genome"]
     output: index1 = config["bowtie"]["bowtie_index"] + ".1.ebwt"
     params: bowtie_index = config["bowtie"]["bowtie_index"]
     log:  config["bowtie"]["bowtie_index"] + "/bowtie-build_log.txt"
     message: "Building bowtie index in directory:\t{params.bowtie_index}"
     benchmark:  config["bowtie"]["bowtie_index"] + "/bowtie-build_benchmark.json"
-    shell: "bowtie-build {input.sequence} {params.bowtie_index} > {log}"
+    shell: "bowtie-build {input.reference_genome} {params.bowtie_index} > {log}"
 
 # rule bowtie2_build:
 #     """
 #     Build index for bowtie2 (gapped read mapping).
 #     """
-#     input: sequence = config["genome"]["install_dir"] + "/" + config["genome"]["sequence"]
+#     input: reference_genome = config["bowtie"]["genome_dir"] + "/" + config["bowtie"]["reference_genome"]
 #     output: index1 = config["bowtie"]["bowtie_index"] + ".1.ebwt"
 #     params: bowtie_index = config["bowtie"]["bowtie_index"]
 #     log:  config["bowtie"]["bowtie_index"] + "/bowtie-build_log.txt"
 #     message: "Building bowtie index in directory:\t{params.bowtie_index}"
 #     benchmark:  config["bowtie"]["bowtie_index"] + "/bowtie-build_benchmark.json"
-#     shell: "bowtie2-build {input.sequence} {params.bowtie_index} > {log}"
+#     shell: "bowtie2-build {input.reference_genome} {params.bowtie_index} > {log}"
 

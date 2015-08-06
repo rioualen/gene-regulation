@@ -22,8 +22,8 @@ workdir: config["dir"]["base"] # Local Root directory for the project. Should be
 #LIST_ALL_COUNTS = "data/1258-BRM/N1/N1_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/N2/N2_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/N4/N4_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/NN2/NN2_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/NN4/NN4_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/NN5/NN5_bowtie2_mm1_sorted_name_count.txt"
 
 path = "scripts/python-scripts/"
-sys.path.append(path) # For find my module "read_analysis_table_lib"
-import util # read_analysis_table_lib is a module where you can find two functions who give you several lists for peak-callers softwares
+sys.path.append(path) # To find my module "read_analysis_table_lib"
+import util # read_analysis_table_lib is a module where you can find two functions that return several lists for peak-callers softwares
 
 
 
