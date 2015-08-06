@@ -14,7 +14,7 @@ Usage: snakemake -p -c "qsub {params.qsub}" -j 30
 import os
 import datetime
 from snakemake.utils import R
-configfile: "/Users/jvanheld/fg-chip-seq/scripts/snakefiles/workflows/broche_analysis_config.json"
+configfile: "scripts/snakefiles/workflows/broche_analysis_config.json"
 workdir: config["dir"]["base"]
 #workdir: os.getcwd() # Local Root directoray for the project. Should be adapted for porting.
 
@@ -45,7 +45,7 @@ include: config["dir"]["fg-rules"] + "/featurecounts.rules"        ## Count read
 ################################################################
 
 ## Read the list of sample IDs from the sample description file
-SAMPLE_IDS=read_sample_ids(config["files"]["samples"])
+SAMPLE_IDS = read_sample_ids(config["files"]["samples"])
 
 ## DEBUG ##
 if debug:
