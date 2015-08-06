@@ -27,18 +27,18 @@ NOW = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
 
 ################################################################
 ## Import snakemake rules and python library
-include: config["dir"]["fg-rules"] + "/util.py"                   ## Python utilities
-include: config["dir"]["fg-rules"] + "/util.rules"                ## Snakemake utilities
-include: config["dir"]["fg-rules"] + "/count_reads.rules"         ## Count reads in different file formats
-include: config["dir"]["fg-rules"] + "/fastqc.rules"              ## Quality control with fastqc
-include: config["dir"]["fg-rules"] + "/flowcharts.rules"          ## Draw flowcharts (dag and rule graph)
-include: config["dir"]["fg-rules"] + "/sickle_paired_ends.rules"  ## Trimming with sickle
-#include: config["dir"]["fg-rules"] + "/bowtie_build.rules"        ## Read mapping with bowtie version 1 (no gap)
-#include: config["dir"]["fg-rules"] + "/bowtie_paired_ends.rules"  ## Paired-ends read mapping with bowtie version 1 (no gap)
-include: config["dir"]["fg-rules"] + "/bowtie2_build.rules"        ## Read mapping with bowtie version 2 (suports gaps)
-include: config["dir"]["fg-rules"] + "/bowtie2_paired_ends.rules"  ## Paired-ends read mapping with bowtie version 2 (support gaps)
-include: config["dir"]["fg-rules"] + "/htseq.rules"        ## Count reads per gene with htseq-count
-include: config["dir"]["fg-rules"] + "/featurecounts.rules"        ## Count reads per gene with R subread::featurecounts
+include: config["dir"]["python_lib"] + "/util.py"                   ## Python utilities
+include: config["dir"]["rules"] + "/util.rules"                ## Snakemake utilities
+include: config["dir"]["rules"] + "/count_reads.rules"         ## Count reads in different file formats
+include: config["dir"]["rules"] + "/fastqc.rules"              ## Quality control with fastqc
+include: config["dir"]["rules"] + "/flowcharts.rules"          ## Draw flowcharts (dag and rule graph)
+include: config["dir"]["rules"] + "/sickle_paired_ends.rules"  ## Trimming with sickle
+#include: config["dir"]["rules"] + "/bowtie_build.rules"        ## Read mapping with bowtie version 1 (no gap)
+#include: config["dir"]["rules"] + "/bowtie_paired_ends.rules"  ## Paired-ends read mapping with bowtie version 1 (no gap)
+include: config["dir"]["rules"] + "/bowtie2_build.rules"        ## Read mapping with bowtie version 2 (suports gaps)
+include: config["dir"]["rules"] + "/bowtie2_paired_ends.rules"  ## Paired-ends read mapping with bowtie version 2 (support gaps)
+include: config["dir"]["rules"] + "/htseq.rules"        ## Count reads per gene with htseq-count
+include: config["dir"]["rules"] + "/featurecounts.rules"        ## Count reads per gene with R subread::featurecounts
 
 ################################################################
 ## Define the lists of requested files
