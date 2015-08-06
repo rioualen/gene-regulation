@@ -1,6 +1,7 @@
 rule bwa_index:
-	"""Rule for the creation of BWA index. Has to be done only once. 
-	The output file is used to test whether the index already exists when aligning. 
+	"""Rule for the creation of BWA index. Has to be done only once.  The
+	output file is used to test whether the index already exists
+	when aligning.
 
 	Required parameters:
 		config["bwa"]["index"]
@@ -8,7 +9,8 @@ rule bwa_index:
 
 	Usage:
 		input:expand()
-	"""
+
+        """
 	input: "{genome}.fa"
 	output: "{genome}.fa.bwt"
 	log: "{genome}_bwa-index.log"
