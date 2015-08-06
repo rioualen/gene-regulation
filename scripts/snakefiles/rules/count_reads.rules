@@ -30,3 +30,11 @@ rule count_reads_sam:
     log: "{file}_sam_readnb.log"
     params: qsub = config["qsub"] + " -q long -e {file}_sam_readnb_qsub.err -o {file}_sam_readnb_qsub.out"
     shell: "samtools view -S -c {input} > {output} 2> {log}"
+
+rule count_features_bed:
+    """Count number of features in a bed-formatted file."""
+    input: "{file}.bed"
+    output: "{file}_bed_nb.txt"
+    log: "{file}_bed_nb.log"
+    params: qsub = config["qsub"] + " -q long -e {file}_bed_nb_qsub.err -o {file}_bed_nb_qsub.out"
+    shell: "grep -v '^#' {input} | wc -l | perl -pe 's|\s+||g' > {output} 2> {log}"
