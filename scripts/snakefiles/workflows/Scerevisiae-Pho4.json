@@ -14,7 +14,7 @@
         "install_dir": ""
     },
     "files": {
-	"snakefile": "scripts/snakefiles/workflows/Scerevisiae-Pho4.py",
+	"snakefile": "/workspace/france_genomique/Scerevisiae-Pho4/scripts/snakefiles/workflows/Scerevisiae-Pho4.py",
 	"samples": "data/Scerevisiae-Pho4_samples.tab",
 	"design": "data/Scerevisiae-Pho4_design.tab"
     },
@@ -30,8 +30,8 @@
 	"results": "results/",
 	"reports": "results/",
 	"genome": "genomes/",
-	"python_lib": "scripts/snakefiles/python_lib/",
-	"rules": "scripts/snakefiles/rules/",
+	"python_lib": "/workspace/france_genomique/Scerevisiae-Pho4/scripts/snakefiles/python_lib/",
+	"rules": "/workspace/france_genomique/Scerevisiae-Pho4/scripts/snakefiles/rules/",
 	"logs": "logs/"
     },
     "reports" : {
