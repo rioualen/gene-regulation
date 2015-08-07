@@ -1,5 +1,6 @@
 rule sam_to_bam:
-	"""Converts sam files into bam files.
+	"""    Convert reads from SAM (sequence alignment map) to BAM (binary
+	alignment map) format.
 
 	Required parameters:
 		config["qsub"]
