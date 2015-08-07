@@ -45,6 +45,10 @@ import time
 configfile: "scripts/snakefiles/workflows/Scerevisiae-Pho4.json"
 #workdir: config["dir"]["base"] ## does not work??
 
+# Flag indicating whether the debug mode should be activated.  Beware:
+# this mode can create problems, for example for the flowcharts
+# (failure because the debug messages are printed to the STDOUT).
+debug = False
 
 # Rules dir
 RULES = config["dir"]["rules"]
@@ -52,10 +56,6 @@ RULES = config["dir"]["rules"]
 # Raw data
 READS = config["dir"]["reads_source"]
 RESULTSDIR = config["dir"]["results"]	
-
-# CHIP = config["samples"]["chip"].split()
-# INPUT = config["samples"]["input"].split()
-# SAMPLES = CHIP + INPUT ## Read from the sample description file
 
 GENOME = config["genome"]["genome_version"]
 
@@ -71,6 +71,7 @@ PEAK_CALLER = "macs2"
 #================================================================#
 
 include: config["dir"]["python_lib"] + "util.py"
+include: RULES + "util.rules"
 #include: RULES + "assign_samples.rules"
 #include: RULES + "bed_to_fasta.rules"
 #include: RULES + "bowtie.rules"
@@ -79,7 +80,7 @@ include: RULES + "bwa_index.rules"
 include: RULES + "bwa_se.rules"
 include: RULES + "clean.rules"
 include: RULES + "convert_bam_to_bed.rules"
-include: RULES + "convert_sam_to_bam.rules"
+#include: RULES + "convert_sam_to_bam.rules"
 #include: RULES + "count_oligo.rules"
 include: RULES + "fastqc.rules"
 include: RULES + "flowcharts.rules"
@@ -101,9 +102,15 @@ include: RULES + "sickle_se.rules"
 #================================================================#
 #                Read sample IDs and design                      #
 #================================================================#
+
+
 ## Read the list of sample IDs from the sample description file
-SAMPLES = read_sample_ids(config["files"]["samples"], verbose=1)
-CHIP, INPUT = read_chipseq_design(config["files"]["design"], test_column=1, input_column=2, verbose=2)
+CHIP = config["samples"]["chip"].split()
+INPUT = config["samples"]["input"].split()
+# CHIP, INPUT = read_chipseq_design(config["files"]["design"], test_column=1, input_column=2, verbose=2)
+
+#SAMPLES = read_sample_ids(config["files"]["samples"], verbose=1)
+SAMPLES = CHIP + INPUT ## Read from the sample description file
 
 #================================================================#
 #                         Workflow                               #
@@ -149,12 +156,14 @@ TRIMMED_QC = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_fastqc/",
 BWA_INDEX = expand(config["dir"]["genome"] + "{genome}/BWAIndex/{genome}.fa.bwt", genome=GENOME)
 BWA_MAPPING = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}.sam", samples=SAMPLES, aligner=ALIGNER)
 
-# File conversion
-SAM_TO_BAM = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.bam", sample=SAMPLES, aligner=ALIGNER)
-BAM_READNB = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}_bam_readnb.txt", samples=SAMPLES, aligner=ALIGNER)
-BAM_TO_BED = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.bed", sample=SAMPLES, aligner=ALIGNER)
-BED_READNB = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}_bed_nb.txt", samples=SAMPLES, aligner=ALIGNER)
-print("BAM_TO_BED\n\t" + "\n\t".join(BAM_TO_BED))
+# Sorted and converted reads (bam, bed)
+READS_BAM = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.bam", sample=SAMPLES, aligner=ALIGNER)
+SORTED_READS_BAM = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}_sorted_pos.bam", sample=SAMPLES, aligner=ALIGNER)
+BAM_READNB = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}_bam_sorted_readnb.txt", samples=SAMPLES, aligner=ALIGNER)
+SORTED_READS_BED = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}_sorted_pos.bed", sample=SAMPLES, aligner=ALIGNER)
+BED_READNB = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}_sorted_bed_nb.txt", samples=SAMPLES, aligner=ALIGNER)
+if debug: 
+    print("SORTED_READS_BED\n\t" + "\n\t".join(SORTED_READS_BED))
 #CONVERTED_BED = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.converted.bed", sample=SAMPLES, aligner=ALIGNER)
 
 # Peak-calling
@@ -162,7 +171,8 @@ print("BAM_TO_BED\n\t" + "\n\t".join(BAM_TO_BED))
 #MACS2 = expand(RESULTSDIR + "{chip}_vs_{inp}/{chip}_vs_{inp}_{trimming}_{aligner}_{caller}_peaks.narrowPeak", chip="GSM121459", inp="GSM1217457", trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
 MACS2 = expand(expand(RESULTSDIR + "{chip}_vs_{inp}/{chip}_vs_{inp}_{{trimming}}_{{aligner}}_{{caller}}._summits.bed", 
                zip, chip=CHIP, inp=INPUT), trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
-print("MACS2\n\t" + "\n\t".join(MACS2))
+if debug: 
+    print("MACS2\n\t" + "\n\t".join(MACS2))
 
 # File conversion
 #NARROWPEAK_TO_BED = expand(RESULTSDIR + "{chip}_vs_{inp}/{chip}_vs_{inp}_{trimming}_{aligner}_{caller}_peaks.bed", chip=CHIP, inp=INPUT, trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
@@ -188,8 +198,8 @@ rule all:
     """
     Run all the required analyses
     """
-    input: GRAPHICS, RAW_READNB, RAW_QC, TRIMMED_QC, BAM_READNB, BAM_TO_BED, BED_READNB
-#    input: MACS2
+#    input: GRAPHICS, RAW_READNB, RAW_QC, TRIMMED_QC, BAM_READNB, BED_SORTED, BED_READNB, MACS2
+    input: SORTED_READS_BAM, SORTED_READS_BED
     params: qsub=config["qsub"]
     shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
