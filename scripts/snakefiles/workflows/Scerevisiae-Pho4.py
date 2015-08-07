@@ -105,12 +105,12 @@ include: RULES + "sickle_se.rules"
 
 
 ## Read the list of sample IDs from the sample description file
-CHIP = config["samples"]["chip"].split()
-INPUT = config["samples"]["input"].split()
-# CHIP, INPUT = read_chipseq_design(config["files"]["design"], test_column=1, input_column=2, verbose=2)
+# TREATMENT = config["samples"]["chip"].split()
+# CONTROL = config["samples"]["input"].split()
+TREATMENT, CONTROL = read_chipseq_design(config["files"]["design"], test_column=1, input_column=2, verbose=2)
 
-#SAMPLES = read_sample_ids(config["files"]["samples"], verbose=1)
-SAMPLES = CHIP + INPUT ## Read from the sample description file
+SAMPLES = read_sample_ids(config["files"]["samples"], verbose=1)
+# SAMPLES = TREATMENT + CONTROL ## Read from the sample description file
 
 #================================================================#
 #                         Workflow                               #
@@ -159,24 +159,24 @@ BWA_MAPPING = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_{aligner
 # Sorted and converted reads (bam, bed)
 READS_BAM = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.bam", sample=SAMPLES, aligner=ALIGNER)
 SORTED_READS_BAM = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}_sorted_pos.bam", sample=SAMPLES, aligner=ALIGNER)
-BAM_READNB = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}_bam_sorted_readnb.txt", samples=SAMPLES, aligner=ALIGNER)
+BAM_READNB = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}_sorted_pos_bam_readnb.txt", samples=SAMPLES, aligner=ALIGNER)
 SORTED_READS_BED = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}_sorted_pos.bed", sample=SAMPLES, aligner=ALIGNER)
-BED_READNB = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}_sorted_bed_nb.txt", samples=SAMPLES, aligner=ALIGNER)
+BED_READNB = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}_sorted_pos_bed_nb.txt", samples=SAMPLES, aligner=ALIGNER)
 if debug: 
     print("SORTED_READS_BED\n\t" + "\n\t".join(SORTED_READS_BED))
 #CONVERTED_BED = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.converted.bed", sample=SAMPLES, aligner=ALIGNER)
 
 # Peak-calling
 # ! In case of use of several peak-callers, beware of specific prefixes or such...
-#MACS2 = expand(RESULTSDIR + "{chip}_vs_{inp}/{chip}_vs_{inp}_{trimming}_{aligner}_{caller}_peaks.narrowPeak", chip="GSM121459", inp="GSM1217457", trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
-MACS2 = expand(expand(RESULTSDIR + "{chip}_vs_{inp}/{chip}_vs_{inp}_{{trimming}}_{{aligner}}_{{caller}}._summits.bed", 
-               zip, chip=CHIP, inp=INPUT), trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
+#MACS2 = expand(RESULTSDIR + "{treat}_vs_{ctrl}/{treat}_vs_{ctrl}_{trimming}_{aligner}_{caller}_peaks.narrowPeak", treat="GSM121459", ctrl="GSM1217457", trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
+MACS2 = expand(expand(RESULTSDIR + "{treat}_vs_{ctrl}/{treat}_vs_{ctrl}_{{trimming}}_{{aligner}}_{{caller}}_summits.bed", 
+               zip, treat=TREATMENT, ctrl=CONTROL), trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
 if debug: 
     print("MACS2\n\t" + "\n\t".join(MACS2))
 
 # File conversion
-#NARROWPEAK_TO_BED = expand(RESULTSDIR + "{chip}_vs_{inp}/{chip}_vs_{inp}_{trimming}_{aligner}_{caller}_peaks.bed", chip=CHIP, inp=INPUT, trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
-#BED_TO_FASTA = expand(RESULTSDIR + "{chip}_vs_{inp}/{chip}_vs_{inp}_{trimming}_{aligner}_{caller}_peaks.fasta", chip=CHIP, inp=INPUT, trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
+#NARROWPEAK_TO_BED = expand(RESULTSDIR + "{treat}_vs_{ctrl}/{treat}_vs_{ctrl}_{trimming}_{aligner}_{caller}_peaks.bed", treat=TREATMENT, ctrl=CONTROL, trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
+#BED_TO_FASTA = expand(RESULTSDIR + "{treat}_vs_{ctrl}/{treat}_vs_{ctrl}_{trimming}_{aligner}_{caller}_peaks.fasta", treat=TREATMENT, ctrl=CONTROL, trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
 BED_TO_FASTA = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.calling.fasta", sample=SAMPLES, trimming=TRIMMING, aligner=ALIGNER)
 
 ## Sequence purge
@@ -190,7 +190,8 @@ BED_TO_FASTA = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}
 ## Peaks length
 #PEAK_LENGTH = expand(RESULTSDIR + '{sample}_purged_length.png', sample=SAMPLES)
 
-ruleorder: macs2 > bam_to_bed
+ruleorder: macs2 > bam_to_bed > sam2bam
+ruleorder: count_reads_bam > sam2bam
 
 CLEANING = expand(RESULTSDIR + "cleaning.done")
 
@@ -198,8 +199,9 @@ rule all:
     """
     Run all the required analyses
     """
-#    input: GRAPHICS, RAW_READNB, RAW_QC, TRIMMED_QC, BAM_READNB, BED_SORTED, BED_READNB, MACS2
-    input: SORTED_READS_BAM, SORTED_READS_BED
+#    input: GRAPHICS, RAW_READNB, RAW_QC, TRIMMED_QC, SORTED_READS_BAM, SORTED_READS_BED
+    input: BAM_READNB, BED_READNB
+#    input: MACS2 ### NOT WORKING YET
     params: qsub=config["qsub"]
     shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
