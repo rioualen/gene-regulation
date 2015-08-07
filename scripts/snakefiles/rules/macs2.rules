@@ -18,7 +18,7 @@ rule macs2:
 	"""
         input: treatment="{result_dir}/{treatment}/{treatment}" + config["suffixes"]["mapped"] + ".bed", \
             control="{result_dir}/{control}/{control}" + config["suffixes"]["mapped"] + ".bed"
-	output: "{result_dir}/{treatment}_vs_{control}/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2._summits.bed"
+	output: "{result_dir}/{treatment}_vs_{control}/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2_summits.bed"
         params: outdir="{result_dir}/{treatment}_vs_{control}", \
             name="{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2._summits",\
             genome_size = config["genome"]["size"]
