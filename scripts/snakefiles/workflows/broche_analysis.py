@@ -5,7 +5,24 @@ Reference genome: Escherichia_coli_str_k_12_substr_mg1655
 
 Usage: snakemake -p -c "qsub {params.qsub}" -j 30
 
+Analyse différentielle:
+
+Il s'agit de deux projets RNAseq, A et B.  
+
+- Pour le projet A, il s'agit de comparer chaque mutant (iscU, im et
+  cyay) à la souche de référence (wt). Chaque souche a été faite en
+  triplicat.
+
+- Pour le projet B, il s'agit de comparer la souche 2 ( mutant IKE en
+  triplicat sp5, 6, 7) à la souche 1 (mutant IK en triplicat sp1,2,3);
+  puis la souche 3 (mutant stpA en triplicat sp8,9 10) à la souche 1;
+  puis la souche 2 à la souche 3. Dans ce projet B il n'y a pas de
+  souche wt car on veut comparer uniquement des mutants entre eux.
+
 """
+
+
+
 
 #================================================================#
 #                        Imports/Configuration file              #
@@ -18,7 +35,8 @@ configfile: "scripts/snakefiles/workflows/broche_analysis_config.json"
 workdir: config["dir"]["base"]
 #workdir: os.getcwd() # Local Root directoray for the project. Should be adapted for porting.
 
-debug = True
+## Beware: verbosity messages are incompatible with the flowcharts
+verbosity = int(config["verbosity"])
 
 ################################################################
 ## Define global variables
@@ -28,17 +46,17 @@ NOW = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
 ################################################################
 ## Import snakemake rules and python library
 include: config["dir"]["python_lib"] + "/util.py"                   ## Python utilities
-include: config["dir"]["rules"] + "/util.rules"                ## Snakemake utilities
-include: config["dir"]["rules"] + "/count_reads.rules"         ## Count reads in different file formats
-include: config["dir"]["rules"] + "/fastqc.rules"              ## Quality control with fastqc
-include: config["dir"]["rules"] + "/flowcharts.rules"          ## Draw flowcharts (dag and rule graph)
-include: config["dir"]["rules"] + "/sickle_paired_ends.rules"  ## Trimming with sickle
-#include: config["dir"]["rules"] + "/bowtie_build.rules"        ## Read mapping with bowtie version 1 (no gap)
-#include: config["dir"]["rules"] + "/bowtie_paired_ends.rules"  ## Paired-ends read mapping with bowtie version 1 (no gap)
-include: config["dir"]["rules"] + "/bowtie2_build.rules"        ## Read mapping with bowtie version 2 (suports gaps)
-include: config["dir"]["rules"] + "/bowtie2_paired_ends.rules"  ## Paired-ends read mapping with bowtie version 2 (support gaps)
-include: config["dir"]["rules"] + "/htseq.rules"        ## Count reads per gene with htseq-count
-include: config["dir"]["rules"] + "/featurecounts.rules"        ## Count reads per gene with R subread::featurecounts
+include: config["dir"]["rules"] + "/util.rules"                     ## Snakemake utilities
+include: config["dir"]["rules"] + "/count_reads.rules"              ## Count reads in different file formats
+include: config["dir"]["rules"] + "/fastqc.rules"                   ## Quality control with fastqc
+include: config["dir"]["rules"] + "/flowcharts.rules"               ## Draw flowcharts (dag and rule graph)
+include: config["dir"]["rules"] + "/sickle_paired_ends.rules"       ## Trimming with sickle
+#include: config["dir"]["rules"] + "/bowtie_build.rules"            ## Read mapping with bowtie version 1 (no gap)
+#include: config["dir"]["rules"] + "/bowtie_paired_ends.rules"      ## Paired-ends read mapping with bowtie version 1 (no gap)
+include: config["dir"]["rules"] + "/bowtie2_build.rules"            ## Read mapping with bowtie version 2 (suports gaps)
+include: config["dir"]["rules"] + "/bowtie2_paired_ends.rules"      ## Paired-ends read mapping with bowtie version 2 (support gaps)
+include: config["dir"]["rules"] + "/htseq.rules"                    ## Count reads per gene with htseq-count
+include: config["dir"]["rules"] + "/featurecounts.rules"            ## Count reads per gene with R subread::featurecounts
 
 ################################################################
 ## Define the lists of requested files
@@ -47,63 +65,112 @@ include: config["dir"]["rules"] + "/featurecounts.rules"        ## Count reads p
 ## Read the list of sample IDs from the sample description file
 SAMPLE_IDS = read_sample_ids(config["files"]["samples"])
 
-## DEBUG ##
-if debug:
+## Verbosity
+if (verbosity >= 2):
     print ("Sample description file:\t" + config["files"]["samples"])
     print ("Sample IDs:\t" + ";".join(SAMPLE_IDS))
 
-## List the merged raw reads
+################################################################
+## Raw read files.  
+
+## THIS SHOULD BE IMPROVED: for the time being I collect the file
+## names by listing the files corresponding to a given pattern. THE
+## INPUT FILE NAMES SHOULD BE PROVIDED IN THE SAMPLE DESCRIPTION FILE
+## !!!
 RAWR_L1R1, RAWR_L1R1_DIRS, RAWR_L1R1_BASENAMES=glob_multi_dir(SAMPLE_IDS, "*_L001" + config["suffix"]["reads_fwd"] + ".fastq.gz", config["dir"]["reads_source"], "_L001" + config["suffix"]["reads_fwd"] + ".fastq.gz")
 RAWR_MERGED_FWD=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_fwd"] + ".fastq", zip, sample_dir=RAWR_L1R1_DIRS, sample_basename=RAWR_L1R1_BASENAMES)
 RAWR_MERGED_REV=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_rev"] + ".fastq", zip, sample_dir=RAWR_L1R1_DIRS, sample_basename=RAWR_L1R1_BASENAMES)
 RAWR_MERGED=RAWR_MERGED_FWD + RAWR_MERGED_REV
 
-## List separately the FORWARD and REVERSE raw read files, which will be submitted to quality control
+## List separately the FORWARD and REVERSE raw read files
 RAWR_FILES_FWD, RAWR_DIRS_FWD, RAWR_BASENAMES_FWD=glob_multi_dir(SAMPLE_IDS, "*" + config["suffix"]["reads_fwd"] + ".fastq.gz", config["dir"]["reads"], config["suffix"]["reads_fwd"] + ".fastq.gz")
 RAWR_FILES_REV, RAWR_DIRS_REV, RAWR_BASENAMES_REV=glob_multi_dir(SAMPLE_IDS, "*" + config["suffix"]["reads_rev"] + ".fastq.gz", config["dir"]["reads"], config["suffix"]["reads_rev"] + ".fastq.gz")
 
+## List all the raw read files
+RAWR_FILES, RAWR_DIRS, RAWR_BASENAMES=glob_multi_dir(SAMPLE_IDS, "*_R*_001.fastq.gz", config["dir"]["reads"], ".fastq.gz")
 
-## Merge trimmed reads I use a trick to obtain one directory name per
-## group of lanes: I only glob the first lane, and I use the list of
-## directories and basenames
+
+
+################################################################
+## Trimmed reads
+
+## Merge trimmed reads. Note: I use a trick to obtain one directory
+## name per group of lanes: I only glob the first lane, and I use the
+## list of directories and basenames.
 SAMPLE_L1R1, PAIRED_DIRS, PAIRED_BASENAMES=glob_multi_dir(SAMPLE_IDS, "*_L001" + config["suffix"]["reads_fwd"] + ".fastq.gz", config["dir"]["reads"], "_L001" + config["suffix"]["reads_fwd"] + ".fastq.gz")
 TRIMMED_MERGED_FWD=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_fwd"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 TRIMMED_MERGED_REV=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_rev"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 TRIMMED_MERGED=TRIMMED_MERGED_FWD + TRIMMED_MERGED_REV
 
-## Bowtie version 1: paired-end read mapping without gap
-## Bowtie version 2: paired-end read mapping with gap
-MAPPED_PE_SAM=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe.sam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
-MAPPED_PE_BAM=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe.bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
-MAPPED_PE_SORTED=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_pos.bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+## Trimmed reads
+#TRIMMED_SUMMARIES = expand(config["dir"]["reads"] + "/{sample_dir}/{reads}_trimmed_thr" + config["sickle"]["threshold"] + "_summary.txt", zip, reads=RAWR_BASENAMES_FWD, sample_dir=RAWR_DIRS_FWD)
+TRIMMED_FILES, TRIMMED_DIRS, TRIMMED_BASENAMES=glob_multi_dir(SAMPLE_IDS, "*_R*_001_trimmed_thr" + config["sickle"]["threshold"] + ".fastq.gz", config["dir"]["reads"], ".fastq.gz")
 
-MAPPED_PE_SORTED_BY_NAME=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_name.bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
-if (debug):
-    print ("MAPPED_PE_SORTED_BY_NAME:\n\t" + "\n\t".join(MAPPED_PE_SORTED_BY_NAME))
-
-## Problem with HTSeq and position-sorted bam files ? To be chacked later
-## HTSEQ_COUNTS=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_pos_HTSeqcount.tab", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
-HTSEQ_COUNTS=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_name_HTSeqcount.tab", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
-
-if (debug):
-    print ("HTSEQ_COUNTS:\n\t" + "\n\t".join(HTSEQ_COUNTS))
-
-## List all the raw read files, which will be submitted to quality control
-RAWR_FILES, RAWR_DIRS, RAWR_BASENAMES=glob_multi_dir(SAMPLE_IDS, "*_R*_001.fastq.gz", config["dir"]["reads"], ".fastq.gz")
-
+################################################################
 ## Quality control
+
 #RAWR_QC=expand(config["dir"]["reads"] + "/{sample_dir}/{reads}_fastqc/", zip, reads=RAWR_BASENAMES, sample_dir=RAWR_DIRS)
 MERGED_RAWR_QC=expand(config["dir"]["reads"] + "/{sample_dir}/{reads}_merged" + config["suffix"]["reads_fwd"] + "_fastqc/", zip, reads=PAIRED_BASENAMES, sample_dir=PAIRED_DIRS) + expand(config["dir"]["reads"] + "/{sample_dir}/{reads}_merged" + config["suffix"]["reads_rev"] + "_fastqc/", zip, reads=PAIRED_BASENAMES, sample_dir=PAIRED_DIRS)
 #MERGED_RAWR_PREFIXES=expand(config["dir"]["reads"] + "/{sample_dir}/{reads}_merged" + config["suffix"]["reads_fwd"], zip, reads=PAIRED_BASENAMES, sample_dir=PAIRED_DIRS) + expand(config["dir"]["reads"] + "/{sample_dir}/{reads}_merged" + config["suffix"]["reads_rev"], zip, reads=PAIRED_BASENAMES, sample_dir=PAIRED_DIRS)
 #MERGED_RAWR_QC = expand("{fastq_prefix}_fastqc", fastq_prefix=MERGED_PREFIXES)
 
-## Trimmed reads
-# TRIMMED_SUMMARIES = expand(config["dir"]["reads"] + "/{sample_dir}/{reads}_trimmed_thr" + config["sickle"]["threshold"] + "_summary.txt", zip, reads=RAWR_BASENAMES_FWD, sample_dir=RAWR_DIRS_FWD)
-# TRIMMED_FILES, TRIMMED_DIRS, TRIMMED_BASENAMES=glob_multi_dir(SAMPLE_IDS, "*_R*_001_trimmed_thr" + config["sickle"]["threshold"] + ".fastq.gz", config["dir"]["reads"], ".fastq.gz")
-# TRIMMED_QC=expand(config["dir"]["reads"] + "/{sample_dir}/{reads}_fastqc/", zip, reads=TRIMMED_BASENAMES, sample_dir=TRIMMED_DIRS)
+TRIMMED_QC=expand(config["dir"]["reads"] + "/{sample_dir}/{reads}_fastqc/", zip, reads=TRIMMED_BASENAMES, sample_dir=TRIMMED_DIRS)
 
+################################################################
 ## Mapped reads
+
 #MAPPED_FILES=expand(config["dir"]["reads"] + "/{sample_dir}/{reads}_trimmed_thr" + config["sickle"]["threshold"] + "_bowtie2.sam", zip, reads=RAWR_BASENAMES, sample_dir=RAWR_DIRS)
+
+## Bowtie version 1: paired-end read mapping without gap.  
+## Bowtie version 2: paired-end read mapping with gap.  
+##
+## Note: I finally opted for bowtie2, because the sequence counts wit
+## htseq-count was causing problems with bowtie1. I should revise this
+## at some point.
+
+MAPPED_PE_SAM=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe.sam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+MAPPED_PE_BAM=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe.bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+MAPPED_PE_SORTED=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_pos.bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+
+MAPPED_PE_SORTED_BY_NAME=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_name.bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+if (verbosity >= 3):
+    print ("MAPPED_PE_SORTED_BY_NAME:\n\t" + "\n\t".join(MAPPED_PE_SORTED_BY_NAME))
+
+################################################################
+## Read counts per gene (done with htseq-count)
+
+## THERE SEEMS TO BE A PROBLEM WITH HTSEQ AND POSITION-SORTED BAM
+## FILES ?  TO BE CHACKED LATER
+
+HTSEQ_COUNTS=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_name_HTSeqcount.tab", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+COUNT_FILES=HTSEQ_COUNTS
+if (verbosity >= 3):
+    print ("HTSEQ_COUNTS:\n\t" + "\n\t".join(HTSEQ_COUNTS))
+
+################################################################
+## Differential expression analysis
+PARAMS_R = config["dir"]["results"] + "DEG/sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + "_params.R"
+ALL_COUNTS = config["dir"]["results"] + "DEG/sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + "_allcounts.tab"
+#OUT_HTSEQ = PARAMS_R, ALL_COUNTS
+if (verbosity >= 0):
+    print ("PARAMS_R:\t" + PARAMS_R)
+    print ("ALL_COUNTS:\t" + ALL_COUNTS)
+#    print ("OUT_HTSEQ:\t" + ",".join(OUT_HTSEQ))
+
+
+################################################################
+## Rules for differential analysis. 
+##
+## Note: these rules must be loaded after having defined some global
+## variables COUNT_FILES, PARAMS_R, ALL_COUNTS.
+include: config["dir"]["rules"] + "/HTseq_allcount_params.rules"    ## Produce the count table from sample-based count files + the parameters for differential analysis
+#include: config["dir"]["rules"] + "/edgeR.rules"                   ## Differential expression analysis with BioConductor edgeR package
+#include: config["dir"]["rules"] + "/DESeq2.rules"                  ## Differential expression analysis with BioConductor DESeq2 package
+
+
+################################################################
+## Targets
+################################################################
 
 rule all: 
     """
@@ -111,8 +178,9 @@ rule all:
     """
 #    input: TRIMMED_SUMMARIES, TRIMMED_QC
 #    input: MAPPED_PE_SAM, MAPPED_PE_BAM, MAPPED_PE_SORTED
-    input: MAPPED_PE_SORTED_BY_NAME, HTSEQ_COUNTS
-#    input: MERGED_RAWR_QC, RAWR_MERGED, TRIMMED_MERGED, MAPPED_PE_SAM, MAPPED_PE_BAM, MAPPED_PE_SORTED, MAPPED_PE_SORTED_BY_NAME, HTSEQ_COUNTS
+#    input: MAPPED_PE_SORTED_BY_NAME, HTSEQ_COUNTS
+#    input: MERGED_RAWR_QC, RAWR_MERGED, TRIMMED_MERGED, TRIMMED_QC, MAPPED_PE_SAM, MAPPED_PE_BAM, MAPPED_PE_SORTED, MAPPED_PE_SORTED_BY_NAME, HTSEQ_COUNTS
+    input: PARAMS_R
     params: qsub=config["qsub"]
     shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
