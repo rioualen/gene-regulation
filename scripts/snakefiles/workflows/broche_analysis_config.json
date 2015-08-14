@@ -3,6 +3,7 @@
     "__author__": "Jacques van Helden",
     "data_source": "TGML platform, samples from Beatrice Roche",
     "qsub": "-V -m a -d /workspace/tgml/BeatriceRoche/",
+    "verbosity": "0",
 
     "genome": {
 	"organism": "Escherichia_coli_str_k_12_substr_mg1655",
@@ -95,7 +96,12 @@
         "gtf_attrtype": "gene_id",
         "reference_genome": "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27.dna.genome.fa",
         "annotations":"genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27.gtf"
-    }
+    },
 
+    "Diff_Exp": {
+        "conditions": ["wt", "isw", "im", "cyay", "souche1", "souche2", "souche3"],
+        "cond1": ["iscU"],
+        "cond2": ["wt"]
+    }
 
 }
