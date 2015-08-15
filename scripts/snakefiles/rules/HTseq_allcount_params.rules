@@ -99,7 +99,7 @@ rule HTseq_allcount_params:
             dir_results = config["dir"]["results"]
 
     run:
-        verbosity = config["verbosity"]
+        verbosity = int(config["verbosity"])
 
         if verbosity >= 2:
             print("Generating count table\t" + output.all_counts_file)
