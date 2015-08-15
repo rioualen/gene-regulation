@@ -71,7 +71,25 @@ def read_column_from_tab(file_path:str, column:int=1, verbosity:int=0) -> list:
         print("\t".join(["read_sample_ids()", "Result:", str(len(values)), "sample IDs"]))
     return(values)
     
+def read_table(file:str, verbosity:int=0, header:int=0, skip_blank_lines=True, comment=';'):
+    """Read a tab-delimited text file and return the content as a data
+    frame (object of the class panda.DataFrame).
 
+    This is a simple wrapper around panda.read_csv, with the
+    appropriat options for our tab-delimited files: comment lines
+    start with ';', the first non-comment line contains the
+    header. These options can be overwritten in the function call.
+
+    """
+    import pandas as pd
+    if verbosity >= 1:
+        print ("read_table() from file\t" + file)
+    df = pd.read_csv(file, sep="\t", 
+                     header=header, 
+                     skip_blank_lines=skip_blank_lines,
+                     comment=comment)
+    return(df)
+    
 # ################################################################
 # def read_sample_ids(file, base_dir=".", column=1, verbose=0):
 #     """Read sample descriptions from a tab-delimited file. 
