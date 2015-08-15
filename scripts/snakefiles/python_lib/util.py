@@ -3,14 +3,9 @@ __license__ = "GPL"
 __version__ = "0.01"
 __maintainer__ = "Jacques van Helden"
 __email__ = "Jacques.van-Helden@univ-amu.fr"
-__status__ = "Embryonic"
+__status__ = "In development"
 
-__author__ = 'Jacques van Helden'
-__license__ = "GPL"
-__version__ = "0.01"
-__maintainer__ = "Jacques van Helden"
-__email__ = "Jacques.van-Helden@univ-amu.fr"
-__status__ = "Embryonic"
+import pandas as pd
 
 def read_sample_ids(file_path:str, base_dir:str=".", column:int=1, verbosity:int=0) -> list:
     """Read sample descriptions from a tab-delimited file. 
@@ -71,7 +66,7 @@ def read_column_from_tab(file_path:str, column:int=1, verbosity:int=0) -> list:
         print("\t".join(["read_sample_ids()", "Result:", str(len(values)), "sample IDs"]))
     return(values)
     
-def read_table(file:str, verbosity:int=0, header:int=0, skip_blank_lines=True, comment=';'):
+def read_table(file:str, verbosity:int=0, header:int=0, skip_blank_lines=True, comment=';') -> pd.DataFrame:
     """Read a tab-delimited text file and return the content as a data
     frame (object of the class panda.DataFrame).
 
@@ -81,30 +76,31 @@ def read_table(file:str, verbosity:int=0, header:int=0, skip_blank_lines=True, c
     header. These options can be overwritten in the function call.
 
     """
-    import pandas as pd
-    if verbosity >= 1:
-        print ("read_table() from file\t" + file)
+    if verbosity >= 3:
+        print ("read_table()\t" + file)
     df = pd.read_csv(file, sep="\t", 
                      header=header, 
                      skip_blank_lines=skip_blank_lines,
                      comment=comment)
+    if verbosity >= 3:
+        print("\tColumns:\t" + ";".join(list(df.columns)))
     return(df)
     
 # ################################################################
 # def read_sample_ids(file, base_dir=".", column=1, verbose=0):
 #     """Read sample descriptions from a tab-delimited file. 
-
+#
 #     The first column of the sample description file contains the
 #     sample ID. The other columns are currently ignored.
-
+#
 #     Lines starting with a semicolumn (;) are considered as comment
 #     lines, and thus ignored.
-
+#
 #     A line starting with a # can optionally be used at the beginning
 #     of the file to specify column headers (still not taken in
 #     consideration, but should be treated in future versions of this
 #     function).
-
+#
 #     :param file: path to the sample description file
 #     :type file: string
 #     :param column: number of the column containing the sample ID (Default: 1)
@@ -113,12 +109,12 @@ def read_table(file:str, verbosity:int=0, header:int=0, skip_blank_lines=True, c
 #     :type verbose: Integer
 #     :return: a list of sample IDs, taken from the first column of the sample file.
 #     :rtype: list of strings
-
+#
 #     """
 #     if verbose >= 1:
 #         print ("read_sample_ids()\t" +"Reading sample IDs from file\t" + file)
 #     samples = []
-
+#
 #     f = open(file, "r")
 #     for line in f.readlines():
 #         line = line.rstrip("\n") ## Suppress carriage.return
