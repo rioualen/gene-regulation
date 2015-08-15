@@ -59,26 +59,33 @@ include: config["dir"]["rules"] + "/htseq.rules"                    ## Count rea
 include: config["dir"]["rules"] + "/featurecounts.rules"            ## Count reads per gene with R subread::featurecounts
 
 ################################################################
-## Define the lists of requested files
+## Read sample descriptions and design files
 ################################################################
 
-## Read the list of sample IDs from the sample description file
-#SAMPLE_IDS = read_column_from_tab(config["files"]["samples"], column=1, verbosity=verbosity)
-#SAMPLE_TYPES = read_column_from_tab(config["files"]["samples"], column=2, verbosity=verbosity)
-#SAMPLE_DIRS = read_column_from_tab(config["files"]["samples"], column=3, verbosity=verbosity)
-
-SAMPLE_DESCR = read_table(config["files"]["samples"])
+## Read the sample description file
+SAMPLE_DESCR = read_table(config["files"]["samples"], verbosity=verbosity)
 SAMPLE_IDS = SAMPLE_DESCR['ID_client']
 SAMPLE_DIRS = SAMPLE_DESCR['folder']
-CONDITIONS = SAMPLE_DESCR['Cond']
+SAMPLE_CONDITIONS = SAMPLE_DESCR['Cond']
 
 ## Verbosity
-if (verbosity >= 2):
-    print ("Sample description file:\t" + config["files"]["samples"])
-    print(SAMPLE_DESCR.columns)
-    print ("Sample IDs:\t" + ";".join(SAMPLE_IDS))
-    print ("Sample folders:\t" + ";".join(SAMPLE_DIRS))
-    print ("Conditions:\t" + ";".join(CONDITIONS))
+if (verbosity >= 1):
+    print("Sample descriptions:\t" + config["files"]["samples"])
+    if (verbosity >= 2):
+        print("\tSample IDs:\t" + ";".join(SAMPLE_IDS))
+        print("\tSample folders:\t" + ";".join(SAMPLE_DIRS))
+        print("\tConditions:\t" + ";".join(SAMPLE_CONDITIONS))
+
+## Read the analysis design file
+DESIGN = read_table(config["files"]["analyses"], verbosity=verbosity)
+config["Diff_Exp"]["cond1"] = CONDITION_1 = DESIGN['cond1']
+config["Diff_Exp"]["cond2"] = CONDITION_2 = DESIGN['cond2']
+if (verbosity >= 1):
+    print("Analysis design:\t" + config["files"]["analyses"])
+    if (verbosity >= 2):
+        print("\tCondition 1:\t" + ";".join(CONDITION_1))
+        print("\tCondition 2:\t" + ";".join(CONDITION_2))
+
 
 ################################################################
 ## Raw read files.  
