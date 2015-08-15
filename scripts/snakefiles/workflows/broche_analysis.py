@@ -63,15 +63,22 @@ include: config["dir"]["rules"] + "/featurecounts.rules"            ## Count rea
 ################################################################
 
 ## Read the list of sample IDs from the sample description file
-SAMPLE_IDS = read_sample_ids(config["files"]["samples"], column=1, verbosity=verbosity)
-SAMPLE_TYPES = read_sample_ids(config["files"]["samples"], column=2, verbosity=verbosity)
-SAMPLE_DIRS = read_sample_ids(config["files"]["samples"], column=3, verbosity=verbosity)
+#SAMPLE_IDS = read_column_from_tab(config["files"]["samples"], column=1, verbosity=verbosity)
+#SAMPLE_TYPES = read_column_from_tab(config["files"]["samples"], column=2, verbosity=verbosity)
+#SAMPLE_DIRS = read_column_from_tab(config["files"]["samples"], column=3, verbosity=verbosity)
+
+SAMPLE_DESCR = read_table(config["files"]["samples"])
+SAMPLE_IDS = SAMPLE_DESCR['ID_client']
+SAMPLE_DIRS = SAMPLE_DESCR['folder']
+CONDITIONS = SAMPLE_DESCR['Cond']
 
 ## Verbosity
 if (verbosity >= 2):
     print ("Sample description file:\t" + config["files"]["samples"])
+    print(SAMPLE_DESCR.columns)
     print ("Sample IDs:\t" + ";".join(SAMPLE_IDS))
-    print ("Sample directories:\t" + ";".join(SAMPLE_DIRS))
+    print ("Sample folders:\t" + ";".join(SAMPLE_DIRS))
+    print ("Conditions:\t" + ";".join(CONDITIONS))
 
 ################################################################
 ## Raw read files.  
@@ -155,7 +162,7 @@ if (verbosity >= 3):
 PARAMS_R = config["dir"]["results"] + "DEG/sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + "_params.R"
 ALL_COUNTS = config["dir"]["results"] + "DEG/sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + "_allcounts.tab"
 #OUT_HTSEQ = PARAMS_R, ALL_COUNTS
-if (verbosity >= 0):
+if (verbosity >= 2):
     print ("PARAMS_R:\t" + PARAMS_R)
     print ("ALL_COUNTS:\t" + ALL_COUNTS)
 #    print ("OUT_HTSEQ:\t" + ",".join(OUT_HTSEQ))
