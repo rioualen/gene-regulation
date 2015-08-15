@@ -1,3 +1,78 @@
+import pandas as pd
+
+
+def merge_count_files(count_files:list, split_suffix:str=""):
+    """Read a list of tab-delimited files containing counts per genes
+    (column 1 = gene ID, column 2 = read counts) and merge all counts
+    in a single data frame (one row per gene, one column per
+    sample).
+
+    """
+
+    ## !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    ## JVH: THIS SHOULD BE REVISED: it will be more robust to
+    ## merge count files with python pandas library.
+    ## http://pandas.pydata.org/pandas-docs/stable/merging.html#set-logic-on-the-other-axes
+
+    # Initilizing headers for all_count file
+#    table_header = "gene_id"
+
+    # # Condition only true on the first loop
+    # gene_ids_ok = True
+    # list_line = []
+
+    ## Instantiate an empty data frame to merge the counts for
+    ## each sample (one column per sample, one row per gene).
+    count_table = pd.DataFrame()
+
+    # Parse a count files of all replicates of all conditions
+    for i in range(len(COUNT_FILES)):
+        count_file = COUNT_FILES[i]
+
+
+        ## !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        ## JVH: THIS SHOULD BE REVISED: the headers should simply be the
+        ## sample IDs.
+
+        # The sample ID is currently computed from the file name
+        # sample_id = count_file.split("/")[-1]         ## Remove path of count table files
+        sample_id = os.path.basename(count_file)        ## Take the basename of the count file as sample ID
+        sample_id = sample_id.split(split_suffix)[0]    ## Split the suffix if defined
+#        table_header += "\t" + sample_id                ## Add the current sample ID to the header line
+
+        if verbosity >= 3:
+            print("\t".join(["\tReading counts", str(i), sample_id, count_file]))
+
+        ## Read the count table for the current sample
+        sample_counts = pd.read_csv(count_file, sep="\t", names=[sample_id],  index_col=0)
+
+        ## Add a column with current sample to the count table
+        count_table = pd.concat([count_table, sample_counts], axis=1)
+            
+        # count_res = open(count_file)
+        # #Check if first loop
+        # if gene_ids_ok:
+        #     for line in count_res:
+        #         # Create gene_ids
+        #         gene_counts_ids = line.split("\t")
+        #         list_line.append(gene_counts_ids[0] + "\t" + gene_counts_ids[1].strip("\n"))
+        #     gene_ids_ok = False
+
+        # #If gene_ids already exist add count column
+        # list_file = count_res.readlines()
+        # for j in range(len(list_file)):
+        #     gene_counts = list_file[j].split("\t")
+        #     list_line[j] += "\t" + gene_counts[1].strip("\n")
+        # count_res.close()
+
+    # # Write the content of the variable all_counts in a file
+    # all_counts = open(output.all_counts_file + "_old.tab", 'w')
+    # all_counts.write(table_header + "\n")
+    # for elm in list_line:
+    #     all_counts.write(elm + "\n")
+    # all_counts.close()
+    return(count_table)
+
 rule HTseq_allcount_params:
     """Create a tab-delimited file regrouping the counts of reads per gene
     for all the samples, by collecting the sample-specific counts
@@ -24,61 +99,66 @@ rule HTseq_allcount_params:
             dir_results = config["dir"]["results"]
 
     run:
-        # Create lists containing tested condition at the same index
-        condition_1 = params.cond1
-        condition_2 = params.cond2
+        verbosity = config["verbosity"]
 
+        if verbosity >= 2:
+            print("Generating count table\t" + output.all_counts_file)
 
-        dir_results  = params.dir_results
     
-        # Get name of R_params file without path
-        params_R_file = output.R_params.split("/")[-1]
+        # Get name of R_params file without path.
+#        R_params_basename = output.R_params.split("/")[-1]
+        R_params_basename = os.path.basename(output.R_params)
 
-        # Get extention of align files from name of R_params
-        ext_align = params_R_file.replace("_params.R", "")
+        # Get common suffix of all the aligned read files from name of
+        # R_params.  
+        # 
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        # NOTE BY JVH (2015-08-14): THIS SHOULD BE
+        # REVISED. The script relies on the fact that the suffix of
+        # all the count files is the prefix of the parameter file.
+        split_suffix = "_" + R_params_basename.replace("_params.R", "")
 
-        # Get extention of count file
-        complet_path_count = COUNT_FILES[0].rsplit("/", maxsplit=1)
-        #count_ext = complet_path_count[-1].rsplit("_")[-1]
-        count_ext = complet_path_count[-1].rsplit(".")[-1]
+        # Get extention of count files by splitting the first file of
+        # the list. Note that this assumes that all count files have
+        # the same extension.
+        #
+        # complet_path_count = COUNT_FILES[0].rsplit("/", maxsplit=1)
+        # #count_ext = complet_path_count[-1].rsplit("_")[-1]
+        # count_ext = complet_path_count[-1].rsplit(".")[-1]
+        first_file_basename = os.path.basename(COUNT_FILES[0])
+        count_ext = os.path.splitext(first_file_basename)[1]
 
-        # Initilizing headers for all_count file
-        header = "gene_id"
-        # Add to header the name of the replicates in the same order as COUNT_FILES
-        for count_file in COUNT_FILES:
-            # Remove path of count table files
-            head = count_file.split("/")[-1]
-            header += "\t" + head.split("_" + ext_align)[0]
+        count_table = merge_count_files(COUNT_FILES, split_suffix=split_suffix)
 
-        # Condition only true on the first loop
-        gene_ids_ok = True
-        list_line = []
+        ## Export the count table in tab-delimited text file, with a
+        ## column header (sample IDs) and row names (gene IDs).
+        count_table.to_csv(output.all_counts_file, sep="\t", 
+                           header=True, index=True, index_label="gene_id")
 
-        #Parse a count files of all replicates of all conditions
-        for i in range(len(COUNT_FILES)):
-            count_res = open(COUNT_FILES[i])
-            #Check if first loop
-            if gene_ids_ok:
-                for line in count_res:
-                    # Create gene_ids
-                    gene_counts_ids = line.split("\t")
-                    list_line.append(gene_counts_ids[0] + "\t" + gene_counts_ids[1].strip("\n"))
-                gene_ids_ok = False
+        ## For debugging
+        if verbosity >= 4:
+            print("split_suffix" + "\t" + split_suffix)
+            print("count_ext" + "\t" + count_ext)
+#            print("table_header" + "\t" + table_header)
+            if verbosity >= 10:
+                print("count_table\t" + str(count_table.head()))
 
-            #If gene_ids already exist add count column
-            list_file = count_res.readlines()
-            for j in range(len(list_file)):
-                gene_counts = list_file[j].split("\t")
-                list_line[j] += "\t" + gene_counts[1].strip("\n")
-            count_res.close()
+        if verbosity >= 3:
+            print("Exported count table\t" + output.all_counts_file)
 
-        # Write the content of the variable all_counts in a file
-        all_counts = open(output.all_counts_file, 'w')
-        all_counts.write(header + "\n")
-        for elm in list_line:
-            all_counts.write(elm + "\n")
-        all_counts.close()
+        ################################################################
+        ## Exporting parameters for differential analysis with R
 
+
+        ## !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        ## JVH: In this version, the associations between samples and
+        ## conditions are indicated in the configuration file. This
+        ## can become eavy to manage, and it is redundant since this
+        ## information should be present in the sample description
+        ## file. I will adapt this
+
+        if verbosity >= 2:
+            print("Exporting R parameters\t" + output.R_params)
 
         # Initializing variables
         counts_f = []
@@ -88,27 +168,52 @@ rule HTseq_allcount_params:
         n_rep = []
         output_list = []
 
-        # Get all parameters for all comparisons
+        # Get parameters
+        condition_1 = params.cond1
+        condition_2 = params.cond2
+        dir_results  = params.dir_results
+
+        if verbosity >= 3:
+            print("condition_1" + "\t" + ";".join(condition_1))
+            print("condition_2" + "\t" + ";".join(condition_2))
+            print("R_params_basename" + "\t" + R_params_basename)
+
+        # Iterate over the analyses. One analysis consists in
+        # detecting differentially expressed genes between two
+        # conditions. This function exports the parameters for one or
+        # several analyses. 
         for i in range(len(condition_1)):
+            cond_1 = condition_1[i] # First condition for current analysis
+            cond_2 = condition_2[i] # Second condition for current analysis
+            if verbosity >= 2:
+                print(cond_1 + "\tversus\t" + cond_2)
 
-            cond_1 = condition_1[i]
-            cond_2 = condition_2[i]
-            output_list.append(dir_results + "DEG/" + cond_1 + "_vs_" + cond_2 + "/" + cond_1 + "_VS_" + cond_2 + "_" + ext_align + ".tab")
-            
+            output_list.append(dir_results + "DEG/" + cond_1 + "_vs_" + cond_2 + "/" + cond_1 + "_VS_" + cond_2 + "_" + split_suffix + ".tab")            
 
-            # Get the list of biological replicates
-            R_1 = config["Diff_Exp"][cond_1]
-            R_2 = config["Diff_Exp"][cond_2]
+            # Get the respective lists R_1, R_2 with the sample IDs
+            # for the two selected conditions (there should be several
+            # samples per condition).
+            R_1 = []
+            R_2 = []
+            if ("Diff_Exp" in config) and (cond_1 in config["Diff_Exp"]) and (cond_2 in config["Diff_Exp"]):
+                R_1 = config["Diff_Exp"][cond_1]
+                R_2 = config["Diff_Exp"][cond_2]
+            else:
+                R_1 = list(SAMPLE_IDS[SAMPLE_CONDITIONS == cond_1])
+                R_2 = list(SAMPLE_IDS[SAMPLE_CONDITIONS == cond_2])
 
+            if verbosity >= 2:
+                print("\t" + cond_1 + "\t" + ";".join(R_1))
+                print("\t" + cond_2 + "\t" + ";".join(R_2))
+                
+
+            # List path + name of replicats
             files_list = []
             files_list_R1 = []
             files_list_R2 = []
-            # List path + name of replicats
             for i in range(len(R_1)) :
-                #files_list_R1.append('"' + config["dir"]["reads_source"] + R_1[i]+ "/" + R_1[i] + "_" + ext_align + count_ext + '"')
-                #files_list_R2.append('"' + config["dir"]["reads_source"] + R_2[i]+ "/" + R_2[i] + "_" + ext_align + count_ext + '"')
-                files_list_R1.append('"' + config["dir"]["results"] + R_1[i]+ "/" + R_1[i] + "_" + ext_align + "." + count_ext + '"')
-                files_list_R2.append('"' + config["dir"]["results"] + R_2[i]+ "/" + R_2[i] + "_" + ext_align + "." + count_ext + '"')
+                files_list_R1.append('"' + config["dir"]["results"] + R_1[i]+ "/" + R_1[i] + "_" + split_suffix + "." + count_ext + '"')
+                files_list_R2.append('"' + config["dir"]["results"] + R_2[i]+ "/" + R_2[i] + "_" + split_suffix + "." + count_ext + '"')
 
             files_list = files_list_R1 + files_list_R2
             
@@ -132,25 +237,25 @@ rule HTseq_allcount_params:
         
         out_R=open(output.R_params, 'w')
         out_R.write("## Root path \n" \
-        + "data.root <-'" +  config["dir"]["results"] + "' \n \n" \
-        + "## Table containing the counts of reads per gene (rows) for each sample (columns)  \n" \
-        + "all.counts.table <- '" + output.all_counts_file + "' \n \n" \
-        + "## Description of the conditions \n" \
-        + "conditions <- c('" + "','".join(config["Diff_Exp"]["conditions"]) + "') \n" \
-        + "n.rep <-c(" + ','.join(n_rep) + ")\n \n" \
-        + "count.files <-c('" + "', \n '".join(COUNT_FILES) + "') \n \n"\
-        + "FDR.threshold <- " + config["edgeR"]["FDR_threshold"] + "\n \n \n"\
-        + "################################################################ \n" \
-        + "## Structure of the comparisons for edgeR \n \n" \
-        + "comparisons <-list(" + ','.join(conditions) + ")\n" \
-        + "comparisons.cond1 <-list('" + "','".join(condition_1) + "') \n" \
-        + "comparsions.cond2 <-list('" + "','".join(condition_2) + "') \n" \
-        + "counts.files.per.comparisons <- list(" + ', \n'.join(counts_f) + ")\n" \
-        + "condition.per.comparisons <-list(" + ', \n '.join(sample_condition_py) + ")\n" \
-        + "names.per.comparisons <-list(" +  ', \n '.join(sample_names_py) + ")\n \n" \
-        + "## List of cvs files that will be created by edgeR \n" \
-        + "output <-c('" + "', \n '".join(output_list) + "') \n \n" \
-        + "#### END OF THE CONFIG FILE \n" \
-        + "################################################################" \
-        )     
+                    + "data.root <-'" +  config["dir"]["results"] + "' \n \n" \
+                    + "## Table containing the counts of reads per gene (rows) for each sample (columns)  \n" \
+                    + "all.counts.table <- '" + output.all_counts_file + "' \n \n" \
+                    + "## Description of the conditions \n" \
+                    + "conditions <- c('" + "','".join(config["Diff_Exp"]["conditions"]) + "') \n" \
+                    + "n.rep <-c(" + ','.join(n_rep) + ")\n \n" \
+                    + "count.files <-c('" + "', \n '".join(COUNT_FILES) + "') \n \n"\
+                    + "FDR.threshold <- " + config["edgeR"]["FDR_threshold"] + "\n \n \n"\
+                    + "################################################################ \n" \
+                    + "## Structure of the comparisons for edgeR \n \n" \
+                    + "comparisons <-list(" + ','.join(conditions) + ")\n" \
+                    + "comparisons.cond1 <-list('" + "','".join(condition_1) + "') \n" \
+                    + "comparsions.cond2 <-list('" + "','".join(condition_2) + "') \n" \
+                    + "counts.files.per.comparisons <- list(" + ', \n'.join(counts_f) + ")\n" \
+                    + "condition.per.comparisons <-list(" + ', \n '.join(sample_condition_py) + ")\n" \
+                    + "names.per.comparisons <-list(" +  ', \n '.join(sample_names_py) + ")\n \n" \
+                    + "## List of cvs files that will be created by edgeR \n" \
+                    + "output <-c('" + "', \n '".join(output_list) + "') \n \n" \
+                    + "#### END OF THE CONFIG FILE \n" \
+                    + "################################################################" \
+                )     
         out_R.close()
