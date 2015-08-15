@@ -63,12 +63,15 @@ include: config["dir"]["rules"] + "/featurecounts.rules"            ## Count rea
 ################################################################
 
 ## Read the list of sample IDs from the sample description file
-SAMPLE_IDS = read_sample_ids(config["files"]["samples"])
+SAMPLE_IDS = read_sample_ids(config["files"]["samples"], column=1, verbosity=verbosity)
+SAMPLE_TYPES = read_sample_ids(config["files"]["samples"], column=2, verbosity=verbosity)
+SAMPLE_DIRS = read_sample_ids(config["files"]["samples"], column=3, verbosity=verbosity)
 
 ## Verbosity
 if (verbosity >= 2):
     print ("Sample description file:\t" + config["files"]["samples"])
     print ("Sample IDs:\t" + ";".join(SAMPLE_IDS))
+    print ("Sample directories:\t" + ";".join(SAMPLE_DIRS))
 
 ################################################################
 ## Raw read files.  
@@ -77,17 +80,17 @@ if (verbosity >= 2):
 ## names by listing the files corresponding to a given pattern. THE
 ## INPUT FILE NAMES SHOULD BE PROVIDED IN THE SAMPLE DESCRIPTION FILE
 ## !!!
-RAWR_L1R1, RAWR_L1R1_DIRS, RAWR_L1R1_BASENAMES=glob_multi_dir(SAMPLE_IDS, "*_L001" + config["suffix"]["reads_fwd"] + ".fastq.gz", config["dir"]["reads_source"], "_L001" + config["suffix"]["reads_fwd"] + ".fastq.gz")
+RAWR_L1R1, RAWR_L1R1_DIRS, RAWR_L1R1_BASENAMES=glob_multi_dir(SAMPLE_DIRS, "*_L001" + config["suffix"]["reads_fwd"] + ".fastq.gz", config["dir"]["reads_source"], "_L001" + config["suffix"]["reads_fwd"] + ".fastq.gz")
 RAWR_MERGED_FWD=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_fwd"] + ".fastq", zip, sample_dir=RAWR_L1R1_DIRS, sample_basename=RAWR_L1R1_BASENAMES)
 RAWR_MERGED_REV=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_rev"] + ".fastq", zip, sample_dir=RAWR_L1R1_DIRS, sample_basename=RAWR_L1R1_BASENAMES)
 RAWR_MERGED=RAWR_MERGED_FWD + RAWR_MERGED_REV
 
 ## List separately the FORWARD and REVERSE raw read files
-RAWR_FILES_FWD, RAWR_DIRS_FWD, RAWR_BASENAMES_FWD=glob_multi_dir(SAMPLE_IDS, "*" + config["suffix"]["reads_fwd"] + ".fastq.gz", config["dir"]["reads"], config["suffix"]["reads_fwd"] + ".fastq.gz")
-RAWR_FILES_REV, RAWR_DIRS_REV, RAWR_BASENAMES_REV=glob_multi_dir(SAMPLE_IDS, "*" + config["suffix"]["reads_rev"] + ".fastq.gz", config["dir"]["reads"], config["suffix"]["reads_rev"] + ".fastq.gz")
+RAWR_FILES_FWD, RAWR_DIRS_FWD, RAWR_BASENAMES_FWD=glob_multi_dir(SAMPLE_DIRS, "*" + config["suffix"]["reads_fwd"] + ".fastq.gz", config["dir"]["reads"], config["suffix"]["reads_fwd"] + ".fastq.gz")
+RAWR_FILES_REV, RAWR_DIRS_REV, RAWR_BASENAMES_REV=glob_multi_dir(SAMPLE_DIRS, "*" + config["suffix"]["reads_rev"] + ".fastq.gz", config["dir"]["reads"], config["suffix"]["reads_rev"] + ".fastq.gz")
 
 ## List all the raw read files
-RAWR_FILES, RAWR_DIRS, RAWR_BASENAMES=glob_multi_dir(SAMPLE_IDS, "*_R*_001.fastq.gz", config["dir"]["reads"], ".fastq.gz")
+RAWR_FILES, RAWR_DIRS, RAWR_BASENAMES=glob_multi_dir(SAMPLE_DIRS, "*_R*_001.fastq.gz", config["dir"]["reads"], ".fastq.gz")
 
 
 
@@ -97,14 +100,14 @@ RAWR_FILES, RAWR_DIRS, RAWR_BASENAMES=glob_multi_dir(SAMPLE_IDS, "*_R*_001.fastq
 ## Merge trimmed reads. Note: I use a trick to obtain one directory
 ## name per group of lanes: I only glob the first lane, and I use the
 ## list of directories and basenames.
-SAMPLE_L1R1, PAIRED_DIRS, PAIRED_BASENAMES=glob_multi_dir(SAMPLE_IDS, "*_L001" + config["suffix"]["reads_fwd"] + ".fastq.gz", config["dir"]["reads"], "_L001" + config["suffix"]["reads_fwd"] + ".fastq.gz")
+SAMPLE_L1R1, PAIRED_DIRS, PAIRED_BASENAMES=glob_multi_dir(SAMPLE_DIRS, "*_L001" + config["suffix"]["reads_fwd"] + ".fastq.gz", config["dir"]["reads"], "_L001" + config["suffix"]["reads_fwd"] + ".fastq.gz")
 TRIMMED_MERGED_FWD=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_fwd"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 TRIMMED_MERGED_REV=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_rev"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 TRIMMED_MERGED=TRIMMED_MERGED_FWD + TRIMMED_MERGED_REV
 
 ## Trimmed reads
 #TRIMMED_SUMMARIES = expand(config["dir"]["reads"] + "/{sample_dir}/{reads}_trimmed_thr" + config["sickle"]["threshold"] + "_summary.txt", zip, reads=RAWR_BASENAMES_FWD, sample_dir=RAWR_DIRS_FWD)
-TRIMMED_FILES, TRIMMED_DIRS, TRIMMED_BASENAMES=glob_multi_dir(SAMPLE_IDS, "*_R*_001_trimmed_thr" + config["sickle"]["threshold"] + ".fastq.gz", config["dir"]["reads"], ".fastq.gz")
+TRIMMED_FILES, TRIMMED_DIRS, TRIMMED_BASENAMES=glob_multi_dir(SAMPLE_DIRS, "*_R*_001_trimmed_thr" + config["sickle"]["threshold"] + ".fastq.gz", config["dir"]["reads"], ".fastq.gz")
 
 ################################################################
 ## Quality control
@@ -180,7 +183,7 @@ rule all:
 #    input: MAPPED_PE_SAM, MAPPED_PE_BAM, MAPPED_PE_SORTED
 #    input: MAPPED_PE_SORTED_BY_NAME, HTSEQ_COUNTS
 #    input: MERGED_RAWR_QC, RAWR_MERGED, TRIMMED_MERGED, TRIMMED_QC, MAPPED_PE_SAM, MAPPED_PE_BAM, MAPPED_PE_SORTED, MAPPED_PE_SORTED_BY_NAME, HTSEQ_COUNTS
-    input: PARAMS_R
+    input: ALL_COUNTS
     params: qsub=config["qsub"]
     shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
@@ -212,7 +215,7 @@ rule merge_lanes:
 from snakemake.utils import report
 
 ## Bulleted list of samples for the report
-SAMPLE_IDS_OL=report_numbered_list(SAMPLE_IDS)
+SAMPLE_DIRS_OL=report_numbered_list(SAMPLE_DIRS)
 RAWR_MERGED_OL=report_numbered_list(RAWR_MERGED)
 TRIMMED_MERGED_OL=report_numbered_list(TRIMMED_MERGED)
 MAPPED_PE_SAM_OL=report_numbered_list(MAPPED_PE_SAM)
@@ -265,7 +268,7 @@ rule report:
         Sample directories
         ------------------
 
-        {SAMPLE_IDS_OL} 
+        {SAMPLE_DIRS_OL} 
 
         Raw reads 
         ---------
