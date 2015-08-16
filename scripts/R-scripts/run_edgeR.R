@@ -1,3 +1,4 @@
+################################################################
 ## R code to detect differentially expressed genes using the 
 ## edgeR BioConductor library. 
 ##
@@ -90,10 +91,11 @@ for (i in 1:nrow(design)) {
   samples2 <- sample.ids[sample.conditions == cond2]
   
   current.samples <- c(samples1, samples2)
-  
+
   ## Select counts for the samples belonging to the two conditions
   counts <- all.counts.mapped[,current.samples]
-  dim(counts)  
+  # dim(counts)  ## For test
+  
   if (sum(!names(counts) %in% sample.ids) > 0) {
     stop("Count table contains column names without ID in sample description file.")
   }
@@ -122,46 +124,44 @@ for (i in 1:nrow(design)) {
   d <- estimateTagwiseDisp(d, verbose=FALSE)
   
   ################################################################
-  ## Detect differentially expressed genes by applying the exact test
-  de <- exactTest(d)
+  ## Detect differentially expressed genes by applying the exact 
+  ## test from edgeR package
+  edger.de <- exactTest(d)
   
-  ## Tabular summary of the DE stats
-  tt <- topTags(de, n=nrow(d))
-  
+  ## Sort genes by p-value
+  edger.tt <- topTags(edger.de, n=nrow(d), sort.by = "PValue")
   
   ## Compute the E-value
-  tt$table$Evalue <- tt$table$PValue * nrow(tt$table)
+  edger.tt$table$Evalue <- edger.tt$table$PValue * nrow(edger.tt$table)
 
   ## Label the genes passing the FDR and E-value thresholds
-  tt$table[, paste(sep="", "FDR_", FDR.threshold)] <- (tt$table$FDR < FDR.threshold)*1
-  tt$table[, paste(sep="", "Evalue_", Evalue.threshold)] <- (tt$table$Evalue < Evalue.threshold)*1
+  edger.tt$table[, paste(sep="", "FDR_", FDR.threshold)] <- (edger.tt$table$FDR < FDR.threshold)*1
+  edger.tt$table[, paste(sep="", "Evalue_", Evalue.threshold)] <- (edger.tt$table$Evalue < Evalue.threshold)*1
   
-  #  head(tt) 
+  #  head(edger.tt) 
   
-  nc <- cpm(d, normalized.lib.sizes=TRUE)
-  rn <- rownames(tt$table)
+  #  edger.nc <- cpm(d, normalized.lib.sizes=TRUE)
+  edger.deg <- rownames(edger.tt$table)[edger.tt$table$FDR < FDR.threshold]
   
-  deg <- rn[tt$table$FDR < FDR.threshold]
-  
-  ## adding "_edgeR" to the output files
-  deg.file <- file.path(dir.analysis, 
-                        paste(sep = "", cond1, "_vs_", cond2, 
-                              "_", suffix.edgeR, ".tab"))
   
   ## Generate and export a result table.
   ## - round numerical values to 3 significant digits.
   ## - add a column with gene_ids, to enable exporting a column header.
-  result.table <- cbind(data.frame("gene_ID"= row.names(tt$table)), signif(tt$table, digits=3))
+  edgeR.result.table <- cbind(data.frame("gene_ID"= row.names(edger.tt$table)), 
+                        signif(edger.tt$table, digits=3))
   
-  write.table(x = result.table, row.names = FALSE,
+  deg.file <- file.path(dir.analysis, 
+                        paste(sep = "", cond1, "_vs_", cond2, 
+                              "_", suffix.edgeR, ".tab"))
+  write.table(x = edgeR.result.table, row.names = FALSE,
               file = deg.file, sep = "\t", quote=FALSE)
   
   ## Summarise results of the current analysis  
   current.summary <- data.frame(
     "analysis"=paste(sep="", cond1, "_vs_", cond2),
     "cond1" = cond1, "cond2" = cond2)
-  current.summary[,paste(sep="", "edgeR_FDR_", FDR.threshold)] = sum(result.table[,paste(sep="", "FDR_", FDR.threshold)])
-  current.summary[,paste(sep="", "edgeR_Evalue_", Evalue.threshold)] = sum(result.table[,paste(sep="", "Evalue_", Evalue.threshold)])
+  current.summary[,paste(sep="", "edgeR.FDR_", FDR.threshold)] = sum(edgeR.result.table[,paste(sep="", "FDR_", FDR.threshold)])
+  current.summary[,paste(sep="", "edgeR.Evalue_", Evalue.threshold)] = sum(edgeR.result.table[,paste(sep="", "Evalue_", Evalue.threshold)])
   
   if (i == 1) {
     summary.per.analysis <- current.summary
@@ -171,30 +171,31 @@ for (i in 1:nrow(design)) {
   
   ## Plot an histogram of the nominal p-values
   pdf(file=file.path(dir.figures, paste(sep = "", "pval_hist_", cond1, "_vs_", cond2, "_edgeR.pdf")))
-  hist(tt$table$PValue, breaks=20)
+  hist(edger.tt$table$PValue, breaks=20)
   quiet <- dev.off()
   
   ################################################################
   ## Export edgeR characteristic plots
   
   ## MA plot
-  pdf(file=file.path(dir.figures, paste(sep = "", "plotSmear_", cond1, "_vs_", cond2, "_edgeR.pdf")))
-  plotSmear(d, de.tags = deg)
+  pdf(file=file.path(dir.figures, paste(sep = "", "edgeR_plotSmear_", cond1, "_vs_", cond2, ".pdf")))
+  plotSmear(d, de.tags = edger.deg)
   quiet <- dev.off()
   
   ## MDS plot (Multidimensional scaling plot of distances between gene expression profiles)
-  pdf(file=file.path(dir.figures, paste(sep="", "MDS_plot_", cond1, "_vs_", cond2, "_edgeR.pdf")))
+  pdf(file=file.path(dir.figures, paste(sep="", "edgeR_MDS_plot_", cond1, "_vs_", cond2, ".pdf")))
   plotMDS(d, labels=current.labels, 
           col=c("darkgreen","blue")[factor(sample.conditions[names(counts)])])
   quiet <- dev.off()
   
   # Mean-variance relationship
-  pdf(file= file.path(dir.figures, paste(sep = "", "plotMeanVar_", cond1, "_vs_", cond2, "_edgeR.pdf")))
+  pdf(file= file.path(dir.figures, paste(sep = "", "edgeR_plotMeanVar_", cond1, "_vs_", cond2, ".pdf")))
   plotMeanVar(d, show.tagwise.vars=TRUE, NBline=TRUE)
   quiet <- dev.off()
   
+  
   # BCV (Biological Coefficient of Variation)
-  pdf(file= file.path(dir.figures, paste(sep = "", "plotBCV_", cond1, "_vs_", cond2, "_edgeR.pdf")))
+  pdf(file= file.path(dir.figures, paste(sep = "", "edgeR_plotBCV_", cond1, "_vs_", cond2, ".pdf")))
   plotBCV(d)
   quiet <- dev.off()
 
