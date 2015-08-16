@@ -1,95 +1,208 @@
-################################################################
-## R code to run differential analysis
+## R code to detect differentially expressed genes using the 
+## edgeR BioConductor library. 
 ##
 ## Authors: Jeanne Chèneby & Justine Long
+## Date: June-July 2015
+## 
+## Revised by Jacques.van-Helden@univ-amu.fr
+## Revision date: 2015-08-15
 ################################################################
 
-library("edgeR")
-library("limma")
+library("edgeR", quietly=TRUE)
+#library("limma", quietly=TRUE)
+library(gplots, warn.conflicts = FALSE, quietly=TRUE) ## Required for heatmaps.2
+library(RColorBrewer, quietly=TRUE)
+
+## Define a color palette for heatmaps
+cols.heatmap <- rev(colorRampPalette(brewer.pal(9,"RdBu"))(100))
 
 
-## setwd("../../") ## Only for testing when the test starts from the scripts directory
-
-## Temporary: set up manually the files and folder.
-## We will later improve this by reading the config file from arguments (argv) 
+## The only argument is the file containing all the parameters for the analysis
 r.params.path <- commandArgs(trailingOnly = FALSE)[6]
+## TEMPORARY FOR DEBUGGING: 
+## setwd("~/BeatriceRoche/")
+## r.params.path <- "results/DEG/sickle_pe_q20_bowtie2_pe_sorted_name_params.R"
 source(r.params.path)
-dir.main <- "."
+setwd(dir.main)
 
-for (i in 1:length(comparisons)){
-	
-## Create a specific result directory for this differential analysis
-dir.results <- file.path(dir.main, data.root , "DEG", paste(sep="", comparisons.cond1[i], "_vs_", comparsions.cond2[i]))
-dir.create(path = dir.results, showWarnings = FALSE, recursive = TRUE)
-dir.figures <- file.path(dir.results, "figures")
-dir.create(path = dir.figures, showWarnings = FALSE, recursive = TRUE)
+## Read the sample description file, which indicates the 
+## condition associated to each sample ID.
+sample.desc <- read.delim(sample.description.file, sep="\t", 
+                          comment=";", header = TRUE, row.names=1)
+sample.ids <- row.names(sample.desc)
+sample.conditions <- as.vector(sample.desc[,1])
+names(sample.conditions) <- sample.ids
 
-## Read data from counts files
+## Read the design file, which indicates the anlayses to be done.
+## Each row specifies one differential expression analysis, which 
+## consists in comparing two conditions. 
+design <- read.delim(design.file, sep="\t", 
+                          comment=";", header = TRUE, row.names=NULL)
 
-counts <- readDGE(counts.files.per.comparisons[[i]])$counts
+## Prefix for output files concerning the whole count table (all samples together)
+all.prefix <- sub(pattern = ".tab", replacement="", all.counts.table)
 
-## Remove summary lines from HTseq files
-# noint <- rownames(counts) %in% c("no_feature","ambiguous","too_low_aQual", "not_aligned","alignment_not_unique")
-info.rows <- rownames(counts) %in% grep(rownames(counts),
-                                        pattern = "__", 
-                                        value = TRUE)
+## Read the count table
+all.counts <- read.delim(all.counts.table, row.names=1, sep="\t")
+# names(all.counts)
 
-## Remove all features that have less than 1 reads per millions of reads
-cpms <- cpm(counts)    ## Counts per million reads
+## Statistics on reads that could not be mapped to genes for different reasons (intergenic, ambiguous, not unique, ...)
+all.counts.not.mapped <- all.counts[grep(pattern = "^__", x = row.names(all.counts)), ]
+# dim(all.counts.not.mapped)
+all.counts.mapped <- all.counts[grep(invert=TRUE, pattern = "^__", x = row.names(all.counts)), ]
+# dim(all.counts.mapped)
 
+## Compute the counts per million reads 
+## (note: this normalization method is questionable)
+cpms <- cpm(all.counts.mapped)    ## Counts per million reads
 
-## Only keep genes detected in at least n.rep samples, where n.rep is the number of replicates
-keep <- (rowSums(cpms > 1) >= n.rep[i]) & !info.rows  
-counts <- counts[keep,]
+## Draw sample correlation heatmaps for the raw read counts
+pdf(file=paste(sep="", all.prefix,"_sample_correl_heatmap_counts.pdf"))
+hm <- heatmap.2(as.matrix(cor(all.counts.mapped)),  scale="none", trace="none", 
+                main="Correlation between counts",
+                col=cols.heatmap) #, breaks=seq(-1,1,2/length(cols.heatmap)))
+quiet <- dev.off()
 
-# Preparation of tables
-colnames(counts) <- names.per.comparisons[[i]]
+## Draw sample correlation heatmaps for CPM
+#heatmap(cor(all.counts.mapped), scale = "none")
+pdf(file=paste(sep="", all.prefix,"_sample_correl_heatmap_cpms.pdf"))
+hm <- heatmap.2(as.matrix(cor(cpms)),  scale="none", trace="none", 
+                main="Correlation between counts",
+                col=cols.heatmap) #, breaks=seq(-1,1,2/length(cols.heatmap)))
+quiet <- dev.off()
 
-########
-## Convert the count table in a DGEList structure
-d <- DGEList(counts=counts, group=condition.per.comparisons[[i]])
-d <- calcNormFactors(d)
-
-## Export MDS plot
-pdf(file=file.path(dir.figures, paste(sep="", "MDS_plot_", comparisons.cond1[i], "_vs_", comparsions.cond2[i], "_edgeR.pdf")))
-plotMDS(d, labels=names.per.comparisons[[i]], col=c("darkgreen","blue")[factor(condition.per.comparisons[[i]])])
-dev.off()
-
-d <- estimateCommonDisp(d)
-d <- estimateTagwiseDisp(d)
-
-pdf(file= file.path(dir.figures, paste(sep = "", "plotMeanVar_", comparisons.cond1[i], "_VS_", comparsions.cond2[i], "_edgeR.pdf")))
-plotMeanVar(d, show.tagwise.vars=TRUE, NBline=TRUE)
-dev.off()
-
-pdf(file= file.path(dir.figures, paste(sep = "", "plotBCV_", comparisons.cond1[i], "_VS_", comparsions.cond2[i], "_edgeR.pdf")))
-plotBCV(d)
-dev.off()
-
-## Detect differentially expressed genes by applying the exact test
-de <- exactTest(d, pair = c(comparisons[[i]]))
-
-## Tabular summary of the DE stats
-tt <- topTags(de, n=nrow(d))
-
-nc <- cpm(d, normalized.lib.sizes=TRUE)
-rn <- rownames(tt$table)
-
-deg <- rn[tt$table$FDR < FDR.threshold]
-
-pdf(file=file.path(dir.figures, paste(sep = "", "plotSmear_", comparisons.cond1[i], "_VS_", comparsions.cond2[i], "_edgeR.pdf")))
-plotSmear(d, de.tags = deg)
-dev.off()
+## Plot the first versus second components of samples
+pc <- prcomp(t(all.counts.mapped))
+pdf(file=paste(sep="", all.prefix,"_PC1-PC2.pdf"))
+plot(pc$x[,1:2], panel.first=grid(), type="n")
+text(pc$x[,1:2], labels = sample.conditions)
+quiet <- dev.off()
 
 
-## TEMP output <- sub(pattern="data/1258-BRM", replacement = dir.results, output)
-# write.csv(tt$table, output[i])
 
-## adding "_edgeR" to the output files
-temp_output <- strsplit(output[i], "[.]")
-final_output <- paste(sep='', temp_output[[1]][1], "_edgeR.", temp_output[[1]][2])
+## Iterate over analyses
+for (i in 1:nrow(design)) {
+  
+  cond1 <- design[i,1]  ## First condition for the current comparison
+  samples1 <- sample.ids[sample.conditions == cond1]
+    
+  cond2 <- design[i,2]  ## Second condition for the current comparison
+  samples2 <- sample.ids[sample.conditions == cond2]
+  
+  current.samples <- c(samples1, samples2)
+  
+  ## Select counts for the samples belonging to the two conditions
+  counts <- all.counts.mapped[,current.samples]
+  dim(counts)  
+  if (sum(!names(counts) %in% sample.ids) > 0) {
+    stop("Count table contains column names without ID in sample description file.")
+  }
+  
+  ## Define conditions and labels for the samples of the current analysis
+  current.conditions <- sample.conditions[current.samples]
+  current.labels <- paste(current.conditions, names(counts), sep="_")
+  
+  ## Create a specific result directory for this differential analysis
+  dir.analysis <- file.path(dir.DEG, paste(sep="", cond1, "_vs_", cond2))
+  dir.create(path = dir.analysis, showWarnings = FALSE, recursive = TRUE)
+  dir.figures <- file.path(dir.analysis, "figures")
+  dir.create(path = dir.figures, showWarnings = FALSE, recursive = TRUE)
+  
+  ## Only keep genes detected in at least min.rep samples, which is defined as 
+  ## the minimal number of replicates per condition.
+  min.rep <- min(length(samples1), length(samples2))
+  counts <- counts[rowSums(counts > 1) >= min.rep,]
+  # dim(counts)
+  
+  ################################################################
+  ## Convert the count table in a DGEList structure and compute its parameters.
+  d <- DGEList(counts=counts, group=sample.conditions[names(counts)])
+  d <- calcNormFactors(d)
+  d <- estimateCommonDisp(d, verbose=FALSE)
+  d <- estimateTagwiseDisp(d, verbose=FALSE)
+  
+  ################################################################
+  ## Detect differentially expressed genes by applying the exact test
+  de <- exactTest(d)
+  
+  ## Tabular summary of the DE stats
+  tt <- topTags(de, n=nrow(d))
+  
+  
+  ## Compute the E-value
+  tt$table$Evalue <- tt$table$PValue * nrow(tt$table)
 
-write.table(tt$table, final_output, sep="\t")
-# write.table(tt$table, output[i], sep="\t")
-# write.delim(tt$table, output[i], row.names = TRUE, sep = "\t")
+  ## Label the genes passing the FDR and E-value thresholds
+  tt$table[, paste(sep="", "FDR_", FDR.threshold)] <- (tt$table$FDR < FDR.threshold)*1
+  tt$table[, paste(sep="", "Evalue_", Evalue.threshold)] <- (tt$table$Evalue < Evalue.threshold)*1
+  
+  #  head(tt) 
+  
+  nc <- cpm(d, normalized.lib.sizes=TRUE)
+  rn <- rownames(tt$table)
+  
+  deg <- rn[tt$table$FDR < FDR.threshold]
+  
+  ## adding "_edgeR" to the output files
+  deg.file <- file.path(dir.analysis, 
+                        paste(sep = "", cond1, "_vs_", cond2, 
+                              "_", suffix.edgeR, ".tab"))
+  
+  ## Generate and export a result table.
+  ## - round numerical values to 3 significant digits.
+  ## - add a column with gene_ids, to enable exporting a column header.
+  result.table <- cbind(data.frame("gene_ID"= row.names(tt$table)), signif(tt$table, digits=3))
+  
+  write.table(x = result.table, row.names = FALSE,
+              file = deg.file, sep = "\t", quote=FALSE)
+  
+  ## Summarise results of the current analysis  
+  current.summary <- data.frame(
+    "analysis"=paste(sep="", cond1, "_vs_", cond2),
+    "cond1" = cond1, "cond2" = cond2)
+  current.summary[,paste(sep="", "edgeR_FDR_", FDR.threshold)] = sum(result.table[,paste(sep="", "FDR_", FDR.threshold)])
+  current.summary[,paste(sep="", "edgeR_Evalue_", Evalue.threshold)] = sum(result.table[,paste(sep="", "Evalue_", Evalue.threshold)])
+  
+  if (i == 1) {
+    summary.per.analysis <- current.summary
+  } else {
+    summary.per.analysis <- rbind(summary.per.analysis, current.summary)
+  }
+  
+  ## Plot an histogram of the nominal p-values
+  pdf(file=file.path(dir.figures, paste(sep = "", "pval_hist_", cond1, "_vs_", cond2, "_edgeR.pdf")))
+  hist(tt$table$PValue, breaks=20)
+  quiet <- dev.off()
+  
+  ################################################################
+  ## Export edgeR characteristic plots
+  
+  ## MA plot
+  pdf(file=file.path(dir.figures, paste(sep = "", "plotSmear_", cond1, "_vs_", cond2, "_edgeR.pdf")))
+  plotSmear(d, de.tags = deg)
+  quiet <- dev.off()
+  
+  ## MDS plot (Multidimensional scaling plot of distances between gene expression profiles)
+  pdf(file=file.path(dir.figures, paste(sep="", "MDS_plot_", cond1, "_vs_", cond2, "_edgeR.pdf")))
+  plotMDS(d, labels=current.labels, 
+          col=c("darkgreen","blue")[factor(sample.conditions[names(counts)])])
+  quiet <- dev.off()
+  
+  # Mean-variance relationship
+  pdf(file= file.path(dir.figures, paste(sep = "", "plotMeanVar_", cond1, "_vs_", cond2, "_edgeR.pdf")))
+  plotMeanVar(d, show.tagwise.vars=TRUE, NBline=TRUE)
+  quiet <- dev.off()
+  
+  # BCV (Biological Coefficient of Variation)
+  pdf(file= file.path(dir.figures, paste(sep = "", "plotBCV_", cond1, "_vs_", cond2, "_edgeR.pdf")))
+  plotBCV(d)
+  quiet <- dev.off()
+
 }
+
+## Export summary table
+summary.file <- file.path(dir.DEG, paste(sep="", suffix.deg, "_summary.tab"))
+write.table(x = summary.per.analysis, row.names = FALSE,
+            file = summary.file, sep = "\t", quote=FALSE)
+
+

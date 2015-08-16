@@ -34,10 +34,10 @@
 	"rules": "/Users/jvanheld/fg-chip-seq/scripts/snakefiles/rules/",
 	"reads_source": "data/reads_ori",
 	"results": "results",
+	"DEG": "results/DEG",
 	"reads": "results/reads",
         "reports": "reports",
-        "results": "results/",
-        "genome": "genome/"
+        "genome": "genome"
     },
 
     "reports": {
@@ -107,12 +107,13 @@
     "edgeR": {
         "script_R_path": "scripts/R-scripts/run_edgeR.R",
         "FDR_threshold": ".05",
-        "software": "_edgeR"
+        "Evalue_threshold": "1",
+        "suffix": "_edgeR"
     },
 
     "DESeq2": {
         "script_R_path": "scripts/R-scripts/run_deseq2.R",
-        "software": "_DESeq2"
+        "suffix": "_DESeq2"
     }
 
 }
