@@ -103,7 +103,7 @@ for (cond in exp.conditions) {
   ## A trick: by adding 0.1 we can view the 0 values on the log plot, at the 0.1 coordinate
   to.plot <- all.counts.mapped[,current.samples][,1:max.rep.to.plot] + 0.1
   
-  pdf(file= file.path(dir.condition, paste(sep = "", "between-replicate_compa_plot_", cond1, ".pdf")), width=10, height=10)
+  pdf(file= file.path(dir.condition, paste(sep = "", "between-replicate_counts_plot_", cond, ".pdf")), width=10, height=10)
   plot(to.plot, log="xy", col=cols.conditions[cond], 
        main=paste(cond, " ; raw counts per replicate (log scale)"))
   dev.off()
