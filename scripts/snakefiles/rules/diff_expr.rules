@@ -1,4 +1,4 @@
-rule edgeR:
+rule diff_expr:
     """Run differential expression analysis on a table of counts per tag
     (gene). 
 
@@ -13,11 +13,8 @@ rule edgeR:
     """
     input: R_params = PARAMS_R
     output: tab = RESULTS_EDGER
-    log: config["dir"]["results"] + "DEG/edgeR.log"
-    benchmark: config["dir"]["results"] + "DEG/edgeR_benchmark.json"
-    params: qsub = config["qsub"] + " -q short -e " + config["dir"]["results"] + "DEG/edgeR_qsub.err -o " + config["dir"]["results"] + "DEG/edgeR_qsub.out", \
+    log: config["dir"]["results"] + "DEG/diff_expr.log"
+    benchmark: config["dir"]["results"] + "DEG/diff_expr_benchmark.json"
+    params: qsub = config["qsub"] + " -q short -e " + config["dir"]["results"] + "DEG/diff_expr_qsub.err -o " + config["dir"]["results"] + "DEG/diff_expr_qsub.out", \
             r_script = config["dir"]["fg-chip-seq"] + "/scripts/R-scripts/rna-seq_DEG_detection.R"
-#            cond1 = config["Diff_Exp"]["cond1"], \
-#            cond2 = config["Diff_Exp"]["cond2"], \
-#            dir_results = config["dir"]["results"]
     shell: "Rscript {params.r_script} {input.R_params}"
