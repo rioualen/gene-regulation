@@ -12,24 +12,69 @@ library("limma", warn.conflicts = FALSE, quietly=TRUE) ## Required for vennCount
 library(gplots, warn.conflicts = FALSE, quietly=TRUE) ## Required for heatmaps.2
 library(RColorBrewer, warn.conflicts = FALSE, quietly=TRUE)
 
+verbosity <- 1
+
+#' @title Display messages at a given verbosity level
+#'
+#' @author Jacques van Helden (\email{Jacques.van-Helden@@univ-amu.fr})
+#'
+#' @description Display messages depending on user-defined verbosity level
+#'
+#' @details
+#' First version: 2015-03. 
+#' Last modification: 2015-03. 
+#'
+#' @param verbosity   Level of verbosity above which the message should be printed.
+#' @param print.date=TRUE   Print date and time
+#'
+#' @examples
+#'
+#' verbosity <- 1 ## Define level of verbosity
+#'
+#' ## This message will be printed because the level is <= verbosity
+#' verbose("This is printed", 1)
+#'
+#' ## This message will not be printed because the verbosity is inferior to the specified level
+#' verbose("This is not printed", 2)
+#'
+#' @export
+verbose <- function(message.content,
+                    level=1,
+                    print.date=TRUE) {
+  if (!exists("verbosity")) {
+    verbosity <- 1
+  }
+  if (verbosity >= level) {
+    if (print.date) {
+      message(format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\t", message.content)
+    } else {
+      message(message.content)
+    }
+  }
+}
+
+verbose("Reading parameters", 1)
+
 ## Define a color palette for heatmaps. I like this Red-Blue palette because 
 ## - it suggests a subjective feeling of warm (high correlation)/cold (low correlation)
 ## - it can be seen by people suffering from red–green color blindness.
 cols.heatmap <- rev(colorRampPalette(brewer.pal(9,"RdBu"))(100))
 
 ## A trick: to enable log-scaled plots for 0 values, I add an epsilon increment
-epsilon <- 1e-5
+epsilon <- 0.01
 
 ## The only argument is the file containing all the parameters for the analysis
 r.params.path <- commandArgs(trailingOnly = FALSE)[6]
 ## TEMPORARY FOR DEBUGGING: 
 ## setwd("~/BeatriceRoche/")
-## r.params.path <- "results/DEG/sickle_pe_q20_bowtie2_pe_sorted_name_params.R"
+#  r.params.path <- "results/DEG/sickle_pe_q20_bowtie2_pe_sorted_name_params.R"
 source(r.params.path)
 setwd(dir.main)
 
 ## Read the sample description file, which indicates the 
 ## condition associated to each sample ID.
+verbose("Reading sample descriptions", 1)
+
 sample.desc <- read.delim(sample.description.file, sep="\t", 
                           comment=";", header = TRUE, row.names=1)
 sample.ids <- row.names(sample.desc)
@@ -43,19 +88,27 @@ exp.conditions <- unique(sample.conditions) ## Set of distinct conditions
 cols.conditions <- brewer.pal(length(exp.conditions),"Dark2")
 names(cols.conditions) <- exp.conditions
 
+## Define a color per sample according to its condition
+cols.samples <- cols.conditions[sample.conditions]
+names(cols.samples) <- sample.ids
+
 ## Read the design file, which indicates the anlayses to be done.
 ## Each row specifies one differential expression analysis, which 
 ## consists in comparing two conditions. 
+verbose("Reading design", 1)
 design <- read.delim(design.file, sep="\t", 
-                          comment=";", header = TRUE, row.names=NULL)
+                     comment=";", header = TRUE, row.names=NULL)
 
 ## Prefix for output files concerning the whole count table (all samples together)
 ## all.prefix <- sub(pattern = ".tab", replacement="", all.counts.table)
 all.prefix <- file.path(dir.DEG, suffix.deg)
 
 ## Read the count table
+verbose("Loading count table", 1)
 all.counts <- read.delim(all.counts.table, row.names=1, sep="\t")
 # names(all.counts)
+
+verbose("Computing count-derived metrics (log-transformed)", 1)
 
 ## Statistics on reads that could not be mapped to genes for different reasons (intergenic, ambiguous, not unique, ...)
 all.counts.not.mapped <- all.counts[grep(pattern = "^__", x = row.names(all.counts)), ]
@@ -63,14 +116,137 @@ all.counts.not.mapped <- all.counts[grep(pattern = "^__", x = row.names(all.coun
 all.counts.mapped <- all.counts[grep(invert=TRUE, pattern = "^__", x = row.names(all.counts)), ]
 # dim(all.counts.mapped)
 
+## Add an epsilon to 0 values only, in order to enable log-transform and display on logarithmic axes
+all.counts.mapped.epsilon <- all.counts.mapped
+all.counts.mapped.epsilon[all.counts.mapped==0] <- epsilon
+
+## Log-transformed data for some plots. 
+all.counts.mapped.log10 <- log10(all.counts.mapped.epsilon)
+
+################################################################
+## Compute sample-wise statistics on mapped counts
+################################################################
+verbose("Computing statistics per sample", 1)
+
+stats.per.sample <- data.frame(
+  "sum" = apply(all.counts.mapped, 2, sum, na.rm=TRUE),
+  "mean" = apply(all.counts.mapped, 2, mean, na.rm=TRUE),
+  "min" = apply(all.counts.mapped, 2, min, na.rm=TRUE),
+  "perc05" = apply(all.counts.mapped, 2, quantile, probs=0.05, na.rm=TRUE),
+  "perc25" = apply(all.counts.mapped, 2, quantile, probs=0.25, na.rm=TRUE),
+  "median" = apply(all.counts.mapped, 2, median, na.rm=TRUE),
+  "perc75" = apply(all.counts.mapped, 2, quantile, probs=0.75, na.rm=TRUE),
+  "perc95" = apply(all.counts.mapped, 2, quantile, probs=0.95, na.rm=TRUE),
+  "max" = apply(all.counts.mapped, 2, max, na.rm=TRUE)
+)
+
+## Count number and the fraction of samples with counts below the mean. 
+## This shows the impact of very large counts: in my test samples, 
+## 85% of the samples have a value below the mean (i.e. the mean is at the percentile 85 !)
+stats.per.sample$below.mean <- apply(t(all.counts.mapped) < stats.per.sample$mean, 1, sum, na.rm=TRUE)
+stats.per.sample$fract.below.mean <- stats.per.sample$below.mean/nrow(all.counts.mapped)
+
+################################################################
 ## Compute the counts per million reads 
-## (note: this normalization method is questionable)
-cpms <- cpm(all.counts.mapped)    ## Counts per million reads
+################################################################
+verbose("Computing CPMs", 1)
+
+## Note: the default normalization criterion (scaling by libbrary sum) 
+## is questionable because it is stronly sensitive to outliers 
+## (very highly expressed genes).  A more robust normalisation criterion 
+## is to use the 75th percentile, or the median. We use the median, somewhat arbitrarily, 
+## beause it gives a nice alignment on the boxplots.
+cpms.libsum <- cpm(all.counts.mapped.epsilon)    ## Counts per million reads, normalised by library sum
+cpms.perc75 <- cpm(all.counts.mapped.epsilon, lib.size = stats.per.sample$perc75)    ## Counts per million reads, normalised by 75th percentile
+cpms.median <- cpm(all.counts.mapped.epsilon, lib.size = stats.per.sample$median)    ## Counts per million reads, normalised by sample-wise median count
+cpms <- cpms.median ## Choose one normalization factor for the CPMs used below
+cpms.log10 <- log10(cpms) ## Log-10 transformed CPMs, with the epsilon for 0 counts
+
+################################################################
+## Draw some generic plots
+################################################################
+
+verbose("Drawing generic plots from the whole count table", 1)
+
+
+## Plot the impact of the normalization factor (library sum , median or percentile 75)
+pdf(file= file.path(dir.DEG, paste(sep = "", "CPM_libsum_vs_median_vs_perc75.pdf")), width=10, height=10)
+par.ori <- par() ## Save original plot parameters
+cols.counts <- as.data.frame(matrix(cols.samples, nrow=nrow(all.counts.mapped), ncol=ncol(all.counts.mapped), byrow = TRUE))
+colnames(cols.counts) <- names(all.counts.mapped)
+rownames(cols.counts) <- rownames(all.counts.mapped)
+plot(data.frame("libsum" = as.vector(as.matrix(cpms.libsum)),
+                "median" = as.vector(as.matrix(cpms.median)),
+                "perc75" = as.vector(as.matrix(cpms.perc75))),
+     col=as.vector(as.matrix(cols.counts)))
+quiet <- dev.off()
+
+## Plot some sample-wise statistics
+pdf(file= file.path(dir.DEG, paste(sep = "", "sample_statistics_plots.pdf")), width=10, height=10)
+par(mar=c(5,5,1,1)) ## adpt axes
+par(mfrow=c(2,2))
+## Median versus mean
+plot(stats.per.sample[,c("mean", "median")], 
+     panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
+     las=1, col=cols.samples)
+
+## First versus third quartile
+plot(stats.per.sample[,c("perc25", "perc75")], 
+     panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
+     las=1, col=cols.samples)
+
+## Sum versus third quartile. 
+plot(stats.per.sample[,c("sum", "perc75")], 
+     panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
+     las=1, col=cols.samples)
+par(mfrow=c(1,1))
+
+## Mean versus third quartile. 
+plot(stats.per.sample[,c("mean", "perc75")], 
+     panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
+     las=1, col=cols.samples)
+par(mfrow=c(1,1))
+quiet <- dev.off()
+
+################################################################
+## Boxplots of raw counts and derived counting measures
+par(mar=c(5,7,4,1)) ## adapt axes
+
+## Boxplot of raw counts
+pdf(file= file.path(dir.DEG, paste(sep = "", "sample_boxplots_raw_counts.pdf")), width=7, height=7)
+boxplot(all.counts.mapped, horizontal=TRUE, col=cols.samples,
+        xlab="Raw counts",
+        main="Box plots per sample: raw counts", las=1)
+quiet <- dev.off()
+
+## Boxplot of log10-transformed counts
+pdf(file= file.path(dir.DEG, paste(sep = "", "sample_boxplots_log10_counts.pdf")), width=7, height=7)
+boxplot(all.counts.mapped.log10, horizontal=TRUE, col=cols.samples,
+        xlab="log10(counts)",
+        main="Box plots per sample: log10(counts)", las=1)
+quiet <- dev.off()
+
+## Boxplot of CPMs
+pdf(file= file.path(dir.DEG, paste(sep = "", "sample_boxplots_CPM.pdf")), width=7, height=7)
+boxplot(cpms, horizontal=TRUE, col=cols.samples,
+        xlab="CPM",
+        main="Box plots per sample: counts per million reads (CPM)", las=1)
+quiet <- dev.off()
+
+## Boxplot of log10-transformed CPMs
+pdf(file= file.path(dir.DEG, paste(sep = "", "sample_boxplots_log10_CPM.pdf")), width=7, height=7)
+boxplot(cpms.log10, horizontal=TRUE, col=cols.samples,
+        xlab="log10(CPM)",
+        main="Box plots per sample: counts per million reads (CPM)", las=1)
+quiet <- dev.off()
+
+par <- par.ori ## Restore original plot parameters
+
 
 ## Draw sample correlation heatmaps for the raw read counts
 pdf(file=paste(sep="", all.prefix,"_sample_correl_heatmap_counts.pdf"))
 hm <- heatmap.2(as.matrix(cor(all.counts.mapped)),  scale="none", trace="none", 
-                main="Correlation between counts",
+                main="Correlation between raw counts",
                 col=cols.heatmap) #, breaks=seq(-1,1,2/length(cols.heatmap)))
 quiet <- dev.off()
 
@@ -78,23 +254,26 @@ quiet <- dev.off()
 #heatmap(cor(all.counts.mapped), scale = "none")
 pdf(file=paste(sep="", all.prefix,"_sample_correl_heatmap_cpms.pdf"))
 hm <- heatmap.2(as.matrix(cor(cpms)),  scale="none", trace="none", 
-                main="Correlation between counts",
+                main="Correlation between CPM",
                 col=cols.heatmap) #, breaks=seq(-1,1,2/length(cols.heatmap)))
 quiet <- dev.off()
 
 ## Plot the first versus second components of samples
-pc <- prcomp(t(all.counts.mapped))
-pdf(file=paste(sep="", all.prefix,"_PC1-PC2.pdf"))
-plot(pc$x[,1:2], panel.first=grid(), type="n")
-text(pc$x[,1:2], labels = sample.conditions)
+cpms.pc <- prcomp(t(cpms))
+pdf(file=paste(sep="", all.prefix,"_CPM_PC1-PC2.pdf"))
+plot(cpms.pc$x[,1:2], panel.first=grid(), type="n", main="First components from PCA-transformed CPMs")
+text(cpms.pc$x[,1:2], labels = sample.conditions, col=cols.samples)
 quiet <- dev.off()
 
 
 ################################################################
 ## Analyse between-replicate reproducibility
 ################################################################
+verbose("Plotting betwen-replicate comparisons", 1)
 
 for (cond in exp.conditions) {
+  verbose(paste(sep="", "\tcondition\t", cond), 2)
+  
   max.rep.to.plot <- 5 ## Restrict the number of replicates to plot, for the sale of readability
   
   ## Create a specific result directory for this condition
@@ -153,6 +332,7 @@ for (cond in exp.conditions) {
 ################################################################
 ## Run differential expression analysis
 ################################################################
+verbose("Starting differential analysis", 1)
 
 ## Iterate over analyses
 for (i in 1:nrow(design)) {
@@ -164,7 +344,9 @@ for (i in 1:nrow(design)) {
   ## Identify samples for the second condition
   cond2 <- as.vector(design[i,2])  ## Second condition for the current comparison
   samples2 <- sample.ids[sample.conditions == cond2]
-  
+
+  verbose(paste(sep="", "\tDifferential analysis\t", i , "/", nrow(design), "\t", cond1, " vs ", cond2), 1)
+          
   ## Select counts for the samples belonging to the two conditions
   current.samples <- c(samples1, samples2)
   current.counts <- all.counts.mapped[,current.samples]
@@ -194,6 +376,7 @@ for (i in 1:nrow(design)) {
   ## Compare counts per million reads (CPMs) between samples. 
   ## This is just to get an intuitive idea, since CPMs are 
   ## not recommended for diffferential detection.
+  verbose("\t\tmean CPM plot", 2)
   mean.cpm1 <- apply(cpms[,samples1],1, mean) + epsilon
   mean.cpm2 <- apply(cpms[,samples2],1, mean) + epsilon
   pdf(file=file.path(dir.figures, paste(sep = "", "CPM_plot_", cond1, "_vs_", cond2, ".pdf")))
@@ -207,6 +390,7 @@ for (i in 1:nrow(design)) {
   dev.off()
   
   ## Draw MA plot with CPMs
+  verbose("\t\tCPM MA plot", 2)
   A <- log2(mean.cpm1*mean.cpm2)/2
   M <- log2(mean.cpm1/mean.cpm2)
   pdf(file=file.path(dir.figures, paste(sep = "", "CPM_MA_plot_", cond1, "_vs_", cond2, ".pdf")))
@@ -224,6 +408,8 @@ for (i in 1:nrow(design)) {
   ################################################################
   ## DESeq2 analysis
   ################################################################
+
+  verbose("\t\tDESeq2 analysis", 2)
   
   ## Create a DESeqDataSet object from the count table + conditions
   condition <- as.factor(as.vector(current.conditions))
@@ -275,9 +461,11 @@ for (i in 1:nrow(design)) {
   write.table(x = DESeq2.result.table, row.names = FALSE,
               file = deseq2.result.file, sep = "\t", quote=FALSE)
   
+  verbose(paste(sep="", "\t\tDESeq2 result file\t", deseq2.result.file), 1)
   
   ################################################################
   ## Export DESeq2 plots
+  verbose("\t\tExporting DESeq2 plots", 2)
   
   ## Histogram of the nominal p-values
   pdf(file=file.path(dir.figures, paste(sep = "", "DESeq2_pval_hist_", cond1, "_vs_", cond2, ".pdf")))
@@ -293,6 +481,7 @@ for (i in 1:nrow(design)) {
   deseq2.rld <- rlogTransformation(deseq2.dds, blind=TRUE)
 
   ## MA plot
+  verbose("\t\t\tDESeq2 MA plot", 2)
   MA.ymax <- min(4,max(deseq2.res$log2FoldChange))
   MA.ymin <- max(-4,min(deseq2.res$log2FoldChange))
   MA.ylim <- c(MA.ymin, MA.ymax)
@@ -302,6 +491,7 @@ for (i in 1:nrow(design)) {
   quiet <- dev.off()
   
   # PCA plot of the samples
+  verbose("\t\t\tDESeq2 PCA plot", 2)
   pdf(file= file.path(dir.figures, paste(sep = "", "DESeq2_plotBCV_", cond1, "_vs_", cond2, "_pca_DESeq2.pdf")))
   print(plotPCA(deseq2.rld, intgroup=c("condition")))
   quiet <- dev.off()
@@ -309,7 +499,8 @@ for (i in 1:nrow(design)) {
   ################################################################
   ## edgeR analysis
   ################################################################
-
+  verbose("\t\tedgeR analysis", 2)
+  
   ## Convert the count table in a DGEList structure and compute its parameters.
   d <- DGEList(counts=current.counts, group=sample.conditions[names(current.counts)])
   d <- calcNormFactors(d)
@@ -345,11 +536,15 @@ for (i in 1:nrow(design)) {
                               "_", suffix.edgeR, ".tab"))
   write.table(x = edgeR.result.table, row.names = FALSE,
               file = edgeR.result.file, sep = "\t", quote=FALSE)
-    
+  verbose(paste(sep="", "\t\tedgeR result file\t", edgeR.result.file), 1)
+  
   ################################################################
   ## Export edgeR plots
   
+  verbose("\t\tGenerating edgeR plots", 2)
+  
   ## Histogram of the nominal p-values
+  verbose("\t\t\tedgeR nominal p-values histogram", 2)
   pdf(file=file.path(dir.figures, paste(sep = "", "edgeR_pval_hist_", cond1, "_vs_", cond2, ".pdf")))
   hist(edger.tt$table$PValue, breaks=seq(from=0, to=1, by=epsilon),
        xlab="Nominal p-value",
@@ -357,25 +552,29 @@ for (i in 1:nrow(design)) {
        main=paste(cond1, "vs", cond2, "; edgeR p-values"), col="purple")
   quiet <- dev.off()
   
-  ## MA plot
+  ## Smear plot
+  verbose("\t\t\tedgeR Smear plot", 3)
   edger.deg <- rownames(edger.tt$table)[edger.tt$table$FDR < FDR.threshold] ## List of differentially expressed genes reported by edgeR
   pdf(file=file.path(dir.figures, paste(sep = "", "edgeR_plotSmear_", cond1, "_vs_", cond2, ".pdf")))
   plotSmear(d, de.tags = edger.deg)
   quiet <- dev.off()
   
   ## MDS plot (Multidimensional scaling plot of distances between gene expression profiles)
+  verbose("\t\t\tedgeR MDS plot", 3)
   pdf(file=file.path(dir.figures, paste(sep="", "edgeR_MDS_plot_", cond1, "_vs_", cond2, ".pdf")))
   plotMDS(d, labels=current.labels, 
           col=c("darkgreen","blue")[factor(sample.conditions[names(current.counts)])])
   quiet <- dev.off()
   
   # Mean-variance relationship
+  verbose("\t\t\tedgeR mean-variance relationship", 3)
   pdf(file= file.path(dir.figures, paste(sep = "", "edgeR_plotMeanVar_", cond1, "_vs_", cond2, ".pdf")))
   plotMeanVar(d, show.tagwise.vars=TRUE, NBline=TRUE)
   quiet <- dev.off()
   
   
   # BCV (Biological Coefficient of Variation)
+  verbose("\t\t\tedgeR BCV plot", 3)
   pdf(file= file.path(dir.figures, paste(sep = "", "edgeR_plotBCV_", cond1, "_vs_", cond2, ".pdf")))
   plotBCV(d)
   quiet <- dev.off()
@@ -383,6 +582,7 @@ for (i in 1:nrow(design)) {
   ################################################################
   ## Merge DESeq2 and edgeR result tables + add some row-wise statistics. 
   ## Beware: gene orders are not the same since they are sorted by adjusted p-value. 
+  verbose("\t\tExporting merged table with DESeq2 and edgeR results", 2)
   gene.ids <- row.names(current.counts) ## Use the same order for gene IDs as in the original count table
   result.table <- cbind("gene_id" = DESeq2.result.table[gene.ids,1:1], 
                         "n_min" = apply(current.counts, 1, min),
@@ -411,6 +611,7 @@ for (i in 1:nrow(design)) {
                                  "_", suffix.deg, "_DESeq2_and_edgeR.tab"))
   write.table(x = result.table, row.names = FALSE,
               file = result.file, sep = "\t", quote=FALSE)
+  verbose(paste(sep="", "\t\tMerged result file\t", result.file), 1)
   
   
   ## Compare DESeq2 and edgeR nominal p-values
@@ -421,8 +622,8 @@ for (i in 1:nrow(design)) {
        col="#888888",
        panel.first=grid(lty="solid", col="#DDDDDD"))
   abline(a=0, b=1)
-  abline(h=FDR.threshold)
-  abline(v=FDR.threshold)
+#  abline(h=FDR.threshold)
+#  abline(v=FDR.threshold)
   both <- result.table[, paste(sep="", "both_padj_", FDR.threshold)] == 1
   edgeR.only <- result.table[, paste(sep="", "edgeR_only_padj_", FDR.threshold)] == 1
   DESeq2.only <- result.table[, paste(sep="", "DESeq2_only_padj_", FDR.threshold)] == 1
@@ -474,8 +675,10 @@ for (i in 1:nrow(design)) {
 }
 
 ## Export summary table
-summary.file <- paste(sep="", all.prefix, "_summary.tab")
+verbose("Exporting summary table", 1)
+summary.file <- paste(sep="", all.prefix, "_summary_per_analysis.tab")
 write.table(x = summary.per.analysis, row.names = FALSE,
             file = summary.file, sep = "\t", quote=FALSE)
+verbose(paste(sep="", "\tSummary per analysis\t", summary.file), 1)
 
 
