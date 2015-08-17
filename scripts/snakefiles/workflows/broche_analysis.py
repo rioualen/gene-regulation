@@ -212,8 +212,9 @@ if (verbosity >= 1):
 
 # Detect differentially expressed genes wit edgeR
 RESULTS_EDGER = expand(config["dir"]["results"] + "/DEG/{cond_1}_vs_{cond_2}/{cond_1}_vs_{cond_2}_" + config["suffix"]["edgeR"] +".tab", zip, cond_1=COND_1, cond_2=COND_2)
-include: config["dir"]["rules"] + "/edgeR.rules"                   ## Differential expression analysis with BioConductor edgeR package
 
+include: config["dir"]["rules"] + "/diff_expr.rules"                   ## Differential expression analysis with BioConductor edgeR and DESeq2 packates
+#include: config["dir"]["rules"] + "/edgeR.rules"                   ## Differential expression analysis with BioConductor edgeR package
 #include: config["dir"]["rules"] + "/DESeq2.rules"                  ## Differential expression analysis with BioConductor DESeq2 package
 
 

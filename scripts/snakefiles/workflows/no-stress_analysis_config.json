@@ -92,12 +92,12 @@
     "edgeR": {
         "script_R_path": "scripts/R-scripts/run_edgeR.R",
         "FDR_threshold": ".05",
-        "software": "_edgeR"
+        "suffix": "_edgeR"
     },
 
     "DESeq2": {
         "script_R_path": "scripts/R-scripts/run_deseq2.R",
-        "software": "_DESeq2"
+        "suffix": "_DESeq2"
     }
 }
 
