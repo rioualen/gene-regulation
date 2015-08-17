@@ -1,0 +1,23 @@
+rule edgeR:
+    """Run differential expression analysis on a table of counts per tag
+    (gene). 
+
+    This rule takes as input a tab-delimited text file containing gene
+    counts per sample (one row per gene, one column per sample) and a
+    gene annotation file (gtf), and a configuration file for R.
+
+    The rule calls an R script that runs various approaches to detect
+    differentially expressed genes. It produces results files in
+    tab-delimited format (.tab extension) and figures in pdf format.
+
+    """
+    input: R_params = PARAMS_R
+    output: tab = RESULTS_EDGER
+    log: config["dir"]["results"] + "DEG/edgeR.log"
+    benchmark: config["dir"]["results"] + "DEG/edgeR_benchmark.json"
+    params: qsub = config["qsub"] + " -q short -e " + config["dir"]["results"] + "DEG/edgeR_qsub.err -o " + config["dir"]["results"] + "DEG/edgeR_qsub.out", \
+            r_script = config["dir"]["fg-chip-seq"] + "/scripts/R-scripts/rna-seq_DEG_detection.R"
+#            cond1 = config["Diff_Exp"]["cond1"], \
+#            cond2 = config["Diff_Exp"]["cond2"], \
+#            dir_results = config["dir"]["results"]
+    shell: "Rscript {params.r_script} {input.R_params}"
