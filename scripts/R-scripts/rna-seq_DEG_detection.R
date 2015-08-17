@@ -17,6 +17,9 @@ library(RColorBrewer, warn.conflicts = FALSE, quietly=TRUE)
 ## - it can be seen by people suffering from red–green color blindness.
 cols.heatmap <- rev(colorRampPalette(brewer.pal(9,"RdBu"))(100))
 
+## A trick: to enable log-scaled plots for 0 values, I add an epsilon increment
+epsilon <- 1e-5
+
 ## The only argument is the file containing all the parameters for the analysis
 r.params.path <- commandArgs(trailingOnly = FALSE)[6]
 ## TEMPORARY FOR DEBUGGING: 
@@ -37,7 +40,7 @@ names(sample.conditions) <- sample.ids
 
 ## Define a specific color for each distinct condition
 exp.conditions <- unique(sample.conditions) ## Set of distinct conditions
-cols.conditions <- brewer.pal(length(exp.conditions),"Accent")
+cols.conditions <- brewer.pal(length(exp.conditions),"Dark2")
 names(cols.conditions) <- exp.conditions
 
 ## Read the design file, which indicates the anlayses to be done.
@@ -92,21 +95,59 @@ quiet <- dev.off()
 ################################################################
 
 for (cond in exp.conditions) {
+  max.rep.to.plot <- 5 ## Restrict the number of replicates to plot, for the sale of readability
+  
   ## Create a specific result directory for this condition
   dir.condition <- file.path(dir.DEG, "per_condition", cond)
   dir.create(path = dir.condition, showWarnings = FALSE, recursive = TRUE)
   
   current.samples <- names(all.counts.mapped)[sample.conditions == cond]
   nrep <- length(current.samples)
-  max.rep.to.plot <- min(3, nrep)
+   
   
-  ## A trick: by adding 0.1 we can view the 0 values on the log plot, at the 0.1 coordinate
-  to.plot <- all.counts.mapped[,current.samples][,1:max.rep.to.plot] + 0.1
   
+  current.counts <- all.counts.mapped[,current.samples]
+  current.counts[current.counts==0] <- epsilon
+  current.counts.mean <- apply(current.counts, 1, mean)
+  current.counts.var <- apply(current.counts, 1, var)
+  current.counts.var[current.counts.var==0] <- min(current.counts.var[current.counts.var>0])/100
+    
+  current.cpms <- cpms[,current.samples] + epsilon
+  current.cpms[current.cpms==0] <- epsilon
+  current.cpm.mean <- apply(current.cpms, 1, mean)
+  current.cpm.var <- apply(current.cpms, 1, var)
+  current.cpm.var[current.cpm.var==0] <- min(current.cpm.var[current.cpm.var>0])/100
+  
+  ## Plot pairwise comparisons between replicates
   pdf(file= file.path(dir.condition, paste(sep = "", "between-replicate_counts_plot_", cond, ".pdf")), width=10, height=10)
-  plot(to.plot, log="xy", col=cols.conditions[cond], 
+  plot(current.counts[,1:min(max.rep.to.plot, nrep)], log="xy", col=cols.conditions[cond], 
        main=paste(cond, " ; raw counts per replicate (log scale)"))
   dev.off()
+  
+  ## Plot mean versus variance of raw counts for the current condition
+  pdf(file= file.path(dir.condition, paste(sep = "", "counts_variance-mean_plot_", cond, ".pdf")), width=10, height=10)
+  plot(current.counts.mean, 
+       current.counts.var, 
+       log="xy", col=cols.conditions[cond], 
+       panel.first=grid(lty="solid", col="#DDDDDD"),
+       xlab=paste("mean counts for condition", cond),
+       ylab=paste("variance of counts for condition", cond),
+       main=paste(cond, " ; Counts variance/Mean plot"))
+  abline(a=0,b=1, lty="dashed", col="green", lwd=2) ## Milestone for Poisson distributions: var = mean
+  quiet <- dev.off()
+  
+  ## Plot mean versus variance of CPMs for the current condition
+  pdf(file= file.path(dir.condition, paste(sep = "", "CPM_variance-mean_plot_", cond, ".pdf")), width=10, height=10)
+  plot(current.cpm.mean, 
+       current.cpm.var, 
+       log="xy", col=cols.conditions[cond], 
+       panel.first=grid(lty="solid", col="#DDDDDD"),
+       xlab=paste("CPM mean for condition", cond),
+       ylab=paste("CPM variance for condition", cond),
+       main=paste(cond, " ; CPM variance/Mean plot"))
+  abline(a=0,b=1, lty="dashed", col="green", lwd=2) ## Milestone for Poisson distributions: var = mean
+  quiet <- dev.off()
+  
 }
 
 ################################################################
@@ -116,16 +157,17 @@ for (cond in exp.conditions) {
 ## Iterate over analyses
 for (i in 1:nrow(design)) {
   
+  ## Identify samples for the first condition
   cond1 <- as.vector(design[i,1])  ## First condition for the current comparison
   samples1 <- sample.ids[sample.conditions == cond1]
     
+  ## Identify samples for the second condition
   cond2 <- as.vector(design[i,2])  ## Second condition for the current comparison
   samples2 <- sample.ids[sample.conditions == cond2]
   
+  ## Select counts for the samples belonging to the two conditions
   current.samples <- c(samples1, samples2)
   current.counts <- all.counts.mapped[,current.samples]
-
-  ## Select counts for the samples belonging to the two conditions
   # dim(current.counts)  ## For test
   
   if (sum(!names(current.counts) %in% sample.ids) > 0) {
@@ -147,6 +189,35 @@ for (i in 1:nrow(design)) {
   min.rep <- min(length(samples1), length(samples2))
   current.counts <- current.counts[rowSums(current.counts > 1) >= min.rep,]
   # dim(current.counts)
+  
+  ################################################################
+  ## Compare counts per million reads (CPMs) between samples. 
+  ## This is just to get an intuitive idea, since CPMs are 
+  ## not recommended for diffferential detection.
+  mean.cpm1 <- apply(cpms[,samples1],1, mean) + epsilon
+  mean.cpm2 <- apply(cpms[,samples2],1, mean) + epsilon
+  pdf(file=file.path(dir.figures, paste(sep = "", "CPM_plot_", cond1, "_vs_", cond2, ".pdf")))
+  plot(mean.cpm1, mean.cpm2, 
+       main = "Mean counts per million reads (log scales)",
+       xlab=paste(cond1),
+       ylab=paste(cond2),
+       col="darkblue",log="xy",
+       panel.first=grid(lty="solid", col="#DDDDDD"))
+  abline(a=0, b=1)
+  dev.off()
+  
+  ## Draw MA plot with CPMs
+  A <- log2(mean.cpm1*mean.cpm2)/2
+  M <- log2(mean.cpm1/mean.cpm2)
+  pdf(file=file.path(dir.figures, paste(sep = "", "CPM_MA_plot_", cond1, "_vs_", cond2, ".pdf")))
+  plot(A, M,  
+       main = paste(cond1, "vs", cond2, ": CPMs MA plot"),
+       xlab=paste(sep="", "A = log2(", cond1, "*", cond2, ")/2"),
+       ylab=paste(sep="", "M = log2(", cond1, "/", cond2, ")"),
+       col="purple",
+       panel.first=grid(lty="solid", col="#DDDDDD"))
+  abline(h=0)
+  dev.off()
   
   
   
@@ -210,7 +281,7 @@ for (i in 1:nrow(design)) {
   
   ## Histogram of the nominal p-values
   pdf(file=file.path(dir.figures, paste(sep = "", "DESeq2_pval_hist_", cond1, "_vs_", cond2, ".pdf")))
-  hist(deseq2.res.sorted$pvalue, breaks=seq(from=0, to=1, by=0.01),
+  hist(deseq2.res.sorted$pvalue, breaks=seq(from=0, to=1, by=epsilon),
        xlab="Nominal p-value",
        ylab="Number of genes",
        main=paste(cond1, "vs", cond2, "; DESeq2 p-values"), col="purple")
@@ -280,7 +351,7 @@ for (i in 1:nrow(design)) {
   
   ## Histogram of the nominal p-values
   pdf(file=file.path(dir.figures, paste(sep = "", "edgeR_pval_hist_", cond1, "_vs_", cond2, ".pdf")))
-  hist(edger.tt$table$PValue, breaks=seq(from=0, to=1, by=0.01),
+  hist(edger.tt$table$PValue, breaks=seq(from=0, to=1, by=epsilon),
        xlab="Nominal p-value",
        ylab="Number of genes",
        main=paste(cond1, "vs", cond2, "; edgeR p-values"), col="purple")
