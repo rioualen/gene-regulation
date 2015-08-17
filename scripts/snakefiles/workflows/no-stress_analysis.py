@@ -16,44 +16,68 @@ import os
 import subprocess
 from snakemake.utils import R
 
+
+#================================================================#
+#                        Configuration
+#================================================================#
+
+
 configfile: "scripts/snakefiles/workflows/no-stress_analysis_config.json"
 workdir: config["dir"]["base"] # Local Root directory for the project. Should be adapted for porting.
-## A MODIFIER
-#LIST_ALL_COUNTS = "data/1258-BRM/N1/N1_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/N2/N2_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/N4/N4_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/NN2/NN2_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/NN4/NN4_bowtie2_mm1_sorted_name_count.txt", "data/1258-BRM/NN5/NN5_bowtie2_mm1_sorted_name_count.txt"
 
-path = "scripts/python-scripts/"
-sys.path.append(path) # To find my module "read_analysis_table_lib"
+sys.path.append(config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/python_lib") # To find my module "read_analysis_table_lib"
 import util # read_analysis_table_lib is a module where you can find two functions that return several lists for peak-callers softwares
 
+# Beware: verbosity messages are incompatible with the flowcharts
+verbosity = int(config["verbosity"])
+
+#================================================================#
+# Define suffixes for each step of the workflow. Note: this could
+# alternatively be done in the config file but we would then not be
+# able to build suffixes from other config values due to JSON
+# limitations.
+# ================================================================#
+config["suffix"]["trimmed"] = "sickle_pe_q" + config["sickle"]["threshold"]
+config["suffix"]["mapped"] = config["suffix"]["trimmed"] + "_bowtie2_pe"
+config["suffix"]["sorted_pos"] = config["suffix"]["mapped"] + "_sorted_pos"
+config["suffix"]["sorted_name"] = config["suffix"]["mapped"] + "_sorted_name"
+config["suffix"]["htseq_counts"] = config["suffix"]["sorted_name"] + "_HTSeqcount"
+config["suffix"]["deg"] = "sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"]
+config["suffix"]["edgeR"] = config["suffix"]["deg"] + config["edgeR"]["suffix"]
+config["suffix"]["DESeq2"] = config["suffix"]["deg"] + config["DESeq2"]["suffix"]
 
 
 #================================================================#
 #                         Includes                               #
 #================================================================#
+if verbosity >=2:
+    print("Loading libraries")
 
-include: "../rules/flowcharts.rules"
-# include: "../rules/gunzip.rules"
-# include: "../rules/rsync.rules"
-include: "../rules/fastqc.rules"
-include: "../rules/sickle_paired_ends.rules"
-include: "../rules/bowtie2_build.rules"
-include: "../rules/bowtie2_paired_ends.rules"
-include: "../rules/convert_sam_to_bam.rules"
-include: "../rules/sorted_bam.rules"
-include: "../rules/htseq.rules"
-# include: "../rules/featurecounts.rules"
-include: "../rules/index_bam.rules"
+# include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/gunzip.rules"
+# include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/rsync.rules"
+include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/fastqc.rules"
+include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/sickle_paired_ends.rules"
+include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/bowtie2_build.rules"
+include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/bowtie2_paired_ends.rules"
+include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/convert_sam_to_bam.rules"
+include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/sorted_bam.rules"
+include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/htseq.rules"
+# include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/featurecounts.rules"
+include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/index_bam.rules"
+include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/flowcharts.rules"
 
 #================================================================#
 #     Global variables                                           #
 #================================================================#
+if verbosity >=2:
+    print("Defining global variables")
 
 # Usage: snakemake -c "qsub {params.qsub}" -j 25
 # workdir:"/home/desulfo-no" # Root directory for the project. Should be adapted for porting.
 # workdir: "/home/desulfo-no/no-stress_project/data/1258-BRM" # Root directory for the project. Should be adapted for porting.
 # workdir:"/home/no-stress/Documents/no-stress_project/data/1258-BRM" # Local Root directory for the project. Should be adapted for porting.
 # workdir: os.getcwd() # Local Root directory for the project. Should be adapted for porting.
-SAMPLE_IDS=util.read_sample_ids(config["files"]["samples"], column=1, verbose=0)
+SAMPLE_IDS=util.read_sample_ids(config["files"]["samples"], column=1, verbosity=verbosity)
 
 #DATASETS_FWD = expand("{sample_id}" + config["suffix"]["reads_fwd"], sample_id=SAMPLE_IDS)
 #DATASETS_REV = expand("{sample_id}" + config["suffix"]["reads_rev"], sample_id=SAMPLE_IDS)
@@ -66,34 +90,33 @@ RAWR_FILES_FWD, RAWR_DIRS_FWD, RAWR_BASENAMES_FWD = util.glob_multi_dir(SAMPLE_I
 
 RAWR_FILES, RAWR_DIRS, RAWR_BASENAMES = util.glob_multi_dir(SAMPLE_IDS, "*_?" + ".fastq.gz", config["dir"]["data_root"], ".fastq.gz")
 
+# Results with Htseq
+COUNT_FILES = expand(config["dir"]["results"] + "{sample_id}/{sample_id}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + "_HTSeqcount.tab", sample_id = SAMPLE_IDS)
+
 # Variables for EdgeR (Differential expression) 
 COND_1 = config["Diff_Exp"]["cond1"]
 COND_2 = config["Diff_Exp"]["cond2"]
+RESULTS_EDGER = expand(config["dir"]["results"] + "DEG/{cond_1}_vs_{cond_2}/{cond_1}_VS_{cond_2}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + config["edgeR"]["suffix"] +".tab", zip, cond_1=COND_1, cond_2=COND_2)
+# Results with subreads
+# RESULTS_EDGER = expand(config["dir"]["results"] + "DEG/{cond_1}_vs_{cond_2}/{cond_1}_VS_{cond_2}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe__featurecounts" + config["edgeR"]["suffix"] +".tab", zip, cond_1=COND_1, cond_2=COND_2)
 
-COUNT_FILES = expand(config["dir"]["results"] + "{sample_id}/{sample_id}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + "_HTSeqcount.tab", sample_id = SAMPLE_IDS)
+
+LOGS_DESEQ2 = expand(config["dir"]["results"] + "DEG/{cond_1}_VS_{cond_2}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + config["DESeq2"]["suffix"] + ".log", zip, cond_1=COND_1, cond_2=COND_2)
 
 # Results with Htseq
-RESULTS_EDGER = expand(config["dir"]["results"] + "DEG/{cond_1}_vs_{cond_2}/{cond_1}_VS_{cond_2}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + config["edgeR"]["software"] +".tab", zip, cond_1=COND_1, cond_2=COND_2)
+# RESULTS_DESEQ2 = expand(config["dir"]["results"] + "DEG/{cond_1}_vs_{cond_2}/{cond_1}_VS_{cond_2}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + config["DESeq2"]["suffix"] + ".tab", zip, cond_1=COND_1, cond_2=COND_2)
+RESULTS_DESEQ2 = expand(config["dir"]["results"] + "DEG/{cond_1}_vs_{cond_2}/{cond_1}_VS_{cond_2}_{trimmed}_{alignment}_sorted_" + config["htseq"]["order"] + config["DESeq2"]["suffix"] + ".tab", zip, cond_1=COND_1, cond_2=COND_2, trimmed = "sickle_pe_q" + config["sickle"]["threshold"], alignment = "bowtie2_pe")
 # Results with subreads
-# RESULTS_EDGER = expand(config["dir"]["results"] + "DEG/{cond_1}_vs_{cond_2}/{cond_1}_VS_{cond_2}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe__featurecounts" + config["edgeR"]["software"] +".tab", zip, cond_1=COND_1, cond_2=COND_2)
-
-
-LOGS_DESEQ2 = expand(config["dir"]["results"] + "DEG/{cond_1}_VS_{cond_2}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + config["DESeq2"]["software"] + ".log", zip, cond_1=COND_1, cond_2=COND_2)
-
-# Results with Htseq
-# RESULTS_DESEQ2 = expand(config["dir"]["results"] + "DEG/{cond_1}_vs_{cond_2}/{cond_1}_VS_{cond_2}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + config["DESeq2"]["software"] + ".tab", zip, cond_1=COND_1, cond_2=COND_2)
-RESULTS_DESEQ2 = expand(config["dir"]["results"] + "DEG/{cond_1}_vs_{cond_2}/{cond_1}_VS_{cond_2}_{trimmed}_{alignment}_sorted_" + config["htseq"]["order"] + config["DESeq2"]["software"] + ".tab", zip, cond_1=COND_1, cond_2=COND_2, trimmed = "sickle_pe_q" + config["sickle"]["threshold"], alignment = "bowtie2_pe")
-# Results with subreads
-# RESULTS_DESEQ2 = expand(config["dir"]["results"] + "DEG/{cond_1}_vs_{cond_2}/{cond_1}_VS_{cond_2}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_featurecounts" + config["DESeq2"]["software"] + ".tab", zip, cond_1=COND_1, cond_2=COND_2)
-# RESULTS_DESEQ2 = expand(config["dir"]["results"] + "DEG/{cond_1}_vs_{cond_2}/{cond_1}_VS_{cond_2}_{trimmed}_{alignment}_featurecounts" + config["DESeq2"]["software"] + ".tab", zip, cond_1=COND_1, cond_2=COND_2, trimmed = "sickle_pe_q" + config["sickle"]["threshold"], alignment = "bowtie2_pe")
+# RESULTS_DESEQ2 = expand(config["dir"]["results"] + "DEG/{cond_1}_vs_{cond_2}/{cond_1}_VS_{cond_2}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_featurecounts" + config["DESeq2"]["suffix"] + ".tab", zip, cond_1=COND_1, cond_2=COND_2)
+# RESULTS_DESEQ2 = expand(config["dir"]["results"] + "DEG/{cond_1}_vs_{cond_2}/{cond_1}_VS_{cond_2}_{trimmed}_{alignment}_featurecounts" + config["DESeq2"]["suffix"] + ".tab", zip, cond_1=COND_1, cond_2=COND_2, trimmed = "sickle_pe_q" + config["sickle"]["threshold"], alignment = "bowtie2_pe")
 
 
 PARAMS_R = config["dir"]["results"] + "DEG/sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + "_params.R"
 ALL_COUNTS = config["dir"]["results"] + "DEG/sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + "_allcounts.tab"
 
-include: "../rules/HTseq_allcount_params.rules"
-include: "../rules/edgeR.rules"
-include: "../rules/DESeq2.rules"
+include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/HTseq_allcount_params.rules"
+include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/edgeR.rules"
+include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/DESeq2.rules"
 
 #================================================================#
 #                         Workflow                               #

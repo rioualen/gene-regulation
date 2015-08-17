@@ -2,7 +2,8 @@
     "__description__": "Parameters for the analysis of stress response in Desulfovibrio desulfuricans.",
     "__author__": "Jeanne Cheneby, Justine Long & Jacques van Helden",
     "data_source": "Jeff Cole",
-    "qsub": "-V -m a -d ~/no-stress_project",
+    "qsub": "-V -m a -d /Users/jvanheld/no-stress_project_project",
+    "verbosity": "0",
 
     "genome": {
         "organism": "Desulfovibrio_desulfuricans_ATCC_27774_uid59213",
@@ -17,18 +18,20 @@
     },
 
     "files": {
-        "samples": "data/no-stress_samples.tab",
+        "samples": "/Users/jvanheld/no-stress_project/data/no-stress_samples.tab",
         "analyses": "",
-        "snakefile": "scripts/snakefiles/workflows/no-stress_analysis.py"
+        "snakefile": "/Users/jvanheld/no-stress_project/scripts/snakefiles/workflows/no-stress_analysis.py"
     },
 
     "dir": {
-        "base": "/home/desulfo-no/no-stress_project/",
-        "data_root": "data/1258-BRM/",
-        "reads_source" : "data/1258-BRM/",
+        "base": "/Users/jvanheld/no-stress_project/no-stress_project/",
+	"fg-chip-seq": "/Users/jvanheld/fg-chip-seq",
+        "data_root": "/Users/jvanheld/no-stress_project/data/1258-BRM/",
+        "reads_source" : "/Users/jvanheld/no-stress_project/data/1258-BRM/",
         "reports": "reports",
+        "genome": "genome/",
         "results": "results/",
-        "genome": "genome/"
+	"DEG": "results/DEG"
     },
 
     "suffix": {
@@ -90,13 +93,13 @@
     },
 
     "edgeR": {
-        "script_R_path": "scripts/R-scripts/run_edgeR.R",
+        "script_R_path": "/Users/jvanheld/no-stress_project/scripts/R-scripts/run_edgeR.R",
         "FDR_threshold": ".05",
         "suffix": "_edgeR"
     },
 
     "DESeq2": {
-        "script_R_path": "scripts/R-scripts/run_deseq2.R",
+        "script_R_path": "/Users/jvanheld/no-stress_project/scripts/R-scripts/run_deseq2.R",
         "suffix": "_DESeq2"
     }
 }
