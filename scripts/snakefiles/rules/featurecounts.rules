@@ -2,8 +2,8 @@
    subread
 
    This rule excecutes the counting step of RNA-Seq analysis.
-   The program featureCounts requires two files :
 
+   The program featureCounts requires two files :
    -the Sam or Bam file containing mapping reads
    -the annotation file
 
@@ -21,16 +21,24 @@ rule featurecounts:
 	output: count_table = "{data_dir}/{reads}_featurecounts.tab", \
                 stat_table = "{data_dir}/{reads}_featurecounts_stat.tab"
 	params: annotation = config["subread"]["annotations"], \
-			attr_type = config["subread"]["gtf_attrtype"], \
+                attr_type = config["subread"]["gtf_attrtype"], \
+                feature_type = "exon", \
+                multi_overlaps = "TRUE", \
                 qsub = config["qsub"] \
                 + " -q short -e {data_dir}/{reads}_featurecounts_qsub.err" \
                 + " -o {data_dir}/{reads}_featurecounts_qsub.out"
 	log: "{data_dir}/{reads}_featurecounts.log"
 	benchmark: "{data_dir}/{reads}_featurecounts_benchmark.json"
 	run: 
-		R(""" 
-			library("Rsubread")
-			count.features <- featureCounts(files="{input}",annot.ext="{params.annotation}",isGTFAnnotationFile=TRUE,GTF.featureType="exon",GTF.attrType="{params.attr_type}")
-			write.table(count.features$counts, file="{output.count_table}", sep="\t", col.names = FALSE)
-			write.table(count.features$stat, file="{output.stat_table}", sep="\t")
+		R("""
+library("Rsubread")
+count.features <- featureCounts(
+                files="{input}",
+                annot.ext="{params.annotation}",
+                isGTFAnnotationFile=TRUE,
+                GTF.featureType="{params.feature_type}",
+                GTF.attrType="{params.attr_type}",
+                allowMultiOverlap = {params.multi_overlaps})
+write.table(count.features$counts, file="{output.count_table}", sep="\t", col.names = FALSE, quote=FALSE)
+write.table(count.features$stat, file="{output.stat_table}", sep="\t", quote=FALSE)
 		""")
