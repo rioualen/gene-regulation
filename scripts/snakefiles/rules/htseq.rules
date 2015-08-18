@@ -1,7 +1,7 @@
 """
     Snakemake rule to produce a count matrix from a sorted alignment file.
 """
-rule count:
+rule htseq_count:
     """Count reads per gene in a bam file using htseq-count. 
 
     Bam files can be sorted by name or position. If sorted by position
