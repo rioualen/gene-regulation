@@ -213,7 +213,7 @@ COUNT_FILES=FEATURECOUNTS
 #----------------------------------------------------------------#
 
 PARAMS_R = config["dir"]["results"] + "/DEG/" + config["suffix"]["deg"] + "_params.R"
-ALL_COUNTS = config["dir"]["results"] + "/DEG/" + config["suffix"]["deg"] + "_allcounts.tab"
+ALL_COUNTS = config["dir"]["results"] + "/DEG/" + config["suffix"]["deg"] + "_all_counts.tab"
 if (verbosity >= 2):
     print ("PARAMS_R:\t" + PARAMS_R)
     print ("ALL_COUNTS:\t" + ALL_COUNTS)
@@ -253,8 +253,8 @@ rule all:
     """
 #    input: TRIMMED_SUMMARIES ## Still working ?
 #    input: MERGED_RAWR_QC, RAWR_MERGED, TRIMMED_MERGED, TRIMMED_QC, MAPPED_PE_SAM, MAPPED_PE_BAM, 
-    input: MAPPED_PE_SORTED, MAPPED_PE_SORTED_BY_NAME, HTSEQ_COUNTS, FEATURECOUNTS, ALL_COUNTS, RESULTS_EDGER
-#    input: FEATURECOUNTS
+#    input: MAPPED_PE_SORTED, MAPPED_PE_SORTED_BY_NAME, HTSEQ_COUNTS, FEATURECOUNTS, ALL_COUNTS, RESULTS_EDGER
+    input: HTSEQ_COUNTS
     params: qsub=config["qsub"]
     shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
@@ -294,6 +294,11 @@ RAWR_MERGED_OL=report_numbered_list(RAWR_MERGED)
 TRIMMED_MERGED_OL=report_numbered_list(TRIMMED_MERGED)
 MAPPED_PE_SAM_OL=report_numbered_list(MAPPED_PE_SAM)
 MAPPED_PE_BAM_OL=report_numbered_list(MAPPED_PE_BAM)
+MAPPED_PE_SORTED_OL = report_numbered_list(MAPPED_PE_SORTED)
+MAPPED_PE_SORTED_BY_NAME_OL = report_numbered_list(MAPPED_PE_SORTED_BY_NAME)
+HTSEQ_COUNTS_OL = report_numbered_list(HTSEQ_COUNTS)
+FEATURECOUNTS_OL = report_numbered_list(FEATURECOUNTS)
+COUNT_FILES_OL = report_numbered_list(COUNT_FILES)
 
 rule report:
     """
@@ -302,7 +307,9 @@ rule report:
     input:  dag=config["dir"]["reports"] + "/" + "dag.pdf", \
             dag_png=config["dir"]["reports"] + "/" + "dag.png", \
             rulegraph=config["dir"]["reports"] + "/" + "rulegraph.pdf", \
-            rulegraph_png=config["dir"]["reports"] + "/" + "rulegraph.png"
+            rulegraph_png=config["dir"]["reports"] + "/" + "rulegraph.png", \
+            all_counts = ALL_COUNTS, \
+            params_r = PARAMS_R
     output: html=config["dir"]["reports"] + "/report.html"
     run:
         report("""
@@ -323,6 +330,7 @@ rule report:
              - `Raw reads`_
              - `Trimmed`_
              - `Mapped`_
+             - `Count files`_
 
         -----------------------------------------------------
 
@@ -366,6 +374,43 @@ rule report:
         Bam format (compressed)
 
         {MAPPED_PE_BAM_OL}
+
+        Bam format (sorted by positions)
+
+        {MAPPED_PE_SORTED_OL}
+
+        Bam format (sorted by names)
+
+        {MAPPED_PE_SORTED_BY_NAME_OL}
+
+        Count files
+        -----------
+
+        htseq-count results (paired-ends, no multi overlap)
+
+        {HTSEQ_COUNTS_OL}
+
+        Subread featureCounts results (multi-overlaps)
+
+        ! temporarily: paired-ends option *inactive* due to problem
+
+        {FEATURECOUNTS_OL}
+
+        Count files for differential expression analysis
+
+        {COUNT_FILES_OL}
+
+        Count table
+        -----------
+
+        - Count table (one row per gene, one column per sample): all_counts_
+
+        R parameters
+        ------------
+
+        Parameters passed to R for differential expression anlysis
+
+        params_r_
 
         -----------------------------------------------------
 
