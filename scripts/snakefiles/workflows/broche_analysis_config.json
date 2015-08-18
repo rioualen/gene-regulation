@@ -95,7 +95,7 @@
         "basename": "reference_index",
         "gtf_attrtype": "gene_id",
 	"feature_type": "transcript",
-	"paired_ends": "TRUE",
+	"paired_ends": "FALSE",
 	"multi_overlaps": "TRUE", 
         "reference_genome": "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27.dna.genome.fa",
         "annotations":"genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27.gtf"
