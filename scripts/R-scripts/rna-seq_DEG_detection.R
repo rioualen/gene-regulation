@@ -170,7 +170,8 @@ verbose("Drawing generic plots from the whole count table", 1)
 
 
 ## Plot the impact of the normalization factor (library sum , median or percentile 75)
-pdf(file= file.path(dir.DEG, paste(sep = "", "CPM_libsum_vs_median_vs_perc75.pdf")), width=10, height=10)
+png(file= file.path(dir.DEG, paste(sep = "", "CPM_libsum_vs_median_vs_perc75.png")), 
+    width=1000, height=1000)
 par.ori <- par() ## Save original plot parameters
 cols.counts <- as.data.frame(matrix(cols.samples, nrow=nrow(all.counts.mapped), ncol=ncol(all.counts.mapped), byrow = TRUE))
 colnames(cols.counts) <- names(all.counts.mapped)
@@ -199,7 +200,6 @@ plot(stats.per.sample[,c("perc25", "perc75")],
 plot(stats.per.sample[,c("sum", "perc75")], 
      panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
      las=1, col=cols.samples)
-par(mfrow=c(1,1))
 
 ## Mean versus third quartile. 
 plot(stats.per.sample[,c("mean", "perc75")], 
@@ -335,6 +335,7 @@ for (cond in exp.conditions) {
 verbose("Starting differential analysis", 1)
 
 ## Iterate over analyses
+i <- 1
 for (i in 1:nrow(design)) {
   
   ## Identify samples for the first condition
@@ -422,7 +423,7 @@ for (i in 1:nrow(design)) {
   ## Indicate that second condition is the reference condition. 
   ## If not done, the conditions are considered by alphabetical order, 
   ## which may be misleading to interpret the log2 fold changes. 
-  deseq2.dds$condition <- relevel(deseq2.dds$condition, cond2) 
+  deseq2.dds$condition <- relevel(deseq2.dds$condition, ref=cond2) 
   
   
   deseq2.dds <- DESeq(deseq2.dds)      ## Differential analysis with negbin distrib
@@ -437,13 +438,25 @@ for (i in 1:nrow(design)) {
   mcols(deseq2.res.sorted)[7,"type"] <- "results"
   mcols(deseq2.res.sorted)[7,"description"] <- "Expected nb of FP (=pvalue * number of tests)"
   
+  ## Compute the rank of p-value sorted genes
+  deseq2.res.sorted$pval_rank <- rank(deseq2.res.sorted$pvalue)
+  mcols(deseq2.res.sorted)[8,"type"] <- "results"
+  mcols(deseq2.res.sorted)[8,"description"] <- "Rank of genes sorted by increasing p-values"
+  
+  ## Indicate the sense of the regulation (up-down)
+  deseq2.res.sorted$sign <- sign(deseq2.res.sorted$log2FoldChange)
+  mcols(deseq2.res.sorted)[9,"type"] <- "results"
+  mcols(deseq2.res.sorted)[9,"description"] <- "Sign of the regulation (1= up, -1 = down)"
+  
+  
   ## Label the genes passing the FDR and E-value thresholds
   deseq2.res.sorted[[paste(sep="", "padj_", FDR.threshold)]] <- (deseq2.res.sorted$padj < FDR.threshold)*1
-  mcols(deseq2.res.sorted)[8,"type"] <- "results"
-  mcols(deseq2.res.sorted)[8,"description"] <- paste("padj <", FDR.threshold)
+  mcols(deseq2.res.sorted)[10,"type"] <- "results"
+  mcols(deseq2.res.sorted)[10,"description"] <- paste("padj <", FDR.threshold)
+
   deseq2.res.sorted[[paste(sep="", "Evalue_", Evalue.threshold)]] <- (deseq2.res.sorted$Evalue < Evalue.threshold)*1
-  mcols(deseq2.res.sorted)[9,"type"] <- "results"
-  mcols(deseq2.res.sorted)[9,"description"] <- paste("Evalue <", Evalue.threshold)
+  mcols(deseq2.res.sorted)[11,"type"] <- "results"
+  mcols(deseq2.res.sorted)[11,"description"] <- paste("Evalue <", Evalue.threshold)
   
   mcols(deseq2.res.sorted,use.names=TRUE)
   
@@ -503,21 +516,28 @@ for (i in 1:nrow(design)) {
   
   ## Convert the count table in a DGEList structure and compute its parameters.
   d <- DGEList(counts=current.counts, group=sample.conditions[names(current.counts)])
-  d <- calcNormFactors(d)
-  d <- estimateCommonDisp(d, verbose=FALSE)
-  d <- estimateTagwiseDisp(d, verbose=FALSE)
+  d$samples$group <- relevel(d$samples$group, ref=cond2) ## Ensure that condition 2 is considered as the reference
+  d <- calcNormFactors(d, method="RLE")                 ## Compute normalizing factors
+  d <- estimateCommonDisp(d, verbose=FALSE)             ## Estimate common dispersion
+  d <- estimateTagwiseDisp(d, verbose=FALSE)            ## Estimate tagwise dispersion
   
   ################################################################
   ## Detect differentially expressed genes by applying the exact 
-  ## test from edgeR package
-  edger.de <- exactTest(d)
+  ## negative binomial test from edgeR package.
+  edger.de <- exactTest(d, pair=c(cond2, cond1))      ## Run the exact negative binomial test
   
-  ## Sort genes by p-value
+  ## Sort genes by increasing p-values, i.e. by decreasing significance
   edger.tt <- topTags(edger.de, n=nrow(d), sort.by = "PValue")
   
   ## Compute the E-value
   edger.tt$table$Evalue <- edger.tt$table$PValue * nrow(edger.tt$table)
-
+  
+  ## Compute the rank of p-value sorted genes
+  edger.tt$table$pval_rank <- rank(edger.tt$table$PValue)
+  
+  ## Indicate the sense of the regulation (up-down)
+  edger.tt$table$sign <- sign(edger.tt$table$logFC)
+  
   ## Label the genes passing the FDR and E-value thresholds
   edger.tt$table[, paste(sep="", "FDR_", FDR.threshold)] <- (edger.tt$table$FDR < FDR.threshold)*1
   edger.tt$table[, paste(sep="", "Evalue_", Evalue.threshold)] <- (edger.tt$table$Evalue < Evalue.threshold)*1
