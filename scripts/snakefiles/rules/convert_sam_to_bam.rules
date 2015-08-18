@@ -1,3 +1,9 @@
+## TO CHECK: can we suppress this rule which is now in util.rules ?
+## It would be useful because in util.py we define ruleorder, to
+## ensure that sorting has priority on sam to bam conversion.
+
+print("convert_sam_to_bam.rules is obsolete, we recommend to use util.rules instead.")
+
 rule sam_to_bam:
 	"""    Convert reads from SAM (sequence alignment map) to BAM (binary
 	alignment map) format.
