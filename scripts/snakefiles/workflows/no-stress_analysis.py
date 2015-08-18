@@ -6,6 +6,9 @@ Reference genome: Desulfovibrio desulfuricans ATCC_27774 uid59213
 Collaboration with Alain Dolla
 Data from : Jeff Cole
 
+Usage: snakemake -p -c "qsub {params.qsub}" -j 30
+
+
 """
 
 #================================================================#
@@ -60,10 +63,11 @@ include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/fastqc.rules"
 include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/sickle_paired_ends.rules"
 include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/bowtie2_build.rules"
 include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/bowtie2_paired_ends.rules"
-include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/convert_sam_to_bam.rules"
-include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/sorted_bam.rules"
+#include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/convert_sam_to_bam.rules"
+include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/util.rules"
+#include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/sorted_bam.rules"
 include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/htseq.rules"
-# include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/featurecounts.rules"
+include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/featurecounts.rules"
 include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/index_bam.rules"
 include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/flowcharts.rules"
 
@@ -91,8 +95,6 @@ RAWR_FILES_FWD, RAWR_DIRS_FWD, RAWR_BASENAMES_FWD = glob_multi_dir(SAMPLE_IDS, "
 
 RAWR_FILES, RAWR_DIRS, RAWR_BASENAMES = glob_multi_dir(SAMPLE_IDS, "*_?" + ".fastq.gz", config["dir"]["data_root"], ".fastq.gz")
 
-# Results with Htseq
-COUNT_FILES = expand(config["dir"]["results"] + "{sample_id}/{sample_id}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + "_HTSeqcount.tab", sample_id = SAMPLE_IDS)
 
 # Variables for EdgeR (Differential expression) 
 COND_1 = config["Diff_Exp"]["cond1"]
@@ -115,10 +117,6 @@ RESULTS_DESEQ2 = expand(config["dir"]["results"] + "DEG/{cond_1}_vs_{cond_2}/{co
 PARAMS_R = config["dir"]["results"] + "DEG/sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + "_params.R"
 ALL_COUNTS = config["dir"]["results"] + "DEG/sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + "_allcounts.tab"
 
-include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/HTseq_allcount_params.rules"
-include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/diff_expr.rules"
-#include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/edgeR.rules"
-#include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/DESeq2.rules"
 
 #================================================================#
 #                         Workflow                               #
@@ -152,8 +150,20 @@ SAM_BAM = expand(config["dir"]["results"] + "{sample_ids}/{sample_ids}_{trimmed}
 BAM_SORTED = expand(config["dir"]["results"] + "{sample_ids}/{sample_ids}_{trimmed}_{alignment}_{sorting}.bam", sample_ids=SAMPLE_IDS, trimmed=TRIMMED, alignment=ALIGNMENT, sorting=SORTING)
 BAM_INDEX = expand(config["dir"]["results"] + "{sample_ids}/{sample_ids}_{trimmed}_{alignment}_{sorting}.bam.bai", sample_ids=SAMPLE_IDS, trimmed=TRIMMED, alignment=ALIGNMENT, sorting=SORTING)
 
+# Count tags per gene with Htseq
+#HTSEQ_COUNT = expand(config["dir"]["results"] + "{sample_id}/{sample_id}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"] + "_HTSeqcount.tab", sample_id = SAMPLE_IDS)
 HTSEQ_COUNT = expand(config["dir"]["results"] + "{sample_ids}/{sample_ids}_{trimmed}_{alignment}_{sorting}_HTSeqcount.tab", sample_ids=SAMPLE_IDS, trimmed=TRIMMED, alignment=ALIGNMENT, sorting=SORTING)
+# Count tags per gene with featurecounts
+FEATURECOUNTS = expand(config["dir"]["results"] + "{sample_id}/{sample_id}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe" + "_featurecounts.tab", sample_id = SAMPLE_IDS)
+COUNT_FILES = HTSEQ_COUNT
+
 OUT_HTSEQ = PARAMS_R, ALL_COUNTS
+
+## These inclusions have to be done after having defined the variable COUNT_FILES
+include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/HTseq_allcount_params.rules"
+include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/diff_expr.rules"
+#include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/edgeR.rules"
+#include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/DESeq2.rules"
 
 rule all:
     """Run workflow for each replica of each experience"""
@@ -171,6 +181,7 @@ rule all:
         # BAM_SORTED, \
         BAM_INDEX, \
         # HTSEQ_COUNT, \
+        FEATURECOUNTS, \
         # OUT_HTSEQ
 #        RESULTS_EDGER, \
 #        RESULTS_DESEQ2
@@ -183,8 +194,8 @@ rule all:
         # expand(config["dir"]["results"] + "{data_dir}/{data_dir}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_sorted_pos.bam.bai", data_dir=DATA_DIRS), \
         # expand(config["dir"]["results"] + "{sample_ids}/{sample_ids}_{trimmed}_{alignment}.sam", sample_ids=SAMPLE_IDS), \
         # expand(config["dir"]["results"] + "{sample_ids}/{sample_ids}_{trimmed}_{alignment}_featurecounts.tab", sample_ids=SAMPLE_IDS, trimmed = "sickle_pe_q" + config["sickle"]["threshold"], alignment = "bowtie2_pe"), \
-        PARAMS_R, \
-        ALL_COUNTS
+#        PARAMS_R, \
+#        ALL_COUNTS
 
 
     shell: "echo 'job done'"
@@ -192,8 +203,8 @@ rule all:
 
 # ruleorder: bowtie2_paired_end > sorted_bam
 # ruleorder: sorted_bam > index_bam
-
-
+#ruleorder: sort_bam_by_pos > sam_to_bam
+#ruleorder: sort_bam_by_name > sam_to_bam
 
 
 
@@ -212,7 +223,8 @@ BOWTIE2_OL = report_numbered_list(BOWTIE2)
 SAM_BAM_OL = report_numbered_list(SAM_BAM)
 BAM_SORTED_OL = report_numbered_list(BAM_SORTED)
 BAM_INDEX_OL = report_numbered_list(BAM_INDEX)
-HTSEQ_COUNT_OL = report_numbered_list(HTSEQ_COUNT)
+#HTSEQ_COUNT_OL = report_numbered_list(HTSEQ_COUNT)
+FEATURECOUNTS_OL = report_numbered_list(FEATURECOUNTS)
 PARAMS_R_OL = PARAMS_R
 ALL_COUNTS_OL = ALL_COUNTS
 RESULTS_EDGER_OL = report_numbered_list(RESULTS_EDGER)
@@ -339,7 +351,7 @@ rule report:
         Count (HTSeq)
         -------------
 
-        {HTSEQ_COUNT_OL}
+        {FEATURECOUNTS_OL}
 
 
         Parameters file for DE
