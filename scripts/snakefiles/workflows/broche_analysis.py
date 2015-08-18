@@ -19,6 +19,19 @@ Il s'agit de deux projets RNAseq, A et B.
   puis la souche 2 à la souche 3. Dans ce projet B il n'y a pas de
   souche wt car on veut comparer uniquement des mutants entre eux.
 
+DO TO
+=====
+
+- check why featurecounts takes ages with one particular sample when
+  the option paired ends is active
+
+- suppress bam sorted by positions
+
+- compare paired end counts between htseq-counts and featurecounts,
+  with the appropriate options (paired-ends, no multi overlap).
+
+
+
 """
 
 #================================================================#
