@@ -48,6 +48,7 @@ verbosity = int(config["verbosity"])
 # ================================================================#
 config["suffix"]["trimmed"] = "sickle_pe_q" + config["sickle"]["threshold"]
 config["suffix"]["mapped"] = config["suffix"]["trimmed"] + "_bowtie2_pe"
+config["suffix"]["featurecounts"] = config["suffix"]["mapped"] + "_featurecounts"
 config["suffix"]["sorted_pos"] = config["suffix"]["mapped"] + "_sorted_pos"
 config["suffix"]["sorted_name"] = config["suffix"]["mapped"] + "_sorted_name"
 config["suffix"]["htseq_counts"] = config["suffix"]["sorted_name"] + "_HTSeqcount"
@@ -174,12 +175,23 @@ if (verbosity >= 3):
 #----------------------------------------------------------------#
 
 # THERE SEEMS TO BE A PROBLEM WITH HTSEQ AND POSITION-SORTED BAM
-# FILES ?  TO BE CHACKED LATER
+# FILES. This has been discussed on SesqAnswers: 
+# http://seqanswers.com/forums/showthread.php?t=41531
 
 HTSEQ_COUNTS=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["htseq_counts"] + ".tab", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
-COUNT_FILES=HTSEQ_COUNTS
 if (verbosity >= 3):
     print ("HTSEQ_COUNTS:\n\t" + "\n\t".join(HTSEQ_COUNTS))
+
+# Since the program Subreads featureCounts is MUCH faster (30 times)
+# than htseq-count, and does not required bam sorting, I switch to
+# featureCounts.
+
+FEATURECOUNTS=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["featurecounts"] + ".tab", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+if (verbosity >= 3):
+    print ("FEATURECOUNTS:\n\t" + "\n\t".join(FEATURECOUNTS))
+
+#COUNT_FILES=HTSEQ_COUNTS
+COUNT_FILES=FEATURECOUNTS
 
 #----------------------------------------------------------------#
 # Differential expression analysis
@@ -226,7 +238,8 @@ rule all:
     """
 #    input: TRIMMED_SUMMARIES ## Still working ?
 #    input: MERGED_RAWR_QC, RAWR_MERGED, TRIMMED_MERGED, TRIMMED_QC, MAPPED_PE_SAM, MAPPED_PE_BAM, 
-    input: MAPPED_PE_SORTED, MAPPED_PE_SORTED_BY_NAME, HTSEQ_COUNTS, ALL_COUNTS, RESULTS_EDGER
+#    input: MAPPED_PE_SORTED, MAPPED_PE_SORTED_BY_NAME, HTSEQ_COUNTS, FEATURECOUNTS, ALL_COUNTS, RESULTS_EDGER
+    input: FEATURECOUNTS
     params: qsub=config["qsub"]
     shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
