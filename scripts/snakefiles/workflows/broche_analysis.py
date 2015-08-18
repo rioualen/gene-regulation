@@ -151,6 +151,8 @@ MERGED_RAWR_QC = MERGED_RAWR_QC_FWD + MERGED_RAWR_QC_REV
 #MERGED_RAWR_QC = expand("{fastq_prefix}_fastqc", fastq_prefix=MERGED_PREFIXES)
 
 TRIMMED_QC=expand(config["dir"]["reads"] + "/{sample_dir}/{reads}_fastqc/", zip, reads=TRIMMED_BASENAMES, sample_dir=TRIMMED_DIRS)
+if verbosity >= 3:
+    print("TRIMMED_QC\t" + ";".join(TRIMMED_QC))
 
 #----------------------------------------------------------------#
 # Mapped reads
@@ -238,8 +240,8 @@ rule all:
     """
 #    input: TRIMMED_SUMMARIES ## Still working ?
 #    input: MERGED_RAWR_QC, RAWR_MERGED, TRIMMED_MERGED, TRIMMED_QC, MAPPED_PE_SAM, MAPPED_PE_BAM, 
-#    input: MAPPED_PE_SORTED, MAPPED_PE_SORTED_BY_NAME, HTSEQ_COUNTS, FEATURECOUNTS, ALL_COUNTS, RESULTS_EDGER
-    input: FEATURECOUNTS
+    input: MAPPED_PE_SORTED, MAPPED_PE_SORTED_BY_NAME, HTSEQ_COUNTS, FEATURECOUNTS, ALL_COUNTS, RESULTS_EDGER
+#    input: FEATURECOUNTS
     params: qsub=config["qsub"]
     shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
