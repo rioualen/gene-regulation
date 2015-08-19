@@ -65,7 +65,6 @@
 	"threads": "10"
     },
 
-
     "macs2": {
 	"qval": "0.05",
 	"keep_dup": "all",
@@ -76,6 +75,9 @@
 	"other_options": ""
     },
 
+    "swembl": {
+	"R": "0.01"
+    },
 
     "oligo_stats": "1 2 6",
 
