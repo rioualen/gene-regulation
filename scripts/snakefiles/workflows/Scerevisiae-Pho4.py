@@ -169,20 +169,27 @@ if verbosity >= 2:
 GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
 
 # Data trimming
-SICKLE_TRIMMING = expand(RESULTS_DIR + "{samples}/{samples}_" + TRIMMING + ".fastq", samples=SAMPLE_IDS)
+TRIMMED_READS_SICKLE = expand(RESULTS_DIR + "{samples}/{samples}_" + TRIMMING + ".fastq", samples=SAMPLE_IDS)
+if verbosity >= 3:
+    print("\nTRIMMED_READS_SICKLE\n\t" + "\n\t".join(TRIMMED_READS_SICKLE))
 
 # Quality control
 RAW_QC = expand(RESULTS_DIR + "{samples}/{samples}_fastqc/", samples=SAMPLE_IDS)
+if verbosity >= 3:
+    print("\nRAW_QC\n\t" + "\n\t".join(RAW_QC))
 RAW_READNB = expand(RESULTS_DIR + "{samples}/{samples}_fastq_readnb.txt", samples=SAMPLE_IDS)
 TRIMMED_QC = expand(RESULTS_DIR + "{samples}/{samples}_" + TRIMMING + "_fastqc/", samples=SAMPLE_IDS)
+if verbosity >= 3:
+    print("\nTRIMMED_QC\n\t" + "\n\t".join(TRIMMED_QC))
 
-# Mapping
+# Mapping with BWA
 BWA_INDEX = expand(config["dir"]["genome"] + "{genome}/BWAIndex/{genome}.fa.bwt", genome=GENOME)
-BWA_MAPPING = expand(RESULTS_DIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}.sam", samples=SAMPLE_IDS, aligner=ALIGNER)
+MAPPED_READS_BWA = expand(RESULTS_DIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}.sam", samples=SAMPLE_IDS, aligner=ALIGNER)
+if verbosity >= 3:
+    print("\nMAPPED_READS_BWA\n\t" + "\n\t".join(MAPPED_READS_BWA))
 
 # Sorted and converted reads (bam, bed)
-READS_BAM = expand(RESULTS_DIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.bam", sample=SAMPLE_IDS, aligner=ALIGNER)
-SORTED_READS_BAM = expand(RESULTS_DIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}_sorted_pos.bam", sample=SAMPLE_IDS, aligner=ALIGNER)
+SORTED_MAPPED_READS_BWA = expand(RESULTS_DIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}_sorted_pos.bam", sample=SAMPLE_IDS, aligner=ALIGNER)
 BAM_READNB = expand(RESULTS_DIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}_sorted_pos_bam_readnb.txt", samples=SAMPLE_IDS, aligner=ALIGNER)
 SORTED_READS_BED = expand(RESULTS_DIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}_sorted_pos.bed", sample=SAMPLE_IDS, aligner=ALIGNER)
 BED_READNB = expand(RESULTS_DIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}_sorted_pos_bed_nb.txt", samples=SAMPLE_IDS, aligner=ALIGNER)
@@ -223,9 +230,9 @@ rule all:
     """
     Run all the required analyses
     """
-#    input: GRAPHICS, RAW_READNB, RAW_QC, TRIMMED_QC, SORTED_READS_BAM, SORTED_READS_BED
-    input: BAM_READNB, BED_READNB
-#    input: MACS2 ### NOT WORKING YET
+#    input: GRAPHICS, RAW_READNB, RAW_QC, TRIMMED_QC, SORTED_MAPPED_READS_BWA, SORTED_READS_BED
+#    input: RAW_QC, TRIMMED_QC, MAPPED_READS_BWA, BAM_READNB, BED_READNB
+    input: MACS2 ### NOT WORKING YET
     params: qsub=config["qsub"]
     shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
