@@ -19,8 +19,27 @@ rule macs2:
         input: treatment="{result_dir}/{treatment}/{treatment}" + config["suffixes"]["mapped"] + ".bed", \
             control="{result_dir}/{control}/{control}" + config["suffixes"]["mapped"] + ".bed"
 	output: "{result_dir}/{treatment}_vs_{control}/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2_summits.bed"
+        log: "{result_dir}/{treatment}_vs_{control}/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2.log"
+        benchmark: "{result_dir}/{treatment}_vs_{control}/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2_benchmark.json"
         params: outdir="{result_dir}/{treatment}_vs_{control}", \
-            name="{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2._summits",\
-            genome_size = config["genome"]["size"]
-	shell: "macs2 callpeak -t {input.treatment} -c {input.control} --gsize {params.genome_size} --outdir {params.outdir} --name {params.name}"
+            name="{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2", \
+            qval = config["macs2"]["qval"], \
+            call_summits = config["macs2"]["call_summits"], \
+            keep_dup = config["macs2"]["keep_dup"], \
+            band_width = config["macs2"]["band_width"], \
+            mfold_min = config["macs2"]["mfold_min"], \
+            mfold_max = config["macs2"]["mfold_max"], \
+            other_options = config["macs2"]["other_options"], \
+            genome_size = config["genome"]["size"], \
+            qsub=config["qsub"] \
+                  + " -q long -e {result_dir}/{treatment}_vs_{control}/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2_qsub.err" \
+                  + " -q long -e {result_dir}/{treatment}_vs_{control}/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2_qsub.out" 
+	shell: "macs2 \
+callpeak -t {input.treatment} -c {input.control} --gsize {params.genome_size} \
+--qvalue {params.qval} \
+--keep-dup {params.keep_dup} \
+--bw {params.band_width} \
+--mfold {params.mfold_min} {params.mfold_max} \
+--outdir {params.outdir} --name {params.name} \
+{params.call_summits} {params.other_options} &> {log}"
 
