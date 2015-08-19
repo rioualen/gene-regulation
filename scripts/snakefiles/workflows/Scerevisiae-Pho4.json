@@ -3,6 +3,8 @@
     "__author__": "Claire Rioualen",
     "data_source": "Gene Expression Omnibus, modENCODE", 
     "qsub": "-V -m a -d /workspace/france_genomique/Scerevisiae-Pho4",
+    "verbosity": "1",
+
     "genome": {
 	"organism": "Saccharomyces_cerevisiae",
 	"size": "12157105",
