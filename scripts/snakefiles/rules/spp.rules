@@ -8,18 +8,18 @@ rule spp:
 	Usage: TODO
 	"""
 	input:
-		chip = RESULTSDIR + "{CHIP}/{CHIP}_{ALIGNER}.bam" , \
-		inp = RESULTSDIR + "{INPUT}/{INPUT}_{ALIGNER}.bam"
-	log: RESULTSDIR + "{CHIP}_vs_{INPUT}/spp.log"
-	benchmark: RESULTSDIR + {CHIP} + "_vs_" + {INPUT} + "/spp_benchmark.json"
+		chip = config["dir"]["results"] + "{CHIP}/{CHIP}_{ALIGNER}.bam" , \
+		inp = config["dir"]["results"] + "{INPUT}/{INPUT}_{ALIGNER}.bam"
+	log: config["dir"]["results"] + "{CHIP}_vs_{INPUT}/spp.log"
+	benchmark: config["dir"]["results"] + {CHIP} + "_vs_" + {INPUT} + "/spp_benchmark.json"
 	params: qsub = config["qsub"] + " -e {input.chip}_homer_qsub.err -o {input.chip}_homer_qsub.out"
 	output: 
-		RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.narrowPeak", \
-		RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.crosscorrelation.pdf", \
-		RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.smoothed.density.wig", \
-		RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.enrichment.estimates.wig", \
-		RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.broadPeak", \
-		RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.binding.positions.txt"
+		config["dir"]["results"] + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.narrowPeak", \
+		config["dir"]["results"] + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.crosscorrelation.pdf", \
+		config["dir"]["results"] + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.smoothed.density.wig", \
+		config["dir"]["results"] + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.enrichment.estimates.wig", \
+		config["dir"]["results"] + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.broadPeak", \
+		config["dir"]["results"] + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.binding.positions.txt"
 	run:
 		R("""library(spp)
 
