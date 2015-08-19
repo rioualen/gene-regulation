@@ -65,8 +65,6 @@ if verbosity >= 1:
 #  /!\ can be a *list* of tools?
 TRIMMING = "sickle-se-q" + config['sickle']['threshold']
 ALIGNER = "bwa"
-PEAK_CALLER = "macs2"
-
 
 #================================================================#
 #                         Includes                               #
@@ -99,7 +97,7 @@ include: RULES + "macs2.rules"
 include: RULES + "sickle_se.rules"
 #include: RULES + "sorted_bam.rules"
 #include: RULES + "spp.rules"
-#include: RULES + "swembl.rules"
+include: RULES + "swembl.rules"
 #include: RULES + "trimming.rules"
 
 
@@ -197,17 +195,26 @@ if verbosity >= 3:
     print("\nSORTED_READS_BED\n\t" + "\n\t".join(SORTED_READS_BED))
 #CONVERTED_BED = expand(RESULTS_DIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.converted.bed", sample=SAMPLE_IDS, aligner=ALIGNER)
 
+# ----------------------------------------------------------------
 # Peak-calling
-# ! In case of use of several peak-callers, beware of specific prefixes or such...
-#MACS2 = expand(RESULTS_DIR + "{treat}_vs_{ctrl}/{treat}_vs_{ctrl}_{trimming}_{aligner}_{caller}_peaks.narrowPeak", treat="GSM121459", ctrl="GSM1217457", trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
-MACS2 = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/{treat}_vs_{ctrl}_{{trimming}}_{{aligner}}_{{caller}}_summits.bed", 
-               zip, treat=TREATMENT, ctrl=CONTROL), trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
+# ----------------------------------------------------------------
+
+## Peak-calling with MACS2
+PEAKS_MACS2 = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2/{treat}_vs_{ctrl}_{{trimming}}_{{aligner}}_macs2_peaks.narrowPeak",
+               zip, treat=TREATMENT, ctrl=CONTROL), trimming=TRIMMING, aligner=ALIGNER)
 if verbosity >= 3: 
-    print("\nMACS2\n\t" + "\n\t".join(MACS2))
+    print("\nPEAKS_MACS2\n\t" + "\n\t".join(PEAKS_MACS2))
+
+## Peak-calling with SWEMBL
+PEAKS_SWEMBL = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/swembl/{treat}_vs_{ctrl}_{{trimming}}_{{aligner}}_swembl_R" + config["swembl"]["R"] + ".bed", 
+               zip, treat=TREATMENT, ctrl=CONTROL), trimming=TRIMMING, aligner=ALIGNER)
+if verbosity >= 3: 
+    print("\nPEAKS_SWEMBL\n\t" + "\n\t".join(PEAKS_SWEMBL))
+
+## Peaks returned by the different peak callers
+PEAKS = PEAKS_MACS2 + PEAKS_SWEMBL
 
 # File conversion
-#NARROWPEAK_TO_BED = expand(RESULTS_DIR + "{treat}_vs_{ctrl}/{treat}_vs_{ctrl}_{trimming}_{aligner}_{caller}_peaks.bed", treat=TREATMENT, ctrl=CONTROL, trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
-#BED_TO_FASTA = expand(RESULTS_DIR + "{treat}_vs_{ctrl}/{treat}_vs_{ctrl}_{trimming}_{aligner}_{caller}_peaks.fasta", treat=TREATMENT, ctrl=CONTROL, trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
 BED_TO_FASTA = expand(RESULTS_DIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.calling.fasta", sample=SAMPLE_IDS, trimming=TRIMMING, aligner=ALIGNER)
 
 ## Sequence purge
@@ -231,8 +238,8 @@ rule all:
     Run all the required analyses
     """
 #    input: GRAPHICS, RAW_READNB, RAW_QC, TRIMMED_QC, SORTED_MAPPED_READS_BWA, SORTED_READS_BED
-#    input: RAW_QC, TRIMMED_QC, MAPPED_READS_BWA, BAM_READNB, BED_READNB
-    input: MACS2 ### NOT WORKING YET
+#    input: RAW_QC, TRIMMED_QC, MAPPED_READS_BWA, BAM_READNB, BED_READNB, PEAKS_MACS2
+    input: PEAKS_SWEMBL, PEAKS_MACS2
     params: qsub=config["qsub"]
     shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
