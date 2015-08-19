@@ -63,8 +63,6 @@ if verbosity >= 1:
 
 # list of suffixes used
 #  /!\ can be a *list* of tools?
-TRIMMING = "sickle-se-q" + config['sickle']['threshold']
-ALIGNER = "bwa"
 
 #================================================================#
 #                         Includes                               #
@@ -166,48 +164,57 @@ if verbosity >= 2:
 # Graphics
 GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
 
-# Data trimming
-TRIMMED_READS_SICKLE = expand(RESULTS_DIR + "{samples}/{samples}_" + TRIMMING + ".fastq", samples=SAMPLE_IDS)
+#----------------------------------------------------------------#
+# Trimming of the raw reads
+#----------------------------------------------------------------#
+
+TRIMMED_READS_SICKLE = expand(RESULTS_DIR + "{samples}/{samples}" + config["sickle"]["suffix"] + ".fastq", samples=SAMPLE_IDS)
 if verbosity >= 3:
     print("\nTRIMMED_READS_SICKLE\n\t" + "\n\t".join(TRIMMED_READS_SICKLE))
 
+#----------------------------------------------------------------#
 # Quality control
+#----------------------------------------------------------------#
+
 RAW_QC = expand(RESULTS_DIR + "{samples}/{samples}_fastqc/", samples=SAMPLE_IDS)
 if verbosity >= 3:
     print("\nRAW_QC\n\t" + "\n\t".join(RAW_QC))
 RAW_READNB = expand(RESULTS_DIR + "{samples}/{samples}_fastq_readnb.txt", samples=SAMPLE_IDS)
-TRIMMED_QC = expand(RESULTS_DIR + "{samples}/{samples}_" + TRIMMING + "_fastqc/", samples=SAMPLE_IDS)
+
+TRIMMED_QC = expand(RESULTS_DIR + "{samples}/{samples}" + config["sickle"]["suffix"] + "_fastqc/", samples=SAMPLE_IDS)
 if verbosity >= 3:
     print("\nTRIMMED_QC\n\t" + "\n\t".join(TRIMMED_QC))
 
-# Mapping with BWA
+#----------------------------------------------------------------#
+# Mapping
+#----------------------------------------------------------------#
+
 BWA_INDEX = expand(config["dir"]["genome"] + "{genome}/BWAIndex/{genome}.fa.bwt", genome=GENOME)
-MAPPED_READS_BWA = expand(RESULTS_DIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}.sam", samples=SAMPLE_IDS, aligner=ALIGNER)
+MAPPED_READS_BWA = expand(RESULTS_DIR + "{samples}/{samples}" + config["sickle"]["suffix"] + "_{aligner}.sam", samples=SAMPLE_IDS, aligner=config["bwa"]["suffix"])
 if verbosity >= 3:
     print("\nMAPPED_READS_BWA\n\t" + "\n\t".join(MAPPED_READS_BWA))
 
 # Sorted and converted reads (bam, bed)
-SORTED_MAPPED_READS_BWA = expand(RESULTS_DIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}_sorted_pos.bam", sample=SAMPLE_IDS, aligner=ALIGNER)
-BAM_READNB = expand(RESULTS_DIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}_sorted_pos_bam_readnb.txt", samples=SAMPLE_IDS, aligner=ALIGNER)
-SORTED_READS_BED = expand(RESULTS_DIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}_sorted_pos.bed", sample=SAMPLE_IDS, aligner=ALIGNER)
-BED_READNB = expand(RESULTS_DIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}_sorted_pos_bed_nb.txt", samples=SAMPLE_IDS, aligner=ALIGNER)
+SORTED_MAPPED_READS_BWA = expand(RESULTS_DIR + "{sample}/{sample}" + config["sickle"]["suffix"] + "_{aligner}_sorted_pos.bam", sample=SAMPLE_IDS, aligner=config["bwa"]["suffix"])
+BAM_READNB = expand(RESULTS_DIR + "{samples}/{samples}" + config["sickle"]["suffix"] + "_{aligner}_sorted_pos_bam_readnb.txt", samples=SAMPLE_IDS, aligner=config["bwa"]["suffix"])
+SORTED_READS_BED = expand(RESULTS_DIR + "{sample}/{sample}" + config["sickle"]["suffix"] + "_{aligner}_sorted_pos.bed", sample=SAMPLE_IDS, aligner=config["bwa"]["suffix"])
+BED_READNB = expand(RESULTS_DIR + "{samples}/{samples}" + config["sickle"]["suffix"] + "_{aligner}_sorted_pos_bed_nb.txt", samples=SAMPLE_IDS, aligner=config["bwa"]["suffix"])
 if verbosity >= 3: 
     print("\nSORTED_READS_BED\n\t" + "\n\t".join(SORTED_READS_BED))
-#CONVERTED_BED = expand(RESULTS_DIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.converted.bed", sample=SAMPLE_IDS, aligner=ALIGNER)
 
 # ----------------------------------------------------------------
 # Peak-calling
 # ----------------------------------------------------------------
 
 ## Peak-calling with MACS2
-PEAKS_MACS2 = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2/{treat}_vs_{ctrl}_{{trimming}}_{{aligner}}_macs2_peaks.narrowPeak",
-               zip, treat=TREATMENT, ctrl=CONTROL), trimming=TRIMMING, aligner=ALIGNER)
+PEAKS_MACS2 = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_macs2_peaks.narrowPeak",
+               zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
 if verbosity >= 3: 
     print("\nPEAKS_MACS2\n\t" + "\n\t".join(PEAKS_MACS2))
 
 ## Peak-calling with SWEMBL
-PEAKS_SWEMBL = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/swembl/{treat}_vs_{ctrl}_{{trimming}}_{{aligner}}_swembl_R" + config["swembl"]["R"] + ".bed", 
-               zip, treat=TREATMENT, ctrl=CONTROL), trimming=TRIMMING, aligner=ALIGNER)
+PEAKS_SWEMBL = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/swembl/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_swembl_R" + config["swembl"]["R"] + ".bed", 
+               zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
 if verbosity >= 3: 
     print("\nPEAKS_SWEMBL\n\t" + "\n\t".join(PEAKS_SWEMBL))
 
@@ -215,7 +222,7 @@ if verbosity >= 3:
 PEAKS = PEAKS_MACS2 + PEAKS_SWEMBL
 
 # File conversion
-BED_TO_FASTA = expand(RESULTS_DIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.calling.fasta", sample=SAMPLE_IDS, trimming=TRIMMING, aligner=ALIGNER)
+BED_TO_FASTA = expand(RESULTS_DIR + "{sample}/{sample}" + config["sickle"]["suffix"] + "_{aligner}.calling.fasta", sample=SAMPLE_IDS, trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
 
 ## Sequence purge
 #PURGED_SEQ = expand(RESULTS_DIR + "{sample}_purged.fasta", sample=SAMPLE_IDS)
@@ -238,8 +245,8 @@ rule all:
     Run all the required analyses
     """
 #    input: GRAPHICS, RAW_READNB, RAW_QC, TRIMMED_QC, SORTED_MAPPED_READS_BWA, SORTED_READS_BED
-#    input: RAW_QC, TRIMMED_QC, MAPPED_READS_BWA, BAM_READNB, BED_READNB, PEAKS_MACS2
-    input: PEAKS_SWEMBL, PEAKS_MACS2
+#    input: RAW_QC, TRIMMED_READS_SICKLE, TRIMMED_QC, MAPPED_READS_BWA, BAM_READNB, BED_READNB, PEAKS_MACS2, PEAKS_SWEMBL
+    input: RAW_QC, TRIMMED_READS_SICKLE, TRIMMED_QC, MAPPED_READS_BWA, BAM_READNB, BED_READNB, PEAKS_MACS2
     params: qsub=config["qsub"]
     shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 

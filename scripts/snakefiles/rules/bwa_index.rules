@@ -1,3 +1,13 @@
+# Check if each required parameter has been defined in the JSON
+# configuration file, otherwise use default values
+
+if not "bwa" in config.keys():
+    config["bwa"] = {}
+
+if not "index" in config["bwa"].keys():
+#    config["bwa"]["index"] = ""
+    sys.exit("The parameter bwa index must be defined in the JSON file")
+
 rule bwa_index:
 	"""Rule for the creation of BWA index. Has to be done only once.  The
 	output file is used to test whether the index already exists

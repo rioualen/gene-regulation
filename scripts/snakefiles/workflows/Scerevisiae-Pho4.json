@@ -22,6 +22,10 @@
 	"design": "data/Scerevisiae-Pho4_design.tab"
     },
 
+    "reads": {
+       	"qual_type": "sanger"
+    },
+
     "suffixes": {
 	"trimmed": "_sickle-se-q20",
 	"mapped":  "_sickle-se-q20_bwa",
@@ -51,7 +55,6 @@
     },
 
     "sickle":  { 
-       	"qual_type": "sanger",
         "threshold": "20",
         "other_options": ""
     },
@@ -62,6 +65,7 @@
 
     "bwa": {
 	"index": "genomes/sc/BWAIndex/sc.fa",
+	"suffix": "bwa",
 	"threads": "10"
     },
 

@@ -1,3 +1,16 @@
+# Check if each required parameter has been defined in the JSON
+# configuration file, otherwise use default values
+
+if not "bwa" in config.keys():
+    config["bwa"] = {}
+
+if not "index" in config["bwa"].keys():
+#    config["bwa"]["index"] = ""
+    sys.exit("The parameter bwa index must be defined in the JSON file")
+
+if not "threads" in config["bwa"].keys():
+    config["bwa"]["threads"] = "1"
+
 rule bwa_se:
 	"""Read mapping using BWA. 
 
@@ -5,7 +18,7 @@ rule bwa_se:
 	rule bwa_index).  This is checked by testing the presence of
 	file {genome}.done
 
-	Required parameters:
+	Parameters:
 		config["bwa"]["index"]
 		config["bwa"]["threads"]
 		config["qsub"]
