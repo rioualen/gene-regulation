@@ -3,14 +3,30 @@ __license__ = "GPL"
 __version__ = "0.01"
 __maintainer__ = "Jacques van Helden"
 __email__ = "Jacques.van-Helden@univ-amu.fr"
-__status__ = "Embryonic"
+__status__ = "In development"
 
-################################################################
-def read_sample_ids(file, base_dir=".", column=1, verbose=0):
+import pandas as pd
+
+def read_sample_ids(file_path:str, base_dir:str=".", column:int=1, verbosity:int=0) -> list:
     """Read sample descriptions from a tab-delimited file. 
 
     The first column of the sample description file contains the
     sample ID. The other columns are currently ignored.
+
+    Note: this function has been renamed read_column_from_tab, because
+    it is generic. The function read_sample_id() is maintained for
+    backward compatibility.
+
+    """
+    if verbosity >= 3:
+        print ("read_sample_ids()\t" +"column\t" + str(column) +"\tfile_path\t" + file_path)
+    sample_ids = read_column_from_tab(file_path, column, verbosity)
+    return(sample_ids)
+
+
+def read_column_from_tab(file_path:str, column:int=1, verbosity:int=0) -> list:
+    """Read a column from a tab-delimited file, and returns the values in
+    a list.
 
     Lines starting with a semicolumn (;) are considered as comment
     lines, and thus ignored.
@@ -20,21 +36,20 @@ def read_sample_ids(file, base_dir=".", column=1, verbose=0):
     consideration, but should be treated in future versions of this
     function).
 
-    :param file: path to the sample description file
-    :type file: string
-    :param column: number of the column containing the sample ID (Default: 1)
+    :param file_path: path to a tab-delimited text file
+    :type file_path: string
+    :param column: number of the column to read (Default: 1)
     :type column: Integer >= 1
-    :param verbose: verbosity level
-    :type verbose: Integer
-    :return: a list of sample IDs, taken from the first column of the sample file.
+    :param verbosity: verbosity level
+    :type verbosity: Integer
+    :return: the list of values from the specified columns.
     :rtype: list of strings
-
     """
-    if verbose >= 1:
-        print ("read_sample_ids()\t" +"Reading sample IDs from file\t" + file)
-    samples = []
+    if verbosity >= 2:
+        print ("read_column_from_tab()\t" +"column\t" + str(column) +"\tfile_path\t" + file_path)
+    values = []
 
-    f = open(file, "r")
+    f = open(file_path, "r")
     for line in f.readlines():
         line = line.rstrip("\n") ## Suppress carriage.return
         if line[0:1] != ';': ## Skip comment lines (starting by "--")
@@ -44,11 +59,77 @@ def read_sample_ids(file, base_dir=".", column=1, verbose=0):
 #                print("\t".join(keys))
             else:
                 fields = line.split("\t")
-                samples.append(fields[column-1])
-#                print(fields[column -1])
-    if verbose >= 1:
-        print("\t".join(["read_sample_ids()", "Result:", str(len(samples)), "sample IDs"]))
-    return(samples)
+                current_value = fields[column -1]
+#                current_value = fields[0]
+                values.append(current_value)
+    if verbosity >= 1:
+        print("\t".join(["read_sample_ids()", "Result:", str(len(values)), "sample IDs"]))
+    return(values)
+    
+def read_table(file:str, verbosity:int=0, header:int=0, skip_blank_lines=True, comment=';') -> pd.DataFrame:
+    """Read a tab-delimited text file and return the content as a data
+    frame (object of the class panda.DataFrame).
+
+    This is a simple wrapper around panda.read_csv, with the
+    appropriat options for our tab-delimited files: comment lines
+    start with ';', the first non-comment line contains the
+    header. These options can be overwritten in the function call.
+
+    """
+    if verbosity >= 3:
+        print ("read_table()\t" + file)
+    df = pd.read_csv(file, sep="\t", 
+                     header=header, 
+                     skip_blank_lines=skip_blank_lines,
+                     comment=comment)
+    if verbosity >= 3:
+        print("\tColumns:\t" + ";".join(list(df.columns)))
+    return(df)
+    
+# ################################################################
+# def read_sample_ids(file, base_dir=".", column=1, verbose=0):
+#     """Read sample descriptions from a tab-delimited file. 
+#
+#     The first column of the sample description file contains the
+#     sample ID. The other columns are currently ignored.
+#
+#     Lines starting with a semicolumn (;) are considered as comment
+#     lines, and thus ignored.
+#
+#     A line starting with a # can optionally be used at the beginning
+#     of the file to specify column headers (still not taken in
+#     consideration, but should be treated in future versions of this
+#     function).
+#
+#     :param file: path to the sample description file
+#     :type file: string
+#     :param column: number of the column containing the sample ID (Default: 1)
+#     :type column: Integer >= 1
+#     :param verbose: verbosity level
+#     :type verbose: Integer
+#     :return: a list of sample IDs, taken from the first column of the sample file.
+#     :rtype: list of strings
+#
+#     """
+#     if verbose >= 1:
+#         print ("read_sample_ids()\t" +"Reading sample IDs from file\t" + file)
+#     samples = []
+#
+#     f = open(file, "r")
+#     for line in f.readlines():
+#         line = line.rstrip("\n") ## Suppress carriage.return
+#         if line[0:1] != ';': ## Skip comment lines (starting by "--")
+#             if line[0:1] == '#': ## Line containing column headers
+#                 line = line.lstrip("#")
+#                 keys = line.split("\t")
+# #                print("\t".join(keys))
+#             else:
+#                 fields = line.split("\t")
+#                 samples.append(fields[column-1])
+# #                print(fields[column -1])
+#     if verbose >= 1:
+#         print("\t".join(["read_sample_ids()", "Result:", str(len(samples)), "sample IDs"]))
+#     return(samples)
     
 ################################################################
 def read_chipseq_design(file, test_column=1, input_column=2, verbose=0):

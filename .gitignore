@@ -13,3 +13,6 @@ results/
 logs/
 
 .Rproj.user
+#*
+\#*
+.\#*

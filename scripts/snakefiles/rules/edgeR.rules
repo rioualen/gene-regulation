@@ -18,8 +18,8 @@ rule edgeR:
     output: tab = RESULTS_EDGER
     log: config["dir"]["results"] + "DEG/edgeR.log"
     benchmark: config["dir"]["results"] + "DEG/edgeR_benchmark.json"
-    params: qsub = config["qsub"] + " -q short -e " + config["dir"]["results"] + "DEG/edgeR_qsub.err -o " + config["dir"]["results"] + "DEG/edgeR_qsub.out", \
-            cond1 = config["Diff_Exp"]["cond1"], \
-            cond2=config["Diff_Exp"]["cond2"], \
-            dir_results = config["dir"]["results"]
+    params: qsub = config["qsub"] + " -q short -e " + config["dir"]["results"] + "DEG/edgeR_qsub.err -o " + config["dir"]["results"] + "DEG/edgeR_qsub.out" #, \
+#            cond1 = config["Diff_Exp"]["cond1"], \
+#            cond2 = config["Diff_Exp"]["cond2"], \
+#            dir_results = config["dir"]["results"]
     shell: "Rscript {input.r_script} {input.R_params}"

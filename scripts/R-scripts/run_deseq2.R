@@ -22,8 +22,6 @@ dir.figures <- file.path(dir.results, "figures")
 dir.create(path = dir.figures, showWarnings = FALSE, recursive = TRUE)
 
 sampleFiles <- counts.files.per.comparisons[[i]]
-
-# condition.per.comparisons  <- c('N', 'N', 'N','NN','NN','NN') 
  
 sampleCondition <- condition.per.comparisons[[i]]
 

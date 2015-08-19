@@ -2,7 +2,8 @@
     "__description__": "Parameters for the analysis of Beatrice Roche data.",
     "__author__": "Jacques van Helden",
     "data_source": "TGML platform, samples from Beatrice Roche",
-    "qsub": "-V -m a -d /workspace/tgml/BeatriceRoche/",
+    "qsub": "-V -m a -d /Users/jvanheld/BeatriceRoche/",
+    "verbosity": "0",
 
     "genome": {
 	"organism": "Escherichia_coli_str_k_12_substr_mg1655",
@@ -27,16 +28,16 @@
     },
 
     "dir": {
-	"base": "/workspace/tgml/BeatriceRoche",
-	"fg-chip-seq": "/home/jvanheld/fg-chip-seq",
-	"python_lib": "/home/jvanheld/fg-chip-seq/scripts/snakefiles/python_lib/",
-	"rules": "/home/jvanheld/fg-chip-seq/scripts/snakefiles/rules/",
+	"base": "/Users/jvanheld/BeatriceRoche",
+	"fg-chip-seq": "/Users/jvanheld/fg-chip-seq",
+	"python_lib": "/Users/jvanheld/fg-chip-seq/scripts/snakefiles/python_lib/",
+	"rules": "/Users/jvanheld/fg-chip-seq/scripts/snakefiles/rules/",
 	"reads_source": "data/reads_ori",
 	"results": "results",
+	"DEG": "results/DEG",
 	"reads": "results/reads",
         "reports": "reports",
-        "results": "results/",
-        "genome": "genome/"
+        "genome": "genome"
     },
 
     "reports": {
@@ -81,11 +82,11 @@
     
     "htseq": {
         "ht_type": "bam",
-        "order": "pos",
+        "order": "name",
         "stranded": "no",
         "minaqual": "10",
         "id_attr": "gene_id",
-        "mode": "intersection-nonempty",
+        "mode": "union",
         "gff_file": "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27.gtf",
         "other_options": ""
     },
@@ -93,9 +94,29 @@
     "subread": {
         "basename": "reference_index",
         "gtf_attrtype": "gene_id",
+	"feature_type": "transcript",
+	"paired_ends": "FALSE",
+	"multi_overlaps": "TRUE", 
         "reference_genome": "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27.dna.genome.fa",
         "annotations":"genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27.gtf"
-    }
+    },
 
+    "Diff_Exp": {
+        "conditions": ["wt", "isw", "im", "cyay", "souche1", "souche2", "souche3"],
+        "cond1": ["iscU"],
+        "cond2": ["wt"]
+    },
+
+    "edgeR": {
+        "script_R_path": "scripts/R-scripts/run_edgeR.R",
+        "FDR_threshold": ".05",
+        "Evalue_threshold": "1",
+        "suffix": "_edgeR"
+    },
+
+    "DESeq2": {
+        "script_R_path": "scripts/R-scripts/run_deseq2.R",
+        "suffix": "_DESeq2"
+    }
 
 }

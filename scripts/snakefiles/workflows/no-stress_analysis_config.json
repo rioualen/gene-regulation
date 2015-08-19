@@ -2,7 +2,8 @@
     "__description__": "Parameters for the analysis of stress response in Desulfovibrio desulfuricans.",
     "__author__": "Jeanne Cheneby, Justine Long & Jacques van Helden",
     "data_source": "Jeff Cole",
-    "qsub": "-V -m a -d ~/no-stress_project",
+    "qsub": "-V -m a -d /home/desulfo-no/no-stress_project",
+    "verbosity": "0",
 
     "genome": {
         "organism": "Desulfovibrio_desulfuricans_ATCC_27774_uid59213",
@@ -17,18 +18,20 @@
     },
 
     "files": {
-        "samples": "data/no-stress_samples.tab",
+        "samples": "/home/desulfo-no/no-stress_project/data/no-stress_samples.tab",
         "analyses": "",
-        "snakefile": "scripts/snakefiles/workflows/no-stress_analysis.py"
+        "snakefile": "/home/desulfo-no/no-stress_project/scripts/snakefiles/workflows/no-stress_analysis.py"
     },
 
     "dir": {
         "base": "/home/desulfo-no/no-stress_project/",
-        "data_root": "data/1258-BRM/",
-        "reads_source" : "data/1258-BRM/",
+	"fg-chip-seq": "/home/desulfo-no/no-stress_project/fg-chip-seq",
+        "data_root": "/home/desulfo-no/no-stress_project/data/1258-BRM/",
+        "reads_source" : "/home/desulfo-no/no-stress_project/data/1258-BRM/",
         "reports": "reports",
+        "genome": "genome/",
         "results": "results/",
-        "genome": "genome/"
+	"DEG": "results/DEG"
     },
 
     "suffix": {
@@ -76,6 +79,7 @@
     "subread": {
         "basename": "reference_index",
         "reference_genome": "genome/Desulfovibrio_desulfuricans_ATCC_27774_uid59213_genome.fasta",
+        "gtf_attrtype": "gene_id",
         "annotations": "genome/Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27.gtf"
     },
 
@@ -90,14 +94,14 @@
     },
 
     "edgeR": {
-        "script_R_path": "scripts/R-scripts/run_edgeR.R",
+        "script_R_path": "/home/desulfo-no/no-stress_project/scripts/R-scripts/run_edgeR.R",
         "FDR_threshold": ".05",
-        "software": "_edgeR"
+        "suffix": "_edgeR"
     },
 
     "DESeq2": {
-        "script_R_path": "scripts/R-scripts/run_deseq2.R",
-        "software": "_DESeq2"
+        "script_R_path": "/home/desulfo-no/no-stress_project/scripts/R-scripts/run_deseq2.R",
+        "suffix": "_DESeq2"
     }
 }
 
