@@ -45,19 +45,21 @@ import time
 configfile: "scripts/snakefiles/workflows/Scerevisiae-Pho4.json"
 #workdir: config["dir"]["base"] ## does not work??
 
-# Flag indicating whether the debug mode should be activated.  Beware:
-# this mode can create problems, for example for the flowcharts
-# (failure because the debug messages are printed to the STDOUT).
-debug = False
+# Beware: verbosity messages are incompatible with the flowcharts
+verbosity = int(config["verbosity"])
 
 # Rules dir
 RULES = config["dir"]["rules"]
 
 # Raw data
 READS = config["dir"]["reads_source"]
-RESULTSDIR = config["dir"]["results"]	
+RESULTS_DIR = config["dir"]["results"]	
+if verbosity >= 1:
+    print("\nRESULTS_DIR\t" + RESULTS_DIR)
 
 GENOME = config["genome"]["genome_version"]
+if verbosity >= 1:
+    print("\nGENOME\t" + GENOME)
 
 # list of suffixes used
 #  /!\ can be a *list* of tools?
@@ -69,6 +71,8 @@ PEAK_CALLER = "macs2"
 #================================================================#
 #                         Includes                               #
 #================================================================#
+if verbosity >= 2:
+    print("\nImporting rules")
 
 include: config["dir"]["python_lib"] + "util.py"
 include: RULES + "util.rules"
@@ -104,13 +108,33 @@ include: RULES + "sickle_se.rules"
 #================================================================#
 
 
+## Read sample descriptions
+if verbosity >= 1:
+    print("\nReading sample descriptions\t" + config["files"]["samples"])
+# SAMPLES = read_sample_ids(config["files"]["samples"], verbose=1)
+# SAMPLES = TREATMENT + CONTROL ## Read from the sample description file
+# Read the sample description file
+SAMPLES = read_table(config["files"]["samples"], verbosity=verbosity)
+SAMPLE_IDS = SAMPLES.iloc[:,0] ## First column MUST contain the sample ID
+SAMPLE_CONDITIONS = SAMPLES.iloc[:,1] ## Second column MUST contain condition for each sample
+SAMPLE_EXT_DB = SAMPLES.iloc[:,2] ## External database from which the raw reads will be downloaded
+SAMPLE_EXT_ID = SAMPLES.iloc[:,3] ## Sample ID in the external database
+SAMPLE_DESCR = SAMPLES.iloc[:,7] ## First column MUST contain the sample ID
+if verbosity >= 2:
+    print("\nSAMPLE_IDS\t" + ";".join(SAMPLE_IDS))
+
 ## Read the list of sample IDs from the sample description file
+if verbosity >= 1:
+    print("\nReading experimental design\t" + config["files"]["design"])
 # TREATMENT = config["samples"]["chip"].split()
 # CONTROL = config["samples"]["input"].split()
-TREATMENT, CONTROL = read_chipseq_design(config["files"]["design"], test_column=1, input_column=2, verbose=2)
-
-SAMPLES = read_sample_ids(config["files"]["samples"], verbose=1)
-# SAMPLES = TREATMENT + CONTROL ## Read from the sample description file
+DESIGN = read_table(config["files"]["design"], verbosity=verbosity)
+TREATMENT = DESIGN.iloc[:,0]
+CONTROL = DESIGN.iloc[:,1]
+#TREATMENT, CONTROL = read_chipseq_design(config["files"]["design"], test_column=1, input_column=2, verbose=2)
+if verbosity >= 2:
+    print("\nTREATMENT\t" + ";".join(TREATMENT))
+    print("\nCONTROL\t" + ";".join(CONTROL))
 
 #================================================================#
 #                         Workflow                               #
@@ -121,11 +145,11 @@ SAMPLES = read_sample_ids(config["files"]["samples"], verbose=1)
 # ## Tricky python code to prepare the data, but this should be
 # ## commented to avoid executing it at each run of the workflow. Should
 # ## be converted to a rule.
-# if not os.path.exists(RESULTSDIR):
-# 	os.makedirs(RESULTSDIR)
+# if not os.path.exists(RESULTS_DIR):
+# 	os.makedirs(RESULTS_DIR)
 # for sample in SAMPLES:
 # 	indir = READS + sample + "/"
-# 	outdir = RESULTSDIR + sample + "/"
+# 	outdir = RESULTS_DIR + sample + "/"
 # 	if not os.path.exists(outdir):
 # 		os.makedirs(outdir)
 # 	sra_files = os.listdir(indir)
@@ -142,58 +166,58 @@ SAMPLES = read_sample_ids(config["files"]["samples"], verbose=1)
 	
 
 # Graphics
-GRAPHICS = expand(RESULTSDIR + "dag.pdf")
+GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
 
 # Data trimming
-SICKLE_TRIMMING = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + ".fastq", samples=SAMPLES)
+SICKLE_TRIMMING = expand(RESULTS_DIR + "{samples}/{samples}_" + TRIMMING + ".fastq", samples=SAMPLE_IDS)
 
 # Quality control
-RAW_QC = expand(RESULTSDIR + "{samples}/{samples}_fastqc/", samples=SAMPLES)
-RAW_READNB = expand(RESULTSDIR + "{samples}/{samples}_fastq_readnb.txt", samples=SAMPLES)
-TRIMMED_QC = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_fastqc/", samples=SAMPLES)
+RAW_QC = expand(RESULTS_DIR + "{samples}/{samples}_fastqc/", samples=SAMPLE_IDS)
+RAW_READNB = expand(RESULTS_DIR + "{samples}/{samples}_fastq_readnb.txt", samples=SAMPLE_IDS)
+TRIMMED_QC = expand(RESULTS_DIR + "{samples}/{samples}_" + TRIMMING + "_fastqc/", samples=SAMPLE_IDS)
 
 # Mapping
 BWA_INDEX = expand(config["dir"]["genome"] + "{genome}/BWAIndex/{genome}.fa.bwt", genome=GENOME)
-BWA_MAPPING = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}.sam", samples=SAMPLES, aligner=ALIGNER)
+BWA_MAPPING = expand(RESULTS_DIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}.sam", samples=SAMPLE_IDS, aligner=ALIGNER)
 
 # Sorted and converted reads (bam, bed)
-READS_BAM = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.bam", sample=SAMPLES, aligner=ALIGNER)
-SORTED_READS_BAM = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}_sorted_pos.bam", sample=SAMPLES, aligner=ALIGNER)
-BAM_READNB = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}_sorted_pos_bam_readnb.txt", samples=SAMPLES, aligner=ALIGNER)
-SORTED_READS_BED = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}_sorted_pos.bed", sample=SAMPLES, aligner=ALIGNER)
-BED_READNB = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}_sorted_pos_bed_nb.txt", samples=SAMPLES, aligner=ALIGNER)
-if debug: 
-    print("SORTED_READS_BED\n\t" + "\n\t".join(SORTED_READS_BED))
-#CONVERTED_BED = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.converted.bed", sample=SAMPLES, aligner=ALIGNER)
+READS_BAM = expand(RESULTS_DIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.bam", sample=SAMPLE_IDS, aligner=ALIGNER)
+SORTED_READS_BAM = expand(RESULTS_DIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}_sorted_pos.bam", sample=SAMPLE_IDS, aligner=ALIGNER)
+BAM_READNB = expand(RESULTS_DIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}_sorted_pos_bam_readnb.txt", samples=SAMPLE_IDS, aligner=ALIGNER)
+SORTED_READS_BED = expand(RESULTS_DIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}_sorted_pos.bed", sample=SAMPLE_IDS, aligner=ALIGNER)
+BED_READNB = expand(RESULTS_DIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}_sorted_pos_bed_nb.txt", samples=SAMPLE_IDS, aligner=ALIGNER)
+if verbosity >= 3: 
+    print("\nSORTED_READS_BED\n\t" + "\n\t".join(SORTED_READS_BED))
+#CONVERTED_BED = expand(RESULTS_DIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.converted.bed", sample=SAMPLE_IDS, aligner=ALIGNER)
 
 # Peak-calling
 # ! In case of use of several peak-callers, beware of specific prefixes or such...
-#MACS2 = expand(RESULTSDIR + "{treat}_vs_{ctrl}/{treat}_vs_{ctrl}_{trimming}_{aligner}_{caller}_peaks.narrowPeak", treat="GSM121459", ctrl="GSM1217457", trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
-MACS2 = expand(expand(RESULTSDIR + "{treat}_vs_{ctrl}/{treat}_vs_{ctrl}_{{trimming}}_{{aligner}}_{{caller}}_summits.bed", 
+#MACS2 = expand(RESULTS_DIR + "{treat}_vs_{ctrl}/{treat}_vs_{ctrl}_{trimming}_{aligner}_{caller}_peaks.narrowPeak", treat="GSM121459", ctrl="GSM1217457", trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
+MACS2 = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/{treat}_vs_{ctrl}_{{trimming}}_{{aligner}}_{{caller}}_summits.bed", 
                zip, treat=TREATMENT, ctrl=CONTROL), trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
-if debug: 
-    print("MACS2\n\t" + "\n\t".join(MACS2))
+if verbosity >= 3: 
+    print("\nMACS2\n\t" + "\n\t".join(MACS2))
 
 # File conversion
-#NARROWPEAK_TO_BED = expand(RESULTSDIR + "{treat}_vs_{ctrl}/{treat}_vs_{ctrl}_{trimming}_{aligner}_{caller}_peaks.bed", treat=TREATMENT, ctrl=CONTROL, trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
-#BED_TO_FASTA = expand(RESULTSDIR + "{treat}_vs_{ctrl}/{treat}_vs_{ctrl}_{trimming}_{aligner}_{caller}_peaks.fasta", treat=TREATMENT, ctrl=CONTROL, trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
-BED_TO_FASTA = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.calling.fasta", sample=SAMPLES, trimming=TRIMMING, aligner=ALIGNER)
+#NARROWPEAK_TO_BED = expand(RESULTS_DIR + "{treat}_vs_{ctrl}/{treat}_vs_{ctrl}_{trimming}_{aligner}_{caller}_peaks.bed", treat=TREATMENT, ctrl=CONTROL, trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
+#BED_TO_FASTA = expand(RESULTS_DIR + "{treat}_vs_{ctrl}/{treat}_vs_{ctrl}_{trimming}_{aligner}_{caller}_peaks.fasta", treat=TREATMENT, ctrl=CONTROL, trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
+BED_TO_FASTA = expand(RESULTS_DIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.calling.fasta", sample=SAMPLE_IDS, trimming=TRIMMING, aligner=ALIGNER)
 
 ## Sequence purge
-#PURGED_SEQ = expand(RESULTSDIR + "{sample}_purged.fasta", sample=SAMPLES)
+#PURGED_SEQ = expand(RESULTS_DIR + "{sample}_purged.fasta", sample=SAMPLE_IDS)
 ##PURGED_SEQ = expand("results/H3K27me3/liver/GSM537698_purged.fasta")
 
 ## Oligo analysis
 #OLIGO = config['oligo_stats'].split()
-#OLIGO_ANALYSIS = expand(RESULTSDIR + '{sample}_purged_oligo{oligo}.txt', sample=SAMPLES, oligo=OLIGO)
+#OLIGO_ANALYSIS = expand(RESULTS_DIR + '{sample}_purged_oligo{oligo}.txt', sample=SAMPLE_IDS, oligo=OLIGO)
 
 ## Peaks length
-#PEAK_LENGTH = expand(RESULTSDIR + '{sample}_purged_length.png', sample=SAMPLES)
+#PEAK_LENGTH = expand(RESULTS_DIR + '{sample}_purged_length.png', sample=SAMPLE_IDS)
 
 ruleorder: macs2 > bam_to_bed > sam2bam
 ruleorder: count_reads_bam > sam2bam
 
-CLEANING = expand(RESULTSDIR + "cleaning.done")
+CLEANING = expand(RESULTS_DIR + "cleaning.done")
 
 rule all: 
     """
