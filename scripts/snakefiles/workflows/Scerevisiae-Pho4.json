@@ -15,17 +15,20 @@
 	"RefSeq_to_std": "",
         "install_dir": ""
     },
+
     "files": {
 	"snakefile": "/workspace/france_genomique/Scerevisiae-Pho4/scripts/snakefiles/workflows/Scerevisiae-Pho4.py",
 	"samples": "data/Scerevisiae-Pho4_samples.tab",
 	"design": "data/Scerevisiae-Pho4_design.tab"
     },
+
     "suffixes": {
 	"trimmed": "_sickle-se-q20",
 	"mapped":  "_sickle-se-q20_bwa",
 	"macs2":  "_sickle-se-q20_bwa_macs2",
 	"swembl":  "_sickle-se-q20_bwa_swembl_R0.01"
     },
+
     "dir": {
 	"base": ".",
 	"reads_source": "data/Scerevisiae-Pho4/",
@@ -36,30 +39,46 @@
 	"rules": "/workspace/france_genomique/Scerevisiae-Pho4/scripts/snakefiles/rules/",
 	"logs": "logs/"
     },
+
     "reports" : {
 	"dag": "results/dag",
 	"rulegraph": "results/rule"
     },
+
     "samples": {
 	"input": "GSM730528 GSM730529",
 	"chip": "GSM730517 GSM730518"
     },
+
     "sickle":  { 
        	"qual_type": "sanger",
         "threshold": "20",
         "other_options": ""
     },
+
     "fastqc": {
 	"other_options": ""
     },
+
     "bwa": {
 	"index": "genomes/sc/BWAIndex/sc.fa",
 	"threads": "10"
     },
+
+
     "macs2": {
-	"genome": "ce"
+	"qval": "0.05",
+	"keep_dup": "all",
+	"band_width": "250",
+	"mfold_min": "2",
+	"mfold_max": "50",
+	"call_summits": "--call-summits",
+	"other_options": ""
     },
+
+
     "oligo_stats": "1 2 6",
+
     "peak-motifs_parameters": {
 	"tasks" : "purge,seqlen,composition,disco,collect_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan",
 	"max_seq_len" : "1000",
@@ -68,13 +87,18 @@
 	"maxol" : "",
 	"motif_db jaspar_core_vertebrates" : "tf $RSAT/public_html/data/motif_databases/JASPAR/jaspar_core_vertebrates_2013-11.tf"
     },
+
     "samtools": {
         "sort_by_name": ""    
     },
+
     "rsat": {
 	"verbosity": "1"
     },
+
+
     "oligo_stats": "1 2 6",
+
     "peak-motifs_parameters": {
 	"tasks": "purge,seqlen,composition,disco,collect_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan",
 	"max_seq_len": "1000",
