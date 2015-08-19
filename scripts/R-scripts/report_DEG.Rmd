@@ -20,7 +20,7 @@ library("org.Dm.eg.db")
 ```{r parameters}
 
 ## Parameters
-dir.main <- "~/dr-chip-rna-seq"
+dir.main <- "~/mountrsat/dr-chip-rna-seq"
 
 
 ## TEMPORARY: hard-coded parameters. Should be adapted to read file path from the command-line arguments. 
@@ -42,7 +42,7 @@ kable(data.frame(unlist(parameters)))
 setwd(dir.main)
 
 ## Load the DEG analysis result table
-deg.table <- read.table(parameters$deg.file,row.names=1)
+deg.table <- read.table(paste(dir.main,parameters$deg.file, sep="/"),row.names=1)
 #dim(deg.table)
 
 ## Select genes according to the user-specified threshold
@@ -79,7 +79,21 @@ From the `r parameters$deg.software` result table `r sum(deg.table$positive)` ge
 ```{r IDs}
 library('clusterProfiler')
 gg <- bitr(row.names(deg.table), fromType="SYMBOL", toType="ENTREZID", annoDb="org.Dm.eg.db")
+
+# gg$ENTREZID <- as.numeric(gg$ENTREZID)
+# gg <-gg[order(gg$ENTREZID),]
+
+## Store the "entrez.id" column in deg.table
 deg.table[gg[,1], "entrez.id"] = gg[,2]
 
+ggo <- groupGO(gene=gg[,2], organism="fly",ont="BP", level=3, readable=TRUE)
+barplot(ggo, showCategory=24)
+
+
+ego <- enrichGO(gene =  gg[,2], organism = "fly",ont = "BP", readable = T)
+barplot(ego,  showCategory=24)
+
+
+ego2 <- gseGO(geneList = ggo,organism = "fly",ont = "BP" )
 ```
 
