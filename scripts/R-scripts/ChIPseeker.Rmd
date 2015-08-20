@@ -1,0 +1,89 @@
+---
+title: "ChIPseeker_test"
+author: "Lucie Khamvongsa & Jacques van Helden"
+date: "19 August 2015"
+output: html_document
+---
+
+Fichier dans lequel l'exploration du package ChIPseeker se fait. Une règle ChIPseeker en snakemake sera dèvellopé pour le workflow ChIP-seq.
+
+
+```{r load packages}
+library("ChIPseeker")
+library("TxDb.Dmelanogaster.UCSC.dm3.ensGene")
+require(TxDb.Dmelanogaster.UCSC.dm3.ensGene)
+library("clusterProfiler")
+library("GenomicRanges")
+library("ChIPpeakAnno")
+library("org.Dm.eg.db")
+
+
+```
+
+
+```{r load peaks}
+
+dir.main <- "~/mountrsat/dr-chip-rna-seq"
+setwd(dir.main)
+
+#Presence de ligne dans les fichier bed qui ne sont precede par aucun caratere particulier
+#Pose probleme a la lecture 
+# track name='WT1_327_vs_WT_Input_4runs_casava_swembl_R0.01.swembl' description='WT1_327_vs_WT#_Input_4runs_casava_swembl_R0.01.swembl' visibility=3 itemRgb='On' use_score=0
+# browser dense WT1_327_vs_WT_Input_4runs_casava_swembl_R0.01.swembl
+#Presence de commentaire en fin de fichier
+# ; convert-features  -v 1 -from swembl -to bed -i results-chip/WT1_327_vs_WT_Input_4runs_casava_swembl_R0.01/WT1_327_vs_WT_Input_4runs_casava_swembl_R0.01.swembl -o results-chip/WT1_327_vs_WT_Input_4runs_casava_swembl_R0.01/WT1_327_vs_WT_Input_4runs_casava_swembl_R0.01.bed
+# ; Input files
+# ;  input	results-chip/WT1_327_vs_WT_Input_4runs_casava_swembl_R0.01/WT1_327_vs_WT_Input_4runs_casava_swembl_R0.01.swembl
+# ; Output files
+# ;	output	results-chip/WT1_327_vs_WT_Input_4runs_casava_swembl_R0.01/WT1_327_vs_WT_Input_4runs_casava_swembl_R0.01.bed
+# ; Input format	swembl
+# ; Output format	bed
+# ; Host name	rsat-tagc
+# ; Job started	2015-08-05.112619
+# ; Job done	2015-08-05.112628
+# ; Seconds	9.43
+# ;	user	9.43
+# ;	system	0.07
+# ;	cuser	0
+# ;	csystem	0
+
+peaks <- toGRanges("results/chip-seq/WT1_327_vs_WT_Input_4runs_casava_swembl_R0.01/WT1_327_vs_WT_Input_4runs_casava_swembl_R0.01.bed", format="BED", header=FALSE, sep = "\t")
+
+```
+
+
+```{r locations peaks}
+#visualize the peak locations over the whole genome
+covplot(peaks, weightCol = "score")
+
+```
+
+```{r  Heatmap of ChIP binding to TSS regions}
+
+peakHeatmap(peak = peaks, TxDb = TxDb.Dmelanogaster.UCSC.dm3.ensGene, upstream=3000, downstream=3000, color="red")
+
+```
+
+```{r Average Profile of ChIP peaks binding to TSS region}
+
+plotAvgProf2(peak = peaks, TxDb = TxDb.Dmelanogaster.UCSC.dm3.ensGene, upstream=3000, downstream=3000, xlab="Genomic Region (5'->3')", ylab = "Read Count Frequency", weightCol = "score")
+```
+
+```{r  Peak Annotation}
+
+peakAnno <- annotatePeak(peak = peaks, tssRegion=c(-3000, 3000), TxDb= TxDb.Dmelanogaster.UCSC.dm3.ensGene, annoDb="org.Dm.eg.db")
+
+peakAnno.tab <- as.data.frame(peakAnno)
+```
+
+```{r Visualize Genomic Annotation fig.width=7, fig.height=8}
+
+#circle representation
+plotAnnoPie(peakAnno)
+
+#venn representation
+vennpie(peakAnno)
+
+
+```
+
