@@ -11,18 +11,24 @@
 
 rule swembl:
     """Peak-calling with SWEMBL.
+
+    Beware: for SWEMBL the peaks MUST be sorted by position. If not,
+    SWEMBL runs indefinitely.
+
     """
-    input:treatment = "{gsm_treatment}/{gsm_treatment}_{aligneur}_sorted_" + config["htseq"]["order"] + ".bed", \
-          control =  "{gsm_control}/{gsm_control}_{aligneur}_sorted_" + config["htseq"]["order"] + ".bed"
-    params: qsub = config["qsub"] + " -q short -e {gsm_treatment}_vs_{gsm_control}_{aligneur}_swembl_R{swembl_r}/{gsm_treatment}_vs_{gsm_control}_{aligneur}_swembl_R{swembl_r}swembl_qsub.err -o {gsm_treatment}_vs_{gsm_control}_swembl_R{swembl_r}/{gsm_treatment}_vs_{gsm_control}_swembl_R{swembl_r}swembl_qsub.out"
-    log: "{gsm_treatment}_vs_{gsm_control}_{aligneur}_swembl_R{swembl_r}/{gsm_treatment}_vs_{gsm_control}_{aligneur}_swembl_R{swembl_r}.log"
-    benchmark: "{gsm_treatment}_vs_{gsm_control}_{aligneur}_swembl_R{swembl_r}/{gsm_treatment}_vs_{gsm_control}_{aligneur}_swembl_R{swembl_r}_benchmark.json"
-    output: peaks_swembl = "{gsm_treatment}_vs_{gsm_control}_{aligneur}_swembl_R{swembl_r}/{gsm_treatment}_vs_{gsm_control}_{aligneur}_swembl_R{swembl_r}.swembl", \
-            peaks_bed = "{gsm_treatment}_vs_{gsm_control}_{aligneur}_swembl_R{swembl_r}/{gsm_treatment}_vs_{gsm_control}_{aligneur}_swembl_R{swembl_r}.bed", \
-            peak_len="{gsm_treatment}_vs_{gsm_control}_{aligneur}_swembl_R{swembl_r}/{gsm_treatment}_vs_{gsm_control}_{aligneur}_swembl_R{swembl_r}_peaklen.tab"  
-    shell: "SWEMBL -i {input.treatment} -r {input.control} -B -R {wildcards.swembl_r} -o {output.peaks_swembl} 2> {log} ; \
+    input:treatment = "{result_dir}/{gsm_treatment}/{gsm_treatment}_{some_suffix}_sorted_pos.bed", \
+          control =  "{result_dir}/{gsm_control}/{gsm_control}_{some_suffix}_sorted_pos.bed"
+    params: qsub = config["qsub"]  \
+            + " -e {result_dir}/{gsm_treatment}_vs_{gsm_control}/swembl/{gsm_treatment}_vs_{gsm_control}_{some_suffix}_swembl_R{swembl_r}_qsub.err" \
+            + " -o {result_dir}/{gsm_treatment}_vs_{gsm_control}/swembl/{gsm_treatment}_vs_{gsm_control}_{some_suffix}_swembl_R{swembl_r}_qsub.out" 
+    log: "{result_dir}/{gsm_treatment}_vs_{gsm_control}/swembl/{gsm_treatment}_vs_{gsm_control}_{some_suffix}_swembl_R{swembl_r}.log"
+    benchmark: "{result_dir}/{gsm_treatment}_vs_{gsm_control}/swembl/{gsm_treatment}_vs_{gsm_control}_{some_suffix}_swembl_R{swembl_r}_benchmark.json"
+    output: peaks_swembl = "{result_dir}/{gsm_treatment}_vs_{gsm_control}/swembl/{gsm_treatment}_vs_{gsm_control}_{some_suffix}_swembl_R{swembl_r}.swembl", \
+            peaks_bed = "{result_dir}/{gsm_treatment}_vs_{gsm_control}/swembl/{gsm_treatment}_vs_{gsm_control}_{some_suffix}_swembl_R{swembl_r}.bed", \
+            peak_len="{result_dir}/{gsm_treatment}_vs_{gsm_control}/swembl/{gsm_treatment}_vs_{gsm_control}_{some_suffix}_swembl_R{swembl_r}_peaklen.tab"  
+    shell: "(SWEMBL -i {input.treatment} -r {input.control} -B -R {wildcards.swembl_r} -o {output.peaks_swembl}; \
 convert-features -from swembl -to bed -i {output.peaks_swembl} -o {output.peaks_bed}; \
-sequence-lengths -i {output.peaks_bed} -in_format bed | classfreq -ci 10 -v 1 -o {output.peak_len}"
+sequence-lengths -i {output.peaks_bed} -in_format bed | classfreq -ci 10 -v 1 -o {output.peak_len}) &> {log} "
 
 
 
@@ -30,8 +36,8 @@ sequence-lengths -i {output.peaks_bed} -in_format bed | classfreq -ci 10 -v 1 -o
 #	"""Peak-calling using SWEMBL algorithm.
 #	"""
 #	input:
-#		chip = RESULTSDIR + "{CHIP}/{CHIP}_{ALIGNER}.bed" , \
-#		inp = RESULTSDIR + "{INPUT}/{INPUT}_{ALIGNER}.bed"
+#		chip = config["dir"]["results"] + "{CHIP}/{CHIP}_{ALIGNER}.bed" , \
+#		inp = config["dir"]["results"] + "{INPUT}/{INPUT}_{ALIGNER}.bed"
 #	output:
-#		RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_swembl.bed"
+#		config["dir"]["results"] + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_swembl.bed"
 #	shell: "SWEMBL -B -m 10 -f 150 -x 1.5 -i {input.chip} -r {input.inp} -o {output}"

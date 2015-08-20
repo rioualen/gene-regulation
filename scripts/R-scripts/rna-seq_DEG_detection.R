@@ -405,6 +405,11 @@ for (i in 1:nrow(design)) {
   dev.off()
   
   
+  ## Define the names of the columns for significant genes according to different criteria
+  padj.is.selected.column <- paste(sep="", "padj_", FDR.threshold)
+  FDR.is.selected.column <- paste(sep="", "FDR_", FDR.threshold)
+  evalue.is.selected.column <- paste(sep="", "Evalue_", Evalue.threshold)
+  
   
   ################################################################
   ## DESeq2 analysis
@@ -450,11 +455,11 @@ for (i in 1:nrow(design)) {
   
   
   ## Label the genes passing the FDR and E-value thresholds
-  deseq2.res.sorted[[paste(sep="", "padj_", FDR.threshold)]] <- (deseq2.res.sorted$padj < FDR.threshold)*1
+  deseq2.res.sorted[[padj.is.selected.column]] <- (deseq2.res.sorted$padj < FDR.threshold)*1
   mcols(deseq2.res.sorted)[10,"type"] <- "results"
   mcols(deseq2.res.sorted)[10,"description"] <- paste("padj <", FDR.threshold)
 
-  deseq2.res.sorted[[paste(sep="", "Evalue_", Evalue.threshold)]] <- (deseq2.res.sorted$Evalue < Evalue.threshold)*1
+  deseq2.res.sorted[[evalue.is.selected.column]] <- (deseq2.res.sorted$Evalue < Evalue.threshold)*1
   mcols(deseq2.res.sorted)[11,"type"] <- "results"
   mcols(deseq2.res.sorted)[11,"description"] <- paste("Evalue <", Evalue.threshold)
   
@@ -539,8 +544,8 @@ for (i in 1:nrow(design)) {
   edger.tt$table$sign <- sign(edger.tt$table$logFC)
   
   ## Label the genes passing the FDR and E-value thresholds
-  edger.tt$table[, paste(sep="", "FDR_", FDR.threshold)] <- (edger.tt$table$FDR < FDR.threshold)*1
-  edger.tt$table[, paste(sep="", "Evalue_", Evalue.threshold)] <- (edger.tt$table$Evalue < Evalue.threshold)*1
+  edger.tt$table[, FDR.is.selected.column] <- (edger.tt$table$FDR < FDR.threshold)*1
+  edger.tt$table[, evalue.is.selected.column] <- (edger.tt$table$Evalue < Evalue.threshold)*1
   
   #  head(edger.tt) 
   
@@ -623,7 +628,7 @@ for (i in 1:nrow(design)) {
     1*(!result.table[,paste(sep="", "edgeR.FDR_", FDR.threshold)] & result.table[,paste(sep="", "DESeq2.padj_", FDR.threshold)])
   result.table[, paste(sep="", "none_padj_", FDR.threshold)] <- 
     1*(!result.table[,paste(sep="", "edgeR.FDR_", FDR.threshold)] & !result.table[,paste(sep="", "DESeq2.padj_", FDR.threshold)])
-  result.table[, paste(sep="", "Evalue_", Evalue.threshold)] <- 
+  result.table[, evalue.is.selected.column] <- 
     1*(result.table[,paste(sep="", "edgeR.Evalue_", Evalue.threshold)] & result.table[,paste(sep="", "DESeq2.Evalue_", Evalue.threshold)])
   
   result.file <- file.path(dir.analysis, 
@@ -642,8 +647,8 @@ for (i in 1:nrow(design)) {
        col="#888888",
        panel.first=grid(lty="solid", col="#DDDDDD"))
   abline(a=0, b=1)
-#  abline(h=FDR.threshold)
-#  abline(v=FDR.threshold)
+  #  abline(h=FDR.threshold)
+  #  abline(v=FDR.threshold)
   both <- result.table[, paste(sep="", "both_padj_", FDR.threshold)] == 1
   edgeR.only <- result.table[, paste(sep="", "edgeR_only_padj_", FDR.threshold)] == 1
   DESeq2.only <- result.table[, paste(sep="", "DESeq2_only_padj_", FDR.threshold)] == 1
@@ -668,6 +673,14 @@ for (i in 1:nrow(design)) {
   dev.off()
   
   ################################################################
+  ## Functional enrichment analysis
+  gene.IDs.edgeR.FDR <- gene.ids[edgeR.result.table[,FDR.is.selected.column]==1]
+#  library("clusterProfiler")
+#  library("org.EcK12.eg.db")
+#  eg = bitr(gene.IDs.edgeR.FDR, fromType="SYMBOL", toType="ENTREZID", annoDb="org.EcK12.eg.db")
+  #eg = bitr(gene.IDs.edgeR.FDR, fromType="SYMBOL", toType="ENTREZID", annoDb="ecoliK12.db0")
+  
+  ################################################################
   ## Summarise results of the current analysis
   
   ## Instantiate a data frame for the current analysis
@@ -677,13 +690,13 @@ for (i in 1:nrow(design)) {
 
   ## DESeq2 results
   current.summary[,paste(sep="", "DESeq2.padj_", FDR.threshold)] <- 
-    sum(DESeq2.result.table[,paste(sep="", "padj_", FDR.threshold)], na.rm=TRUE)
+    sum(DESeq2.result.table[,padj.is.selected.column], na.rm=TRUE)
   current.summary[,paste(sep="", "edgeR.FDR_", FDR.threshold)] <-
-    sum(edgeR.result.table[,paste(sep="", "FDR_", FDR.threshold)])
+    sum(edgeR.result.table[,FDR.is.selected.column])
   current.summary[,paste(sep="", "DESeq2.Evalue_", Evalue.threshold)] <-
-    sum(DESeq2.result.table[,paste(sep="", "Evalue_", Evalue.threshold)], na.rm=TRUE)
+    sum(DESeq2.result.table[,evalue.is.selected.column], na.rm=TRUE)
   current.summary[,paste(sep="", "edgeR.Evalue_", Evalue.threshold)] <-
-    sum( edgeR.result.table[,paste(sep="", "Evalue_", Evalue.threshold)])
+    sum( edgeR.result.table[,evalue.is.selected.column])
   
   if (i == 1) {
     summary.per.analysis <- current.summary
