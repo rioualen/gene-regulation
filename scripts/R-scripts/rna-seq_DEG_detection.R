@@ -23,8 +23,8 @@ verbosity <- 1
 ## The only argument is the file containing all the parameters for the analysis
 r.params.path <- commandArgs(trailingOnly = FALSE)[6]
 ## TEMPORARY FOR DEBUGGING: 
-setwd("~/BeatriceRoche/")
-r.params.path <- "results/DEG/sickle_pe_q20_bowtie2_pe_sorted_name_params.R"
+#setwd("~/BeatriceRoche/")
+#r.params.path <- "results/DEG/sickle_pe_q20_bowtie2_pe_sorted_name_params.R"
 verbose(paste("Reading parameters", r.params.path), 1)
 source(r.params.path)
 setwd(dir.main)
@@ -350,8 +350,8 @@ for (i in 1:nrow(design)) {
     gene.id = row.names(cpms),
     mean.cpm1 = apply(cpms[,samples1],1, mean),
     mean.cpm2 = apply(cpms[,samples2],1, mean))
-  result.table$A = log2(mean.cpm1*mean.cpm2)/2
-  result.table$M = log2(mean.cpm1/mean.cpm2)
+  result.table$A = log2(result.table$mean.cpm1*result.table$mean.cpm2)/2
+  result.table$M = log2(result.table$mean.cpm1/result.table$mean.cpm2)
   # dim(result.table)
   
   ## Tag genes detected in less than min.rep samples, which is defined as 
@@ -610,8 +610,8 @@ for (i in 1:nrow(design)) {
   
   ################################################################
   ## Draw Venn diagram with number of genes declared significant with edgeR and DESeq2, resp
-  venn.counts <- vennCounts(result.table[,c(paste(sep="", "edgeR.", padj.is.selected.column), 
-                                            paste(sep="", "DESeq2.", padj.is.selected.column))])
+  venn.counts <- vennCounts(result.table[,c(paste(sep="", "edgeR.padj_", thresholds["padj"]), 
+                                            paste(sep="", "DESeq2.padj_", thresholds["padj"]))])
   
   pdf(file= file.path(dir.figures, paste(sep = "", "DESeq2_vs_edgeR_Venn_", cond1, "_vs_", cond2, ".pdf")))
   vennDiagram(venn.counts, cex=1, main=paste(cond1, "vs", cond2, "; FDR <", thresholds["padj"]))
@@ -676,11 +676,10 @@ for (i in 1:nrow(design)) {
   
   ################################################################
   ## Functional enrichment analysis
-  #  gene.IDs.edgeR.FDR <- gene.ids[edger.result.table[,padj.is.selected.column]==1]
+  #  gene.ids <- row.names(result.table)
   #  library("clusterProfiler")
   #  library("org.EcK12.eg.db")
-  #  eg = bitr(gene.IDs.edgeR.FDR, fromType="SYMBOL", toType="ENTREZID", annoDb="org.EcK12.eg.db")
-  #eg = bitr(gene.IDs.edgeR.FDR, fromType="SYMBOL", toType="ENTREZID", annoDb="ecoliK12.db0")
+  #  eg <- bitr(gene.ids, fromType="SYMBOL", toType="ENTREZID", annoDb="org.EcK12.eg.db")
   
   ################################################################
   ## Summarise results of the current analysis
