@@ -152,7 +152,7 @@ complete.deg.table <- function(deg.table,
       selected <- deg.table[, s] > thresholds[s]
     }
     deg.table[, selection.columns[s]] <- selected*1
-    col.descriptions[selected.col] <- paste("Passing", threshold.type[s], "threshold on", s)
+    col.descriptions[selection.columns[s]] <- paste("Passing", threshold.type[s], "threshold on", s)
   }
   
   # print(data.frame(col.descriptions))
