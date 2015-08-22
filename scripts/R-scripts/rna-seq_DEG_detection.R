@@ -18,7 +18,7 @@ source(file.path(dir.fg, "scripts/R-scripts/deg_lib.R"))
 
 
 verbosity <- 1
-
+deg.tools <- c("edgeR", "DESeq2")
 
 ## The only argument is the file containing all the parameters for the analysis
 r.params.path <- commandArgs(trailingOnly = FALSE)[6]
