@@ -26,6 +26,7 @@ deg.tools <- c("edgeR", "DESeq2")
 org.db <- "org.EcK12.eg.db" ## Should be added to parameters
 gene.info.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655_GCA_000005845.2_gene_info.tab"
 organism.name <- "Escherichia coli"
+organism.clusterProfiler <- NA
 gtf.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.gtf"
 gtf.source <- "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-28/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655/"
 #   pet.gene <- "b2531"
@@ -808,8 +809,8 @@ for (i in 1:nrow(design)) {
     all.gene.ids <- row.names(result.table)
     
     ## Convert IDs to entrez IDs using custom annotation table
-    entrez.ids <- as.vector(gene.info[all.gene.ids,"entrez.id"])
-    names(entrez.ids) <- gene.info[all.gene.ids,"gene_id"]
+    all.entrez.ids <- as.vector(gene.info[all.gene.ids,"entrez.id"])
+    names(all.entrez.ids) <- gene.info[all.gene.ids,"gene_id"]
     
     # names(result.table)
     geneset.selection.columns <- vector()
@@ -823,18 +824,31 @@ for (i in 1:nrow(design)) {
     
     col <- "edgeR.DEG"
     for (col in geneset.selection.columns) {
-      geneset <- all.gene.ids[result.table[,col] == 1]
-      go.bp.table <- gostat.overrepresentation(geneset=na.omit(entrez.ids[geneset]), 
-                                               allgenes=entrez.ids, 
-                                               db=org.db, evalue.filter=TRUE,
-                                               verbosity=2)
-      # View(go.bp.table)
+      geneset.ids <- as.vector(as.matrix(all.gene.ids[result.table[,col] == 1]))
+      geneset <- all.entrez.ids[geneset.ids]
+      # sum(is.na(entrez.ids))
+      geneset <- geneset[!is.na(geneset)]
+      # length(geneset)
+      verbosity <- 2
+      enrich.result <- functional.enrichment(geneset=geneset,
+                            allgenes=all.entrez.ids,
+                            db=org.db,
+                            ontology="BP",
+                            thresholds = c("evalue"=1, "qvalue"=0.05),
+                            select.positives=FALSE,
+                            run.GOstats = FALSE,
+                            run.clusterProfiler = FALSE,
+                            clusterProfiler.org=organism.clusterProfiler,
+                            plot.adjust = TRUE,
+                            verbosity=1)
+
+      # View(enrich.result$go.bp.table)
       ## Save result table
       go.bp.file <- paste(sep = "", prefix["comparison_figure"], 
                           "_", suffix.deg,
                           "_", col,
                           "_GOstats.tab")
-      write.table(x = go.bp.table, row.names = FALSE,
+      write.table(x = enrich.result$go.bp.table, row.names = FALSE,
                   file = go.bp.file, sep = "\t", quote=FALSE)
       verbose(paste(sep="", "\t\tGO over-representation analysis file\t", go.bp.file), 1)
       
