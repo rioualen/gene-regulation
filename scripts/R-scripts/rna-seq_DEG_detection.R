@@ -21,21 +21,20 @@ source(file.path(dir.fg, "scripts/R-scripts/deg_lib.R"))
 verbosity <- 1
 deg.tools <- c("edgeR", "DESeq2")
 
+## Elements that should be added to the parameters
+org.db <- "org.EcK12.eg.db" ## Should be added to parameters
+gene.info.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655_GCA_000005845.2_gene_info.tab"
+organism.name <- "Escherichia coli"
+gtf.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.gtf"
+gtf.source <- "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-28/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655/"
+#   pet.gene <- "b2531"
 
 ## The only argument is the file containing all the parameters for the analysis
 if (is.na(commandArgs(trailingOnly = FALSE)[6])) {
   #   stop("Parameter file must be passed as command-line argument.")
   ## TEMPORARY FOR DEBUGGING: 
   setwd("~/BeatriceRoche/")
-  r.params.path <- "results/DEG/sickle_pe_q20_bowtie2_pe_sorted_name_params.R"
-  ## Elements that should be added to the parameters
-  org.db <- "org.EcK12.eg.db" ## Should be added to parameters
-  gene.info.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655_GCA_000005845.2_gene_info.tab"
-  organism.name <- "Escherichia coli"
-  gtf.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.gtf"
-  gtf.source <- "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-28/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655/"
-  #   pet.gene <- "b2531"
-  
+  r.params.path <- "results/DEG/sickle_pe_q20_bowtie2_pe_sorted_name_params.R"  
 } else {
   r.params.path <- commandArgs(trailingOnly = FALSE)[6]  
 }
