@@ -166,30 +166,36 @@ for (deg.tool in deg.tools) {
             nb.signif.classes = nrow(ego@result)
           )
         )
-        
-        ## Barplot with the enrichGO results
-        #         png(file=paste(sep="", ego.path, "_barplot.png"), width=10*150, heigh=7*150)
-        #         barplot(ego,  showCategory=parameters$barplot_catnb, 
-        #                 main=ego.prefix)
-        #         tais.toi <- dev.off()
 
+        
+        ## Prepare a result table with some added columns for convenience of plot generation
+        ego.result.table <- ego@result
+        
+        ## Barplot with the enrichGO results. 
         max.to.plot <- min(nrow(ego@result), parameters$barplot_catnb)
-        par.ori <- par()
         pdf(file=paste(sep="", ego.path, "_barplot.pdf"), width=8, height=10)
+        par.ori <- par()
         par(mar= c(4, 15,4,1))
         barplot(rev(ego@result[1:max.to.plot, "Count"]),
                 names.arg = rev(ego@result[1:max.to.plot, "Description"]),
                 horiz = TRUE, las=1, cex.names=0.7, width=0.7, cex.main=0.9,
                 main=ego.prefix, xlab="Nb genes")
-        tais.toi <- dev.off()
+        silence <- dev.off()
         
-#         plot(ego@result[,c("p.adjust", "Count")])
-#         
-#         pdf(file=paste(sep="", ego.path, "_barplot.pdf"), width=10, heigh=7)
-#         #      X11(width=10, height=7)
-#         barplot(ego, showCategory=parameters$barplot_catnb)
-#         tais.toi <- dev.off()
-#         
+        ## The customized barplot() for enrichGO return object has a bug: 
+        ## when it is inserted in a loop, the exported pdf or png files are empty.
+        #         png(file=paste(sep="", ego.path, "_barplot.png"), width=10*150, heigh=7*150)
+        #         barplot(ego,  showCategory=parameters$barplot_catnb, 
+        #                 main=ego.prefix)
+        #         tais.toi <- dev.off()
+        #         plot(ego@result[,c("p.adjust", "Count")])
+        #         
+        #         pdf(file=paste(sep="", ego.path, "_barplot.pdf"), width=10, heigh=7)
+        #         #      X11(width=10, height=7)
+        #         barplot(ego, showCategory=parameters$barplot_catnb)
+        #         tais.toi <- dev.off()
+        #         
+
         ## Compute the enrichment of the gene list for Biological Processes
         ## of the Gene Ontology using groupGO, which permits to specify a minimal 
         ## level for the GO annotations. This avoids to have significant enrichment 
@@ -219,3 +225,142 @@ for (deg.tool in deg.tools) {
     }
   } 
 }
+
+
+################################################################
+## Build custom annotation table
+
+## Source : M. Carlson. How To Use GOstats and Category to do Hypergeometric testing with unsupported model organisms. 
+organism <- "Escherichia coli K12 MG1655"
+annot.schema <- "ECOLI_DB"
+annot.prefix <- "org.EcK12"
+library("org.EcK12.eg.db")
+
+# organism <- "Drosophila melanogaster"
+# annot.schema <- "FLY_DB"
+# annot.prefix <- "org.dm"
+# library("org.dm.eg.db")
+
+annot.db.eg <- paste(sep="", annot.prefix, ".eg.db")
+annot.db.go <- paste(sep="", annot.prefix, ".egGO")
+annot.db.kegg <- paste(sep="", annot.prefix, ".egPATH")
+
+library("AnnotationForge")
+# available.dbschemas()
+frame = toTable(get(annot.db.go))
+frame$Evidence[frame$Evidence=="-"] <- "ND"
+goframeData = data.frame(frame$go_id, frame$Evidence, frame$gene_id)
+# View(goframeData)
+# dim(goframeData)
+
+## Prepare GO gene mapping
+goFrame=GOFrame(goframeData,organism=organism)
+goAllFrame=GOAllFrame(goFrame)
+
+## Generate a geneSetCollection object
+library("GSEABase")
+gsc <- GeneSetCollection(goAllFrame, setType = GOCollection())
+
+## Setting up the parameter object
+library("GOstats")
+universe = Lkeys(get(annot.db.go))
+# length(universe)
+genes = universe[1:100] ## Quick test with arbitrary genes
+params <- GSEAGOHyperGParams(
+  name=paste(goFrame@organism, "GSEA based annot Params"),
+  geneSetCollection=gsc,
+  geneIds = genes,
+  universeGeneIds = universe,
+  ontology = "BP",
+  pvalueCutoff = 0.05,
+  conditional = FALSE,
+  testDirection = "over")
+Over <- hyperGTest(params)
+head(summary(Over))
+
+## Preparing KEGG to gene mapping
+kegg.frame = toTable(get(annot.db.kegg))
+keggframeData = data.frame(kegg.frame$path_id, kegg.frame$gene_id)
+# head(keggframeData)
+keggFrame=KEGGFrame(keggframeData,organism=organism)
+gsc <- GeneSetCollection(keggFrame, setType = KEGGCollection())
+universe = Lkeys(get(annot.db.kegg))
+genes = universe[1:100]
+
+kparams <- GSEAKEGGHyperGParams(
+  name=paste(goFrame@organism, "GSEA based annot Params"),
+  geneSetCollection=gsc,
+  geneIds = genes,
+  universeGeneIds = universe,
+  pvalueCutoff = 0.05,
+  testDirection = "over")
+
+kOver <- hyperGTest(kparams)
+head(summary(kOver))
+
+toLatex(sessionInfo())
+
+## ROntoTool Vignette
+require(graph)
+require(ROntoTools)
+korg <- "eco" ## Organism abbreviation in KEGG
+kpg <- keggPathwayGraphs(korg, verbose = FALSE)
+#kpg <- keggPathwayGraphs(korg, updateCache = TRUE, verbose = TRUE)  ## This may be slow
+head(names(kpg))
+
+kpg <- setEdgeWeights(kpg, edgeTypeAttr = "subtype",
+                      edgeWeightByType = list(activation = 1, inhibition = -1,
+                                              expression = 1, repression = -1),
+                      defaultWeight = 0)
+
+load(system.file("extdata/E-GEOD-21942.topTable.RData", package = "ROntoTools"))
+head(top)
+fc <- top$logFC[top$adj.P.Val <= .01]
+names(fc) <- top$entrez[top$adj.P.Val <= .01]
+pv <- top$P.Value[top$adj.P.Val <= .01]
+names(pv) <- top$entrez[top$adj.P.Val <= .01]
+head(fc)
+head(pv)
+fcAll <- top$logFC
+names(fcAll) <- top$entrez
+pvAll <- top$P.Value
+names(pvAll) <- top$entrez
+ref <- top$entrez
+kpg <- setNodeWeights(kpg, weights = alphaMLG(pv), defaultWeight = 1)
+head(nodeWeights(kpg[[names(kpg[1])]]))
+peRes <- pe(x = fc, graphs = kpg, ref = ref,  nboot = 200, verbose = FALSE)
+head(Summary(peRes))
+
+
+## ReactomePA vignette
+require(DOSE)
+data(geneList)
+de <- names(geneList)[abs(geneList) > 1.5]
+head(de)
+
+
+require(ReactomePA)
+x <- enrichPathway(gene=de,pvalueCutoff=0.05, readable=T)
+head(summary(x))
+barplot(x, showCategory=36)
+dotplot(x, showCategory=36)
+enrichMap(x)
+cnetplot(x, categorySize="pvalue", foldChange=geneList)
+
+require(clusterProfiler)
+data(gcSample)
+res <- compareCluster(gcSample, fun="enrichPathway")
+plot(res)
+
+
+## Gene Set Enrichment Analysis (GSEA)
+y <- gsePathway(geneList, nPerm=100, 
+                minGSSize=120, pvalueCutoff=0.05, 
+                pAdjustMethod="BH", verbose=FALSE)
+res <- summary(y)
+head(res)
+enrichMap(y)
+
+gseaplot(y, geneSetID = "1280215")
+viewPathway("E2F mediated regulation of DNA replication", readable=TRUE, foldChange=geneList)
+
