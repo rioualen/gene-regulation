@@ -221,6 +221,7 @@ complete.deg.table <- function(deg.table,
 #' indicating whether or not they did or not pass all thresholds. Additional columns indicate the 
 #' result of the individual thresholds.
 #' @param verbosity=1 Level of verbosity.
+#' @param organism organism name in various tools. E.g: 
 #'
 #' @examples
 #'
@@ -228,12 +229,12 @@ complete.deg.table <- function(deg.table,
 functional.enrichment <- function(geneset,
                                   allgenes,
                                   db,
+                                  organism.names,
                                   ontology="BP",
                                   thresholds = c("evalue"=1, "qvalue"=0.05),
                                   select.positives=TRUE,
                                   run.GOstats = TRUE,
-                                  run.clusterProfiler = TRUE,
-                                  clusterProfiler.org=NA,
+                                  run.clusterProfiler = FALSE,
                                   plot.adjust = TRUE,
                                   verbosity=1) {
   #library("ALL")
@@ -336,16 +337,18 @@ functional.enrichment <- function(geneset,
     
   }    ## End of GOstats analysis
   
+  
+  ## Run GO enrichment analysis with clusterProfiler
   if (run.clusterProfiler) {
     library("clusterProfiler")
     ## Check the organism
-    if (is.na(clusterProfiler.org)) {
+    if (is.na(organism["clusterProfiler"])) {
       message("Skipping clusterProfiler analysis because organisms is not specified")
     } else {
       ## Compute the enrichment of the gene list for Biological Processes of the Gene Ontology
       ## We intently set all cutoffs to a value > than the possible max, in order to get the full table.
       ## We then perform the filter only if requested.
-      ego <- enrichGO(gene = geneset, organism = clusterProfiler.org,
+      ego <- enrichGO(gene = geneset, organism = organism["clusterProfiler"],
                       pvalueCutoff = 2,
                       qvalueCutoff = 2,
                       ont = ontology, readable = T)  
@@ -364,7 +367,7 @@ functional.enrichment <- function(geneset,
     }
   }
   
-  
+  ## Att the results per gene to the result object
   result$result.per.gene <- result.per.gene
   
   # plot(hist(go.enrich.table[,pvalue.column], breaks=20))
