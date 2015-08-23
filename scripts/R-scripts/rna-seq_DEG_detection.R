@@ -2,8 +2,9 @@
 ## R code to detect differentially expressed genes with a combination 
 ## of several  BioConductor libraries, including edgeR and DESeq2.
 ##
-## Authors: Jeanne Chèneby & Justine Long & Jacques van Helden
+## Authors: Jeanne Chèneby & Justine Long (Initial script), revised and completed by Jacques van Helden
 ## First version: 2015-07
+## Last update: 2015-08-23
 ################################################################
 
 library("edgeR", warn.conflicts = FALSE, quietly=TRUE)
@@ -89,8 +90,9 @@ design <- read.delim(design.file, sep="\t",
                      comment=";", header = TRUE, row.names=NULL)
 
 ## Prefix for output files concerning the whole count table (all samples together)
-## all.prefix <- sub(pattern = ".tab", replacement="", all.counts.table)
-all.prefix <- file.path(dir.DEG, suffix.deg)
+## prefix["general.file"] <- sub(pattern = ".tab", replacement="", all.counts.table)
+prefix <- vector()
+prefix["general.file"] <- file.path(dir.DEG, suffix.deg)
 
 ## Read the count table
 verbose("Loading count table", 1)
@@ -174,7 +176,7 @@ if (exists("gene.info.file")) {
 
 ## Export the gene information table to keep a trace of what has been used. 
 verbose("Exporting gene information table", 1)
-gene.info.out <- paste(sep="", all.prefix, "_gene_descriptions.tab")
+gene.info.out <- paste(sep="", prefix["general.file"], "_gene_descriptions.tab")
 write.table(x = gene.info, row.names = FALSE,
             file = gene.info.out, sep = "\t", quote=FALSE)
 verbose(paste(sep="", "\tGene info table\t", gene.info.out), 1)
@@ -302,7 +304,7 @@ par <- par.ori ## Restore original plot parameters
 
 
 ## Draw sample correlation heatmaps for the raw read counts
-pdf(file=paste(sep="", all.prefix,"_sample_correl_heatmap_counts.pdf"))
+pdf(file=paste(sep="", prefix["general.file"],"_sample_correl_heatmap_counts.pdf"))
 hm <- heatmap.2(as.matrix(cor(all.counts.mapped)),  scale="none", trace="none", 
                 main="Correlation between raw counts",
                 col=cols.heatmap) #, breaks=seq(-1,1,2/length(cols.heatmap)))
@@ -310,7 +312,7 @@ quiet <- dev.off()
 
 ## Draw sample correlation heatmaps for CPM
 #heatmap(cor(all.counts.mapped), scale = "none")
-pdf(file=paste(sep="", all.prefix,"_sample_correl_heatmap_cpms.pdf"))
+pdf(file=paste(sep="", prefix["general.file"],"_sample_correl_heatmap_cpms.pdf"))
 hm <- heatmap.2(as.matrix(cor(cpms)),  scale="none", trace="none", 
                 main="Correlation between CPM",
                 col=cols.heatmap) #, breaks=seq(-1,1,2/length(cols.heatmap)))
@@ -318,7 +320,7 @@ quiet <- dev.off()
 
 ## Plot the first versus second components of samples
 cpms.pc <- prcomp(t(cpms))
-pdf(file=paste(sep="", all.prefix,"_CPM_PC1-PC2.pdf"))
+pdf(file=paste(sep="", prefix["general.file"],"_CPM_PC1-PC2.pdf"))
 plot(cpms.pc$x[,1:2], panel.first=grid(), type="n", main="First components from PCA-transformed CPMs")
 text(cpms.pc$x[,1:2], labels = sample.conditions, col=cols.samples)
 quiet <- dev.off()
@@ -406,12 +408,15 @@ for (i in 1:nrow(design)) {
   verbose(paste(sep="", "\tDifferential analysis\t", i , "/", nrow(design), "\t", cond1, " vs ", cond2), 1)
   
   ## Create a specific result directory for this differential analysis
-  prefix.analysis <- paste(sep="_", cond1, "vs", cond2)
-  dir.analysis <- file.path(dir.DEG, paste(sep="", prefix.analysis))
+  prefix["comparison"] <- paste(sep="_", cond1, "vs", cond2)
+  dir.analysis <- file.path(dir.DEG, paste(sep="", prefix["comparison"]))
   dir.create(path = dir.analysis, showWarnings = FALSE, recursive = TRUE)
   dir.figures <- file.path(dir.analysis, "figures")
   dir.create(path = dir.figures, showWarnings = FALSE, recursive = TRUE)
-  
+  prefix["comparison_file"] <- file.path(dir.analysis, prefix["comparison"])
+  prefix["comparison_figure"] <- file.path(
+    dir.figures, 
+    paste(sep="", prefix["comparison"], "_",  suffix.deg))
   
   ## Select counts for the samples belonging to the two conditions
   current.samples <- c(samples1, samples2)
@@ -467,12 +472,16 @@ for (i in 1:nrow(design)) {
   result.table$cpm1.var <- apply(cpms[,samples1],1, sd)
   result.table$cpm2.var <- apply(cpms[,samples2],1, sd)
   # View(result.table)
-
+  
   ################################################################
   ## DESeq2 analysis
   ################################################################
   
   verbose("\t\tDESeq2 analysis", 2)
+  
+  ## Path prefix to save DESeq2 result files
+  prefix["DESeq2_file"] <- paste(sep="", prefix["comparison_file"], "_", suffix.DESeq2)
+  prefix["DESeq2_figure"] <- paste(sep="", prefix["comparison_figure"], "_", suffix.DESeq2)
   
   ## Create a DESeqDataSet object from the count table + conditions
   condition <- as.factor(as.vector(current.conditions))
@@ -499,7 +508,7 @@ for (i in 1:nrow(design)) {
     "padj" = deseq2.res$padj)
   deseq2.result.table <- complete.deg.table(
     deseq2.result.table, 
-    paste(sep="_", "DESeq2", prefix.analysis),
+    paste(sep="_", "DESeq2", prefix["comparison"]),
     sort.column = "padj",
     thresholds=c("padj"=0.05, "evalue"=1, "FC"=1.5),
     round.digits = 3,
@@ -512,9 +521,7 @@ for (i in 1:nrow(design)) {
   # View(result.table)
   
   ## Save the completed DESeq2 result table
-  deseq2.result.file <- file.path(dir.analysis, 
-                                  paste(sep = "", prefix.analysis, 
-                                        "_", suffix.DESeq2, ".tab"))
+  deseq2.result.file <- paste(sep = "", prefix["DESeq2_file"], ".tab")
   write.table(x = deseq2.result.table, 
               row.names = FALSE, file = deseq2.result.file, sep = "\t", quote=FALSE)
   verbose(paste(sep="", "\t\tDESeq2 result file\t", deseq2.result.file), 1)
@@ -532,14 +539,14 @@ for (i in 1:nrow(design)) {
   MA.ymax <- min(4,max(na.omit(deseq2.res$log2FoldChange)))
   MA.ymin <- max(-4,min(na.omit(deseq2.res$log2FoldChange)))
   MA.ylim <- c(MA.ymin, MA.ymax)
-  pdf(file= file.path(dir.figures, paste(sep = "", "DESeq2_plotBCV_", prefix.analysis, "_MAplot.pdf")))
-  plotMA(deseq2.dds, main=paste("DESeq2", prefix.analysis), ylim=MA.ylim)
+  pdf(file=paste(sep = "", prefix["DESeq2_figure"], "_MAplot.pdf"))
+  plotMA(deseq2.dds, main=paste("DESeq2", prefix["comparison"]), ylim=MA.ylim)
   grid(lty="solid", col="#CCCCCC")
   quiet <- dev.off()
   
   # PCA plot of the samples
   verbose("\t\t\tDESeq2 PCA plot", 2)
-  pdf(file= file.path(dir.figures, paste(sep = "", "DESeq2_plotBCV_", prefix.analysis, "_pca_DESeq2.pdf")))
+  pdf(file=paste(sep = "", prefix["DESeq2_figure"], "_PCAplot.pdf"))
   print(plotPCA(deseq2.rld, intgroup=c("condition")))
   quiet <- dev.off()
   
@@ -547,6 +554,9 @@ for (i in 1:nrow(design)) {
   ## edgeR analysis
   ################################################################
   verbose("\t\tedgeR analysis", 2)
+  
+  prefix["edgeR_file"] <- paste(sep="", prefix["comparison_file"], "_", suffix.edgeR)
+  prefix["edgeR_figure"] <- paste(sep="", prefix["comparison_figure"], "_", suffix.edgeR)
   
   ## Convert the count table in a DGEList structure and compute its parameters.
   d <- DGEList(counts=current.counts, group=sample.conditions[names(current.counts)])
@@ -571,7 +581,7 @@ for (i in 1:nrow(design)) {
                                    "padj"=edger.tt$table$FDR)
   edger.result.table <- complete.deg.table(
     deg.table = edger.result.table, 
-    table.name = paste(sep="_","edgeR",prefix.analysis),
+    table.name = paste(sep="_","edgeR",prefix["comparison"]),
     sort.column = "padj",
     thresholds=c("padj"=0.05, "evalue"=1, "FC"=1.5),
     round.digits = 3,
@@ -583,9 +593,7 @@ for (i in 1:nrow(design)) {
   # View(edger.result.table)
   
   ## Export edgeR result table
-  edger.result.file <- file.path(dir.analysis, 
-                                 paste(sep = "", prefix.analysis, 
-                                       "_", suffix.edgeR, ".tab"))
+  edger.result.file <- paste(sep="", prefix["edgeR_file"], ".tab")
   write.table(x = edger.result.table, 
               row.names = FALSE, file = edger.result.file, sep = "\t", quote=FALSE)
   verbose(paste(sep="", "\t\tedgeR result file\t", edger.result.file), 1)
@@ -598,27 +606,29 @@ for (i in 1:nrow(design)) {
   ## Smear plot
   verbose("\t\t\tedgeR Smear plot", 3)
   edger.deg <- rownames(edger.tt$table)[edger.tt$table$FDR < thresholds["padj"]] ## List of differentially expressed genes reported by edgeR
-  pdf(file=file.path(dir.figures, paste(sep = "", "edgeR_plotSmear_", prefix.analysis, ".pdf")))
+  pdf(file=paste(sep="", prefix["DESeq2_figure"], "_plotSmear.pdf"))
   plotSmear(d, de.tags = edger.deg)
   quiet <- dev.off()
   
   ## MDS plot (Multidimensional scaling plot of distances between gene expression profiles)
   verbose("\t\t\tedgeR MDS plot", 3)
-  pdf(file=file.path(dir.figures, paste(sep="", "edgeR_MDS_plot_", prefix.analysis, ".pdf")))
+  pdf(file=paste(sep="", prefix["DESeq2_figure"], "_plotMDS.pdf"))
+  #  pdf(file=file.path(dir.figures, paste(sep="", "edgeR_MDS_plot_", prefix["comparison"], ".pdf")))
   plotMDS(d, labels=current.labels, 
           col=c("darkgreen","blue")[factor(sample.conditions[names(current.counts)])])
   quiet <- dev.off()
   
   # Mean-variance relationship
   verbose("\t\t\tedgeR mean-variance relationship", 3)
-  pdf(file= file.path(dir.figures, paste(sep = "", "edgeR_plotMeanVar_", prefix.analysis, ".pdf")))
+  pdf(file=paste(sep="", prefix["DESeq2_figure"], "_plotMeanVar.pdf"))
   plotMeanVar(d, show.tagwise.vars=TRUE, NBline=TRUE)
   quiet <- dev.off()
   
   
   # BCV (Biological Coefficient of Variation)
   verbose("\t\t\tedgeR BCV plot", 3)
-  pdf(file= file.path(dir.figures, paste(sep = "", "edgeR_plotBCV_", prefix.analysis, ".pdf")))
+  pdf(file=paste(sep="", prefix["DESeq2_figure"], "_plotBCV.pdf"))
+  #pdf(file= file.path(dir.figures, paste(sep = "", "edgeR_plotBCV_", prefix["comparison"], ".pdf")))
   plotBCV(d)
   quiet <- dev.off()
   
@@ -653,13 +663,13 @@ for (i in 1:nrow(design)) {
   # View(result.table)
   
   ## Save result table
-  result.file <- file.path(dir.analysis, 
-                           paste(sep = "", prefix.analysis, 
-                                 "_", suffix.deg, "_DESeq2_and_edgeR.tab"))
+  result.file <- paste(sep = "", 
+                       prefix["comparison_file"], 
+                       "_", suffix.deg, "_DESeq2_and_edgeR.tab")
   write.table(x = result.table, row.names = FALSE,
               file = result.file, sep = "\t", quote=FALSE)
   verbose(paste(sep="", "\t\tMerged result file\t", result.file), 1)
- 
+  
   ## Define point colors according to the test results
   both <- result.table$padj_edgeR_and_DESeq2 == 1
   edgeR.only <- result.table$padj_edgeR_not_DESeq2 == 1
@@ -677,7 +687,7 @@ for (i in 1:nrow(design)) {
   ################################################################
   ## P-value comparison plot
   ## Compare DESeq2 and edgeR nominal p-values
-  pdf(file= file.path(dir.figures, paste(sep = "", "DESeq2_vs_edgeR_pvalues_", prefix.analysis, ".pdf")))
+  pdf(file=paste(sep = "", prefix["comparison_figure"], suffix.deg, "_DESeq2_vs_edgeR_pvalues", ".pdf"))
   plot.cex=0.7
   plot(result.table$edgeR.pvalue, 
        result.table$DESeq2.pvalue,
@@ -700,32 +710,36 @@ for (i in 1:nrow(design)) {
   
   ################################################################
   ## Draw Venn diagram with number of genes declared significant with edgeR and DESeq2, resp
-
+  
   ## Lists of differentially expressed genes (DEG) based on all thresholds together
   venn.counts.deg <- vennCounts(result.table[,c("edgeR.DEG", "DESeq2.DEG")])
   
-  pdf(file= file.path(
-    dir.figures, 
-    paste(sep = "", "DESeq2_vs_edgeR_Venn",
-          "_DEG", 
-          "_", prefix.analysis, ".pdf")))
+  pdf(file=paste(sep = "", prefix["comparison_figure"], suffix.deg, "_DESeq2_vs_edgeR_Venn_DEG", ".pdf"))
+  #   pdf(file= file.path(
+  #     dir.figures, 
+  #     paste(sep = "", "DESeq2_vs_edgeR_Venn",
+  #           "_DEG", 
+  #           "_", prefix["comparison"], ".pdf")))
   vennDiagram(venn.counts.deg, cex=1, 
               main=paste(sep='; ', 
                          paste(sep=" ", cond1, "vs", cond2, "DEG")))
   dev.off()
   
   
-  ## Adjusted p-value criterion only
+  ## For each threshold separately
   for (s in names(thresholds)) {
+    
     venn.counts.one.threshold <- vennCounts(
       result.table[,c(paste(sep="", "edgeR.",s,"_", thresholds[s]), 
                       paste(sep="", "DESeq2.",s,"_", thresholds[s]))])
     
-    pdf(file= file.path(
-      dir.figures, 
-      paste(sep = "", "DESeq2_vs_edgeR_Venn",
-            "_", s, "_", thresholds[s], 
-            "_", prefix.analysis, ".pdf")))
+    pdf(file=paste(sep = "", prefix["comparison_figure"], suffix.deg, "_DESeq2_vs_edgeR_Venn", 
+                   "_", s, "_", thresholds[s], ".pdf"))
+    #     pdf(file= file.path(
+    #       dir.figures, 
+    #       paste(sep = "", "DESeq2_vs_edgeR_Venn",
+    #             "_", s, "_", thresholds[s], 
+    #             "_", prefix["comparison"], ".pdf")))
     vennDiagram(venn.counts.one.threshold, cex=1, main=paste(sep=" ", cond1, "vs", cond2, "; ", s, "threshold = ", thresholds[s]))
     dev.off()
   }
@@ -736,7 +750,7 @@ for (i in 1:nrow(design)) {
   ## This is just to get an intuitive idea, since CPMs are 
   ## not recommended for diffferential detection.
   verbose("\t\tmean CPM plot", 2)
-  pdf(file=file.path(dir.figures, paste(sep = "", "CPM_plot_", prefix.analysis, ".pdf")))
+  pdf(file=paste(sep = "", prefix["comparison_figure"], "CPM_plot",  ".pdf"))
   plot(result.table[,c("cpm1.mean", "cpm2.mean")], 
        log="xy",
        main = "Mean counts per million reads (log scales)",
@@ -763,7 +777,8 @@ for (i in 1:nrow(design)) {
   ################################################################
   ## Draw MA plot with CPMs
   verbose("\t\tCPM MA plot", 2)
-  pdf(file=file.path(dir.figures, paste(sep = "", "CPM_MA_plot_", prefix.analysis, ".pdf")))
+  pdf(file=paste(sep = "", prefix["comparison_figure"], "_CPM_MA_plot.pdf"))
+  #pdf(file=file.path(dir.figures, paste(sep = "", "CPM_MA_plot_", prefix["comparison"], ".pdf")))
   plot(result.table[,c("A", "M")],
        main = paste(sep=" ", cond1, "vs", cond2, ": CPMs MA plot"),
        xlab=paste(sep="", "A = log2(", cond1, "*", cond2, ")/2"),
@@ -789,7 +804,7 @@ for (i in 1:nrow(design)) {
   ################################################################
   ## Functional enrichment analysis
   if (exists("org.db") & !is.na(org.db) & !is.null(org.db) & exists("gene.info.rsat")) {
-  
+    
     all.gene.ids <- row.names(result.table)
     
     ## Convert IDs to entrez IDs using custom annotation table
@@ -797,7 +812,15 @@ for (i in 1:nrow(design)) {
     names(entrez.ids) <- gene.info[all.gene.ids,"gene_id"]
     
     # names(result.table)
-    geneset.selection.columns <- c("edgeR.DEG", "DESeq2.DEG")
+    geneset.selection.columns <- vector()
+    for (deg.tool in deg.tools) {
+      for (s in names(thresholds)) {
+        geneset.selection.columns <- append(geneset.selection.columns, paste(sep="", deg.tool, ".", s, "_", thresholds[s]))
+      }      
+      geneset.selection.columns <- append(geneset.selection.columns, paste(sep="", deg.tool, ".DEG"))
+    }
+    # print(geneset.selection.columns)
+    
     col <- "edgeR.DEG"
     for (col in geneset.selection.columns) {
       geneset <- all.gene.ids[result.table[,col] == 1]
@@ -807,10 +830,10 @@ for (i in 1:nrow(design)) {
                                                verbosity=2)
       # View(go.bp.table)
       ## Save result table
-      go.bp.file <- file.path(dir.analysis, 
-                              paste(sep = "", prefix.analysis, 
-                                    "_", col,
-                                    "_GOstats.tab"))
+      go.bp.file <- paste(sep = "", prefix["comparison_figure"], 
+                          "_", suffix.deg,
+                          "_", col,
+                          "_GOstats.tab")
       write.table(x = go.bp.table, row.names = FALSE,
                   file = go.bp.file, sep = "\t", quote=FALSE)
       verbose(paste(sep="", "\t\tGO over-representation analysis file\t", go.bp.file), 1)
@@ -850,7 +873,7 @@ for (i in 1:nrow(design)) {
   
   ## Instantiate a data frame for the current analysis
   current.summary <- data.frame(
-    "analysis"=paste(sep="", prefix.analysis),
+    "analysis"=paste(sep="", prefix["comparison"]),
     "cond1" = cond1, "cond2" = cond2)
   
   ## DESeq2 results
@@ -882,7 +905,7 @@ for (i in 1:nrow(design)) {
 
 ## Export summary table
 verbose("Exporting summary table", 1)
-summary.file <- paste(sep="", all.prefix, "_summary_per_analysis.tab")
+summary.file <- paste(sep="", prefix["general.file"], "_summary_per_analysis.tab")
 write.table(x = summary.per.analysis, row.names = FALSE,
             file = summary.file, sep = "\t", quote=FALSE)
 verbose(paste(sep="", "\tSummary per analysis\t", summary.file), 1)
