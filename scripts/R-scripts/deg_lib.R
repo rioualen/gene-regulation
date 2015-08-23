@@ -256,9 +256,9 @@ gostat.overrepresentation <- function(geneset,
     db=db,
     prefix = sub(db, pattern = ".db", replacement = ""))
   for (suffix in c("GO", "ENTREZID")) {
-    envir[suffix] <- paste(sep="", envir.prefix,suffix)
+    envir[suffix] <- paste(sep="", envir["prefix"],suffix)
   }
-  #   envir.GO <- get(paste(sep="", envir.prefix,"GO"))
+  #   envir.GO <- get(paste(sep="", envir["prefix"],"GO"))
   
   
   ## Check entrez IDs
@@ -347,8 +347,8 @@ gostat.overrepresentation <- function(geneset,
   }
   
   # plot(hist(go.enrich.table$Pvalue, breaks=20))
-  dim(result.per.class)
-  # View(result.per.class)
+  dim(go.enrich.table)
+  # View(go.enrich.table)
   # print(over.result.cond)
   return(go.enrich.table)
 }
