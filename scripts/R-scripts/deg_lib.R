@@ -213,27 +213,41 @@ complete.deg.table <- function(deg.table,
 #' @param geneset   Entrez IDs of the gene set of interest.
 #' @param allgenes  EntrezIDs for all genes of the analyzed genome (the "universe").
 #' @param db an annotation database
-#' @param evalue.cutoff=0.1 Upper threshold on the e-value for GOstats. 
+#' @param thresholds["evalue"]=0.1 Upper threshold on the e-value for GOstats. 
 #' Note that we perform the selection with a p-value threshold of 1, in order to obtain the 
 #' stats for all the classes. The e-value is calculated a posteriori and indicated in the table.
-#' @param evalue.filter=TRUE If TRUE, the result table only contains the significant classes. 
-#' Otherwise, all classes are returned, with a column "positive" indicating whether or not
-#' they pass the e-value threshold.
+#' @param select.positives=TRUE If TRUE, the result table only contains the positive tests, 
+#' i.e. those passing all the thresholds. Otherwise, all rows are returned, with a column "positive" 
+#' indicating whether or not they did or not pass all thresholds. Additional columns indicate the 
+#' result of the individual thresholds.
 #' @param verbosity=1 Level of verbosity.
 #'
 #' @examples
 #'
 #' @export
-gostat.overrepresentation <- function(geneset,
-                                      allgenes,
-                                      db,
-                                      evalue.cutoff=0.1,
-                                      evalue.filter = TRUE,
-                                      ontology="BP",
-                                      verbosity=1) {
+functional.enrichment <- function(geneset,
+                                  allgenes,
+                                  db,
+                                  ontology="BP",
+                                  thresholds = c("evalue"=1, "qvalue"=0.05),
+                                  select.positives=TRUE,
+                                  run.GOstats = TRUE,
+                                  run.clusterProfiler = TRUE,
+                                  clusterProfiler.org=NA,
+                                  plot.adjust = TRUE,
+                                  verbosity=1) {
   #library("ALL")
   verbose(paste(sep="", "Go over-representation analysis. ",
                 length(geneset), " input genes (among ", length(allgenes), ")"), verbosity)
+  
+  ## Prepare the result
+  result <- list()
+  result$ngenes.test <- length(geneset)
+  result$ngenes.all <- length(allgenes)
+  result$db = db
+  result$ontology = ontology
+  result$thresholds <- thresholds
+  result$select.positives <- select.positives
   
   ## Create a data frame with results per gene (one row per gene, one column per attribute)
   result.per.gene <- data.frame("entrez.id" = allgenes)
@@ -241,16 +255,9 @@ gostat.overrepresentation <- function(geneset,
   result.per.gene$selected <- 0
   result.per.gene[geneset,"selected"] <- 1
   
-  ## Load required libraries
+  ## Load annotation library
   library("GO.db")
   library("annotate")
-  #library("genefilter")
-  library("GOstats")
-  #library("RColorBrewer")
-  #library("xtable")
-  #library("Rgraphviz")
-  
-  ## Load annotation library
   library(db, character.only = TRUE)
   envir <- c(
     db=db,
@@ -258,97 +265,215 @@ gostat.overrepresentation <- function(geneset,
   for (suffix in c("GO", "ENTREZID")) {
     envir[suffix] <- paste(sep="", envir["prefix"],suffix)
   }
-  #   envir.GO <- get(paste(sep="", envir["prefix"],"GO"))
   
-  
-  ## Check entrez IDs
-  #  entrezIds <- mget(geneset, envir=get(envir["ENTREZID"])) ## !!! Does not work for E.coli, I should check why
-  
-  ## Get go annotations per gene
-  go.annot.geneset <- mget(geneset, envir=get(envir["GO"]))
-  go.annot.allgenes <- mget(allgenes, envir=get(envir["GO"]))
-  result.per.gene$nb.go.annot <- as.vector(unlist(lapply(go.annot.allgenes, length)  ))
-
-  ## Compute number of genes with at least one annotation in GO. 
-  ## Note that this is for all the GO ontologies. For the hypergeometric test 
-  ## below we need to take into account the ontology-specific annotations.
-  nb.allgenes.with.go <- sum(result.per.gene$nb.go.annot >0) ## Total number of genes with GO annotations
-  nb.geneset.with.go <- sum(result.per.gene[geneset, "nb.go.annot"] >0) ## Number of genes with GO annotations in the test set
-  
-  # head(result.per.gene)
-  # table(result.per.gene$nb.go.annot)
-
   ################################################################
   ## Run over-representation analysis with GOstats
-  gostats.params <- new("GOHyperGParams",
-                        geneIds=geneset,
-                        universeGeneIds=allgenes,
-                        annotation=db,
-                        ontology=ontology,
-                        pvalueCutoff=1,
-                        conditional=FALSE,
-                        testDirection="over")
-  
-  ## Define a separate set of parameters for conditional test
-  #   gostats.paramsCond <- gostats.params
-  #   conditional(gostats.paramsCond) <- TRUE
-  #  print(over.result)
-  
-  over.result <- hyperGTest(gostats.params)
-  
-  ## Collect the statistics for all the tested GO classes.
-  ## For this we set the p-value threshold to 1.1, so we select
-  ## all classes, even non-significant!
-  go.enrich.table <- summary(over.result, pvalue=2)
-  go.enrich.table$expectedCounts = expectedCounts(over.result)
-  #   length(geneIds(over.result))
-  #   length(geneIdUniverse(over.result))
+  if (run.GOstats) {
+    library("GOstats")
+    
+    ## Get go annotations per gene
+    go.annot.geneset <- mget(geneset, envir=get(envir["GO"]))
+    go.annot.allgenes <- mget(allgenes, envir=get(envir["GO"]))
+    result.per.gene$nb.go.annot <- as.vector(unlist(lapply(go.annot.allgenes, length)  ))
+    
+    ## Compute number of genes with at least one annotation in GO. 
+    ## Note that this is for all the GO ontologies. For the hypergeometric test 
+    ## below we need to take into account the ontology-specific annotations.
+    nb.allgenes.with.go <- sum(result.per.gene$nb.go.annot >0) ## Total number of genes with GO annotations
+    nb.geneset.with.go <- sum(result.per.gene[geneset, "nb.go.annot"] >0) ## Number of genes with GO annotations in the test set
+    # head(result.per.gene)
+    # table(result.per.gene$nb.go.annot)
+    
+    ## Define parameters for GOstats analysis
+    gostats.params <- new("GOHyperGParams",
+                          geneIds=geneset,
+                          universeGeneIds=allgenes,
+                          annotation=db,
+                          ontology=ontology,
+                          pvalueCutoff=1,
+                          conditional=FALSE,
+                          testDirection="over")
 
-  ## Compute the E-value
-  nb.tests <- length(over.result@goDag@nodes)
-  go.enrich.table$Evalue <- go.enrich.table$Pvalue * nb.tests
-  go.enrich.table <- go.enrich.table[order(go.enrich.table$Pvalue, decreasing=FALSE),]
+    ## Run over-representation hypergeometric test with GOstats
+    over.result <- hyperGTest(gostats.params)
+    # plot(goDag(over.result))
+    
+    result$geneIds <-  length(geneIds(over.result)) # Number of mapped genes
+    result$geneIdUniverse <- length(geneIdUniverse(over.result))
+    
+    ## Collect the statistics for all the tested GO classes.
+    ## For this we set the p-value threshold to 1.1, so we select
+    ## all classes, even non-significant!
+    go.enrich.table <- summary(over.result, pvalue=2)
+    go.enrich.table$expectedCounts = expectedCounts(over.result)
+    
+    go.enrich.table <- complete.enrich.table(go.enrich.table,
+                                             pvalue.column="Pvalue",
+                                             thresholds=thresholds, 
+                                             select.positives=select.positives,
+                                             plot.adjust=plot.adjust)    
+    
+    ## Add  GO table to the result
+    result$go.bp.table <- go.enrich.table
+    
+    
+    ## For the sake of understanding, we can re-compute the p-value 
+    ## with the hypergeometric distribution. We obtain the same result as GOstats.
+    N <- universeMappedCount(over.result) ## Universe, i.e. nb of genes with at least one annotation in the selected ontology
+    m <- go.enrich.table$Size ## genes marked as belonging to the considered GO class
+    n <- N -m ## Number of "non-marked" genes, i.e. not belonging to the considered GO class
+    k <- length(over.result@geneIds) ## Number of test genes with at least one annotation in the selected ontology
+    Pvalue.check <- 
+      phyper(q = go.enrich.table$Count -1, m=m, n=n, k = k, lower=FALSE)
+    #   plot(go.enrich.table[,pvalue.column], Pvalue.check, log="xy")
+    ExpCount.check <- m * k/N
+    # plot(go.enrich.table$ExpCount, ExpCount.check)
+    #   abline(a=0, b=1)
+    
+    # View(go.enrich.table)
+    # names(go.enrich.table)
+    # dim(go.enrich.table)
+    
+  }    ## End of GOstats analysis
   
-  ## Tag significant genes according to the e-value cutoff
-  go.enrich.table$positive <- 1*(go.enrich.table$Evalue < evalue.cutoff)
-  sum(go.enrich.table$positive)
-  verbose(paste(sep="", "\t",
-                sum(go.enrich.table$positive), " significant tests among ", nb.tests,
-                " (e-value <=", evalue.cutoff, ").")
-          , 2)
-  
-  ## For the sake of understanding, we can re-compute the p-value with the hypergeometric distribution
-  N <- universeMappedCount(over.result) ## Universe, i.e. nb of genes with at least one annotation in the selected ontology
-  m <- go.enrich.table$Size ## genes marked as belonging to the considered GO class
-  n <- N -m ## Number of "non-marked" genes, i.e. not belonging to the considered GO class
-  k <- length(over.result@geneIds) ## Number of test genes with at least one annotation in the selected ontology
-  Pvalue.check <- 
-    phyper(q = go.enrich.table$Count -1, m=m, n=n, k = k, lower=FALSE)
-  #   plot(go.enrich.table$Pvalue, Pvalue.check, log="xy")
-  ExpCount.check <- m * k/N
-  # plot(go.enrich.table$ExpCount, ExpCount.check)
-  #   abline(a=0, b=1)
-  
-  # plot(goDag(hgOver))
-  
-  # View(go.enrich.table)
-  # names(go.enrich.table)
-  # dim(go.enrich.table)
-  
-  
-  ## Select only the GO classes passing the e-value
-  if (evalue.filter) {
-    go.enrich.table <- go.enrich.table[go.enrich.table$positive==1, ]
-    verbose(paste("\tGO over-representation. Returning", 
-                  sum(go.enrich.table$positive), "significant associations."), verbosity)
-  } else {
-    verbose(paste(sep="", "\tGO over-representation. Returning table with all associations (", 
-                  sum(go.enrich.table$positive), " significant)."), verbosity)
+  if (run.clusterProfiler) {
+    library("clusterProfiler")
+    ## Check the organism
+    if (is.na(clusterProfiler.org)) {
+      message("Skipping clusterProfiler analysis because organisms is not specified")
+    } else {
+      ## Compute the enrichment of the gene list for Biological Processes of the Gene Ontology
+      ## We intently set all cutoffs to a value > than the possible max, in order to get the full table.
+      ## We then perform the filter only if requested.
+      ego <- enrichGO(gene = geneset, organism = clusterProfiler.org,
+                      pvalueCutoff = 2,
+                      qvalueCutoff = 2,
+                      ont = ontology, readable = T)  
+      ego.table <- data.frame(ego@result)
+
+      
+      ego.table <- complete.enrich.table(
+        ego.table,
+        pvalue.column="pvalue",
+        thresholds=thresholds, 
+        select.positives=select.positives,
+        plot=TRUE)
+      
+      ## Add  GO table to the result
+      result$clusterProfiler.bp.table <- ego.table
+    }
   }
   
-  # plot(hist(go.enrich.table$Pvalue, breaks=20))
-  dim(go.enrich.table)
+  
+  result$result.per.gene <- result.per.gene
+  
+  # plot(hist(go.enrich.table[,pvalue.column], breaks=20))
+  #dim(go.enrich.table)
   # View(go.enrich.table)
   # print(over.result.cond)
-  return(go.enrich.table)
+  return(result)
+}
+
+#' @title Add some columns to a functional enrichment table in order to ensure that we always have the same statistics.
+#'
+#' @author Jacques van Helden (\email{Jacques.van-Helden@@univ-amu.fr})
+#'
+#' @description Add some columns to a functional enrichment table in order to ensure that we always have the same statistics.
+#'
+#' @details
+#' First version: 2015-08 
+#' Last modification: 2015-08. 
+#'
+#' @param enrich.table Enrichment table from GOstats, clusterProfiler or similar programs.
+#' @param pvalue.column Name or number of the column containing the p-values (this depends on the program).
+#' @param thresholds=c("evalue"=1)
+#' @examples
+#'
+#' @export
+complete.enrich.table <- function(enrich.table, 
+                                  pvalue.column = "Pvalue",
+                                  thresholds=c("evalue"=1, "qvalue"=0.05),
+                                  nb.tests=nrow(enrich.table),
+                                  select.positives=FALSE,
+                                  plot.adjust = TRUE
+                                  ) {
+  
+  ## Ensure homogeneous column names exist in all results even if it duplicates the p-value column.
+  if (pvalue.column != "pvalue") {
+    enrich.table$pvalue <- enrich.table[,pvalue.column]    
+  }
+  
+  # Initialize the "positive" flag. It will be update for each selection criterion. 
+  enrich.table$positive <- 1
+  # View(enrich.table)
+  
+  ## Compute the E-value
+  enrich.table$evalue <- enrich.table[,pvalue.column] * nb.tests
+  
+  ## Sort enrichment table by increasing p-values
+  enrich.table$pvalue.rank <- rank(enrich.table[,pvalue.column])  
+  enrich.table <- enrich.table[order(enrich.table[,pvalue.column], decreasing=FALSE),]
+
+  ## q-value according to Benjamini-Hochberg method, which does not consider the prior proportions of null and non-null hypotheses
+  enrich.table$qvalue <- enrich.table[,pvalue.column] * nb.tests/enrich.table$pvalue.rank
+  
+  
+  ## Compute the q-value according to Benjamini-Hochberg method
+  
+  ## Tag significant genes according to zero, one or more cutoff values
+  upper.thresholds <- c("evalue"=TRUE, "qvalue"=TRUE, "pvalue"=TRUE, "intersect"=FALSE)
+  for (s in names(thresholds)) {
+    if (is.numeric(thresholds[s])) {
+      selection.column <- paste(sep="_", s, thresholds[s])
+      if (upper.thresholds[s]) {
+        enrich.table[, selection.column] <- 1*(enrich.table[,s] < thresholds[s])
+      } else {
+        enrich.table[, selection.column] <- 1*(enrich.table[,s] > thresholds[s])
+      }
+      sum(enrich.table[, selection.column])
+      verbose(paste(sep="", "\t",
+                    sum(enrich.table[selection.column]), "/", nb.tests, " tests passed ",
+                    s, " threshold=", thresholds[s]), 2)
+      enrich.table$positive <- enrich.table$positive * enrich.table[,selection.column]
+      verbose(paste(sep="", "\t", sum(enrich.table$positive), "/", nb.tests, " positive tests"), 3)    
+    }
+  }  
+  
+  ## Plot the different multiple testing corrections
+  if (plot.adjust) {
+    threshold.colors <- c("qvalue"="darkgreen", "evalue"="blue", "positive"="red")
+    plot(enrich.table[,c("pvalue","evalue")], log="xy", panel.first=grid(lty="solid", col="#BBBBBB"),
+         xlab="p-value", ylab="Multiple testing corrections",
+         ylim=c(min(enrich.table$pvalue), max(enrich.table$evalue)),
+         pch=1, col=threshold.colors["evalue"])
+    abline(h=1, lwd=1)
+    abline(h=thresholds, col=threshold.colors[names(thresholds)], lwd=1)  ## Mark thresholds
+    abline(a=0, b=1)
+    points(enrich.table[,c("pvalue","qvalue")], pch=20, 
+           col=threshold.colors["qvalue"])
+    points(enrich.table[enrich.table["positive"]==1,c("pvalue","qvalue")], pch=3, 
+           col=threshold.colors["positive"], lwd=2)
+    
+    ## Count number of selected genes by different criteria
+    selection.columns <- paste(sep="_", names(thresholds), thresholds)
+    selection.columns <- append(selection.columns, "positive")
+    selected.numbers <- apply(enrich.table[,selection.columns], 2, sum)
+    legend("topleft", 
+           legend=paste(selected.numbers, selection.columns), 
+           col=threshold.colors[c(names(thresholds), "positive")], 
+           pch=c(1, 20, 3))
+  }  
+  ## Select only the GO classes passing the e-value
+  if (select.positives) {
+    enrich.table <- enrich.table[enrich.table$positive, ]
+    verbose(paste("\tGO over-representation. Returning", 
+                  sum(enrich.table$evalue.selection), "significant associations."), verbosity)
+  } else {
+    verbose(paste(sep="", "\tGO over-representation. Returning table with all associations (", 
+                  nrow(enrich.table), " among which ",
+                  sum(enrich.table$positive), " significant)."), verbosity)
+  }
+  
+   return(enrich.table)
+  
 }
