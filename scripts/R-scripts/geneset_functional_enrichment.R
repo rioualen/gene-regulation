@@ -1,11 +1,26 @@
 library("knitr")
 library('clusterProfiler')
 library(GO.db)
-library("org.Dm.eg.db")
+#library("org.Dm.eg.db")
+
+
+
 
 ## Parameters
 dir.main <- "~/dr-chip-rna-seq"
 setwd(dir.main)
+## Source : M. Carlson. How To Use GOstats and Category to do Hypergeometric testing with unsupported model organisms. 
+org <- "dme"
+# org <- "eco"
+if (org == "eco") {
+  organism <- "Escherichia coli K12 MG1655"
+  #annot.schema <- "ECOLI_DB"
+  org.db <- "org.EcK12.eg.db"
+} else if (org =="dme") {
+  organism <- "Drosophila melanogaster"
+  annot.schema <- "FLY_DB"
+  org.db <- "org.Dm.eg.db"
+}
 
 dir.deg <- file.path(dir.main, "results/rna-seq/DEG")
 dir.enrichment <- file.path(dir.deg, "enrichment_analysis")
@@ -95,6 +110,9 @@ for (deg.tool in deg.tools) {
   gg <- bitr(row.names(deg.table), fromType="SYMBOL", toType="ENTREZID", annoDb="org.Dm.eg.db")
   ## Add a column with the "entrez.id" column in the deg.table
   deg.table[gg[,1], "entrez.id"] = gg[,2]
+  all.entrez.ids <- deg.table$entrez.id[!is.na(deg.table$entrez.id)]
+  names(all.entrez.ids) <- row.names(deg.table)[!is.na(deg.table$entrez.id)]
+  # length(entrez.ids)
   
   ## Run GO enrichment analysis for up-regulated, down-regulated and the union of them.
   groups <- c("up", "down", "positive")  
@@ -108,13 +126,13 @@ for (deg.tool in deg.tools) {
     for (selection.criterion in selection.criteria) {
       
       ## Selet significant genes
-      gene.ids <- deg.table[deg.table[,group], "entrez.id"] ## IDs of the significant genes for the group of interest
-      
+      gene.ids <- deg.table[deg.table[,group], "entrez.id"] ## IDs of the significant genes for the group of interest      
       if (selection.criterion == "random") {
         ## Select random gene list of the same size as the significant genes
-        gene.ids <- sample(x = deg.table$entrez.id, size = length(gene.ids))  
+        gene.ids <- sample(x = deg.table$entrez.id, size = sum(deg.table[,group]))  
       }
-      gene.ids <- na.omit(gene.ids)   ## Filter out the genes for which no EntrezID has been found
+      gene.ids <- gene.ids[!is.na(gene.ids)] ## Filter ou unidentified genes
+      #      gene.ids <- na.omit(gene.ids)   ## Filter out the genes for which no EntrezID has been found
       
       ## Iterate over ontology types (biological process, cellular component, molecular function)
       ontologies <- c("BP", "CC", "MF")
@@ -125,6 +143,18 @@ for (deg.tool in deg.tools) {
                       "DEG set", deg.tool, 
                       length(gene.ids), group, selection.criterion, "genes"))
         
+        ## Just a wrapper around various functional enrichment packages
+        enrich.result <- functional.enrichment(geneset=gene.ids, 
+                                               allgenes=all.entrez.ids, 
+                                               db=org.db, 
+                                               ontology="BP",
+                                               thresholds = c("evalue"=1, "qvalue"=0.05),
+                                               select.positives=FALSE,
+                                               run.GOstats = TRUE,
+                                               run.clusterProfiler = TRUE,
+                                               clusterProfiler.org="fly",
+                                               plot.adjust = TRUE,
+                                               verbosity=1)
         
         ## Compute the enrichment of the gene list for Biological Processes of the Gene Ontology
         ego <- enrichGO(gene = gene.ids, organism = "fly",
@@ -231,20 +261,26 @@ for (deg.tool in deg.tools) {
 ## Build custom annotation table
 
 ## Source : M. Carlson. How To Use GOstats and Category to do Hypergeometric testing with unsupported model organisms. 
-organism <- "Escherichia coli K12 MG1655"
-annot.schema <- "ECOLI_DB"
-annot.prefix <- "org.EcK12"
-library("org.EcK12.eg.db")
+org <- "dme"
+# org <- "eco"
+if (org == "eco") {
+  organism <- "Escherichia coli K12 MG1655"
+  #annot.schema <- "ECOLI_DB"
+  org.db <- "org.EcK12.eg.db"
+} else if (org =="dme") {
+  organism <- "Drosophila melanogaster"
+  annot.schema <- "FLY_DB"
+  org.db <- "org.Dm.eg.db"
+}
 
-# organism <- "Drosophila melanogaster"
-# annot.schema <- "FLY_DB"
-# annot.prefix <- "org.dm"
-# library("org.dm.eg.db")
+library(org.db, character.only = TRUE)
 
-annot.db.eg <- paste(sep="", annot.prefix, ".eg.db")
-annot.db.go <- paste(sep="", annot.prefix, ".egGO")
-annot.db.kegg <- paste(sep="", annot.prefix, ".egPATH")
+annot.prefix <- sub(org.db, pattern = ".db$", replacement = "")
+annot.db.go <- paste(sep="", annot.prefix, "GO")
+annot.db.kegg <- paste(sep="", annot.prefix, "PATH")
 
+
+## ??? Do we need the following piece of code ? It seems to be only valid for Homo sapiens
 library("AnnotationForge")
 # available.dbschemas()
 frame = toTable(get(annot.db.go))
