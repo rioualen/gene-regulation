@@ -11,6 +11,7 @@ library("DESeq2", warn.conflicts = FALSE, quietly=TRUE, verbose=FALSE)
 library("limma", warn.conflicts = FALSE, quietly=TRUE) ## Required for vennCounts and vennDiagram
 library(gplots, warn.conflicts = FALSE, quietly=TRUE) ## Required for heatmaps.2
 library(RColorBrewer, warn.conflicts = FALSE, quietly=TRUE)
+library("GenomicFeatures")
 
 ## Load library of functions for differential analysis
 dir.fg <- "~/fg-chip-seq/"
@@ -19,7 +20,7 @@ source(file.path(dir.fg, "scripts/R-scripts/deg_lib.R"))
 
 verbosity <- 1
 deg.tools <- c("edgeR", "DESeq2")
-org.db <- "org.EcK12.eg.db" ## Should be added to parameters
+
 
 ## The only argument is the file containing all the parameters for the analysis
 if (is.na(commandArgs(trailingOnly = FALSE)[6])) {
@@ -27,6 +28,14 @@ if (is.na(commandArgs(trailingOnly = FALSE)[6])) {
   ## TEMPORARY FOR DEBUGGING: 
   setwd("~/BeatriceRoche/")
   r.params.path <- "results/DEG/sickle_pe_q20_bowtie2_pe_sorted_name_params.R"
+  ## Elements that should be added to the parameters
+  org.db <- "org.EcK12.eg.db" ## Should be added to parameters
+  gene.info.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655_GCA_000005845.2_gene_info.tab"
+  organism.name <- "Escherichia coli"
+  gtf.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.gtf"
+  gtf.source <- "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-28/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655/"
+  #   pet.gene <- "b2531"
+  
 } else {
   r.params.path <- commandArgs(trailingOnly = FALSE)[6]  
 }
@@ -103,6 +112,74 @@ all.counts.mapped.epsilon[all.counts.mapped==0] <- epsilon
 
 ## Log-transformed data for some plots. 
 all.counts.mapped.log10 <- log10(all.counts.mapped.epsilon)
+
+
+################################################################
+## Load gene information from the GTF file 
+## (should be the same as used to count tags per gene)
+if (exists("gtf.file")) {
+  #   library(rtracklayer)  # for the import() function
+  #   gr <- import(gtf.file)
+  txdb <- makeTxDbFromGFF(file=gtf.file,
+                          organism=organism.name,
+                          dataSource=gtf.source)
+  #seqlevels(txdb)
+  #   transcripts <- transcriptsBy(txdb, by="gene")
+  #   transcript.table <- as.data.frame(transcripts@unlistData)
+  #   cds <- cdsBy(txdb, by="gene")
+  #   cds.table <- as.data.frame(cds@unlistData)
+  #   exons <- exonsBy(txdb, by="gene")
+  #   exon.table <- as.data.frame(exons@unlistData)
+  all.genes <- genes(txdb)
+  gene.info <- as.data.frame(all.genes)
+  gene.info$name <- gene.info$gene_id
+  gene.info$entrez.id <- NA
+  gene.info$description <- "no description"
+} else {
+  g <- nrow(all.counts.mapped)
+  gene.info <- data.frame("seqnames"=rep(NA, times=g),
+                          "start"=rep(NA, times=g),
+                          "end"=rep(NA, times=g),
+                          "width"=rep(NA, times=g),
+                          "strand"=rep(NA, times=g),
+                          "gene_id"=row.names(all.counts.mapped),
+                          "name"=row.names(all.counts.mapped),
+                          "entrez.id" = rep(NA, times=g),
+                          "description"=rep("no description", times=g))
+  row.names(gene.info) <- row.names(all.counts.mapped)
+}
+# View(gene.info)
+
+################################################################
+## TEMPORARY: load gene information from a tab-delimited file generated with RSAT, 
+## because for bacterial genomes there is no obvious way to obtain EntrezIDs.
+if (exists("gene.info.file")) {
+  gene.info.rsat <- read.delim(gene.info.file, sep="\t", skip=3, header=1)  
+  ## A bit tricky: we need to discard rows starting with ";", but we cannot use ";" as comment.char since it is found in descriptions and as separator for names
+  comment.lines <- grep(gene.info.rsat[,1], pattern = ";")
+  gene.info.rsat <- gene.info.rsat[-comment.lines,]
+  row.names(gene.info.rsat) <- gene.info.rsat[,1]
+  gene.info.rsat <- gene.info.rsat[row.names(gene.info), ] ## Ensure gene.info.rsat contains same IDs in the same order as gene.info
+  
+  
+  ## Extract additional attributes for the gene.info table
+  gene.info$name <- gene.info.rsat[row.names(gene.info), "name"]
+  gene.info$entrez.id <- gene.info.rsat[row.names(gene.info), 2]
+  gene.info$description <- gene.info.rsat[row.names(gene.info), "description"]
+  gene.info$names <- gene.info.rsat[row.names(gene.info), "names"]
+  # dim(gene.info.rsat)
+  # names(gene.info.rsat)
+  # View(gene.info.rsat)
+  # View(gene.info)
+} 
+
+## Export the gene information table to keep a trace of what has been used. 
+verbose("Exporting gene information table", 1)
+gene.info.out <- paste(sep="", all.prefix, "_gene_descriptions.tab")
+write.table(x = gene.info, row.names = FALSE,
+            file = gene.info.out, sep = "\t", quote=FALSE)
+verbose(paste(sep="", "\tGene info table\t", gene.info.out), 1)
+
 
 ################################################################
 ## Compute sample-wise statistics on mapped counts
@@ -351,25 +428,30 @@ for (i in 1:nrow(design)) {
   current.labels <- paste(current.conditions, names(current.counts), sep="_")
   
   ## Initiate a result table with the CPMs and derived statistics
-  result.table <- data.frame(
-    gene.id = row.names(cpms),
-    mean.cpm1 = apply(cpms[,samples1],1, mean),
-    mean.cpm2 = apply(cpms[,samples2],1, mean))
-  result.table$A = log2(result.table$mean.cpm1*result.table$mean.cpm2)/2
-  result.table$M = log2(result.table$mean.cpm1/result.table$mean.cpm2)
+  all.gene.ids <- row.names(cpms)
+  result.table <- data.frame("gene_id" = all.gene.ids,
+                             "name"=gene.info[all.gene.ids,"name"])
+  row.names(result.table) <- all.gene.ids
+  result.table$entrez.id <- gene.info[all.gene.ids,"entrez.id"]
+  result.table$description <- gene.info[all.gene.ids,"description"]
+  #   result.table$mean.cpm1 <- apply(cpms[,samples1],1, mean)
+  #   result.table$mean.cpm2 <- apply(cpms[,samples2],1, mean)
+  #   result.table$A <- log2(result.table$mean.cpm1*result.table$mean.cpm2)/2
+  #   result.table$M <- log2(result.table$mean.cpm1/result.table$mean.cpm2)
   # dim(result.table)
   
   ## Tag genes detected in less than min.rep samples, which is defined as 
   ## the minimal number of replicates per condition.
   min.rep <- min(length(samples1), length(samples2))
-  result.table$undetected <- rowSums(current.counts > 1) >= min.rep
+  result.table$undetected <- rowSums(current.counts > 1) < min.rep
   #current.counts <- current.counts[rowSums(current.counts > 1) >= min.rep,]
   # dim(current.counts)
   
-  # View(result.table)
   result.table$cpm.mean <- apply(cpms,1, mean)
   result.table$cpm1.mean <- apply(cpms[,samples1],1, mean)
   result.table$cpm2.mean <- apply(cpms[,samples2],1, mean)
+  result.table$A = log2(result.table$cpm1.mean*result.table$cpm2.mean)/2
+  result.table$M = log2(result.table$cpm1.mean/result.table$cpm2.mean)
   result.table$cpm.median <- apply(cpms,1, median)
   result.table$cpm1.median <- apply(cpms[,samples1],1, median)
   result.table$cpm2.median <- apply(cpms[,samples2],1, median)
@@ -385,9 +467,8 @@ for (i in 1:nrow(design)) {
   result.table$cpm.var <-  apply(cpms,1, var)
   result.table$cpm1.var <- apply(cpms[,samples1],1, sd)
   result.table$cpm2.var <- apply(cpms[,samples2],1, sd)
-  result.table$A = log2(result.table$cpm1.mean*result.table$cpm2.mean)/2
-  result.table$M = log2(result.table$cpm1.mean/result.table$cpm2.mean)
-  
+  # View(result.table)
+
   ################################################################
   ## DESeq2 analysis
   ################################################################
@@ -429,6 +510,7 @@ for (i in 1:nrow(design)) {
   # dim(deseq2.result.table)
   # names(deseq2.result.table)
   # View(deseq2.result.table)
+  # View(result.table)
   
   ## Save the completed DESeq2 result table
   deseq2.result.file <- file.path(dir.analysis, 
@@ -569,6 +651,8 @@ for (i in 1:nrow(design)) {
          & !result.table[,paste(sep="", "DESeq2.", selection.column)])
   }
   
+  # View(result.table)
+  
   ## Save result table
   result.file <- file.path(dir.analysis, 
                            paste(sep = "", prefix.analysis, 
@@ -654,7 +738,7 @@ for (i in 1:nrow(design)) {
   ## not recommended for diffferential detection.
   verbose("\t\tmean CPM plot", 2)
   pdf(file=file.path(dir.figures, paste(sep = "", "CPM_plot_", prefix.analysis, ".pdf")))
-  plot(result.table[,c("mean.cpm1", "mean.cpm2")], 
+  plot(result.table[,c("cpm1.mean", "cpm2.mean")], 
        log="xy",
        main = "Mean counts per million reads (log scales)",
        xlab=paste(cond1),
@@ -662,9 +746,9 @@ for (i in 1:nrow(design)) {
        col=gene.colors,
        panel.first=grid(lty="solid", col="#DDDDDD"))
   ## Plot genes on the top layer to highlight them
-  points(result.table[both,c("mean.cpm1", "mean.cpm2")], col=gene.palette["both"])
-  points(result.table[DESeq2.only,c("mean.cpm1", "mean.cpm2")], col=gene.palette["DESeq2.only"])
-  points(result.table[edgeR.only,c("mean.cpm1", "mean.cpm2")], col=gene.palette["edgeR.only"])
+  points(result.table[both,c("cpm1.mean", "cpm2.mean")], col=gene.palette["both"])
+  points(result.table[DESeq2.only,c("cpm1.mean", "cpm2.mean")], col=gene.palette["DESeq2.only"])
+  points(result.table[edgeR.only,c("cpm1.mean", "cpm2.mean")], col=gene.palette["edgeR.only"])
   abline(a=0, b=1)
   legend("topleft", 
          pch=1, cex=1, 
@@ -701,36 +785,25 @@ for (i in 1:nrow(design)) {
                     paste(sum(edgeR.only, na.rm=TRUE), "edgeR only"),
                     paste(sum(none, na.rm=TRUE), "none")))
   dev.off()
-  #   M["b2531"]
   
   
   ################################################################
   ## Functional enrichment analysis
-  if (exists(org.db) & !is.na(org.db) & !is.null(org.db)) {
+  if (exists("org.db") & !is.na(org.db) & !is.null(org.db) & exists("gene.info.rsat")) {
   
-    gene.ids <- row.names(result.table)
+    all.gene.ids <- row.names(result.table)
     
     ## Convert IDs to entrez IDs using custom annotation table
-    gene.info.file <- file.path(dir.main, "genome/Escherichia_coli_str_k_12_substr_mg1655_GCA_000005845.2_gene_info.tab")
-    gene.info <- read.delim(gene.info.file, sep="\t", skip=3, header=1)  
-    ## A bit tricky: we need to discard rows starting with ";", but we cannot use ";" as comment.char since it is found in descriptions and as separator for names
-    comment.lines <- grep(gene.info[,1], pattern = ";")
-    gene.info <- gene.info[-comment.lines,]
-    row.names(gene.info) <- gene.info[,1]
-    gene.info <- gene.info[gene.ids, ] ## Ensure gene.info contains same IDs in the same order as RNA-seq tables
-    # dim(gene.info)
-    # View(gene.info)
-    gene.ids.converted <- as.vector(gene.info[,2])
-    names(gene.ids.converted) <- gene.info[,1]
+    entrez.ids <- as.vector(gene.info[all.gene.ids,"entrez.id"])
+    names(entrez.ids) <- gene.info[all.gene.ids,"gene_id"]
     
     # names(result.table)
     geneset.selection.columns <- c("edgeR.DEG", "DESeq2.DEG")
     col <- "edgeR.DEG"
     for (col in geneset.selection.columns) {
       geneset <- gene.ids[result.table[,col] == 1]
-      geneset.ids <- na.omit(geneset=gene.ids.converted[geneset])
-      go.bp.table <- gostat.overrepresentation(geneset=geneset.ids, 
-                                               allgenes=gene.ids.converted, 
+      go.bp.table <- gostat.overrepresentation(geneset=na.omit(entrez.ids[geneset]), 
+                                               allgenes=entrez.ids, 
                                                db=org.db, evalue.filter=TRUE,
                                                verbosity=2)
       # View(go.bp.table)
@@ -747,8 +820,8 @@ for (i in 1:nrow(design)) {
     }
     
     #   library("GenomicFeatures")
-    #   gtfFile <- "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.gtf"
-    #   txdb <- makeTxDbFromGFF(file=gtfFile,
+    #   gtf.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.gtf"
+    #   txdb <- makeTxDbFromGFF(file=gtf.file,
     #                           organism="Escherichia coli",
     #                           #                         genome="Escherichia_coli_str_k_12_substr_mg1655",
     #                           dataSource="ftp://ftp.ensemblgenomes.org/pub/bacteria/release-28/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655/")
