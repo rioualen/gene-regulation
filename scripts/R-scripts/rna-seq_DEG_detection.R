@@ -13,6 +13,7 @@ library("limma", warn.conflicts = FALSE, quietly=TRUE) ## Required for vennCount
 library(gplots, warn.conflicts = FALSE, quietly=TRUE) ## Required for heatmaps.2
 library(RColorBrewer, warn.conflicts = FALSE, quietly=TRUE)
 library("GenomicFeatures")
+library("clusterProfiler")
 
 ## Load library of functions for differential analysis
 dir.fg <- "~/fg-chip-seq/"
@@ -25,11 +26,13 @@ deg.tools <- c("edgeR", "DESeq2")
 ## Elements that should be added to the parameters
 org.db <- "org.EcK12.eg.db" ## Should be added to parameters
 gene.info.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655_GCA_000005845.2_gene_info.tab"
-organism.name <- "Escherichia coli"
-organism.clusterProfiler <- NA
+organism.names <- c("name" = "Escherichia coli",
+                    "clusterProfiler" = NA,
+                    "kegg"="eco")
 gtf.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.gtf"
 gtf.source <- "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-28/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655/"
 #   pet.gene <- "b2531"
+gomap.file <- 'genome/Escherichia_coli_str_k_12_substr_mg1655_GCA_000005845.2_gene_GO.tab'
 
 ## The only argument is the file containing all the parameters for the analysis
 if (is.na(commandArgs(trailingOnly = FALSE)[6])) {
@@ -123,7 +126,7 @@ if (exists("gtf.file")) {
   #   library(rtracklayer)  # for the import() function
   #   gr <- import(gtf.file)
   txdb <- makeTxDbFromGFF(file=gtf.file,
-                          organism=organism.name,
+                          organism=organism.names["name"],
                           dataSource=gtf.source)
   #seqlevels(txdb)
   #   transcripts <- transcriptsBy(txdb, by="gene")
@@ -151,6 +154,8 @@ if (exists("gtf.file")) {
   row.names(gene.info) <- row.names(all.counts.mapped)
 }
 # View(gene.info)
+
+
 
 ################################################################
 ## TEMPORARY: load gene information from a tab-delimited file generated with RSAT, 
@@ -836,9 +841,9 @@ for (i in 1:nrow(design)) {
                             ontology="BP",
                             thresholds = c("evalue"=1, "qvalue"=0.05),
                             select.positives=FALSE,
-                            run.GOstats = FALSE,
+                            run.GOstats = TRUE,
                             run.clusterProfiler = FALSE,
-                            clusterProfiler.org=organism.clusterProfiler,
+                            organism.names=organism.names,
                             plot.adjust = TRUE,
                             verbosity=1)
 
@@ -850,10 +855,62 @@ for (i in 1:nrow(design)) {
                           "_GOstats.tab")
       write.table(x = enrich.result$go.bp.table, row.names = FALSE,
                   file = go.bp.file, sep = "\t", quote=FALSE)
-      verbose(paste(sep="", "\t\tGO over-representation analysis file\t", go.bp.file), 1)
+      verbose(paste(sep="", "\t\tGOstats over-representation analysis file\t", go.bp.file), 1)
       
+#       kk <- enrichKEGG(gene = geneset,
+#                        organism = "eco",
+#                        pvalueCutoff = 1,
+#                        readable = TRUE)
+#       head(summary(kk))
+#       
+      ## Build a custom GO map from 2-column data.frame with GO, gene (entrez ID)
+      if (exists("gomap.file")) {
+        ## Read description of GO terms
+        go.terms <- read.delim("genome/GO_terms.tab", header=FALSE)
+        dim(go.terms)
+        row.names(go.terms) <- go.terms[,1]
+        names(go.terms) <- c("GO.id", "description", "ontology")
+        # head(go.terms)
+        # dim(go.terms)
+        gomap.frame <- read.delim(gomap.file, header=FALSE)
+        names(gomap.frame) <- c("gene.id", 
+                                "GO.id", 
+                                "gene.name", 
+                                "transcript.name", 
+                                "protein.id", 
+                                "entrez.id")
+        gomap.frame$GO.descr <- go.terms[gomap.frame$GO.id, "description"] ## Load GO term descriptions in GO-gene table
+        # dim(gomap.frame)
+        # head(gomap.frame)
+        
+        #go.annot <- buildGOmap(gomap.frame[,c(2,6)])
+        go.enricher.res = enricher(geneset, 
+                                   TERM2GENE=gomap.frame[, c("GO.id", "entrez.id")], 
+                                   TERM2NAME=gomap.frame[, c("GO.id", "GO.descr")],
+                                   pAdjustMethod = "BH", 
+                                   minGSSize = 0,
+                                   pvalueCutoff = 1,
+                                   qvalueCutoff=1)
+        go.enricher.table <- data.frame(go.enricher.res@result)
+        go.enricher.table <- complete.enrich.table(go.enricher.table, pvalue.column = "pvalue")
+        # dim(go.enricher.table)
+        # View(go.enricher.table)
+        go.enricher.table[go.enricher.table$positive==1,]
+        
+        ## Save result table
+        go.enricher.file <- paste(sep = "", prefix["comparison_figure"], 
+                                  "_", suffix.deg,
+                                  "_", col,
+                                  "_GO_enricher.tab")
+        write.table(x = go.enricher.table, row.names = FALSE,
+                    file = go.enricher.file, sep = "\t", quote=FALSE)
+        verbose(paste(sep="", "\t\tGO clusterProfiles enricher result\t", go.enricher.file), 1)
+        
+      }
       
+                    
     }
+    
     
     #   library("GenomicFeatures")
     #   gtf.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.gtf"
