@@ -801,7 +801,7 @@ for (i in 1:nrow(design)) {
     geneset.selection.columns <- c("edgeR.DEG", "DESeq2.DEG")
     col <- "edgeR.DEG"
     for (col in geneset.selection.columns) {
-      geneset <- gene.ids[result.table[,col] == 1]
+      geneset <- all.gene.ids[result.table[,col] == 1]
       go.bp.table <- gostat.overrepresentation(geneset=na.omit(entrez.ids[geneset]), 
                                                allgenes=entrez.ids, 
                                                db=org.db, evalue.filter=TRUE,
