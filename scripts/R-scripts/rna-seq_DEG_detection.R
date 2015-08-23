@@ -330,12 +330,12 @@ for (i in 1:nrow(design)) {
   verbose(paste(sep="", "\tDifferential analysis\t", i , "/", nrow(design), "\t", cond1, " vs ", cond2), 1)
   
   ## Create a specific result directory for this differential analysis
+  prefix.analysis <- paste(sep="_", cond1, "vs", cond2)
   dir.analysis <- file.path(dir.DEG, paste(sep="", prefix.analysis))
   dir.create(path = dir.analysis, showWarnings = FALSE, recursive = TRUE)
   dir.figures <- file.path(dir.analysis, "figures")
   dir.create(path = dir.figures, showWarnings = FALSE, recursive = TRUE)
   
-  prefix.analysis <- paste(sep="_", cond1, "vs", cond2)
   
   ## Select counts for the samples belonging to the two conditions
   current.samples <- c(samples1, samples2)
