@@ -1,4 +1,4 @@
-rule sra_to_fastq:
+rule import_sra_to_fastq:
 	"""Converts SRA files in fastq format with SRA toolkit. 
 	
 	TODO locally in workflow: 
@@ -7,12 +7,60 @@ rule sra_to_fastq:
 	
 	Parameters required:
 		config['qsub']
+		config['dir']['results']
 	Usage:
 		SRA_TO_FASTQ = expand(config['dir']['results'] + "{dataset}/{file}.fastq", dataset=DATASETS, file=FILES)
 	"""
-	input: "{file}.sra"
-	output: "{file}.fastq"
-	log: "{file}_sra-conversion.log"
-	benchmark: "{file}_sra-conversion_benchmark.json"
-	params: qsub = config["qsub"] + " -q short -e {file}_sra-conversion_qsub.err -o {file}_sra-conversion_qsub.out"
-	shell:"fastq-dump {input}  2> {log}"
+	input: "{dataset}/"
+#	output: "{results}/{sample}/{sample}.fastq"
+	log: "{sra}_sra-conversion.log"
+	benchmark: "{sra}_sra-conversion_benchmark.json"
+	params: qsub = config["qsub"] + " -q short -e {sra}_sra-conversion_qsub.err -o {sra}_sra-conversion_qsub.out", \
+		outdir = config['dir']['results']
+	shell:""
+
+
+## now it works!
+data="/home/rioualen/Desktop/workspace/fg-chip-seq/data2/Scerevisiae-Pho4/"
+results="/home/rioualen/Desktop/workspace/fg-chip-seq/results3/"
+samples=( "GSM730517" "GSM730528" )
+
+if [ ! -d $results ]
+then
+mkdir $results
+fi
+for sam in ${samples[@]}
+do
+if [ ! -d $results$sam ]
+then
+mkdir $results$sam
+fi
+echo -e "Reading $sam directory $data$sam...\n"
+files=($data$sam/*)
+if [ ${#files[@]} -gt 1 ]
+then
+echo -e "\n\nCase 2+ files : ${files[@]}\n"
+for f in ${files[@]}
+do
+base=$(basename $f .sra)
+echo -e "$base\n"
+echo -e "\tConverting $base.sra to $base.fastq...\n"
+fastq-dump --outdir $results$sam/ $data$sam/$base.sra
+done
+echo -e "\tMerging ${#files[@]} together as $sam.fastq.\n"
+echo -e "\tCmd: cat ${files[@]} > $data$sam.fastq"
+files=($results$sam/*)
+cat ${files[@]} > $results$sam/$sam.fastq
+rm ${files[@]}
+else
+echo -e "\n\nCase 1 file : ${files[@]}\n"
+base=$(basename ${files[0]} .sra)
+echo -e "\tConverting $base.sra to $base.fastq...\n"
+fastq-dump --outdir $results$sam $data$sam/$base.sra
+echo -e "\tMoving $data$base.fastq to $results$sam/$sam.fastq\n"
+mv  $results$sam/$base.fastq $results$sam/$sam.fastq
+fi
+done
+
+
+
