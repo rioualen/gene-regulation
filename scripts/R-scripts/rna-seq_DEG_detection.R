@@ -32,7 +32,8 @@ organism.names <- c("name" = "Escherichia coli",
 gtf.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.gtf"
 gtf.source <- "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-28/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655/"
 #   pet.gene <- "b2531"
-gomap.file <- 'genome/Escherichia_coli_str_k_12_substr_mg1655_GCA_000005845.2_gene_GO.tab'
+go.map.file <- 'genome/Escherichia_coli_str_k_12_substr_mg1655_GCA_000005845.2_gene_GO.tab'
+go.description.file <- "genome/GO_description.tab"
 
 ## The only argument is the file containing all the parameters for the analysis
 if (is.na(commandArgs(trailingOnly = FALSE)[6])) {
@@ -811,12 +812,14 @@ for (i in 1:nrow(design)) {
   ## Functional enrichment analysis
   if (exists("org.db") & !is.na(org.db) & !is.null(org.db) & exists("gene.info.rsat")) {
     
+    ## Convert IDs to entrez IDs
     all.gene.ids <- row.names(result.table)
-    
-    ## Convert IDs to entrez IDs using custom annotation table
     all.entrez.ids <- as.vector(gene.info[all.gene.ids,"entrez.id"])
     names(all.entrez.ids) <- gene.info[all.gene.ids,"gene_id"]
+    # length(all.entrez.ids)
     
+    ## Select the selection columns on wchich enrichment analysis will be performed.
+    ## We select each single-score threshold column, as well as the combined thresholds ("DEG" columns).
     # names(result.table)
     geneset.selection.columns <- vector()
     for (deg.tool in deg.tools) {
@@ -834,7 +837,6 @@ for (i in 1:nrow(design)) {
       # sum(is.na(entrez.ids))
       geneset <- geneset[!is.na(geneset)]
       # length(geneset)
-      verbosity <- 2
       enrich.result <- functional.enrichment(geneset=geneset,
                             allgenes=all.entrez.ids,
                             db=org.db,
@@ -844,18 +846,32 @@ for (i in 1:nrow(design)) {
                             run.GOstats = TRUE,
                             run.clusterProfiler = FALSE,
                             organism.names=organism.names,
-                            plot.adjust = TRUE,
-                            verbosity=1)
-
+                            plot.adjust = TRUE)
+      
+      ## Select GO Biological process result table
+      go.bp.table <- enrich.result$go.bp.table
+      go.bp.table.positive <- go.bp.table[go.bp.table$positive==1,]
+      
       # View(enrich.result$go.bp.table)
-      ## Save result table
-      go.bp.file <- paste(sep = "", prefix["comparison_figure"], 
+      ## Save full result table
+      go.bp.file <- paste(sep = "", prefix["comparison_file"], 
                           "_", suffix.deg,
                           "_", col,
-                          "_GOstats.tab")
-      write.table(x = enrich.result$go.bp.table, row.names = FALSE,
+                          "_GOstats_all.tab")
+      write.table(x = go.bp.table, row.names = FALSE,
                   file = go.bp.file, sep = "\t", quote=FALSE)
-      verbose(paste(sep="", "\t\tGOstats over-representation analysis file\t", go.bp.file), 1)
+      verbose(paste(sep="", "\tGOstats BP over-representation\t", 
+                    nrow(go.bp.table), " rows\t", go.bp.file), 1)
+      
+      ## Save positive associations in a separate file
+      go.bp.file.positive <- paste(sep = "", prefix["comparison_file"], 
+                          "_", suffix.deg,
+                          "_", col,
+                          "_GOstats_positive.tab")
+      write.table(x = go.bp.table.positive, row.names = FALSE,
+                  file = go.bp.file.positive, sep = "\t", quote=FALSE)
+      verbose(paste(sep="", "\tGOstats BP over-representation\t", 
+                    nrow(go.bp.table.positive), " rows\t", go.bp.file.positive), 1)
       
 #       kk <- enrichKEGG(gene = geneset,
 #                        organism = "eco",
@@ -864,22 +880,22 @@ for (i in 1:nrow(design)) {
 #       head(summary(kk))
 #       
       ## Build a custom GO map from 2-column data.frame with GO, gene (entrez ID)
-      if (exists("gomap.file")) {
+      if ((exists("go.map.file")) & (exists("go.description.file"))) {
         ## Read description of GO terms
-        go.terms <- read.delim("genome/GO_terms.tab", header=FALSE)
-        dim(go.terms)
-        row.names(go.terms) <- go.terms[,1]
-        names(go.terms) <- c("GO.id", "description", "ontology")
-        # head(go.terms)
-        # dim(go.terms)
-        gomap.frame <- read.delim(gomap.file, header=FALSE)
+        go.description <- read.delim(go.description.file, header=TRUE, row.names=1)
+        # dim(go.description)
+        # names(go.description)
+        # head(go.description)
+        
+        ## Read the GO-gene annotation table (tab-delimited file)
+        gomap.frame <- read.delim(go.map.file, header=FALSE)
         names(gomap.frame) <- c("gene.id", 
                                 "GO.id", 
                                 "gene.name", 
                                 "transcript.name", 
                                 "protein.id", 
                                 "entrez.id")
-        gomap.frame$GO.descr <- go.terms[gomap.frame$GO.id, "description"] ## Load GO term descriptions in GO-gene table
+        gomap.frame$GO.descr <- go.description[as.vector(gomap.frame$GO.id), "GO.Term"] ## Load GO term descriptions in GO-gene table
         # dim(gomap.frame)
         # head(gomap.frame)
         
@@ -895,20 +911,29 @@ for (i in 1:nrow(design)) {
         go.enricher.table <- complete.enrich.table(go.enricher.table, pvalue.column = "pvalue")
         # dim(go.enricher.table)
         # View(go.enricher.table)
-        go.enricher.table[go.enricher.table$positive==1,]
+        ## Select positive rows
+        go.enricher.table.positive <- go.enricher.table[go.enricher.table$positive==1,]
         
         ## Save result table
-        go.enricher.file <- paste(sep = "", prefix["comparison_figure"], 
+        go.enricher.file <- paste(sep = "", prefix["comparison_file"], 
                                   "_", suffix.deg,
                                   "_", col,
-                                  "_GO_enricher.tab")
+                                  "_GO_enricher_all.tab")
         write.table(x = go.enricher.table, row.names = FALSE,
                     file = go.enricher.file, sep = "\t", quote=FALSE)
-        verbose(paste(sep="", "\t\tGO clusterProfiles enricher result\t", go.enricher.file), 1)
-        
+        verbose(paste(sep="", "\tGO clusterProfiles::enricher\t", 
+                      nrow(go.enricher.table), " rows\t", go.enricher.file), 1)
+
+        ## Save result table
+        go.enricher.file.positive <- paste(sep = "", prefix["comparison_file"], 
+                                  "_", suffix.deg,
+                                  "_", col,
+                                  "_GO_enricher_positive.tab")
+        write.table(x = go.enricher.table.positive, row.names = FALSE,
+                    file = go.enricher.file.positive, sep = "\t", quote=FALSE)
+        verbose(paste(sep="", "\tGO clusterProfiles::enricher\t", 
+                      nrow(go.enricher.table.positive), " rows\t", go.enricher.file.positive), 1)
       }
-      
-                    
     }
     
     
@@ -980,5 +1005,4 @@ summary.file <- paste(sep="", prefix["general.file"], "_summary_per_analysis.tab
 write.table(x = summary.per.analysis, row.names = FALSE,
             file = summary.file, sep = "\t", quote=FALSE)
 verbose(paste(sep="", "\tSummary per analysis\t", summary.file), 1)
-
 
