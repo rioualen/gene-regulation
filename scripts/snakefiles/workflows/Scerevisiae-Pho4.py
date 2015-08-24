@@ -37,6 +37,7 @@ from snakemake.utils import R
 import os
 import sys
 import time
+import pandas as pd
 
 #================================================================#
 #                      Data & directories                        #
@@ -48,9 +49,6 @@ configfile: "scripts/snakefiles/workflows/Scerevisiae-Pho4.json"
 # Beware: verbosity messages are incompatible with the flowcharts
 verbosity = int(config["verbosity"])
 
-# Rules dir
-RULES = config["dir"]["rules"]
-
 # Raw data
 READS = config["dir"]["reads_source"]
 RESULTS_DIR = config["dir"]["results"]	
@@ -61,32 +59,25 @@ GENOME = config["genome"]["genome_version"]
 if verbosity >= 1:
     print("\nGENOME\t" + GENOME)
 
-# list of suffixes used
-#  /!\ can be a *list* of tools?
-
 #================================================================#
 #                         Includes                               #
 #================================================================#
 if verbosity >= 2:
     print("\nImporting rules")
 
-include: config["dir"]["python_lib"] + "util.py"
+RULES = config["dir"]["rules"]
+PYTHON = config["dir"]["python_lib"]
+
+include: PYTHON + "util.py"
 include: RULES + "util.rules"
-#include: RULES + "assign_samples.rules"
-#include: RULES + "bed_to_fasta.rules"
-#include: RULES + "bowtie.rules"
 include: RULES + "count_reads.rules"
 include: RULES + "bwa_index.rules"
 include: RULES + "bwa_se.rules"
-include: RULES + "clean.rules"
 include: RULES + "convert_bam_to_bed.rules"
 #include: RULES + "convert_sam_to_bam.rules"
 #include: RULES + "count_oligo.rules"
 include: RULES + "fastqc.rules"
 include: RULES + "flowcharts.rules"
-#include: RULES + "homer.rules"
-#include: RULES + "idr.rules"
-#include: RULES + "macs14.rules"
 include: RULES + "macs2.rules"
 #include: RULES + "merge.rules"
 #include: RULES + "narrowpeak_to_bed.rules"
@@ -94,9 +85,7 @@ include: RULES + "macs2.rules"
 #include: RULES + "purge_sequence.rules"
 include: RULES + "sickle_se.rules"
 #include: RULES + "sorted_bam.rules"
-#include: RULES + "spp.rules"
 include: RULES + "swembl.rules"
-#include: RULES + "trimming.rules"
 
 
 #================================================================#
@@ -107,8 +96,7 @@ include: RULES + "swembl.rules"
 ## Read sample descriptions
 if verbosity >= 1:
     print("\nReading sample descriptions\t" + config["files"]["samples"])
-# SAMPLES = read_sample_ids(config["files"]["samples"], verbose=1)
-# SAMPLES = TREATMENT + CONTROL ## Read from the sample description file
+
 # Read the sample description file
 SAMPLES = read_table(config["files"]["samples"], verbosity=verbosity)
 SAMPLE_IDS = SAMPLES.iloc[:,0] ## First column MUST contain the sample ID
@@ -116,18 +104,18 @@ SAMPLE_CONDITIONS = SAMPLES.iloc[:,1] ## Second column MUST contain condition fo
 SAMPLE_EXT_DB = SAMPLES.iloc[:,2] ## External database from which the raw reads will be downloaded
 SAMPLE_EXT_ID = SAMPLES.iloc[:,3] ## Sample ID in the external database
 SAMPLE_DESCR = SAMPLES.iloc[:,7] ## First column MUST contain the sample ID
+
 if verbosity >= 2:
     print("\nSAMPLE_IDS\t" + ";".join(SAMPLE_IDS))
 
 ## Read the list of sample IDs from the sample description file
 if verbosity >= 1:
     print("\nReading experimental design\t" + config["files"]["design"])
-# TREATMENT = config["samples"]["chip"].split()
-# CONTROL = config["samples"]["input"].split()
+
 DESIGN = read_table(config["files"]["design"], verbosity=verbosity)
 TREATMENT = DESIGN.iloc[:,0]
 CONTROL = DESIGN.iloc[:,1]
-#TREATMENT, CONTROL = read_chipseq_design(config["files"]["design"], test_column=1, input_column=2, verbose=2)
+
 if verbosity >= 2:
     print("\nTREATMENT\t" + ";".join(TREATMENT))
     print("\nCONTROL\t" + ";".join(CONTROL))
@@ -137,28 +125,10 @@ if verbosity >= 2:
 #================================================================#
 
 # ## Data import & merging.
-# ##
-# ## Tricky python code to prepare the data, but this should be
-# ## commented to avoid executing it at each run of the workflow. Should
-# ## be converted to a rule.
-# if not os.path.exists(RESULTS_DIR):
-# 	os.makedirs(RESULTS_DIR)
-# for sample in SAMPLES:
-# 	indir = READS + sample + "/"
-# 	outdir = RESULTS_DIR + sample + "/"
-# 	if not os.path.exists(outdir):
-# 		os.makedirs(outdir)
-# 	sra_files = os.listdir(indir)
-# 	for sra in sra_files:
-# 		os.system("fastq-dump --outdir " + outdir + " " + indir + sra)
-# 	if len(sra_files) > 1:
-# 		os.system("ls -1 " + outdir + "*.fastq | xargs cat > " + outdir + sample + ".fastq")
-# 		os.system("find " + outdir + " -type f -name SRR* | xargs rm")
-# 	else:
-# 		fastq_files = os.listdir(outdir)
-# 		cmd = "ls -1 " + outdir + fastq_files[0] + " | xargs mv " + outdir + sample + ".fastq"
-# 		print("Running command: "+ cmd)
-# 		os.system(cmd)
+
+## TODO
+# Moved to sra_to_fastq.rules
+# Should develop general import rule? 
 	
 
 # Graphics
@@ -238,8 +208,6 @@ BED_TO_FASTA = expand(RESULTS_DIR + "{sample}/{sample}" + config["sickle"]["suff
 ruleorder: macs2 > bam_to_bed > sam2bam
 ruleorder: count_reads_bam > sam2bam
 
-CLEANING = expand(RESULTS_DIR + "cleaning.done")
-
 rule all: 
     """
     Run all the required analyses
@@ -250,8 +218,4 @@ rule all:
     params: qsub=config["qsub"]
     shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
-
-#================================================================#
-#                       Local rules                              #
-#================================================================#
 
