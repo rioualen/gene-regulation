@@ -5,12 +5,14 @@ date: "6 August 2015"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE,  eval=TRUE, echo=FALSE}
 knitr::opts_chunk$set(echo=FALSE, eval=TRUE, cache=TRUE)
 ```
 
 ```{r load libraries}
 library("knitr")
+library('clusterProfiler')
+library(GO.db)
 library("org.Dm.eg.db")
 ```
 
@@ -21,16 +23,40 @@ library("org.Dm.eg.db")
 
 ## Parameters
 dir.main <- "~/dr-chip-rna-seq"
+setwd(dir.main)
 
+dir.deg <- file.path(dir.main, "results/rna-seq/DEG")
+dir.enrichment <- file.path(dir.deg, "enrichment_analysis")
+dir.create(dir.enrichment, showWarnings = FALSE, recursive = TRUE)
 
-## TEMPORARY: hard-coded parameters. Should be adapted to read file path from the command-line arguments. 
+cond1 <- "S2"
+cond2 <- "WT"
+comparison <- paste(sep="", cond1, "_vs_", cond2)
+
 parameters <- list(
-  deg.file = "results/rna-seq/DEG/S2_vs_WT/S2_VS_WT_sickle_se_q20_subread_featurecounts_DESeq2.tab",
-  "deg.software" = "DESeq2",
-  "threshold" = 0.05,
-  "threshold.column" = "padj")
+  "dir.deg" = dir.deg,
+  "dir.enrichment" =  dir.enrichment,
+  "condition1" = cond1,
+  "condition1" = cond2,
+  "deg.threshold" = 0.05,
+  "enrich.threshold" = 0.05,
+  "groupGo.level" = 3,
+  "barplot_catnb" = 36)
 
-kable(data.frame(unlist(parameters)))
+deg.tools <- c("edgeR", "DESeq2")
+
+for (deg.tool in deg.tools) {
+  
+  parameters[[deg.tool]] <- 
+    file.path(
+      dir.deg, comparison, 
+      paste(sep="", cond1, "_VS_", cond2, "_sickle_se_q20_subread_featurecounts_",deg.tool,".tab"))
+  
+  }  
+
+param.table <- t(as.data.frame(parameters))
+colnames(param.table) <- "value"
+kable(param.table)
 ```
 
 
@@ -39,14 +65,26 @@ kable(data.frame(unlist(parameters)))
 
 
 ```{r load data}
-setwd(dir.main)
+
+## Create a table for the summary of analyses for the different programs
+summary.table <- data.frame()
+
+## Select the DEG analysis tool
+deg.tool <- "DESeq2"
+
+## Select the threshold column according to the DEG tool
+if (deg.tool == "DESeq2") {
+  threshold.column <- "padj"
+} else if (tool == "edgeR") {
+  threshold.column <- "FDR"
+}
 
 ## Load the DEG analysis result table
-deg.table <- read.table(parameters$deg.file,row.names=1)
+deg.table <- read.table(parameters[[deg.tool]], row.names=1)
 #dim(deg.table)
 
 ## Select genes according to the user-specified threshold
-deg.table$positive <- deg.table[,parameters$threshold.column] < parameters$threshold
+deg.table$positive <- deg.table[,threshold.column] < parameters$deg.threshold
 #summary(selected)
 deg.table$positive[is.na(deg.table$positive)] <- FALSE ## Replace the NA values by FALSE to avoid problems with selection
 
@@ -55,31 +93,163 @@ deg.table$up <- deg.table$positive & deg.table$log2FoldChange > 0
 deg.table$down <- deg.table$positive & deg.table$log2FoldChange < 0
 
 ## Summarize the results
-my.summary <- data.frame("nb.genes" = nrow(deg.table),
-                         "threshold" = parameters$threshold,
-                         "threshold column" = parameters$threshold.column,
-                         "NA" = sum(is.na(deg.table[,parameters$threshold.column])),
-                         "Negatives" = sum(deg.table$positive == FALSE) - sum(is.na(deg.table[,parameters$threshold.column])),
-                         "Positives" = sum(deg.table$positive == TRUE),
+summary.table <- data.frame("nb.genes" = nrow(deg.table),
+                         "tool" = deg.tool,
+                         "threshold column" = threshold.column,
+                         "deg.threshold" = parameters$deg.threshold,
                          "Up-regulated" = sum(deg.table$up),
-                         "Down-regulated" = sum(deg.table$down)
+                         "Down-regulated" = sum(deg.table$down),
+                         "Positives" = sum(deg.table$positive == TRUE),
+                         "Negatives" = sum(deg.table$positive == FALSE) - sum(is.na(deg.table[,threshold.column])),
+                         "NA" = sum(is.na(deg.table[,threshold.column]))
 )
 
 
-
-kable(data.frame(t(my.summary)), format = "markdown")
+kable(data.frame(t(summary.table)), format = "markdown")
 ```
 
-From the `r parameters$deg.software` result table `r sum(deg.table$positive)` genes were selected as significant with a threshold of `r parameters$threshold` on the colum `r parameters$threshold.column`.
+From the `r parameters$deg.software` result table `r sum(deg.table$positive)` genes were selected as significant with a threshold of `r parameters$deg.threshold` on the colum `r threshold.column`.
 
 
 ## Conversion of gene names to Entrez IDs
 
 
-```{r IDs}
-library('clusterProfiler')
+```{r IDs, echo=FALSE, warning=FALSE}
+
+## Convert gene names into Entrez IDs
 gg <- bitr(row.names(deg.table), fromType="SYMBOL", toType="ENTREZID", annoDb="org.Dm.eg.db")
+
+# gg$ENTREZID <- as.numeric(gg$ENTREZID)
+# gg <-gg[order(gg$ENTREZID),]
+
+## Add a column with the "entrez.id" column in the deg.table
 deg.table[gg[,1], "entrez.id"] = gg[,2]
 
+```
+
+
+## Functional enrichment of the differentially expressed genes
+
+We performed the functional enrichment analysis for three separate groups of genes : 
+
+1. *up*: Up-regulated
+2. *down*: Down-regulated
+3. *Positive*: union of up- and down-regulated
+
+
+```{r GO_enrichment}
+
+## Run GO enrichment analysis for up-regulated, down-regulated and the union of them.
+
+groups <- c("up", "down", "positive")
+ontologies <- c("BP", "CC", "MF")
+selection.criteria <- c("signif", "random")
+
+group <- "positive"
+ontology <- "MF" ## Select biological processes
+selection.criterion <- "random"
+
+for (group in groups) {
+  for (selection.criterion in selection.criteria) {
+
+    ## Selet significant genes
+    gene.ids <- deg.table[deg.table[,group], "entrez.id"] ## IDs of the significant genes for the group of interest
+    
+    if (selection.criterion == "random") {
+      ## Select random gene list of the same size as the significant genes
+      gene.ids <- sample(x = deg.table$entrez.id, size = length(gene.ids))
+      
+      }
+    gene.ids <- na.omit(gene.ids)   ## Filter out the genes for which no EntrezID has been found
+
+    
+    for (ontology in ontologies) {
+      message(paste(sep=" ", "Enrichment analysis", deg.tool, ontology, group, length(gene.ids), selection.criterion, "genes"))
+      
+     
+    ## Compute the enrichment of the gene list for Biological Processes of the Gene Ontology
+    ego <- enrichGO(gene = gene.ids, organism = "fly",
+                    pvalueCutoff = parameters$enrich.threshold,
+                    qvalueCutoff = parameters$enrich.threshold,
+                    ont = ontology, readable = T)
+    # dim(ego@result)
+    
+    
+    ## Export the result table
+    if (selection.criterion == "random") {
+      ego.prefix <- "random"
+    } else {
+      ego.prefix <- comparison
+    }
+    ego.prefix <- paste(
+      sep="", ego.prefix, "_", group, 
+      "_", deg.tool, "_padj", parameters$deg.threshold,
+      "_enrichGO_", ego@ontology, "_", ego@pAdjustMethod, ego@pvalueCutoff)
+    ego.path <- file.path(dir.enrichment, ego.prefix)
+    write.table(ego@result, file=paste(sep="", ego.path, ".tab"), 
+                quote=FALSE, sep="\t", row.names = FALSE, col.names = TRUE)
+    
+    ## Export a barplot with the groupGO results
+    pdf(file=paste(sep="", ego.path, "_barplot.pdf"), width=10, heigh=7)
+    barplot(ego,  showCategory=parameters$barplot_catnb, 
+            main=ego.prefix)
+    tais.toi <- dev.off()
+    
+    ## Compute the enrichment of the gene list for Biological Processes
+    ## of the Gene Ontology using groupGO, which permits to specify a minimal 
+    ## level for the GO annotations. This avoids to have significant enrichment 
+    ## for very basic classes (e.g. biological process).
+#     ggo <- groupGO(gene = gene.ids, organism = "fly",
+#                    level=parameters$groupGo.level,
+#                    ont = ontology, readable = T)
+#     
+#     ## Export the result table
+#     ggo.path <- file.path(
+#       dir.enrichment, 
+#       paste(sep="", comparison, "_", group, 
+#             "_", deg.tool, "_padj", parameters$deg.threshold,
+#             "_groupGO_", ggo@ontology, "_level", ggo@level))
+#     write.table(ggo@result, file=paste(sep="", ggo.path, ".tab"), 
+#                 quote=FALSE, sep="\t", row.names = FALSE, col.names = TRUE)
+#     
+#     ## Export a barplot with the groupGO results
+#     pdf(file=paste(sep="", ggo.path, "_barplot.pdf"), width=10, heigh=7)
+#     barplot(ggo,  showCategory=parameters$barplot_catnb)
+#     tais.toi <- dev.off()
+    
+    
+    ## TO DO LATER: Gene Set Enrichment Analysis !!!
+    ## ego2 <- gseGO(geneList = ggo,organism = "fly",ont = "BP" )
+    }
+  }
+}
+```
+
+
+
+### Negative controls for the enrichment analysis
+
+To check the reliability of the enrichment analysis, we performed two negative controls:
+
+1) Submit random selections of genes of the same sizes as the DEG lists. In principle, there is no reason for randomly selected genes to be enriched for a given functional class. 
+
+2) Submit the full list of all the genes for which an EntrezID was identified. In principle, by definition there should be no enrichment, since the principle of enrichment analysis is to test whether the input gene list has some bias for some gene ontology class.
+
+
+
+```{r}
+
+
+## Compute the enrichment of the gene list for Biological Processes of the Gene Ontology
+ego <- enrichGO(gene =  gg[,2], organism = "fly",ont = "BP", readable = T)
+barplot(ego,  showCategory=24)
+
+
+ggo <- groupGO(gene=gg[,2], organism="fly",ont="BP", level=3, readable=TRUE)
+barplot(ggo, showCategory=24)
+
+
+
+ego2 <- gseGO(geneList = ggo,organism = "fly",ont = "BP" )
 ```
 

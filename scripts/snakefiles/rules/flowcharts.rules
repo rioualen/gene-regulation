@@ -1,5 +1,6 @@
 import os
 
+## The verbosity MUST be set to zero for the flowcharts
 from snakemake.utils import read_job_properties
 
 rule flowcharts:
@@ -25,9 +26,9 @@ rule flowcharts:
             rulegraph_pdf = config["reports"]["rulegraph"] + ".pdf", \
             rulegraph_png = config["reports"]["rulegraph"] + ".png"
     params: scripts = config["files"]["snakefile"]
-    shell: "snakemake -s {params.scripts} --rulegraph | dot -Tpdf -o {output.rulegraph_pdf} " \
-           + "; snakemake -s {params.scripts} --rulegraph | dot -Tpng -o {output.rulegraph_png} " \
-           + "; snakemake -s {params.scripts} --dag  | perl -pe 's/graph\[/graph\[rankdir='LR', /' | dot -Tpdf -o {output.dag_pdf} " \
-           + "; snakemake -s {params.scripts} --dag  | perl -pe 's/graph\[/graph\[rankdir='LR', /' | dot -Tpng -o {output.dag_png} "
+    shell: "snakemake --config verbosity=0 -s {params.scripts} --rulegraph | dot -Tpdf -o {output.rulegraph_pdf} " \
+           + "; snakemake --config verbosity=0  -s {params.scripts} --rulegraph | dot -Tpng -o {output.rulegraph_png} " \
+           + "; snakemake  --config verbosity=0 -s {params.scripts} --dag  | perl -pe 's/graph\[/graph\[rankdir='LR', /' | dot -Tpdf -o {output.dag_pdf} " \
+           + "; snakemake  --config verbosity=0 -s {params.scripts} --dag  | perl -pe 's/graph\[/graph\[rankdir='LR', /' | dot -Tpng -o {output.dag_png} "
     
 

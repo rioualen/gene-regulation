@@ -5,12 +5,12 @@ rule clean:
 		config['dir']['logs']
 		config['dir']['results']
 
-	Usage example: expand(RESULTSDIR + "cleaning.done")
+	Usage example: expand(config["dir"]["results"] + "cleaning.done")
 	"""
-	input: RESULTSDIR
+	input: config["dir"]["results"]
 	params: logdir = config['dir']['logs'], \
 		resdir = config['dir']['results']
-	output: RESULTSDIR + "cleaning.done"
+	output: config["dir"]["results"] + "cleaning.done"
 	shell: "find {input} -type f -name *benchmark* -print0 | xargs -0r mv -t {params.logdir}; \
 		find {input} -type f -name *.log -print0 | xargs -0r mv -t {params.logdir}; \
 		touch {output}"

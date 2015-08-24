@@ -24,9 +24,9 @@ rule count_oligo:
 #rule count_oligo:
 #	"""Counts occurences of oligonucleotides of length N, as specified in the parameters.
 #	"""
-#	input: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_purged.fasta"
+#	input: config["dir"]["results"] + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_purged.fasta"
 #	params: oligo="{oligo}"
-#	output: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_{oligo}.txt"
-#	benchmark: RESULTSDIR + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_count-seq_benchmark.json"
+#	output: config["dir"]["results"] + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_{oligo}.txt"
+#	benchmark: config["dir"]["results"] + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_count-seq_benchmark.json"
 #	shell: "oligo-analysis -l {params.oligo} -i {input} -o {output}"
 
