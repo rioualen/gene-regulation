@@ -220,7 +220,6 @@ complete.deg.table <- function(deg.table,
 #' i.e. those passing all the thresholds. Otherwise, all rows are returned, with a column "positive" 
 #' indicating whether or not they did or not pass all thresholds. Additional columns indicate the 
 #' result of the individual thresholds.
-#' @param verbosity=1 Level of verbosity.
 #' @param organism organism name in various tools. E.g: 
 #'
 #' @examples
@@ -235,11 +234,10 @@ functional.enrichment <- function(geneset,
                                   select.positives=TRUE,
                                   run.GOstats = TRUE,
                                   run.clusterProfiler = FALSE,
-                                  plot.adjust = TRUE,
-                                  verbosity=1) {
+                                  plot.adjust = TRUE) {
   #library("ALL")
   verbose(paste(sep="", "Go over-representation analysis. ",
-                length(geneset), " input genes (among ", length(allgenes), ")"), verbosity)
+                length(geneset), " input genes (among ", length(allgenes), ")"), 2)
   
   ## Prepare the result
   result <- list()
@@ -470,11 +468,11 @@ complete.enrich.table <- function(enrich.table,
   if (select.positives) {
     enrich.table <- enrich.table[enrich.table$positive, ]
     verbose(paste("\tGO over-representation. Returning", 
-                  sum(enrich.table$evalue.selection), "significant associations."), verbosity)
+                  sum(enrich.table$evalue.selection), "significant associations."), 2)
   } else {
     verbose(paste(sep="", "\tGO over-representation. Returning table with all associations (", 
                   nrow(enrich.table), " among which ",
-                  sum(enrich.table$positive), " significant)."), verbosity)
+                  sum(enrich.table$positive), " significant)."), 2)
   }
   
    return(enrich.table)
