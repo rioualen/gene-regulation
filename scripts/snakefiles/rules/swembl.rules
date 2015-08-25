@@ -1,13 +1,11 @@
-"""
-    =========================
-    Definition of SWEMBL rule
-    =========================
-"""
-# input:expand(CHIP_PEAK_DIR + "/{gsm_treatment}_vs_{gsm_control}_swembl_R{swembl_r}/{gsm_treatment}_vs_{gsm_control}_swembl_R{swembl_r}.fasta", \
-#     zip, \
-#     gsm_treatment = list_treatment_swembl, \
-#     gsm_control =  list_control_swembl, \
-#     swembl_r = list_swembl_r)
+# Check if each required parameter has been defined in the JSON
+# configuration file, otherwise use default values
+
+if not "swembl" in config.keys():
+    config["swembl"] = {}
+
+if not "R" in config["swembl"].keys():
+    config["swembl"]["R"] = 0.01
 
 rule swembl:
     """Peak-calling with SWEMBL.
