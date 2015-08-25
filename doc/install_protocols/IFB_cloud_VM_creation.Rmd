@@ -1,6 +1,6 @@
 ---
 title: "Creation of an appliance on the IFB cloud"
-author: "Claire Rioualen & Jacques van Helden"
+author: "Claire Rioualen"
 date: "July 30, 2015"
 output:
   html_document:
@@ -43,7 +43,7 @@ You should also make sure that you registered your ssh public key in your user p
         * Ubuntu 14.04 IFB-X2Go
         * Ubuntu v12.02 (base)
 
-    * For some reason, *Ubuntu 14.04 IFB-10GB* raises an *Internal Server Error*.
+    * For some reason, *Ubuntu 14.04 IFB-10GB* raises an *Internal Server Error* (sent mail to Christophe Blanchet 15/08/05).
 
 * Name your instance.
 * Check **Create appliance**. 
@@ -69,7 +69,7 @@ sftp -oPort=22 root@192.54.201.177
 4. Connect to the VM using the ssh command in a terminal. 
 
 ```
-sh -A -p 22 root@192.54.201.177
+ssh -A -p 22 root@192.54.201.177
 ```
 
 5. Import your ssh keys from host machine. 
