@@ -1,13 +1,11 @@
-"""
-    =========================
-    Definition of SWEMBL rule
-    =========================
-"""
-# input:expand(CHIP_PEAK_DIR + "/{gsm_treatment}_vs_{gsm_control}_swembl_R{swembl_r}/{gsm_treatment}_vs_{gsm_control}_swembl_R{swembl_r}.fasta", \
-#     zip, \
-#     gsm_treatment = list_treatment_swembl, \
-#     gsm_control =  list_control_swembl, \
-#     swembl_r = list_swembl_r)
+# Check if each required parameter has been defined in the JSON
+# configuration file, otherwise use default values
+
+if not "swembl" in config.keys():
+    config["swembl"] = {}
+
+if not "R" in config["swembl"].keys():
+    config["swembl"]["R"] = 0.01
 
 rule swembl:
     """Peak-calling with SWEMBL.
@@ -30,14 +28,3 @@ rule swembl:
 convert-features -from swembl -to bed -i {output.peaks_swembl} -o {output.peaks_bed}; \
 sequence-lengths -i {output.peaks_bed} -in_format bed | classfreq -ci 10 -v 1 -o {output.peak_len}) &> {log} "
 
-
-
-#rule swembl:
-#	"""Peak-calling using SWEMBL algorithm.
-#	"""
-#	input:
-#		chip = config["dir"]["results"] + "{CHIP}/{CHIP}_{ALIGNER}.bed" , \
-#		inp = config["dir"]["results"] + "{INPUT}/{INPUT}_{ALIGNER}.bed"
-#	output:
-#		config["dir"]["results"] + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_swembl.bed"
-#	shell: "SWEMBL -B -m 10 -f 150 -x 1.5 -i {input.chip} -r {input.inp} -o {output}"

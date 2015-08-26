@@ -16,7 +16,7 @@ rule bwa_se:
 
 	Requires the indexing to have previously been done (using the
 	rule bwa_index).  This is checked by testing the presence of
-	file {genome}.done
+	file {genome}.fa.bwt
 
 	Parameters:
 		config["bwa"]["index"]

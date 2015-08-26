@@ -1,3 +1,12 @@
+# Check if each required parameter has been defined in the JSON
+# configuration file, otherwise use default values
+
+if not "fastqc" in config.keys():
+    config["fastqc"] = {}
+
+if not "other_options" in config["fastqc"].keys():
+    config["fastqc"]["other_options"] = ""
+
 rule fastqc:
     """Check the quality of a file named {dataset}.fastq, containing
     fastq-formatted raw reads using the program fastQC (quality

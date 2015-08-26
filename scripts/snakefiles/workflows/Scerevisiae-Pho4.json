@@ -17,7 +17,6 @@
     },
 
     "files": {
-	"snakefile": "/workspace/france_genomique/Scerevisiae-Pho4/scripts/snakefiles/workflows/Scerevisiae-Pho4.py",
 	"samples": "data/Scerevisiae-Pho4_samples.tab",
 	"design": "data/Scerevisiae-Pho4_design.tab"
     },
@@ -35,23 +34,17 @@
 
     "dir": {
 	"base": ".",
+	"fg_lib": ".",
 	"reads_source": "data/Scerevisiae-Pho4/",
 	"results": "results/",
 	"reports": "results/",
 	"genome": "genomes/",
-	"python_lib": "/workspace/france_genomique/Scerevisiae-Pho4/scripts/snakefiles/python_lib/",
-	"rules": "/workspace/france_genomique/Scerevisiae-Pho4/scripts/snakefiles/rules/",
 	"logs": "logs/"
     },
 
     "reports" : {
 	"dag": "results/dag",
 	"rulegraph": "results/rule"
-    },
-
-    "samples": {
-	"input": "GSM730528 GSM730529",
-	"chip": "GSM730517 GSM730518"
     },
 
     "sickle":  { 
@@ -83,17 +76,6 @@
 	"R": "0.01"
     },
 
-    "oligo_stats": "1 2 6",
-
-    "peak-motifs_parameters": {
-	"tasks" : "purge,seqlen,composition,disco,collect_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan",
-	"max_seq_len" : "1000",
-	"nmotifs" : "",
-	"minol" : "",
-	"maxol" : "",
-	"motif_db jaspar_core_vertebrates" : "tf $RSAT/public_html/data/motif_databases/JASPAR/jaspar_core_vertebrates_2013-11.tf"
-    },
-
     "samtools": {
         "sort_by_name": ""    
     },
@@ -101,19 +83,5 @@
     "rsat": {
 	"verbosity": "1"
     },
-
-
-    "oligo_stats": "1 2 6",
-
-    "peak-motifs_parameters": {
-	"tasks": "purge,seqlen,composition,disco,collect_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan",
-	"max_seq_len": "1000",
-	"nmotifs": "",
-	"minol": "",
-	"maxol": "",
-	"motif_db jaspar_core_vertebrates": "tf $RSAT/public_html/data/motif_databases/JASPAR/jaspar_core_vertebrates_2013-11.tf",
-	"disco": "oligos,positions",
-	"outdir": "results/peak-motifs"
-    }
 
 }
