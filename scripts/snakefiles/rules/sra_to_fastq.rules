@@ -12,9 +12,7 @@ rule import_sra_to_fastq:
 	Usage:
 		SRA_TO_FASTQ = expand(config['dir']['results'] + "{dataset}/{file}.fastq", dataset=DATASETS, file=FILES)
 	"""
-	input:	datadir = config['dir']['reads_source'], \
-		samples_ids = "{sample}"
-		
+	input:	datadir = config['dir']['reads_source']
 	output: fastq = "{results}/{sample}/{sample}.fastq"
 	log: "{sample}_sra-conversion.log"
 	benchmark: "{sample}_sra-conversion_benchmark.json"
@@ -24,7 +22,8 @@ rule import_sra_to_fastq:
 then\
 mkdir {params.results}\
 fi\
-for sam in {input.sample_ids}\
+samples=$(ls {input.datadir})\
+for sam in ${{samples[@]}}\
 do\
 if [ ! -d {params.results}$sam ]\
 then\
@@ -32,24 +31,24 @@ mkdir {params.results}$sam\
 fi\
 echo -e 'Reading $sam directory {input.datadir}$sam...\n'\
 files=({input.datadir}$sam/*)\
-if [ ${#files[@]} -gt 1 ]\
+if [ ${{#files[@]}} -gt 1 ]\
 then\
-echo -e '\n\nCase 2+ files : ${files[@]}\n'\
-for f in ${files[@]}\
+echo -e '\n\nCase 2+ files : ${{files[@]}}\n'\
+for f in ${{files[@]}}\
 do\
 base=$(basename $f .sra)\
 echo -e '$base\n'\
 echo -e '\tConverting $base.sra to $base.fastq...\n'\
 fastq-dump --outdir {params.results}$sam/ {input.datadir}$sam/$base.sra 2> {log}\
 done\
-echo -e '\tMerging ${#files[@]} together as $sam.fastq.\n'\
-echo -e '\tCmd: cat ${files[@]} > {input.datadir}$sam.fastq'\
+echo -e '\tMerging ${{#files[@]}} together as $sam.fastq.\n'\
+echo -e '\tCmd: cat ${{files[@]}} > {input.datadir}$sam.fastq'\
 files=({params.results}$sam/*)\
-cat ${files[@]} > {params.results}$sam/$sam.fastq\
-rm ${files[@]}\
+cat ${{files[@]}} > {params.results}$sam/$sam.fastq\
+rm ${{files[@]}}\
 else\
-echo -e '\n\nCase 1 file : ${files[@]}\n'\
-base=$(basename ${files[0]} .sra)\
+echo -e '\n\nCase 1 file : ${{files[@]}}\n'\
+base=$(basename ${{files[0]}} .sra)\
 echo -e '\tConverting $base.sra to $base.fastq...\n'\
 fastq-dump --outdir {params.results}$sam {input.datadir}$sam/$base.sra  2> {log}\
 echo -e '\tMoving {input.datadir}$base.fastq to {params.results}$sam/$sam.fastq\n'\
