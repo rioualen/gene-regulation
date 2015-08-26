@@ -23,7 +23,9 @@ output:
 * **VBox issues**:
     - '/etc/init.d/vboxdrv setup' error when restarting
     - disparition vboxnet0
- 
+    
+* Since snakemake 3.4: add pyYAML ?
+    
 ## Requirements
 
 ### VM creation
@@ -176,6 +178,11 @@ rule bye:
 * Save it to `~/Desktop/workspace/hello.py`.
 * Issue the command `cd ~/Desktop/workspace ; snakemake -s hello.py`.
 * 2 files shoudl be created: `hello.txt` and `bye.txt`.
+
+**/!\\** Need version 3.4.1
+```
+sudo pip3 install snakemake --upgrade
+```
 
 ## Graphviz
 
