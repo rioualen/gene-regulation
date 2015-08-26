@@ -44,7 +44,8 @@ rule macs2:
 		config["genome"]["size"]
 
 	Usage: 
-		MACS2 = expand(config["dir"]["results"] + "{chip}_vs_{inp}/{chip}_vs_{inp}_{trimming}_{aligner}_{caller}_peaks.xls", chip=CHIP, inp=INPUT, trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
+		PEAKS_MACS2 = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_macs2_peaks.narrowPeak",
+	               zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
 	"""
         input: treatment="{result_dir}/{treatment}/{treatment}" + config["suffixes"]["mapped"] + ".bed", \
             control="{result_dir}/{control}/{control}" + config["suffixes"]["mapped"] + ".bed"
