@@ -1,3 +1,11 @@
+# Check if each required parameter has been defined in the JSON
+# configuration file, otherwise use default values
+
+if not "oligo_analysis" in config.keys():
+    config["oligo_analysis"] = {}
+
+if not "count_oligo" in config["oligo_analysis"].keys():
+    config["oligo_analysis"]["count_oligo"] = "1 2"
 
 rule count_oligo:
 	"""Counts occurences of oligonucleotides of length N, as specified in the parameters.
@@ -10,23 +18,9 @@ rule count_oligo:
 		input:expand(config["dir"]["results"] + '{{histonemark}}/{tissue}/{sample}_oligo{{oligo}}.png', zip, tissue=TISSUES, sample=SAMPLES), histonemark=MARKS, oligo=OLIGO_ANALYSIS)
 	"""
 	input: "{peaks}.fasta"
-	params: 
-		oligo="{oligo}", \
+	params: oligo="{oligo}", \
 		qsub=config['qsub']
 	output: "{peaks}_oligo{params.oligo}.txt"
 	log: "{peaks}_oligo{params.oligo}.log"
 	benchmark: "{peaks}_oligo{params.oligo}.json"
 	shell: "oligo-analysis -l {params.oligo} -i {input} -o {output} 2> {log}"
-
-
-
-
-#rule count_oligo:
-#	"""Counts occurences of oligonucleotides of length N, as specified in the parameters.
-#	"""
-#	input: config["dir"]["results"] + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_purged.fasta"
-#	params: oligo="{oligo}"
-#	output: config["dir"]["results"] + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_{oligo}.txt"
-#	benchmark: config["dir"]["results"] + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_count-seq_benchmark.json"
-#	shell: "oligo-analysis -l {params.oligo} -i {input} -o {output}"
-
