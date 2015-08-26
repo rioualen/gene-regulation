@@ -73,7 +73,9 @@
 	"rsat": {
 		"verbosity": "1"
 	},
-	"oligo_stats": "1 2 6",
+	"oligo_analysis": {
+		"count_oligo" = "1 2 6"
+	},
 	"peak-motifs_parameters": {
 		"tasks": "purge,seqlen,composition,disco,collect_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan",
 		"max_seq_len": "1000",
