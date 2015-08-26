@@ -24,7 +24,7 @@ Reference genome:
 Sequencing type: 	single end
 Data source: 		Gene Expression Omnibus
 
-Author: 		Claire Rioualen
+Author: 		Claire Rioualen, Jacques van Helden
 Contact: 		claire.rioualen@inserm.fr
 
 """
@@ -44,7 +44,7 @@ import pandas as pd
 #================================================================#
 
 configfile: "scripts/snakefiles/workflows/Scerevisiae-Pho4.json"
-#workdir: config["dir"]["base"] ## does not work??
+workdir: config["dir"]["base"]
 
 # Beware: verbosity messages are incompatible with the flowcharts
 verbosity = int(config["verbosity"])
@@ -65,27 +65,42 @@ if verbosity >= 1:
 if verbosity >= 2:
     print("\nImporting rules")
 
-RULES = config["dir"]["rules"]
-PYTHON = config["dir"]["python_lib"]
+if "base" in config["dir"]:
+    workflow.basedir = config["dir"]["base"]
+    print("workflow.basedir\t" + workflow.basedir)
+    print('srcdir("broche_analysis.py")' + "\t" + srcdir("broche_analysis.py"))
+    print('srcdir("../python_lib/util.py")' + "\t" + srcdir("../python_lib/util.py"))
 
-include: PYTHON + "util.py"
-include: RULES + "util.rules"
-include: RULES + "count_reads.rules"
-include: RULES + "bwa_index.rules"
-include: RULES + "bwa_se.rules"
-include: RULES + "convert_bam_to_bed.rules"
-#include: RULES + "convert_sam_to_bam.rules"
-#include: RULES + "count_oligo.rules"
-include: RULES + "fastqc.rules"
-include: RULES + "flowcharts.rules"
-include: RULES + "macs2.rules"
-#include: RULES + "merge.rules"
-#include: RULES + "narrowpeak_to_bed.rules"
-#include: RULES + "peak_length.rules"
-#include: RULES + "purge_sequence.rules"
-include: RULES + "sickle_se.rules"
-#include: RULES + "sorted_bam.rules"
-include: RULES + "swembl.rules"
+
+FG_LIB = os.path.abspath(config["dir"]["fg_lib"])
+RULES = os.path.join(FG_LIB, "scripts/snakefiles/rules")
+PYTHON = os.path.join(FG_LIB, "scripts/snakefiles/python_lib")
+#PYTHON = config["dir"]["python_lib"]
+#PYTHON = "/home/rioualen/Desktop/workspace/fg-chip-seq/scripts/snakefiles/python_lib/"
+
+print ("PYTHON\t" + PYTHON)
+print('config["dir"]["base"]' + "\t" + config["dir"]["base"])
+print("CWD\t" + os.getcwd())
+
+include: os.path.join(PYTHON, "util.py")
+include: os.path.join(RULES, "util.rules")
+include: os.path.join(RULES, "count_reads.rules")
+include: os.path.join(RULES, "bwa_index.rules")
+include: os.path.join(RULES, "bwa_se.rules")
+include: os.path.join(RULES, "convert_bam_to_bed.rules")
+#include: os.path.join(RULES, "convert_sam_to_bam.rules")
+#include: os.path.join(RULES, "count_oligo.rules")
+include: os.path.join(RULES, "fastqc.rules")
+include: os.path.join(RULES, "flowcharts.rules")
+include: os.path.join(RULES, "macs2.rules")
+#include: os.path.join(RULES, "merge.rules")
+#include: os.path.join(RULES, "narrowpeak_to_bed.rules")
+#include: os.path.join(RULES, "peak_length.rules")
+#include: os.path.join(RULES, "purge_sequence.rules")
+include: os.path.join(RULES, "sickle_se.rules")
+#include: os.path.join(RULES, "sorted_bam.rules")
+include: os.path.join(RULES, "sra_to_fastq.rules")
+include: os.path.join(RULES, "swembl.rules")
 
 
 #================================================================#
@@ -128,7 +143,8 @@ if verbosity >= 2:
 
 ## TODO
 # Moved to sra_to_fastq.rules
-# Should develop general import rule? 
+# Should develop general import rule?
+IMPORT = expand(RESULTS_DIR + "{samples}/{samples}.fastq", samples=SAMPLE_IDS) 
 	
 
 # Graphics
@@ -209,13 +225,14 @@ ruleorder: macs2 > bam_to_bed > sam2bam
 ruleorder: count_reads_bam > sam2bam
 
 rule all: 
-    """
-    Run all the required analyses
-    """
+	"""
+	Run all the required analyses
+	"""
 #    input: GRAPHICS, RAW_READNB, RAW_QC, TRIMMED_QC, SORTED_MAPPED_READS_BWA, SORTED_READS_BED
 #    input: RAW_QC, TRIMMED_READS_SICKLE, TRIMMED_QC, MAPPED_READS_BWA, BAM_READNB, BED_READNB, PEAKS_MACS2, PEAKS_SWEMBL
-    input: RAW_QC, TRIMMED_READS_SICKLE, TRIMMED_QC, MAPPED_READS_BWA, BAM_READNB, BED_READNB, PEAKS_MACS2
-    params: qsub=config["qsub"]
-    shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
+#    input: RAW_QC, TRIMMED_READS_SICKLE, TRIMMED_QC, MAPPED_READS_BWA, BAM_READNB, BED_READNB, PEAKS_MACS2
+	input: IMPORT
+	params: qsub=config["qsub"]
+	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
 

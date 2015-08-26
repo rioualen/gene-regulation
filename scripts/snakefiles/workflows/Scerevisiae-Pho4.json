@@ -34,12 +34,11 @@
 
     "dir": {
 	"base": ".",
+	"fg_lib": ".",
 	"reads_source": "data/Scerevisiae-Pho4/",
 	"results": "results/",
 	"reports": "results/",
 	"genome": "genomes/",
-	"python_lib": "scripts/snakefiles/python_lib/",
-	"rules": "scripts/snakefiles/rules/",
 	"logs": "logs/"
     },
 
