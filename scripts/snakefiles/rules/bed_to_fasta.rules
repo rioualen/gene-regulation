@@ -1,3 +1,5 @@
+"""To all: rename to fetch-sequences.rules?"""
+
 rule bed_to_fasta:
 	"""Fetch sequences from UCSC to obtain a fasta file from a set of
 	genomic coordinates described in a bed file.
@@ -26,5 +28,5 @@ rule bed_to_fasta:
                 qsub = config["qsub"] + " -q short -e {regions}_fetchseq_qsub.err -o {regions}_fetchseq_qsub.out"
 	shell:"fetch-sequences -v {params.verbosity} -i {input} -header_format galaxy -genome {params.genome} -o {output} 2> {log}"
 
-
+#working example
 #fetch-sequences -v 1 -i GSM1217459_vs_GSM1217457_sickle-se-q20_bwa_macs2_summits.bed -header_format galaxy -genome ce10 -o GSM1217459_vs_GSM1217457_sickle-se-q20_bwa_macs2_summits.fasta 2> test.log
