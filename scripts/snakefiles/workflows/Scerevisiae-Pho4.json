@@ -17,8 +17,8 @@
     },
 
     "files": {
-	"samples": "data/Scerevisiae-Pho4_samples.tab",
-	"design": "data/Scerevisiae-Pho4_design.tab"
+	"samples": "data/Scerevisiae-Pho4/samples.tab",
+	"design": "data/Scerevisiae-Pho4/design.tab"
     },
 
     "reads": {
@@ -82,6 +82,6 @@
 
     "rsat": {
 	"verbosity": "1"
-    },
+    }
 
 }
