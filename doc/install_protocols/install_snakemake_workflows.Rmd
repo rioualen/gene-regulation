@@ -15,6 +15,8 @@ output:
 ### **TODO**
 
 * Include map of possible "bricks" of worflows (like general rulegraph) with each step's requirement/dependencies
+* Include minimum json file config depending on bricks to be used.
+
 * Beware of paths
     - ~/Desktop/workspace
     - ~/bin
