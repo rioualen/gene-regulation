@@ -23,24 +23,43 @@ source(file.path(dir.fg, "scripts/R-scripts/deg_lib.R"))
 verbosity <- 1
 deg.tools <- c("edgeR", "DESeq2")
 
-## Elements that should be added to the parameters
-org.db <- "org.EcK12.eg.db" ## Should be added to parameters
-gene.info.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655_GCA_000005845.2_gene_info.tab"
-organism.names <- c("name" = "Escherichia coli",
-                    "clusterProfiler" = NA,
-                    "kegg"="eco")
-gtf.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.gtf"
-gtf.source <- "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-28/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655/"
-#   pet.gene <- "b2531"
-go.map.file <- 'genome/Escherichia_coli_str_k_12_substr_mg1655_GCA_000005845.2_gene_GO.tab'
-go.description.file <- "genome/GO_description.tab"
 
 ## The only argument is the file containing all the parameters for the analysis
 if (is.na(commandArgs(trailingOnly = FALSE)[6])) {
   #   stop("Parameter file must be passed as command-line argument.")
-  ## TEMPORARY FOR DEBUGGING: 
-  setwd("~/BeatriceRoche/")
-  r.params.path <- "results/DEG/sickle_pe_q20_bowtie2_pe_sorted_name_params.R"  
+  ## Elements that should be added to the parameters
+  org <- "dm"
+  # org <- "eco"
+  if (org == "eco") {
+    ## TEMPORARY FOR DEBUGGING: 
+    setwd("~/BeatriceRoche/")
+    r.params.path <- "results/DEG/sickle_pe_q20_bowtie2_pe_sorted_name_params.R"  
+    org.db <- "org.EcK12.eg.db" ## Should be added to parameters
+    gene.info.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655_GCA_000005845.2_gene_info.tab"
+    organism.names <- c("name" = "Escherichia coli",
+                        "clusterProfiler" = NA,
+                        "kegg"="eco")
+    gtf.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.gtf"
+    gtf.source <- "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-28/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655/"
+    #   pet.gene <- "b2531"
+    go.map.file <- 'genome/Escherichia_coli_str_k_12_substr_mg1655_GCA_000005845.2_gene_GO.tab'
+    go.description.file <- "genome/GO_description.tab"
+  } else if (org=="dm") {
+    dir.main <- "~/dr-chip-rna-seq/"
+    r.params.path <- "results/rna-seq/DEG/sickle_se_q20_subread_featurecounts_params.R"  
+    sample.description.file <- "data/rna-seq/abdA_overexpr_sample_descriptions.tab" 
+    design.file <- "data/rna-seq/analysis_description.tab"
+    dir.DEG <- "results/rna-seq/DEG/"
+    suffix.deg <- "sickle_se_q20_subread_featurecounts"
+    suffix.DESeq2 <- paste(sep="_", suffix.deg, "DESeq2")
+    suffix.edgeR <- paste(sep="_", suffix.deg, "edgeR")
+    org.db <- "org.Dm.eg.db"
+    organism.names <- c("name" = "Drosophila melanogaster",
+                        "clusterProfiler" = "fly",
+                        "kegg"="dme")
+  } else {
+    message(paste("No info for org", org))
+  }
 } else {
   r.params.path <- commandArgs(trailingOnly = FALSE)[6]  
 }
@@ -53,7 +72,7 @@ setwd(dir.main)
 
 ## Choose default value for thresholds if they were not defined in the config file
 if (!exists("thresholds")) {
-  thresholds <- c("padj"=0.05, "evalue"=1, "FC"=1.5)
+  thresholds <- c("padj"=0.05, "evalue"=1, "FC"=1.5) ## Experimental
 }
 
 
@@ -64,7 +83,6 @@ cols.heatmap <- rev(colorRampPalette(brewer.pal(9,"RdBu"))(100))
 
 ## A trick: to enable log-scaled plots for 0 values, I add an epsilon increment
 epsilon <- 0.01
-
 
 ## Read the sample description file, which indicates the 
 ## condition associated to each sample ID.
@@ -77,15 +95,18 @@ sample.ids <- row.names(sample.desc)
 ## Experimental conditions
 sample.conditions <- as.vector(sample.desc[,1]) ## Condition associated to each sample
 names(sample.conditions) <- sample.ids
+# print(sample.conditions)
 
 ## Define a specific color for each distinct condition
-exp.conditions <- unique(sample.conditions) ## Set of distinct conditions
-cols.conditions <- brewer.pal(length(exp.conditions),"Dark2")
-names(cols.conditions) <- exp.conditions
+conditions <- unique(sample.conditions) ## Set of distinct conditions
+cols.conditions <- brewer.pal(max(3, length(conditions)),"Dark2")[1:length(conditions)]
+names(cols.conditions) <- conditions
+# print(cols.conditions)
 
 ## Define a color per sample according to its condition
 cols.samples <- cols.conditions[sample.conditions]
 names(cols.samples) <- sample.ids
+# print(cols.samples)
 
 ## Read the design file, which indicates the anlayses to be done.
 ## Each row specifies one differential expression analysis, which 
@@ -93,11 +114,13 @@ names(cols.samples) <- sample.ids
 verbose("Reading design", 1)
 design <- read.delim(design.file, sep="\t", 
                      comment=";", header = TRUE, row.names=NULL)
+# print(design)
 
 ## Prefix for output files concerning the whole count table (all samples together)
 ## prefix["general.file"] <- sub(pattern = ".tab", replacement="", all.counts.table)
 prefix <- vector()
 prefix["general.file"] <- file.path(dir.DEG, suffix.deg)
+# print(prefix)
 
 ## Read the count table
 verbose("Loading count table", 1)
@@ -211,6 +234,10 @@ stats.per.sample <- data.frame(
 ## 85% of the samples have a value below the mean (i.e. the mean is at the percentile 85 !)
 stats.per.sample$below.mean <- apply(t(all.counts.mapped) < stats.per.sample$mean, 1, sum, na.rm=TRUE)
 stats.per.sample$fract.below.mean <- stats.per.sample$below.mean/nrow(all.counts.mapped)
+# View(stats.per.sample)
+
+
+
 
 ################################################################
 ## Compute the counts per million reads 
@@ -224,10 +251,24 @@ verbose("Computing CPMs", 1)
 ## beause it gives a nice alignment on the boxplots.
 cpms.libsum <- cpm(all.counts.mapped.epsilon)    ## Counts per million reads, normalised by library sum
 cpms.perc75 <- cpm(all.counts.mapped.epsilon, lib.size = stats.per.sample$perc75)    ## Counts per million reads, normalised by 75th percentile
+cpms.perc95 <- cpm(all.counts.mapped.epsilon, lib.size = stats.per.sample$perc95)    ## Counts per million reads, normalised by 95th percentile
 cpms.median <- cpm(all.counts.mapped.epsilon, lib.size = stats.per.sample$median)    ## Counts per million reads, normalised by sample-wise median count
+#cpms <- cpms.median ## Choose one normalization factor for the CPMs used below
 cpms <- cpms.perc75 ## Choose one normalization factor for the CPMs used below
 cpms.log10 <- log10(cpms) ## Log-10 transformed CPMs, with the epsilon for 0 counts
 cpms.log2 <- log2(cpms) ## Log-10 transformed CPMs, with the epsilon for 0 counts
+
+stats.per.sample$cpm.mean <- apply(cpms, 2, mean)
+stats.per.sample$log2.cpm.mean <- apply(cpms.log2, 2, mean)
+stats.per.sample$log10.cpm.mean <- apply(cpms.log10, 2, mean)
+
+################################################################
+## Export stats per sample
+verbose("Exporting stats per sample", 1)
+sample.summary.file <- paste(sep="", prefix["general.file"], "_summary_per_sample.tab")
+write.table(x = t(stats.per.sample), row.names = TRUE, col.names=NA, 
+            file = sample.summary.file, sep = "\t", quote=FALSE)
+verbose(paste(sep="", "\tSummary per sample\t", sample.summary.file), 1)
 
 ################################################################
 ## Draw some generic plots
@@ -337,8 +378,8 @@ quiet <- dev.off()
 ## Analyse between-replicate reproducibility
 ################################################################
 verbose("Plotting betwen-replicate comparisons", 1)
-cond <- "cyay"
-for (cond in exp.conditions) {
+cond <- conditions[1] ## Choose first condition for testing without the loop
+for (cond in conditions) {
   verbose(paste(sep="", "\tcondition\t", cond), 2)
   
   max.rep.to.plot <- 5 ## Restrict the number of replicates to plot, for the sale of readability
@@ -365,8 +406,11 @@ for (cond in exp.conditions) {
   
   ## Plot pairwise comparisons between replicates
   pdf(file= file.path(dir.condition, paste(sep = "", "between-replicate_counts_plot_", cond, ".pdf")), width=10, height=10)
-  plot(current.counts[,1:min(max.rep.to.plot, nrep)], log="xy", col=cols.conditions[cond], 
-       main=paste(cond, " ; raw counts per replicate (log scale)"))
+  plot(current.counts[,1:min(max.rep.to.plot, nrep)], 
+       log="xy", col=cols.conditions[cond], 
+       main=paste(cond, " ; raw counts per replicate (log scale)"),
+       panel.first=grid(col="#BBBBBB", lty="solid")
+       )
   dev.off()
   
   ## Plot mean versus variance of raw counts for the current condition
@@ -391,8 +435,7 @@ for (cond in exp.conditions) {
        ylab=paste("CPM variance for condition", cond),
        main=paste(cond, " ; CPM variance/Mean plot"))
   abline(a=0,b=1, lty="dashed", col="green", lwd=2) ## Milestone for Poisson distributions: var = mean
-  quiet <- dev.off()
-  
+  quiet <- dev.off() 
 }
 
 ################################################################
@@ -455,6 +498,7 @@ for (i in 1:nrow(design)) {
   ## the minimal number of replicates per condition.
   min.rep <- min(length(samples1), length(samples2))
   result.table$undetected <- rowSums(current.counts > 1) < min.rep
+  # table(result.table$undetected)
   #current.counts <- current.counts[rowSums(current.counts > 1) >= min.rep,]
   # dim(current.counts)
   
@@ -517,7 +561,7 @@ for (i in 1:nrow(design)) {
     deseq2.result.table, 
     paste(sep="_", "DESeq2", prefix["comparison"]),
     sort.column = "padj",
-    thresholds=c("padj"=0.05, "evalue"=1, "FC"=1.5),
+    thresholds=thresholds,
     round.digits = 3,
     dir.figures=dir.figures)
   result.table <- cbind(result.table, "DESeq2" = deseq2.result.table[row.names(result.table),])
@@ -613,13 +657,13 @@ for (i in 1:nrow(design)) {
   ## Smear plot
   verbose("\t\t\tedgeR Smear plot", 3)
   edger.deg <- rownames(edger.tt$table)[edger.tt$table$FDR < thresholds["padj"]] ## List of differentially expressed genes reported by edgeR
-  pdf(file=paste(sep="", prefix["DESeq2_figure"], "_plotSmear.pdf"))
+  pdf(file=paste(sep="", prefix["edgeR_figure"], "_plotSmear.pdf"))
   plotSmear(d, de.tags = edger.deg)
   quiet <- dev.off()
   
   ## MDS plot (Multidimensional scaling plot of distances between gene expression profiles)
   verbose("\t\t\tedgeR MDS plot", 3)
-  pdf(file=paste(sep="", prefix["DESeq2_figure"], "_plotMDS.pdf"))
+  pdf(file=paste(sep="", prefix["edgeR_figure"], "_plotMDS.pdf"))
   #  pdf(file=file.path(dir.figures, paste(sep="", "edgeR_MDS_plot_", prefix["comparison"], ".pdf")))
   plotMDS(d, labels=current.labels, 
           col=c("darkgreen","blue")[factor(sample.conditions[names(current.counts)])])
@@ -627,14 +671,14 @@ for (i in 1:nrow(design)) {
   
   # Mean-variance relationship
   verbose("\t\t\tedgeR mean-variance relationship", 3)
-  pdf(file=paste(sep="", prefix["DESeq2_figure"], "_plotMeanVar.pdf"))
+  pdf(file=paste(sep="", prefix["edgeR_figure"], "_plotMeanVar.pdf"))
   plotMeanVar(d, show.tagwise.vars=TRUE, NBline=TRUE)
   quiet <- dev.off()
   
   
   # BCV (Biological Coefficient of Variation)
   verbose("\t\t\tedgeR BCV plot", 3)
-  pdf(file=paste(sep="", prefix["DESeq2_figure"], "_plotBCV.pdf"))
+  pdf(file=paste(sep="", prefix["edgeR_figure"], "_plotBCV.pdf"))
   #pdf(file= file.path(dir.figures, paste(sep = "", "edgeR_plotBCV_", prefix["comparison"], ".pdf")))
   plotBCV(d)
   quiet <- dev.off()
@@ -643,7 +687,7 @@ for (i in 1:nrow(design)) {
   ## Compare gene selections by edgeR and DESeq2
   verbose("\t\tComparing DESeq2 and edgeR results", 2)    
   ## Add tags indicating the combinations of edgeR/DESeq2 selections
-  for (s in c("padj", "evalue", "FC")) {
+  for (s in names(thresholds)) {
     selection.column <- paste(sep="_", s, thresholds[s])
     
     ## Tag gnes selected by both edgeR and DESeq2
@@ -734,8 +778,7 @@ for (i in 1:nrow(design)) {
   
   
   ## For each threshold separately
-  for (s in names(thresholds)) {
-    
+  for (s in names(thresholds)) {   
     venn.counts.one.threshold <- vennCounts(
       result.table[,c(paste(sep="", "edgeR.",s,"_", thresholds[s]), 
                       paste(sep="", "DESeq2.",s,"_", thresholds[s]))])
@@ -811,6 +854,9 @@ for (i in 1:nrow(design)) {
   ################################################################
   ## Functional enrichment analysis
   if (exists("org.db") & !is.na(org.db) & !is.null(org.db) & exists("gene.info.rsat")) {
+    library(org.db, character.only = TRUE)
+    gg <- bitr(row.names(deg.table), fromType="SYMBOL", toType="ENTREZID", annoDb=org.db)
+    
     
     ## Convert IDs to entrez IDs
     all.gene.ids <- row.names(result.table)
@@ -1002,7 +1048,7 @@ for (i in 1:nrow(design)) {
 ## Export summary table
 verbose("Exporting summary table", 1)
 summary.file <- paste(sep="", prefix["general.file"], "_summary_per_analysis.tab")
-write.table(x = summary.per.analysis, row.names = FALSE,
+write.table(x = t(summary.per.analysis), row.names = TRUE, col.names=FALSE,
             file = summary.file, sep = "\t", quote=FALSE)
 verbose(paste(sep="", "\tSummary per analysis\t", summary.file), 1)
 
