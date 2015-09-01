@@ -18,7 +18,7 @@ output:
 * Include minimum json file config depending on bricks to be used.
 
 * Beware of paths
-    - ~/Desktop/workspace
+    - ~/workspace
     - ~/bin
 * Test all of this in IFB appliance
 
@@ -39,15 +39,18 @@ See one of these:
 
 ### VM customization
 
-Make sure to provide the right amount of RAM and CPU, according to the amount of data, the tools you want to use, and what you actually have on your local.
+Make sure to provide the right amount of RAM and CPU, according to the amount of data, the tools you want to use, and what you actually have on your local installation.
 
 Regarding the size of the virtual disk, see `virtualbox_VM_creation.Rmd`.
 
+<!---
 Here we used these settings:
 
 * RAM: 40Go
 * HD: 120Go
 * CPU: 10
+-->
+
 
 # General requirements 
 
@@ -93,7 +96,7 @@ sudo apt-get install libz-dev
 
 ### qsub
 
-TODO 
+**/?\\** TODO 
 sudo apt-get install slurm-wlm-torque
 ! munge
 
@@ -133,6 +136,9 @@ source ~/.profile
 
 /!\\ check R versions, python versions, etc...
 
+/!\\ It seems there could an issue with the installation of python module while using sudo or doing is as root...
+Googling "sudo pip" suggests it is a bad idea for safety reasons, and should not be needed...
+
 ## Python 3
 
 Snakemake requires to have Python 3 installed. If you have installed Ubuntu14.04 on your machine by following on of the previous tutorials, you should have both Python 2.7 and Python 3.4 installed for starters. You can check this by issuing the following commands in a terminal: 
@@ -140,7 +146,7 @@ Snakemake requires to have Python 3 installed. If you have installed Ubuntu14.04
 python --version # usually the default python version is 2.7+
 python3 --version
 ```
-If you don't have python 3 you should install it:
+If you don't have python 3 you should install it, as well as pip3.
 ```
 sudo apt-get install python3
 sudo apt-get install python3-pip
@@ -153,7 +159,7 @@ sudo apt-get install python3-pip
 
 Now you have installed Python 3 and pip3 (see previous section), you can install snakemake safely:
 ```
-sudo pip3 install snakemake
+pip3 install snakemake
 ```
 You can check snakemake works properly with this basic script:
 ```
@@ -177,13 +183,13 @@ rule bye:
 	message: "Generating {output} file."
 	shell: "echo BYE > {output}"
 ```
-* Save it to `~/Desktop/workspace/hello.py`.
-* Issue the command `cd ~/Desktop/workspace ; snakemake -s hello.py`.
+* Save it to `~/workspace/hello.py`.
+* Issue the command `cd ~/workspace ; snakemake -s hello.py`.
 * 2 files shoudl be created: `hello.txt` and `bye.txt`.
 
 **/!\\** Need version 3.4.1
 ```
-sudo pip3 install snakemake --upgrade
+pip3 install snakemake --upgrade
 ```
 
 ## Graphviz
@@ -196,6 +202,18 @@ sudo apt-get install graphviz
 
 
 Now if we want to use snakemake to develop NGS workflows, we have to install a number of programs depending on what we want to achieve.
+
+## Pandas
+
+**/!\\ TODO** To be checked!
+
+```
+$ pip3 install pandas ## not ok
+$ pip install pandas ## not ok
+# pip install pandas ## not ok
+# pip3 install pandas ## ok ?
+```
+
 
 # NGS analysis (optional) software to install
 
@@ -287,37 +305,39 @@ sudo apt-get install bedtools
 
 See *$RSAT/doc/howto/install_rsat_ubuntu14.04.bash*
 
-# France Génomique ChIP-seq project - Celegans H3K27me3
+# France Génomique ChIP-seq project - Scerevisiae-Pho4
 
 ## Cloning the repository
 
 Cloning the repository from GitHub requires access rights. 
 Contact: claire.rioualen@inserm.fr
 ```
-cd ~/Desktop/workspace
+cd ~/workspace
 git clone git+ssh://git@git.renater.fr:2222/fg-chip-seq.git
 ```
 Note: commit 3e1434c9942a2c7899b135f1a4be99d8f4aa68cf
 
 ## Data transfer
 
-## Raw data
+**/!\\ 15/08/31** Rsync ne fonctionne que dans un sens ? 
+```
+cd
+mkdir data
+mkdir genomes
+```
 
+Et depuis l'hôte:
 ```
-rsync -ruptvl rioualen@10.1.1.133:~/Desktop/workspace/fg-chip-seq/data/Celegans-H3K27me3 data/
+rsync -ruptvl /data/Scerevisiae-Pho4 rg@192.54.201.107:~/data/
+rsync -ruptvl /data/genomes/sc rg@192.54.201.107:~/genomes/
 ```
 
-## Genome
-
-```
-rsync -ruptvl rioualen@10.1.1.133:~/Desktop/workspace/fg-chip-seq/genomes/ce10/BWAIndex/ce10.fa genomes/ce10/BWAIndex/
-```
 
 ## Running the pipeline
 
 ```
-cd ~/Desktop/workspace/fg-chip-seq
-snakemake -s scripts/snakefiles/workflows/Celegans-H3K27me3.py -j 4
+cd ~/workspace/fg-chip-seq
+snakemake -s scripts/snakefiles/workflows/Scerevisiae-Pho4.py -j 4
 ```
 
 /!\\ path of files should be changed from /home/rioualen to /home/rg in both .py and .json files.
