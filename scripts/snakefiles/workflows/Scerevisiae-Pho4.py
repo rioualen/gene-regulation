@@ -87,16 +87,13 @@ include: os.path.join(RULES, "util.rules")
 include: os.path.join(RULES, "count_reads.rules")
 include: os.path.join(RULES, "bwa_index.rules")
 include: os.path.join(RULES, "bwa_se.rules")
+include: os.path.join(RULES, "bed_to_fasta.rules")
 include: os.path.join(RULES, "convert_bam_to_bed.rules")
-#include: os.path.join(RULES, "convert_sam_to_bam.rules")
-#include: os.path.join(RULES, "count_oligo.rules")
+include: os.path.join(RULES, "count_oligo.rules")
 include: os.path.join(RULES, "fastqc.rules")
 include: os.path.join(RULES, "flowcharts.rules")
 include: os.path.join(RULES, "macs2.rules")
-#include: os.path.join(RULES, "merge.rules")
-#include: os.path.join(RULES, "narrowpeak_to_bed.rules")
-#include: os.path.join(RULES, "peak_length.rules")
-#include: os.path.join(RULES, "purge_sequence.rules")
+include: os.path.join(RULES, "purge_sequence.rules")
 include: os.path.join(RULES, "sickle_se.rules")
 #include: os.path.join(RULES, "sorted_bam.rules")
 include: os.path.join(RULES, "sra_to_fastq.rules")
@@ -207,12 +204,18 @@ if verbosity >= 3:
 ## Peaks returned by the different peak callers
 PEAKS = PEAKS_MACS2 + PEAKS_SWEMBL
 
-# File conversion
-BED_TO_FASTA = expand(RESULTS_DIR + "{sample}/{sample}" + config["sickle"]["suffix"] + "_{aligner}.calling.fasta", sample=SAMPLE_IDS, trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
+# ----------------------------------------------------------------
+# Peak analysis
+# ----------------------------------------------------------------
 
-## Sequence purge
-#PURGED_SEQ = expand(RESULTS_DIR + "{sample}_purged.fasta", sample=SAMPLE_IDS)
-##PURGED_SEQ = expand("results/H3K27me3/liver/GSM537698_purged.fasta")
+# File conversion / fetching fasta
+FETCH_MACS_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_macs2_peaks.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
+FETCH_SWEMBL_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/swembl/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_swembl_R0.01.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
+
+# Sequence purge
+PURGE_MACS_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_macs2_peaks_purged.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
+PURGE_SWEMBL_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/swembl/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_swembl_R0.01_purged.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
+#PURGED_SEQ = expand("results/H3K27me3/liver/GSM537698_purged.fasta")
 
 ## Oligo analysis
 #OLIGO = config['oligo_stats'].split()
@@ -223,6 +226,7 @@ BED_TO_FASTA = expand(RESULTS_DIR + "{sample}/{sample}" + config["sickle"]["suff
 
 ruleorder: macs2 > bam_to_bed > sam2bam
 ruleorder: count_reads_bam > sam2bam
+ruleorder: bed_to_fasta > purge_sequence
 
 rule all: 
 	"""
@@ -231,7 +235,7 @@ rule all:
 #    input: GRAPHICS, RAW_READNB, RAW_QC, TRIMMED_QC, SORTED_MAPPED_READS_BWA, SORTED_READS_BED
 #    input: RAW_QC, TRIMMED_READS_SICKLE, TRIMMED_QC, MAPPED_READS_BWA, BAM_READNB, BED_READNB, PEAKS_MACS2, PEAKS_SWEMBL
 #    input: RAW_QC, TRIMMED_READS_SICKLE, TRIMMED_QC, MAPPED_READS_BWA, BAM_READNB, BED_READNB, PEAKS_MACS2
-	input: IMPORT, TRIMMED_READS_SICKLE, TRIMMED_QC, RAW_QC, MAPPED_READS_BWA, RAW_READNB, BAM_READNB, BED_READNB, PEAKS_MACS2, PEAKS_SWEMBL
+	input: IMPORT, TRIMMED_READS_SICKLE, TRIMMED_QC, RAW_QC, MAPPED_READS_BWA, RAW_READNB, BAM_READNB, BED_READNB, PEAKS_MACS2, PEAKS_SWEMBL, FETCH_MACS_PEAKS, FETCH_SWEMBL_PEAKS, PURGE_MACS_PEAKS, PURGE_SWEMBL_PEAKS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 

@@ -8,7 +8,7 @@
     "genome": {
 	"organism": "Saccharomyces_cerevisiae",
 	"size": "12157105",
-	"genome_version": "sc",
+	"genome_version": "sacCer2",
 	"base_url_fasta": "ftp://ftp.ensemblgenomes.org/pub/fungi/current/fasta/saccharomyces_cerevisiae/dna/",
 	"sequence": "",
 	"features": "",
