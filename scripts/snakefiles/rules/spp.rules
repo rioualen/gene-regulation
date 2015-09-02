@@ -5,7 +5,9 @@ rule spp:
 	Required parameters:
 		config["qsub"]
 
-	Usage: TODO
+	Usage: 
+		PEAKS_SPP = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/spp/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_spp.narrowPeak", 
+	               zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
 	"""
 	input: 	treatment="{result_dir}/{treatment}/{treatment}" + config["suffixes"]["mapped"] + ".bam", \
             	control="{result_dir}/{control}/{control}" + config["suffixes"]["mapped"] + ".bam"
@@ -60,7 +62,7 @@ rule spp:
 		print(paste("detected",sum(unlist(lapply(bp$npl,function(d) length(d$x)))),"peaks"))
 		output.binding.results(bp,"{output.bdg_positions}");
 
-		bp <- add.broad.peak.regions(treatment.data.qua, control.data.qua, bp, window.size=1000,z.thr=3)
+		#bp <- add.broad.peak.regions(treatment.data.qua, control.data.qua, bp, window.size=1000,z.thr=3)
 		write.narrowpeak.binding(bp,"{output.peaks_narrowPeak}")
 
 		bed <- read.table("{output.peaks_narrowPeak}")
