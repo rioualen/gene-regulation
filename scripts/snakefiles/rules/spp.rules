@@ -7,59 +7,63 @@ rule spp:
 
 	Usage: TODO
 	"""
-	input:
-		chip = config["dir"]["results"] + "{CHIP}/{CHIP}_{ALIGNER}.bam" , \
-		inp = config["dir"]["results"] + "{INPUT}/{INPUT}_{ALIGNER}.bam"
-	log: config["dir"]["results"] + "{CHIP}_vs_{INPUT}/spp.log"
-	benchmark: config["dir"]["results"] + {CHIP} + "_vs_" + {INPUT} + "/spp_benchmark.json"
-	params: qsub = config["qsub"] + " -e {input.chip}_homer_qsub.err -o {input.chip}_homer_qsub.out"
-	output: 
-		config["dir"]["results"] + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.narrowPeak", \
-		config["dir"]["results"] + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.crosscorrelation.pdf", \
-		config["dir"]["results"] + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.smoothed.density.wig", \
-		config["dir"]["results"] + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.enrichment.estimates.wig", \
-		config["dir"]["results"] + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.broadPeak", \
-		config["dir"]["results"] + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.binding.positions.txt"
+	input: 	treatment="{result_dir}/{treatment}/{treatment}" + config["suffixes"]["mapped"] + ".bam", \
+            	control="{result_dir}/{control}/{control}" + config["suffixes"]["mapped"] + ".bam"
+        log: "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_spp.log"
+        benchmark: "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_spp_benchmark.json"
+	params:	qsub=config["qsub"] \
+                  + " -q long -e {result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_spp_qsub.err" \
+                  + " -q long -e {result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_spp_qsub.out" 
+	output: peaks_narrowPeak = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_spp.narrowPeak", \
+		peaks_bed = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_spp.bed", \
+		pdf = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_spp.crosscorrelation.pdf", \
+		sm_density_wig = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_spp.smoothed.density.wig", \
+		enrich_est_wig = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_spp.enrichment.estimates.wig", \
+		peaks_broadPeak = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_spp.broadPeak", \
+		bdg_positions = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_spp.binding.positions.txt"
 	run:
 		R("""library(spp)
 
 		getwd()
 
 
-		chip.data <- read.bam.tags("{input.chip}")
-		input.data <- read.bam.tags("{input.inp}")
+		treatment.data <- read.bam.tags("{input.treatment}")
+		control.data <- read.bam.tags("{input.control}")
 
-		binding.characteristics <- get.binding.characteristics(chip.data,srange=c(50,500),bin=5, accept.all.tags = T) 
+		binding.characteristics <- get.binding.characteristics(treatment.data,srange=c(50,500),bin=5, accept.all.tags = T) 
 
-		pdf(file="{output[5]}",width=5,height=5)
+		pdf(file="{output.pdf}",width=5,height=5)
 		par(mar = c(3.5,3.5,1.0,0.5), mgp = c(2,0.65,0), cex = 0.8)
 		plot(binding.characteristics$cross.correlation,type='l',xlab="strand shift",ylab="cross-correlation")
 		abline(v=binding.characteristics$peak$x,lty=2,col=2)
 		dev.off()
 
-		chip.data.info <- select.informative.tags(chip.data)
-		input.data.info <- select.informative.tags(input.data)
+		treatment.data.info <- select.informative.tags(treatment.data)
+		control.data.info <- select.informative.tags(control.data)
 
-		chip.data.qua <- remove.local.tag.anomalies(chip.data.info)
-		input.data.qua <- remove.local.tag.anomalies(input.data.info)
+		treatment.data.qua <- remove.local.tag.anomalies(treatment.data.info)
+		control.data.qua <- remove.local.tag.anomalies(control.data.info)
 
 		tag.shift <- round(binding.characteristics$peak$x/2)
-		smoothed.density <- get.smoothed.tag.density(chip.data.qua,control.tags=input.data.qua,bandwidth=200,step=100,tag.shift=tag.shift)
-		writewig(smoothed.density,"{output[1]}","s_1 smoothed, background-subtracted tag density")
+		smoothed.density <- get.smoothed.tag.density(treatment.data.qua,control.tags=control.data.qua,bandwidth=200,step=100,tag.shift=tag.shift)
+		writewig(smoothed.density,"{output.sm_density_wig}","s_1 smoothed, background-subtracted tag density")
 
-		enrichment.estimates <- get.conservative.fold.enrichment.profile(chip.data.qua,input.data.qua,fws=500,step=100,alpha=0.01)
-		writewig(enrichment.estimates,"{output[2]}","conservative fold-enrichment/depletion estimates shown on log2 scale")
+		enrichment.estimates <- get.conservative.fold.enrichment.profile(treatment.data.qua,control.data.qua,fws=500,step=100,alpha=0.01)
+		writewig(enrichment.estimates,"{output.enrich_est_wig}","conservative fold-enrichment/depletion estimates shown on log2 scale")
 
-		broad.clusters <- get.broad.enrichment.clusters(chip.data.qua, input.data.qua, window.size=1e3, z.thr=3,tag.shift=round(binding.characteristics$peak$x/2))
-		write.broadpeak.info(broad.clusters,"{output[3]}")
+		broad.clusters <- get.broad.enrichment.clusters(treatment.data.qua, control.data.qua, window.size=1e3, z.thr=3,tag.shift=round(binding.characteristics$peak$x/2))
+		write.broadpeak.info(broad.clusters,"{output.peaks_broadPeak}")
 
 		fdr <- 5e-2
 		detection.window.halfsize <- binding.characteristics$whs;
-		bp <- find.binding.positions(signal.data=chip.data.qua,control.data=input.data.qua,fdr=fdr,whs=detection.window.halfsize)
+		bp <- find.binding.positions(signal.data=treatment.data.qua,control.data=control.data.qua,fdr=fdr,whs=detection.window.halfsize)
 		print(paste("detected",sum(unlist(lapply(bp$npl,function(d) length(d$x)))),"peaks"))
-		output.binding.results(bp,"{output[4]}");
+		output.binding.results(bp,"{output.bdg_positions}");
 
-		bp <- add.broad.peak.regions(chip.data.qua, input.data.qua, bp, window.size=1000,z.thr=3)
-		write.narrowpeak.binding(bp,"{output[0]}")
+		bp <- add.broad.peak.regions(treatment.data.qua, control.data.qua, bp, window.size=1000,z.thr=3)
+		write.narrowpeak.binding(bp,"{output.peaks_narrowPeak}")
+
+		bed <- read.table("{output.peaks_narrowPeak}")
+		write.table(bed, "{output.peaks_bed}", row.names=FALSE, col.names=FALSE, sep="\t", quote=FALSE)
 
 		""") 
