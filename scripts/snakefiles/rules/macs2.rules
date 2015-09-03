@@ -34,11 +34,6 @@ rule macs2:
 	Input: sam, bam, bed... automatically detected by macs' callpeak algorithm. Bed format was used here. 
 	Output: bed
 
-	To be refined...
-	TODO:
-		Add qsub, log, bench, message keywords.
-		Generalize rule... And clean up this mess of a file once it's done.
-
 	Required parameters:
 		config['qsub']
 		config["genome"]["size"]
