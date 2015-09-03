@@ -198,7 +198,7 @@ if verbosity >= 3:
     print("\nPEAKS_MACS2\n\t" + "\n\t".join(PEAKS_MACS2))
 
 ## Peak-calling with SWEMBL
-PEAKS_SWEMBL = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/swembl/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_swembl_R" + config["swembl"]["R"] + ".bed", 
+PEAKS_SWEMBL = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/swembl/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_swembl-R" + config["swembl"]["R"] + ".bed", 
                zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
 if verbosity >= 3: 
     print("\nPEAKS_SWEMBL\n\t" + "\n\t".join(PEAKS_SWEMBL))
@@ -218,14 +218,14 @@ PEAKS = PEAKS_MACS2 + PEAKS_SWEMBL + PEAKS_SPP
 
 # File conversion / fetching fasta
 FETCH_MACS2_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_macs2_peaks.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
-FETCH_SWEMBL_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/swembl/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_swembl_R0.01.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
+FETCH_SWEMBL_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/swembl/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_swembl-R0.01.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
 FETCH_SPP_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/spp/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_spp.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
 
 FETCH_PEAKS = FETCH_MACS2_PEAKS + FETCH_SWEMBL_PEAKS + FETCH_SPP_PEAKS
 
 # Sequence purge
 PURGE_MACS2_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_macs2_peaks_purged.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
-PURGE_SWEMBL_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/swembl/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_swembl_R0.01_purged.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
+PURGE_SWEMBL_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/swembl/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_swembl-R0.01_purged.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
 PURGE_SPP_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/spp/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_spp_purged.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
 
 PURGE_PEAKS = PURGE_MACS2_PEAKS + PURGE_SWEMBL_PEAKS + PURGE_SPP_PEAKS
@@ -238,8 +238,10 @@ PURGE_PEAKS = PURGE_MACS2_PEAKS + PURGE_SWEMBL_PEAKS + PURGE_SPP_PEAKS
 #PEAK_LENGTH = expand(RESULTS_DIR + '{sample}_purged_length.png', sample=SAMPLE_IDS)
 
 ruleorder: macs2 > bam_to_bed > sam2bam
+ruleorder: swembl > bam_to_bed > sam2bam
 ruleorder: count_reads_bam > sam2bam
 ruleorder: bed_to_fasta > purge_sequence
+
 
 rule all: 
 	"""
