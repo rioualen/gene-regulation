@@ -66,11 +66,11 @@ if verbosity >= 1:
 if verbosity >= 2:
     print("\nImporting rules")
 
-if "base" in config["dir"]:
-    workflow.basedir = config["dir"]["base"]
-    print("workflow.basedir\t" + workflow.basedir)
-    print('srcdir("broche_analysis.py")' + "\t" + srcdir("broche_analysis.py"))
-    print('srcdir("../python_lib/util.py")' + "\t" + srcdir("../python_lib/util.py"))
+#if "base" in config["dir"]:
+#    workflow.basedir = config["dir"]["base"]
+#    print("workflow.basedir\t" + workflow.basedir)
+#    print('srcdir("broche_analysis.py")' + "\t" + srcdir("broche_analysis.py"))
+#    print('srcdir("../python_lib/util.py")' + "\t" + srcdir("../python_lib/util.py"))
 
 
 FG_LIB = os.path.abspath(config["dir"]["fg_lib"])
@@ -79,9 +79,9 @@ PYTHON = os.path.join(FG_LIB, "scripts/snakefiles/python_lib")
 #PYTHON = config["dir"]["python_lib"]
 #PYTHON = "/home/rioualen/Desktop/workspace/fg-chip-seq/scripts/snakefiles/python_lib/"
 
-print ("PYTHON\t" + PYTHON)
-print('config["dir"]["base"]' + "\t" + config["dir"]["base"])
-print("CWD\t" + os.getcwd())
+#print ("PYTHON\t" + PYTHON)
+#print('config["dir"]["base"]' + "\t" + config["dir"]["base"])
+#print("CWD\t" + os.getcwd())
 
 include: os.path.join(PYTHON, "util.py")
 include: os.path.join(RULES, "util.rules")
@@ -250,7 +250,7 @@ rule all:
 #    input: GRAPHICS, RAW_READNB, RAW_QC, TRIMMED_QC, SORTED_MAPPED_READS_BWA, SORTED_READS_BED
 #    input: RAW_QC, TRIMMED_READS_SICKLE, TRIMMED_QC, MAPPED_READS_BWA, BAM_READNB, BED_READNB, PEAKS_MACS2, PEAKS_SWEMBL
 #    input: RAW_QC, TRIMMED_READS_SICKLE, TRIMMED_QC, MAPPED_READS_BWA, BAM_READNB, BED_READNB, PEAKS_MACS2
-	input: IMPORT, TRIMMED_READS_SICKLE, TRIMMED_QC, RAW_QC, MAPPED_READS_BWA, RAW_READNB, BAM_READNB, BED_READNB, PEAKS, FETCH_PEAKS, PURGE_PEAKS
+	input: IMPORT, TRIMMED_READS_SICKLE, TRIMMED_QC, RAW_QC, MAPPED_READS_BWA, RAW_READNB, BAM_READNB, BED_READNB, PEAKS, FETCH_PEAKS, GRAPHICS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
