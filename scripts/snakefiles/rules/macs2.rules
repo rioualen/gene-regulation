@@ -34,6 +34,8 @@ rule macs2:
 	Input: sam, bam, bed... automatically detected by macs' callpeak algorithm. Bed format was used here. 
 	Output: bed
 
+	/!\ Requires RSAT to be installed (maybe we should do this some other way to get rid of the dependency?)
+
 	Required parameters:
 		config['qsub']
 		config["genome"]["size"]
