@@ -36,14 +36,15 @@ Contact: 		claire.rioualen@inserm.fr
 from snakemake.utils import R
 import os
 import sys
-import time
+import time#rm?
+import datetime
 import pandas as pd
 
 #================================================================#
 #                      Data & directories                        #
 #================================================================#
 
-configfile: "scripts/snakefiles/workflows/Scerevisiae-Pho4.json"
+configfile: "scripts/snakefiles/workflows/Scerevisiae-Pho4_claire.json"
 workdir: config["dir"]["base"]
 
 # Beware: verbosity messages are incompatible with the flowcharts
@@ -146,8 +147,9 @@ if verbosity >= 2:
 IMPORT = expand(RESULTS_DIR + "{samples}/{samples}.fastq", samples=SAMPLE_IDS) 
 	
 
-# Graphics
+# Graphics & reports
 GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
+REPORT = expand(RESULTS_DIR + "report.html")
 
 #----------------------------------------------------------------#
 # Trimming of the raw reads
@@ -248,8 +250,128 @@ rule all:
 	Run all the required analyses
 	"""
 #	input: GRAPHICS, IMPORT, TRIMMED_READS_SICKLE, TRIMMED_QC, RAW_QC, MAPPED_READS_BWA, RAW_READNB, BAM_READNB, BED_READNB, PEAKS_MACS2, FETCH_MACS2_PEAKS, PURGE_MACS2_PEAKS #redundant for flowcharts
-	input: GRAPHICS, TRIMMED_QC, RAW_QC, RAW_READNB, BAM_READNB, BED_READNB, PURGE_MACS2_PEAKS
+	input: GRAPHICS, REPORT, TRIMMED_QC, RAW_QC, RAW_READNB, BAM_READNB, BED_READNB, PURGE_MACS2_PEAKS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
+
+#----------------------------------------------------------------#
+# Build the report (including DAG and rulegraph flowcharts).
+from snakemake.utils import report
+
+# Bulleted list of samples for the report
+SAMPLE_IDS_OL=report_numbered_list(SAMPLE_IDS)
+RAW_READS_OL=report_numbered_list(IMPORT)
+TRIMMED_READS_OL=report_numbered_list(TRIMMED_READS_SICKLE)
+RAW_QC_OL=report_numbered_list(RAW_QC)
+TRIMMED_QC_OL=report_numbered_list(TRIMMED_QC)
+
+MAPPED_SAM_OL=report_numbered_list(MAPPED_READS_BWA)
+MAPPED_BAM_SORTED_OL=report_numbered_list(SORTED_MAPPED_READS_BWA)
+MAPPED_BED_SORTED_OL=report_numbered_list(SORTED_READS_BED)
+
+RAW_QC_OL=report_numbered_list(RAW_QC)
+TRIMMED_QC_OL=report_numbered_list(TRIMMED_QC)
+
+PEAKFILES_MACS2_OL=report_numbered_list(PEAKS_MACS2)
+
+#	input: GRAPHICS, IMPORT, TRIMMED_READS_SICKLE, TRIMMED_QC, RAW_QC, MAPPED_READS_BWA, RAW_READNB, BAM_READNB, BED_READNB, PEAKS_MACS2, FETCH_MACS2_PEAKS, PURGE_MACS2_PEAKS #redundant for flowcharts
+
+NOW = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+
+rule report:
+    """
+    Generate a report with the list of datasets + summary of the results.
+    """
+    input:  dag=config["dir"]["reports"] + "dag.pdf", \
+            dag_png=config["dir"]["reports"] + "dag.png", \
+            rulegraph=config["dir"]["reports"] + "rule.pdf", \
+            rulegraph_png=config["dir"]["reports"] + "rule.png"
+    output: html=config["dir"]["reports"] + "report.html"
+    run:
+        report("""
+        ===========================================
+        ChIP-seq analysis - S.cerevisiae Pho4 study
+        ===========================================
+        
+        :Date:                 {NOW}
+        :Project:              S cerevisiae
+        :Analysis workflow:    Claire Rioualen
+        
+        Contents
+        ========
+        
+        - `Flowcharts`_
+        - `Datasets`_
+             - `Samples`_
+             - `Raw reads`_
+             - `Trimmed`_
+             - `Mapped`_
+             - `Peaks`_
+             - `QC reports`_
+
+        -----------------------------------------------------
+
+        Flowcharts
+        ==========
+
+        - Sample treatment: dag_
+        - Workflow: rulegraph_
+
+        .. image:: rulegraph.png
+
+        -----------------------------------------------------
+
+        Datasets
+        ========
+        
+        Samples
+        -------
+
+        {SAMPLE_IDS_OL} 
+
+        Raw reads 
+        ---------
+
+        {RAW_READS_OL}
+
+        Trimmed
+        -------
+
+        {TRIMMED_READS_OL}
+
+        Mapped
+        ------
+
+        Sam format (uncompressed)
+
+        {MAPPED_SAM_OL}
+
+        Bam format (sorted by positions)
+
+        {MAPPED_BAM_SORTED_OL}
+
+        Bed format (sorted by positions)
+
+        {MAPPED_BED_SORTED_OL}
+
+        Peaks
+        -----
+
+        Macs2 peaks
+
+        {PEAKFILES_MACS2_OL}
+
+        QC reports
+        ----------
+
+        {RAW_QC_OL}
+
+        {TRIMMED_QC_OL}
+
+        -----------------------------------------------------
+
+        """, output.html, metadata="Claire Rioualen (claire.rioualen@inserm.fr)", **input)
+
+
 
 
