@@ -198,10 +198,10 @@ if verbosity >= 3:
     print("\nPEAKS_MACS2\n\t" + "\n\t".join(PEAKS_MACS2))
 
 ## Peak-calling with SWEMBL
-PEAKS_SWEMBL = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/swembl/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_swembl-R" + config["swembl"]["R"] + ".bed", 
-               zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
-if verbosity >= 3: 
-    print("\nPEAKS_SWEMBL\n\t" + "\n\t".join(PEAKS_SWEMBL))
+#PEAKS_SWEMBL = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/swembl/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_swembl-R" + config["swembl"]["R"] + ".bed", 
+#               zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
+#if verbosity >= 3: 
+#    print("\nPEAKS_SWEMBL\n\t" + "\n\t".join(PEAKS_SWEMBL))
 
 ## Peak-calling with SPP
 PEAKS_SPP = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/spp/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_spp.narrowPeak", 
@@ -210,7 +210,7 @@ if verbosity >= 3:
     print("\nPEAKS_SPP\n\t" + "\n\t".join(PEAKS_SPP))
 
 ## Peaks returned by the different peak callers
-PEAKS = PEAKS_MACS2 + PEAKS_SWEMBL + PEAKS_SPP
+PEAKS = PEAKS_MACS2 + PEAKS_SPP
 
 # ----------------------------------------------------------------
 # Peak analysis
@@ -218,17 +218,17 @@ PEAKS = PEAKS_MACS2 + PEAKS_SWEMBL + PEAKS_SPP
 
 # File conversion / fetching fasta
 FETCH_MACS2_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_macs2_peaks.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
-FETCH_SWEMBL_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/swembl/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_swembl-R0.01.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
+#FETCH_SWEMBL_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/swembl/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_swembl-R0.01.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
 FETCH_SPP_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/spp/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_spp.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
 
-FETCH_PEAKS = FETCH_MACS2_PEAKS + FETCH_SWEMBL_PEAKS + FETCH_SPP_PEAKS
+FETCH_PEAKS = FETCH_MACS2_PEAKS + FETCH_SPP_PEAKS
 
 # Sequence purge
 PURGE_MACS2_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_macs2_peaks_purged.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
-PURGE_SWEMBL_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/swembl/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_swembl-R0.01_purged.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
+#PURGE_SWEMBL_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/swembl/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_swembl-R0.01_purged.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
 PURGE_SPP_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/spp/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_spp_purged.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
 
-PURGE_PEAKS = PURGE_MACS2_PEAKS + PURGE_SWEMBL_PEAKS + PURGE_SPP_PEAKS
+PURGE_PEAKS = PURGE_MACS2_PEAKS + PURGE_SPP_PEAKS
 
 ## Oligo analysis
 #OLIGO = config['oligo_stats'].split()
@@ -250,7 +250,7 @@ rule all:
 #    input: GRAPHICS, RAW_READNB, RAW_QC, TRIMMED_QC, SORTED_MAPPED_READS_BWA, SORTED_READS_BED
 #    input: RAW_QC, TRIMMED_READS_SICKLE, TRIMMED_QC, MAPPED_READS_BWA, BAM_READNB, BED_READNB, PEAKS_MACS2, PEAKS_SWEMBL
 #    input: RAW_QC, TRIMMED_READS_SICKLE, TRIMMED_QC, MAPPED_READS_BWA, BAM_READNB, BED_READNB, PEAKS_MACS2
-	input: IMPORT, TRIMMED_READS_SICKLE, TRIMMED_QC, RAW_QC, MAPPED_READS_BWA, RAW_READNB, BAM_READNB, BED_READNB, PEAKS, FETCH_PEAKS, GRAPHICS
+	input: IMPORT, TRIMMED_READS_SICKLE, TRIMMED_QC, RAW_QC, MAPPED_READS_BWA, RAW_READNB, BAM_READNB, BED_READNB, PEAKS, FETCH_PEAKS, GRAPHICS, PURGE_PEAKS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
