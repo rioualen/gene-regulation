@@ -27,6 +27,16 @@ output:
     - disparition vboxnet0
     
 * Since snakemake 3.4: add pyYAML ?
+
+**/!\\** attention pour les rsync, notamment si user + root... ssh, ssh agent ?
+
+* revoir les install via apt-get car pb de version ! 
+* mettre la procédure spécifique 
+* lister les versions de chaque programme pour un wf qui fonctionne
+
+* dependance mkvtree / rsat
+
+* see differences between ubuntu and lmde (python libs notamment)
     
 ## Requirements
 
@@ -149,8 +159,33 @@ python3 --version
 If you don't have python 3 you should install it, as well as pip3.
 ```
 sudo apt-get install python3
+```
+Install pip
+```
+sudo apt-get install python-pip
 sudo apt-get install python3-pip
 ```
+Not installed natively?
+```
+apt-get install python-dev
+apt-get install python3.4-dev
+```
+
+## R
+
+### Python 3 package rpy2
+
+```
+pip3 install "rpy2<2.3.10"
+```
+
+Issue with egg_info stuff, found info [here](http://stackoverflow.com/questions/17886647/cant-install-via-pip-because-of-egg-info-error)
+
+```
+doesnt work
+```
+Problems solved after rsat install (including loads of python packages)?
+
 
 ## Snakemake
 
@@ -158,6 +193,7 @@ sudo apt-get install python3-pip
 * Snakemake FAQ/forum: [click](https://groups.google.com/forum/#!forum/snakemake)
 
 Now you have installed Python 3 and pip3 (see previous section), you can install snakemake safely:
+**/!\\** NB done as root#...
 ```
 pip3 install snakemake
 ```
@@ -192,6 +228,11 @@ rule bye:
 pip3 install snakemake --upgrade
 ```
 
+En option, pour générer les rapports:
+```
+pip3 install docutils
+```
+
 ## Graphviz
 
 Snakemake can generate useful graphviz outputs. 
@@ -223,16 +264,38 @@ This toolkit includes a number of programs, allowing the conversion of \*.sra fi
 
 * [SRA format](http://www.ncbi.nlm.nih.gov/Traces/sra/)
 * [fastq-dump manual](http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=toolkit_doc&f=fastq-dump)
+* [Installation manual](http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=toolkit_doc&f=std)
 
-You should be able to install SRA toolkit simply by issuing this command:
+Download last version [here](http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software):
+```
+cd ~/bin
+wget "http://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.5.2/sratoolkit.2.5.2-ubuntu64.tar.gz"
+tar -xvzf sratoolkit.2.5.2-ubuntu64.tar.gz
+rm sratoolkit.2.5.2-ubuntu64.tar.g
+```
+ 
+Add to path (cf section xx): 
+```
+PATH="$HOME/bin/sratoolkit.2.5.2-ubuntu64/bin:$PATH"
+```
+
+Check version:
+```
+fastq-dump --version
+  fastq-dump : 2.5.2
+```
+
+
+You should be able to install SRA toolkit simply by issuing this command, but likely it won't be the most recent release:
 ```
 sudo apt-get install sra-toolkit
 ```
 
-In case:
-
-* [Download archive](http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software)
-* [Installation manual](http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=toolkit_doc&f=std)
+```
+fastq-dump --version
+  fastq-dump : 2.1.7
+```
+ 
 
 ## FastQC
 
@@ -243,6 +306,10 @@ FastQC aims to provide a simple way to do some quality control checks on raw seq
 ```
 sudo apt-get install fastqc
 ```
+V 0.10.1
+
+Latest: 11.3
+
 
 ## Sickle
 
@@ -276,6 +343,9 @@ BWA is a software package for mapping low-divergent sequences against a large re
 ```
 sudo apt-get install bwa
 ````
+V: 0.7.5a-r405
+
+Latest : 0.7.12
 
 ## Bowtie
 
@@ -287,7 +357,9 @@ SAM (Sequence Alignment/Map) format is a generic format for storing large nucleo
 
 ```
 sudo apt-get install samtools
-````
+```
+V: 0.1.19
+Latest: 1.2
 
 ## Bedtools
 
@@ -298,8 +370,59 @@ The bedtools utilities are a swiss-army knife of tools for a wide-range of genom
 ```
 sudo apt-get install bedtools
 ````
+V: v2.17.0
+Latest: 2.24.0
 
 ## MACS2
+
+* [MACS2 web page](https://github.com/taoliu/MACS/)
+
+```
+sudo apt-get install python-numpy
+sudo pip install MACS2
+```
+
+
+Marche pas:< 
+```
+$ git clone https://github.com/taoliu/MACS.git
+# pip install MACS2
+...
+```
+
+## SWEMBL
+
+* [SWEMBL beginner's manual](http://www.ebi.ac.uk/~swilder/SWEMBL/beginners.html)
+
+**TODO**
+
+
+### R package spp
+
+sudo su
+echo "deb http://www.stats.bris.ac.uk/R/bin/linux/ubuntu precise/" >> /etc/apt/sources.list
+apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+apt-get update
+apt-get upgrade
+
+```
+wget "https://cran.r-project.org/src/base/R-3/R-3.2.2.tar.gz"
+tar -xf rm R-3.2.2.tar.gz
+rm R-3.2.2.tar.gz
+cd rm R-3.2.2
+./configure
+```
+doesn't work on VM
+
+not a problem of R version anyway
+
+libboost libraries ?
+apt-get install libboost-all-dev
+
+```
+> install.packages("caTools")
+```
+
 
 ## RSAT suite
 
