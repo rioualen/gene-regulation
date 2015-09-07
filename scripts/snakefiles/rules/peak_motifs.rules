@@ -1,4 +1,4 @@
-rule peak-motifs:
+rule peak_motifs:
 	"""Motif discovery using the peak-motifs pipeline.
 
 	Find out more @ http://floresta.eead.csic.es/rsat/help.peak-motifs.html
@@ -19,10 +19,10 @@ rule peak-motifs:
 	input: "{peaks}.fasta"
 	output: "{peaks}.html"
 	params:
-		qsub = config['qsub']
-		tasks = config['peak-motifs_parameters']['tasks']
-		disco = config['peak-motifs_parameters']['disco']
-		motif_db = config['peak-motifs_parameters']['motif_db']
+		qsub = config['qsub'], \
+		tasks = config['peak-motifs_parameters']['tasks'], \
+		disco = config['peak-motifs_parameters']['disco'], \
+		motif_db = config['peak-motifs_parameters']['motif_db'], \
 		outdir = config['peak-motifs_parameters']['outdir']
 	log: "{peaks}_peak-motifs.log"
 	benchmark: "{peaks}_peak-motifs_bench.json"

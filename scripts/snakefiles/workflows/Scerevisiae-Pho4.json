@@ -17,8 +17,8 @@
     },
 
     "files": {
-	"samples": "data/Scerevisiae-Pho4/samples.tab",
-	"design": "data/Scerevisiae-Pho4/design.tab"
+	"samples": "/root/mydisk/data/Scerevisiae-Pho4/samples.tab",
+	"design": "/root/mydisk/data/Scerevisiae-Pho4/design.tab"
     },
 
     "reads": {
@@ -35,16 +35,16 @@
     "dir": {
 	"base": ".",
 	"fg_lib": ".",
-	"reads_source": "data/Scerevisiae-Pho4/",
-	"results": "results/",
-	"reports": "results/",
-	"genome": "genomes/",
+	"reads_source": "/root/mydisk/data/Scerevisiae-Pho4/",
+	"results": "/root/mydisk/results/",
+	"reports": "/root/mydisk/results/",
+	"genome": "/root/mydisk/genomes/",
 	"logs": "logs/"
     },
 
     "reports" : {
-	"dag": "results/dag",
-	"rulegraph": "results/rule"
+	"dag": "/root/mydisk/results/dag",
+	"rulegraph": "/root/mydisk/results/rule"
     },
 
     "sickle":  { 
@@ -57,7 +57,7 @@
     },
 
     "bwa": {
-	"index": "genomes/sc/BWAIndex/sc.fa",
+	"index": "/root/mydisk/genomes/sc/BWAIndex/sc.fa",
 	"suffix": "bwa",
 	"threads": "10"
     },

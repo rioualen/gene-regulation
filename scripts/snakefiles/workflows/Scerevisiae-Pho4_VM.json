@@ -43,8 +43,8 @@
     },
 
     "reports" : {
-	"dag": "results/dag",
-	"rulegraph": "results/rule"
+	"dag": "/root/mydisk/results/dag",
+	"rulegraph": "/root/mydisk/results/rule"
     },
 
     "sickle":  { 
@@ -92,7 +92,7 @@
 		"nmotifs": "",
 		"minol": "",
 		"maxol": "",
-		"motif_db jaspar_core_vertebrates": "tf $RSAT/public_html/data/motif_databases/JASPAR/jaspar_core_vertebrates_2013-11.tf",
+		"motif_db": "jaspar_core_vertebrates tf $RSAT/public_html/motif_databases/JASPAR/jaspar_core_vertebrates_2013-11.tf",
 		"disco": "oligos,positions",
 		"outdir": "/root/mydisk/results/peak-motifs"
     }

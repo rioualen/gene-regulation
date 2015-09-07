@@ -43,7 +43,7 @@ import pandas as pd
 #                      Data & directories                        #
 #================================================================#
 
-configfile: "scripts/snakefiles/workflows/Scerevisiae-Pho4_claire.json"
+configfile: "scripts/snakefiles/workflows/Scerevisiae-Pho4_VM.json"
 workdir: config["dir"]["base"]
 
 # Beware: verbosity messages are incompatible with the flowcharts
@@ -96,6 +96,7 @@ include: os.path.join(RULES, "flowcharts.rules")
 include: os.path.join(RULES, "homer.rules")
 include: os.path.join(RULES, "macs2.rules")
 include: os.path.join(RULES, "peak_length.rules")
+include: os.path.join(RULES, "peak_motifs.rules")
 include: os.path.join(RULES, "purge_sequence.rules")
 include: os.path.join(RULES, "sickle_se.rules")
 #include: os.path.join(RULES, "sorted_bam.rules")
@@ -218,7 +219,7 @@ if verbosity >= 3:
     print("\nPEAKS_SPP\n\t" + "\n\t".join(PEAKS_SPP))
 
 ## Peaks returned by the different peak callers
-PEAKS = PEAKS_MACS2 + PEAKS_HOMER
+PEAKS = PEAKS_MACS2 + PEAKS_HOMER + PEAKS_SWEMBL
 
 # ----------------------------------------------------------------
 # Peak analysis
@@ -240,17 +241,28 @@ PURGE_HOMER_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/homer/{treat}
 
 PURGE_PEAKS = PURGE_MACS2_PEAKS + PURGE_HOMER_PEAKS
 
-## Oligo analysis ## BUG oligo.sam...
-OLIGO = config['oligo_analysis']['count_oligo'].split()
-MACS2_OLIGO = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/homer/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_homer_peaks_purged_oligo{{oligo}}.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"], oligo=OLIGO)
-#OLIGO_ANALYSIS = expand(RESULTS_DIR + '{sample}_purged_oligo{oligo}.txt', sample=SAMPLE_IDS, oligo=OLIGO)
+## Working til here ##
 
-## Peaks length ## TODO when purge works -> vmatch issue
+# Oligo analysis ## BUG oligo.sam...
+OLIGO = config['oligo_analysis']['count_oligo'].split()
+MACS2_OLIGO = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_macs2_peaks_purged_oligo{{oligo}}.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"], oligo=OLIGO)
+HOMER_OLIGO = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/homer/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_homer_peaks_purged_oligo{{oligo}}.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"], oligo=OLIGO)
+
+# Peaks length ## TODO when purge works -> vmatch issue
 MACS2_PEAKS_LENGTH = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_macs2_peaks_purged_length.png", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
+HOMER_PEAKS_LENGTH = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/homer/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_homer_peaks_purged_length.png", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
+
+# Peak-motifs
+MACS2_MOTIFS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_macs2_peaks_purged.html", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
+HOMER_MOTIFS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/homer/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_homer_peaks_purged.html", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
+
 
 ruleorder: macs2 > bam_to_bed > sam2bam
 ruleorder: count_reads_bam > sam2bam
 ruleorder: bed_to_fasta > purge_sequence
+
+# tests ruleorder
+ruleorder: swembl > bam_to_bed > sort_bam_by_pos > sam2bam
 
 
 rule all: 
@@ -258,7 +270,7 @@ rule all:
 	Run all the required analyses
 	"""
 #	input: GRAPHICS, IMPORT, TRIMMED_READS_SICKLE, TRIMMED_QC, RAW_QC, MAPPED_READS_BWA, RAW_READNB, BAM_READNB, BED_READNB, PEAKS_MACS2, FETCH_MACS2_PEAKS, PURGE_MACS2_PEAKS #redundant for flowcharts
-	input: GRAPHICS, REPORT, TRIMMED_QC, RAW_QC, RAW_READNB, BAM_READNB, BED_READNB, PURGE_PEAKS
+	input: GRAPHICS, REPORT, TRIMMED_QC, RAW_QC, RAW_READNB, BAM_READNB, BED_READNB, PEAKS, PURGE_PEAKS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
