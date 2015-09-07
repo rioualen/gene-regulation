@@ -26,7 +26,6 @@ Data source: 		Gene Expression Omnibus
 
 Author: 		Claire Rioualen, Jacques van Helden
 Contact: 		claire.rioualen@inserm.fr
-
 """
 
 #================================================================#
@@ -94,7 +93,9 @@ include: os.path.join(RULES, "convert_bam_to_bed.rules")
 include: os.path.join(RULES, "count_oligo.rules")
 include: os.path.join(RULES, "fastqc.rules")
 include: os.path.join(RULES, "flowcharts.rules")
+include: os.path.join(RULES, "homer.rules")
 include: os.path.join(RULES, "macs2.rules")
+include: os.path.join(RULES, "peak_length.rules")
 include: os.path.join(RULES, "purge_sequence.rules")
 include: os.path.join(RULES, "sickle_se.rules")
 #include: os.path.join(RULES, "sorted_bam.rules")
@@ -200,10 +201,10 @@ if verbosity >= 3:
     print("\nPEAKS_MACS2\n\t" + "\n\t".join(PEAKS_MACS2))
 
 ## Peak-calling with SWEMBL
-#PEAKS_SWEMBL = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/swembl/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_swembl-R" + config["swembl"]["R"] + ".bed", 
-#               zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
-#if verbosity >= 3: 
-#    print("\nPEAKS_SWEMBL\n\t" + "\n\t".join(PEAKS_SWEMBL))
+PEAKS_SWEMBL = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/swembl/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_swembl-R" + config["swembl"]["R"] + ".bed", 
+               zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
+if verbosity >= 3: 
+    print("\nPEAKS_SWEMBL\n\t" + "\n\t".join(PEAKS_SWEMBL))
 
 ## Peak-calling with SPP
 PEAKS_SPP = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/spp/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_spp.narrowPeak", 
@@ -211,8 +212,13 @@ PEAKS_SPP = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/spp/{treat}_vs_{ctrl}
 if verbosity >= 3: 
     print("\nPEAKS_SPP\n\t" + "\n\t".join(PEAKS_SPP))
 
+PEAKS_HOMER = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/homer/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_homer_peaks.bed", 
+               zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
+if verbosity >= 3: 
+    print("\nPEAKS_SPP\n\t" + "\n\t".join(PEAKS_SPP))
+
 ## Peaks returned by the different peak callers
-PEAKS = PEAKS_MACS2 + PEAKS_SPP
+PEAKS = PEAKS_MACS2 + PEAKS_HOMER
 
 # ----------------------------------------------------------------
 # Peak analysis
@@ -222,25 +228,27 @@ PEAKS = PEAKS_MACS2 + PEAKS_SPP
 FETCH_MACS2_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_macs2_peaks.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
 FETCH_SWEMBL_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/swembl/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_swembl-R0.01.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
 FETCH_SPP_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/spp/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_spp.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
+FETCH_HOMER_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/homer/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_homer_peaks.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
 
-FETCH_PEAKS = FETCH_MACS2_PEAKS + FETCH_SPP_PEAKS
+FETCH_PEAKS = FETCH_MACS2_PEAKS + FETCH_HOMER_PEAKS
 
 # Sequence purge
 PURGE_MACS2_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_macs2_peaks_purged.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
 PURGE_SWEMBL_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/swembl/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_swembl-R0.01_purged.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
 PURGE_SPP_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/spp/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_spp_purged.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
+PURGE_HOMER_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/homer/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_homer_peaks_purged.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
 
-PURGE_PEAKS = PURGE_MACS2_PEAKS + PURGE_SPP_PEAKS
+PURGE_PEAKS = PURGE_MACS2_PEAKS + PURGE_HOMER_PEAKS
 
-## Oligo analysis
-#OLIGO = config['oligo_stats'].split()
+## Oligo analysis ## BUG oligo.sam...
+OLIGO = config['oligo_analysis']['count_oligo'].split()
+MACS2_OLIGO = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/homer/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_homer_peaks_purged_oligo{{oligo}}.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"], oligo=OLIGO)
 #OLIGO_ANALYSIS = expand(RESULTS_DIR + '{sample}_purged_oligo{oligo}.txt', sample=SAMPLE_IDS, oligo=OLIGO)
 
-## Peaks length
-#PEAK_LENGTH = expand(RESULTS_DIR + '{sample}_purged_length.png', sample=SAMPLE_IDS)
+## Peaks length ## TODO when purge works -> vmatch issue
+MACS2_PEAKS_LENGTH = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_macs2_peaks_purged_length.png", zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
 
 ruleorder: macs2 > bam_to_bed > sam2bam
-ruleorder: swembl > bam_to_bed > sam2bam
 ruleorder: count_reads_bam > sam2bam
 ruleorder: bed_to_fasta > purge_sequence
 
@@ -250,7 +258,7 @@ rule all:
 	Run all the required analyses
 	"""
 #	input: GRAPHICS, IMPORT, TRIMMED_READS_SICKLE, TRIMMED_QC, RAW_QC, MAPPED_READS_BWA, RAW_READNB, BAM_READNB, BED_READNB, PEAKS_MACS2, FETCH_MACS2_PEAKS, PURGE_MACS2_PEAKS #redundant for flowcharts
-	input: GRAPHICS, REPORT, TRIMMED_QC, RAW_QC, RAW_READNB, BAM_READNB, BED_READNB, PURGE_MACS2_PEAKS
+	input: GRAPHICS, REPORT, TRIMMED_QC, RAW_QC, RAW_READNB, BAM_READNB, BED_READNB, PURGE_PEAKS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
