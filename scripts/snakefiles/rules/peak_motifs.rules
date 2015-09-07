@@ -29,6 +29,6 @@ rule peak-motifs:
 	shell: "peak-motifs  -v 1 -i  {input} -disco {params.disco} -motif_db {params.motif_db} -task {params.tasks} -prefix peak-motifs -outdir {params.outdir}"
 
 
-peak-motifs -v 1 -i SWEMBL_mmus_CEBPA_vs_mmus_Input_peaks_R0.01_nof_purge.fasta  -disco oligos,positions -motif_db jaspar_core_vertebrates tf $RSAT/public_html/motif_databases/JASPAR/jaspar_core_vertebrates_2013-11.tf -task purge,seqlen,composition,disco,synthesis,small_summary,motifs_vs_db,scan -prefix peak-motifs -outdir .
+#peak-motifs -v 1 -i SWEMBL_mmus_CEBPA_vs_mmus_Input_peaks_R0.01_nof_purge.fasta  -disco oligos,positions -motif_db jaspar_core_vertebrates tf $RSAT/public_html/motif_databases/JASPAR/jaspar_core_vertebrates_2013-11.tf -task purge,seqlen,composition,disco,synthesis,small_summary,motifs_vs_db,scan -prefix peak-motifs -outdir .
 
 
