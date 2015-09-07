@@ -31,10 +31,9 @@ rule homer:
 	output: "{result_dir}/{treatment}_vs_{control}/homer/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_homer_peaks.bed"
 	log: "{result_dir}/{treatment}_vs_{control}/homer/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_homer.log"
 	benchmark: "{result_dir}/{treatment}_vs_{control}/homer/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_homer_benchmark.json"
-	params: outdir="{result_dir}/{treatment}_vs_{control}", \
-		name="{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_homer", \
-		treatment_tag="treatment_{treatment}_tag", \
-		control_tag="control_{control}_tag", \
+	params: name="{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_homer", \
+		treatment_tag="{result_dir}/{treatment}_vs_{control}/homer/treatment_{treatment}_tag", \
+		control_tag="{result_dir}/{treatment}_vs_{control}/homer/control_{control}_tag", \
 		genome=config['genome']['genome_version'], \
 		other_options = config["homer"]["other_options"], \
 		qsub=config["qsub"] \
