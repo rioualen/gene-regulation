@@ -1,0 +1,101 @@
+{
+    "__description__": "ChIP-seq of Pho4 in high or no Pi context in S.cerevisiae.",
+    "__author__": "Claire Rioualen",
+    "data_source": "Gene Expression Omnibus, modENCODE", 
+    "qsub": "-V -m a -d /workspace/france_genomique/Scerevisiae-Pho4",
+    "verbosity": "1",
+
+    "genome": {
+	"organism": "Saccharomyces_cerevisiae",
+	"size": "12157105",
+	"genome_version": "sacCer2",
+	"base_url_fasta": "ftp://ftp.ensemblgenomes.org/pub/fungi/current/fasta/saccharomyces_cerevisiae/dna/",
+	"sequence": "",
+	"features": "",
+	"RefSeq_to_std": "",
+        "install_dir": ""
+    },
+
+    "files": {
+	"samples": "data/Scerevisiae-Pho4/samples.tab",
+	"design": "data/Scerevisiae-Pho4/design.tab"
+    },
+
+    "reads": {
+       	"qual_type": "sanger"
+    },
+
+    "suffixes": {
+	"trimmed": "_sickle-se-q20",
+	"mapped":  "_sickle-se-q20_bwa",
+	"macs2":  "_sickle-se-q20_bwa_macs2",
+	"swembl":  "_sickle-se-q20_bwa_swembl_R0.01"
+    },
+
+    "dir": {
+	"base": ".",
+	"fg_lib": ".",
+	"reads_source": "data/Scerevisiae-Pho4/",
+	"results": "results/",
+	"reports": "results/",
+	"genome": "genomes/",
+	"logs": "logs/"
+    },
+
+    "reports" : {
+	"dag": "results/dag",
+	"rulegraph": "results/rule",
+	"report": "results/report"
+    },
+
+    "sickle":  { 
+        "threshold": "20",
+        "other_options": ""
+    },
+
+    "fastqc": {
+	"other_options": ""
+    },
+
+    "bwa": {
+	"index": "genomes/sc/BWAIndex/sc.fa",
+	"suffix": "bwa",
+	"threads": "10"
+    },
+
+    "macs2": {
+	"qval": "0.05",
+	"keep_dup": "all",
+	"band_width": "250",
+	"mfold_min": "2",
+	"mfold_max": "50",
+	"call_summits": "--call-summits",
+	"other_options": ""
+    },
+
+    "swembl": {
+	"R": "0.01"
+    },
+
+    "samtools": {
+        "sort_by_name": ""    
+    },
+
+    "rsat": {
+	"verbosity": "1"
+    },
+    "oligo_analysis": {
+        "count_oligo": "1 2 4 6"
+    },
+    "peak-motifs_parameters": {
+		"tasks": "purge,seqlen,composition,disco,collect_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan",
+		"max_seq_len": "1000",
+		"nmotifs": "",
+		"minol": "",
+		"maxol": "",
+		"motif_db jaspar_core_vertebrates": "tf $RSAT/public_html/data/motif_databases/JASPAR/jaspar_core_vertebrates_2013-11.tf",
+		"disco": "oligos,positions",
+		"outdir": "/root/mydisk/results/peak-motifs"
+    }
+
+}
