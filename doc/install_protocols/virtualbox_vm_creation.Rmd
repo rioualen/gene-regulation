@@ -228,6 +228,10 @@ ssh-agent > ~/agent
 source ~/agent
 ssh-add
 ```
+
+**/!\\ TODO**
+15/08/31 Add visudo edition? How is it not yet?
+
 # VirtualBox hacks and tricks
 
 ## Clipboard sharing between guest and host

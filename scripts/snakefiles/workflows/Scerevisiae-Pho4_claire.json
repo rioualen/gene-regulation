@@ -17,8 +17,8 @@
     },
 
     "files": {
-	"samples": "/root/mydisk/data/Scerevisiae-Pho4/samples.tab",
-	"design": "/root/mydisk/data/Scerevisiae-Pho4/design.tab"
+	"samples": "data/Scerevisiae-Pho4/samples.tab",
+	"design": "data/Scerevisiae-Pho4/design.tab"
     },
 
     "reads": {
@@ -35,16 +35,17 @@
     "dir": {
 	"base": ".",
 	"fg_lib": ".",
-	"reads_source": "/root/mydisk/data/Scerevisiae-Pho4/",
-	"results": "/root/mydisk/results/",
-	"reports": "/root/mydisk/results/",
-	"genome": "/root/mydisk/genomes/",
+	"reads_source": "data/Scerevisiae-Pho4/",
+	"results": "results/",
+	"reports": "results/",
+	"genome": "genomes/",
 	"logs": "logs/"
     },
 
     "reports" : {
-	"dag": "/root/mydisk/results/dag",
-	"rulegraph": "/root/mydisk/results/rule"
+	"dag": "results/dag",
+	"rulegraph": "results/rule",
+	"report": "results/report"
     },
 
     "sickle":  { 
@@ -57,7 +58,7 @@
     },
 
     "bwa": {
-	"index": "/root/mydisk/genomes/sc/BWAIndex/sc.fa",
+	"index": "genomes/sc/BWAIndex/sc.fa",
 	"suffix": "bwa",
 	"threads": "10"
     },
@@ -82,6 +83,19 @@
 
     "rsat": {
 	"verbosity": "1"
+    },
+    "oligo_analysis": {
+        "count_oligo": "1 2 4 6"
+    },
+    "peak-motifs_parameters": {
+		"tasks": "purge,seqlen,composition,disco,collect_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan",
+		"max_seq_len": "1000",
+		"nmotifs": "",
+		"minol": "",
+		"maxol": "",
+		"motif_db jaspar_core_vertebrates": "tf $RSAT/public_html/data/motif_databases/JASPAR/jaspar_core_vertebrates_2013-11.tf",
+		"disco": "oligos,positions",
+		"outdir": "/root/mydisk/results/peak-motifs"
     }
 
 }

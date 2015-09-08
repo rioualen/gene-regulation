@@ -34,10 +34,7 @@ rule macs2:
 	Input: sam, bam, bed... automatically detected by macs' callpeak algorithm. Bed format was used here. 
 	Output: bed
 
-	To be refined...
-	TODO:
-		Add qsub, log, bench, message keywords.
-		Generalize rule... And clean up this mess of a file once it's done.
+	/!\ Requires RSAT to be installed (maybe we should do this some other way to get rid of the dependency?)
 
 	Required parameters:
 		config['qsub']
@@ -47,15 +44,15 @@ rule macs2:
 		PEAKS_MACS2 = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_macs2_peaks.narrowPeak",
 	               zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
 	"""
-        input: treatment="{result_dir}/{treatment}/{treatment}" + config["suffixes"]["mapped"] + ".bed", \
-            control="{result_dir}/{control}/{control}" + config["suffixes"]["mapped"] + ".bed"
+        input: 	treatment="{result_dir}/{treatment}/{treatment}" + config["suffixes"]["mapped"] + ".bed", \
+            	control="{result_dir}/{control}/{control}" + config["suffixes"]["mapped"] + ".bed"
 	output: narrowpeaks = "{result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2_peaks.narrowPeak", \
                 peaks_bed = "{result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2_peaks.bed", \
                 peak_len = "{result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2_peaklen.tab", \
                 summits = "{result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2_summits.bed"
         log: "{result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2.log"
         benchmark: "{result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2_benchmark.json"
-        params: outdir="{result_dir}/{treatment}_vs_{control}", \
+        params: outdir="{result_dir}/{treatment}_vs_{control}/macs2/", \
             name="{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2", \
             qval = config["macs2"]["qval"], \
             call_summits = config["macs2"]["call_summits"], \
