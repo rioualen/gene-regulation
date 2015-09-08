@@ -1,5 +1,5 @@
 # Check if each required parameter has been defined in the JSON
-# configuration file, otherwise use default values
+# configuration file, otherwise use default values.
 
 if not "size" in config["genome"].keys():
     sys.exit("The parameter genome size must be defined in the JSON file")
