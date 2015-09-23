@@ -7,7 +7,7 @@ library(GO.db)
 
 
 ## Parameters
-dir.main <- "~/dr-chip-rna-seq"
+dir.main <- "/home/lkhamvongsa/mountrsatlocal/dr-chip-rna-seq"
 setwd(dir.main)
 ## Source : M. Carlson. How To Use GOstats and Category to do Hypergeometric testing with unsupported model organisms. 
 org <- "dme"
