@@ -18,7 +18,7 @@ output:
 * Include minimum json file config depending on bricks to be used.
 
 * Beware of paths
-    - ~/Desktop/workspace
+    - ~/workspace
     - ~/bin
 * Test all of this in IFB appliance
 
@@ -27,6 +27,16 @@ output:
     - disparition vboxnet0
     
 * Since snakemake 3.4: add pyYAML ?
+
+**/!\\** attention pour les rsync, notamment si user + root... ssh, ssh agent ?
+
+* revoir les install via apt-get car pb de version ! 
+* mettre la procédure spécifique 
+* lister les versions de chaque programme pour un wf qui fonctionne
+
+* dependance mkvtree / rsat
+
+* see differences between ubuntu and lmde (python libs notamment)
     
 ## Requirements
 
@@ -39,15 +49,18 @@ See one of these:
 
 ### VM customization
 
-Make sure to provide the right amount of RAM and CPU, according to the amount of data, the tools you want to use, and what you actually have on your local.
+Make sure to provide the right amount of RAM and CPU, according to the amount of data, the tools you want to use, and what you actually have on your local installation.
 
 Regarding the size of the virtual disk, see `virtualbox_VM_creation.Rmd`.
 
+<!---
 Here we used these settings:
 
 * RAM: 40Go
 * HD: 120Go
 * CPU: 10
+-->
+
 
 # General requirements 
 
@@ -93,7 +106,7 @@ sudo apt-get install libz-dev
 
 ### qsub
 
-TODO 
+**/?\\** TODO 
 sudo apt-get install slurm-wlm-torque
 ! munge
 
@@ -133,6 +146,9 @@ source ~/.profile
 
 /!\\ check R versions, python versions, etc...
 
+/!\\ It seems there could an issue with the installation of python module while using sudo or doing is as root...
+Googling "sudo pip" suggests it is a bad idea for safety reasons, and should not be needed...
+
 ## Python 3
 
 Snakemake requires to have Python 3 installed. If you have installed Ubuntu14.04 on your machine by following on of the previous tutorials, you should have both Python 2.7 and Python 3.4 installed for starters. You can check this by issuing the following commands in a terminal: 
@@ -140,11 +156,36 @@ Snakemake requires to have Python 3 installed. If you have installed Ubuntu14.04
 python --version # usually the default python version is 2.7+
 python3 --version
 ```
-If you don't have python 3 you should install it:
+If you don't have python 3 you should install it, as well as pip3.
 ```
 sudo apt-get install python3
+```
+Install pip
+```
+sudo apt-get install python-pip
 sudo apt-get install python3-pip
 ```
+Not installed natively?
+```
+apt-get install python-dev
+apt-get install python3.4-dev
+```
+
+## R
+
+### Python 3 package rpy2
+
+```
+pip3 install "rpy2<2.3.10"
+```
+
+Issue with egg_info stuff, found info [here](http://stackoverflow.com/questions/17886647/cant-install-via-pip-because-of-egg-info-error)
+
+```
+doesnt work
+```
+Problems solved after rsat install (including loads of python packages)?
+
 
 ## Snakemake
 
@@ -152,8 +193,9 @@ sudo apt-get install python3-pip
 * Snakemake FAQ/forum: [click](https://groups.google.com/forum/#!forum/snakemake)
 
 Now you have installed Python 3 and pip3 (see previous section), you can install snakemake safely:
+**/!\\** NB done as root#...
 ```
-sudo pip3 install snakemake
+pip3 install snakemake
 ```
 You can check snakemake works properly with this basic script:
 ```
@@ -177,13 +219,18 @@ rule bye:
 	message: "Generating {output} file."
 	shell: "echo BYE > {output}"
 ```
-* Save it to `~/Desktop/workspace/hello.py`.
-* Issue the command `cd ~/Desktop/workspace ; snakemake -s hello.py`.
+* Save it to `~/workspace/hello.py`.
+* Issue the command `cd ~/workspace ; snakemake -s hello.py`.
 * 2 files shoudl be created: `hello.txt` and `bye.txt`.
 
 **/!\\** Need version 3.4.1
 ```
-sudo pip3 install snakemake --upgrade
+pip3 install snakemake --upgrade
+```
+
+En option, pour générer les rapports:
+```
+pip3 install docutils
 ```
 
 ## Graphviz
@@ -197,6 +244,18 @@ sudo apt-get install graphviz
 
 Now if we want to use snakemake to develop NGS workflows, we have to install a number of programs depending on what we want to achieve.
 
+## Pandas
+
+**/!\\ TODO** To be checked!
+
+```
+$ pip3 install pandas ## not ok
+$ pip install pandas ## not ok
+# pip install pandas ## not ok
+# pip3 install pandas ## ok ?
+```
+
+
 # NGS analysis (optional) software to install
 
 ## SRA toolkit
@@ -205,16 +264,38 @@ This toolkit includes a number of programs, allowing the conversion of \*.sra fi
 
 * [SRA format](http://www.ncbi.nlm.nih.gov/Traces/sra/)
 * [fastq-dump manual](http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=toolkit_doc&f=fastq-dump)
+* [Installation manual](http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=toolkit_doc&f=std)
 
-You should be able to install SRA toolkit simply by issuing this command:
+Download last version [here](http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software):
+```
+cd ~/bin
+wget "http://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.5.2/sratoolkit.2.5.2-ubuntu64.tar.gz"
+tar -xvzf sratoolkit.2.5.2-ubuntu64.tar.gz
+rm sratoolkit.2.5.2-ubuntu64.tar.g
+```
+ 
+Add to path (cf section xx): 
+```
+PATH="$HOME/bin/sratoolkit.2.5.2-ubuntu64/bin:$PATH"
+```
+
+Check version:
+```
+fastq-dump --version
+  fastq-dump : 2.5.2
+```
+
+
+You should be able to install SRA toolkit simply by issuing this command, but likely it won't be the most recent release:
 ```
 sudo apt-get install sra-toolkit
 ```
 
-In case:
-
-* [Download archive](http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software)
-* [Installation manual](http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=toolkit_doc&f=std)
+```
+fastq-dump --version
+  fastq-dump : 2.1.7
+```
+ 
 
 ## FastQC
 
@@ -225,6 +306,10 @@ FastQC aims to provide a simple way to do some quality control checks on raw seq
 ```
 sudo apt-get install fastqc
 ```
+V 0.10.1
+
+Latest: 11.3
+
 
 ## Sickle
 
@@ -258,6 +343,9 @@ BWA is a software package for mapping low-divergent sequences against a large re
 ```
 sudo apt-get install bwa
 ````
+V: 0.7.5a-r405
+
+Latest : 0.7.12
 
 ## Bowtie
 
@@ -269,7 +357,9 @@ SAM (Sequence Alignment/Map) format is a generic format for storing large nucleo
 
 ```
 sudo apt-get install samtools
-````
+```
+V: 0.1.19
+Latest: 1.2
 
 ## Bedtools
 
@@ -280,44 +370,97 @@ The bedtools utilities are a swiss-army knife of tools for a wide-range of genom
 ```
 sudo apt-get install bedtools
 ````
+V: v2.17.0
+Latest: 2.24.0
 
 ## MACS2
+
+* [MACS2 web page](https://github.com/taoliu/MACS/)
+
+```
+sudo apt-get install python-numpy
+sudo pip install MACS2
+```
+
+
+Marche pas:< 
+```
+$ git clone https://github.com/taoliu/MACS.git
+# pip install MACS2
+...
+```
+
+## SWEMBL
+
+* [SWEMBL beginner's manual](http://www.ebi.ac.uk/~swilder/SWEMBL/beginners.html)
+
+**TODO**
+
+
+### R package spp
+
+sudo su
+echo "deb http://www.stats.bris.ac.uk/R/bin/linux/ubuntu precise/" >> /etc/apt/sources.list
+apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+apt-get update
+apt-get upgrade
+
+```
+wget "https://cran.r-project.org/src/base/R-3/R-3.2.2.tar.gz"
+tar -xf rm R-3.2.2.tar.gz
+rm R-3.2.2.tar.gz
+cd rm R-3.2.2
+./configure
+```
+doesn't work on VM
+
+not a problem of R version anyway
+
+libboost libraries ?
+apt-get install libboost-all-dev
+
+```
+> install.packages("caTools")
+```
+
 
 ## RSAT suite
 
 See *$RSAT/doc/howto/install_rsat_ubuntu14.04.bash*
 
-# France Génomique ChIP-seq project - Celegans H3K27me3
+# France Génomique ChIP-seq project - Scerevisiae-Pho4
 
 ## Cloning the repository
 
 Cloning the repository from GitHub requires access rights. 
 Contact: claire.rioualen@inserm.fr
 ```
-cd ~/Desktop/workspace
+cd ~/workspace
 git clone git+ssh://git@git.renater.fr:2222/fg-chip-seq.git
 ```
 Note: commit 3e1434c9942a2c7899b135f1a4be99d8f4aa68cf
 
 ## Data transfer
 
-## Raw data
+**/!\\ 15/08/31** Rsync ne fonctionne que dans un sens ? 
+```
+cd
+mkdir data
+mkdir genomes
+```
 
+Et depuis l'hôte:
 ```
-rsync -ruptvl rioualen@10.1.1.133:~/Desktop/workspace/fg-chip-seq/data/Celegans-H3K27me3 data/
+rsync -ruptvl /data/Scerevisiae-Pho4 rg@192.54.201.107:~/data/
+rsync -ruptvl /data/genomes/sc rg@192.54.201.107:~/genomes/
 ```
 
-## Genome
-
-```
-rsync -ruptvl rioualen@10.1.1.133:~/Desktop/workspace/fg-chip-seq/genomes/ce10/BWAIndex/ce10.fa genomes/ce10/BWAIndex/
-```
 
 ## Running the pipeline
 
 ```
-cd ~/Desktop/workspace/fg-chip-seq
-snakemake -s scripts/snakefiles/workflows/Celegans-H3K27me3.py -j 4
+cd ~/workspace/fg-chip-seq
+snakemake -s scripts/snakefiles/workflows/Scerevisiae-Pho4.py -j 4
 ```
 
 /!\\ path of files should be changed from /home/rioualen to /home/rg in both .py and .json files.

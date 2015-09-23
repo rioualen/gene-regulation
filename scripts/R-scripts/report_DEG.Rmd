@@ -43,6 +43,8 @@ parameters <- list(
   "groupGo.level" = 3,
   "barplot_catnb" = 36)
 
+
+## List of tools for differential expression analysis
 deg.tools <- c("edgeR", "DESeq2")
 
 for (deg.tool in deg.tools) {
@@ -54,6 +56,7 @@ for (deg.tool in deg.tools) {
   
   }  
 
+## Print out the parameters in the Rmd report
 param.table <- t(as.data.frame(parameters))
 colnames(param.table) <- "value"
 kable(param.table)
@@ -104,7 +107,7 @@ summary.table <- data.frame("nb.genes" = nrow(deg.table),
                          "NA" = sum(is.na(deg.table[,threshold.column]))
 )
 
-
+## Print out the summary table for the Rmd report
 kable(data.frame(t(summary.table)), format = "markdown")
 ```
 
@@ -137,10 +140,9 @@ We performed the functional enrichment analysis for three separate groups of gen
 3. *Positive*: union of up- and down-regulated
 
 
-```{r GO_enrichment}
+```{r GO_enrichment, echo=FALSE, warning=FALSE, render=TRUE, fig.width=10, fig.height= 7}
 
 ## Run GO enrichment analysis for up-regulated, down-regulated and the union of them.
-
 groups <- c("up", "down", "positive")
 ontologies <- c("BP", "CC", "MF")
 selection.criteria <- c("signif", "random")
@@ -190,7 +192,7 @@ for (group in groups) {
                 quote=FALSE, sep="\t", row.names = FALSE, col.names = TRUE)
     
     ## Export a barplot with the groupGO results
-    pdf(file=paste(sep="", ego.path, "_barplot.pdf"), width=10, heigh=7)
+    png(file=paste(sep="", ego.path, "_barplot.png"), width=10*150, heigh=7*150)
     barplot(ego,  showCategory=parameters$barplot_catnb, 
             main=ego.prefix)
     tais.toi <- dev.off()
@@ -234,22 +236,4 @@ To check the reliability of the enrichment analysis, we performed two negative c
 1) Submit random selections of genes of the same sizes as the DEG lists. In principle, there is no reason for randomly selected genes to be enriched for a given functional class. 
 
 2) Submit the full list of all the genes for which an EntrezID was identified. In principle, by definition there should be no enrichment, since the principle of enrichment analysis is to test whether the input gene list has some bias for some gene ontology class.
-
-
-
-```{r}
-
-
-## Compute the enrichment of the gene list for Biological Processes of the Gene Ontology
-ego <- enrichGO(gene =  gg[,2], organism = "fly",ont = "BP", readable = T)
-barplot(ego,  showCategory=24)
-
-
-ggo <- groupGO(gene=gg[,2], organism="fly",ont="BP", level=3, readable=TRUE)
-barplot(ggo, showCategory=24)
-
-
-
-ego2 <- gseGO(geneList = ggo,organism = "fly",ont = "BP" )
-```
 
