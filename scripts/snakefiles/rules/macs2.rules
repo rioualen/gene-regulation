@@ -55,7 +55,7 @@ rule macs2:
                 summits = "{result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2_summits.bed"
         log: "{result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2.log"
         benchmark: "{result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2_benchmark.json"
-        params: outdir="{result_dir}/{treatment}_vs_{control}", \
+        params: outdir="{result_dir}/{treatment}_vs_{control}/macs2/", \
             name="{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2", \
             qval = config["macs2"]["qval"], \
             call_summits = config["macs2"]["call_summits"], \
