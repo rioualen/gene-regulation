@@ -18,6 +18,8 @@ library("GenomicFeatures")
 library("clusterProfiler")
 library("stats4bioinfo")
 
+
+
 ## Load library of functions for differential analysis
 dir.fg <- "~/fg-chip-seq/"
 source(file.path(dir.fg, "scripts/R-scripts/deg_lib.R"))
@@ -86,7 +88,7 @@ setwd(dir.main)
 ## At the end we can choose any combination of these threshold to select the relevant gene list.
 ## Choose default value for thresholds if they were not defined in the config file
 if (!exists("thresholds")) {
-  thresholds <- c("padj"=0.05, "evalue"=1, "FC"=1.5) 
+  thresholds <- c("padj"=0.05, "FC"=1.5) 
 }
 
 
@@ -122,7 +124,7 @@ names(cols.conditions) <- conditions
 
 ## Define a color per sample according to its condition
 sample.desc$color <- cols.conditions[sample.conditions]
-#names(cols.samples) <- sample.ids
+# names(cols.samples) <- sample.ids
 # print(cols.samples)
 
 ## Read the design file, which indicates the anlayses to be done.
@@ -145,11 +147,20 @@ all.counts <- read.delim(all.counts.table, row.names=1, sep="\t")
 # names(all.counts)
 # dim(all.counts)
 
+
+## Check that the header of all.counts match the sample IDs
+ids.not.found <- setdiff(sample.ids, names(all.counts)) ## Identify sample IDs with no column in the count table
+if (length(ids.not.found) > 0) {
+  stop(paste(length(ids.not.found), "Missing columns in count table", all.counts.table), paste(sep="; ", ids.not.found))
+}
+
 verbose("Computing count-derived metrics (log-transformed)", 1)
 
+## The next step is useful only with htseq-count results, 
+## in order to suppress the statistics that are inserted within the count files themselves.
 ## Statistics on reads that could not be mapped to genes for different reasons (intergenic, ambiguous, not unique, ...)
-all.counts.not.mapped <- all.counts[grep(pattern = "^__", x = row.names(all.counts)), ]
-# dim(all.counts.not.mapped)
+all.counts.htseq.stats <- all.counts[grep(pattern = "^__", x = row.names(all.counts)), ]
+# dim(all.counts.htseq.stats)
 all.counts.mapped <- all.counts[grep(invert=TRUE, pattern = "^__", x = row.names(all.counts)), ]
 # dim(all.counts.mapped)
 
@@ -165,6 +176,11 @@ all.counts.mapped.log10 <- log10(all.counts.mapped.epsilon)
 ## Load gene information from the GTF file 
 ## (should be the same as used to count tags per gene)
 if (exists("gtf.file")) {
+  
+  ## Jacques or Lucie, TO DO : check if the method makeTxDbFromGFF allows to get gene names and descriptions.
+  ## In principle it should be possible since this info is in the GTF file. 
+  ## If not, we migh rewite a parser for GTF. 
+  
   verbose(paste("Loading gene information from GTF file", gtf.file))
   #   library(rtracklayer)  # for the import() function
   #   gr <- import(gtf.file)
@@ -295,138 +311,15 @@ stats.per.sample$log10.cpm.mean <- apply(cpms.log10, 2, mean)
 # head(stats.per.sample)
 verbose("Exporting stats per sample", 1)
 sample.summary.file <- paste(sep="", prefix["general.file"], "_summary_per_sample.tab")
-write.table(x = t(stats.per.sample), row.names = TRUE, col.names=NA, 
+write.table(x = stats.per.sample, row.names = TRUE, col.names=NA, 
             file = sample.summary.file, sep = "\t", quote=FALSE)
 verbose(paste(sep="", "\tSummary per sample\t", sample.summary.file), 1)
 
 ################################################################
-## Draw some generic plots
+## Draw some generic plots to display sample-wise statistics.
 ################################################################
 
-par.ori <- par() ## Save original plot parameters
-
-## Adapt boxplot size to the number of samples and label sizes
-boxplot.lmargin <- max(nchar(sample.desc$label))/3+5
-boxplot.height <- length(sample.ids)/3+2
-
-## Sample-wise statistics
-pdf(file= file.path(dir.DEG, paste(sep = "", "sample_libsum_barplot.pdf")), width=8, height=boxplot.height)
-par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
-bplt <- barplot(stats.per.sample$Mreads, names.arg = stats.per.sample$label, horiz = TRUE, las=1,
-                xlab="libsum (Million reads per sample)",
-                main="Read library sizes (libsum per sample)",
-                col=stats.per.sample$color)
-grid(col="white", lty="solid",ny = 0)
-text(x=pmax(stats.per.sample$Mreads, 3), labels=stats.per.sample$Mreads, y=bplt,pos=2, font=2)
-silence <- dev.off()
-
-## Boxplots of raw counts and CPMs, in linear + log axes. 
-## These plots give a pretty good intuition of the raw data per sample: 
-## library sizes, outliers, dispersion of gene counts.
-
-## Boxplot of raw counts
-pdf(file= file.path(dir.DEG, paste(sep = "", "sample_boxplots_raw_counts.pdf")), width=8, height=boxplot.height)
-par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
-boxplot(all.counts.mapped, horizontal=TRUE, col=sample.desc$color,
-        xlab="Raw counts", names=sample.desc$label,
-        main="Box plots per sample: raw counts", las=1)
-quiet <- dev.off()
-
-## Boxplot of log10-transformed counts
-pdf(file= file.path(dir.DEG, paste(sep = "", "sample_boxplots_log10_counts.pdf")), width=8, height=boxplot.height)
-par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
-boxplot(all.counts.mapped.log10, horizontal=TRUE, col=sample.desc$color,
-        xlab="log10(counts)", names=sample.desc$label,
-        main="Box plots per sample: log10(counts)", las=1)
-quiet <- dev.off()
-
-## Boxplot of CPMs
-pdf(file= file.path(dir.DEG, paste(sep = "", "sample_boxplots_CPM.pdf")), width=8, height=boxplot.height)
-par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
-boxplot(cpms, horizontal=TRUE, col=sample.desc$color,
-        xlab="CPM", names=sample.desc$label,
-        main="Box plots per sample: counts per million reads (CPM)", las=1)
-quiet <- dev.off()
-
-## Boxplot of log10-transformed CPMs
-pdf(file= file.path(dir.DEG, paste(sep = "", "sample_boxplots_log10_CPM.pdf")), width=8, height=boxplot.height)
-par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
-boxplot(cpms.log10, horizontal=TRUE, col=sample.desc$color,
-        xlab="log10(CPM)", names=sample.desc$label,
-        main="Box plots per sample: counts per million reads (CPM)", las=1)
-quiet <- dev.off()
-
-
-par <- par.ori ## Restore original plot parameters
-par(mar=c(4.1,5.1,4.1,1.1))
-
-## Draw sample correlation heatmaps for the raw read counts
-pdf(file=paste(sep="", prefix["general.file"],"_sample_correl_heatmap_counts.pdf"))
-hm <- heatmap.2(as.matrix(cor(all.counts.mapped)),  scale="none", trace="none", 
-                main="Correlation between raw counts", margins=c(8,8),
-                col=cols.heatmap) #, breaks=seq(-1,1,2/length(cols.heatmap)))
-quiet <- dev.off()
-
-## Draw sample correlation heatmaps for CPM. Actually it gives exactly the 
-## same result as correlation between raw counts, since the correlation has a 
-## standardizing effect. 
-# pdf(file=paste(sep="", prefix["general.file"],"_sample_correl_heatmap_cpms.pdf"))
-# hm <- heatmap.2(as.matrix(cor(cpms)),  scale="none", trace="none", 
-#                 main="Correlation between CPM",
-#                 col=cols.heatmap) #, breaks=seq(-1,1,2/length(cols.heatmap)))
-# quiet <- dev.off()
-
-## Plot the first versus second components of samples
-cpms.pc <- prcomp(t(cpms))
-pdf(file=paste(sep="", prefix["general.file"],"_CPM_PC1-PC2.pdf"))
-plot(cpms.pc$x[,1:2], panel.first=grid(), type="n", main="First components from PCA-transformed CPMs")
-text(cpms.pc$x[,1:2], labels = sample.conditions, col=sample.desc$color)
-quiet <- dev.off()
-
-
-
-## Exploratory plots, should not be done for all projects.
-if (run.param$exploratory.plots) {
-  verbose("Drawing generic plots from the whole count table", 1)
-  
-  ## Plot the impact of the normalization factor (library sum , median or percentile 75)
-  png(file= file.path(dir.DEG, paste(sep = "", "CPM_libsum_vs_median_vs_perc75.png")), 
-      width=1000, height=1000)
-  cols.counts <- as.data.frame(matrix(sample.desc$color, nrow=nrow(all.counts.mapped), ncol=ncol(all.counts.mapped), byrow = TRUE))
-  colnames(cols.counts) <- names(all.counts.mapped)
-  rownames(cols.counts) <- rownames(all.counts.mapped)
-  plot(data.frame("libsum" = as.vector(as.matrix(cpms.libsum)),
-                  "median" = as.vector(as.matrix(cpms.median)),
-                  "perc75" = as.vector(as.matrix(cpms.perc75))),
-       col=as.vector(as.matrix(cols.counts)))
-  quiet <- dev.off()
-  
-  ## Plot some sample-wise statistics
-  pdf(file= file.path(dir.DEG, paste(sep = "", "sample_statistics_plots.pdf")), width=10, height=10)
-  par(mar=c(5,5,1,1)) ## adpt axes
-  par(mfrow=c(2,2))
-  ## Median versus mean
-  plot(stats.per.sample[,c("mean", "median")], 
-       panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
-       las=1, col=sample.desc$color)
-  
-  ## First versus third quartile
-  plot(stats.per.sample[,c("perc25", "perc75")], 
-       panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
-       las=1, col=sample.desc$color)
-  
-  ## Sum versus third quartile. 
-  plot(stats.per.sample[,c("sum", "perc75")], 
-       panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
-       las=1, col=sample.desc$color)
-  
-  ## Mean versus third quartile. 
-  plot(stats.per.sample[,c("mean", "perc75")], 
-       panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
-       las=1, col=sample.desc$color)
-  par(mfrow=c(1,1))
-  quiet <- dev.off()
-}
+sample.description.plots()
 
 ################################################################
 ## Analyse between-replicate reproducibility
@@ -535,6 +428,7 @@ for (i in 1:nrow(design)) {
   current.samples <- c(samples1, samples2)
   current.counts <- all.counts.mapped[,current.samples]
   # dim(current.counts)  ## For test
+  # names(current.counts)
   
   if (sum(!names(current.counts) %in% sample.ids) > 0) {
     stop("Count table contains column names without ID in sample description file.")
@@ -841,7 +735,7 @@ for (i in 1:nrow(design)) {
   vennDiagram(venn.counts.deg, cex=1, 
               main=paste(sep='; ', 
                          paste(sep=" ", cond1, "vs", cond2, "DEG")))
-  dev.off()
+  silence <- dev.off()
   
   
   ## For each threshold separately
@@ -858,7 +752,7 @@ for (i in 1:nrow(design)) {
     #             "_", s, "_", thresholds[s], 
     #             "_", prefix["comparison"], ".pdf")))
     vennDiagram(venn.counts.one.threshold, cex=1, main=paste(sep=" ", cond1, "vs", cond2, "; ", s, "threshold = ", thresholds[s]))
-    dev.off()
+   silence <- dev.off()
   }
   
   

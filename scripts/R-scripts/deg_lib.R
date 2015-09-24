@@ -477,5 +477,180 @@ complete.enrich.table <- function(enrich.table,
   }
   
    return(enrich.table)
-  
 }
+
+#' @title Draw an equivalent of the t-test volcano plot for RNA-seq data.  
+#' 
+#'
+#' @author Jacques van Helden (\email{Jacques.van-Helden@@univ-amu.fr})
+#'
+#' @description Draw an equivalent of the t-test volcano plot for RNA-seq 
+#' data. The main idea is to display simultaneously the effect size (X axis) 
+#' and the significance (Y axis). The measure of the effect size is in this 
+#' case the log2 fold change. (logFC). 
+#' 
+#' There is a close relationship between this RNA-seq version of the volcano 
+#' and the volcano plots commonly used to show the result of a t-test with microarrays.
+#'
+#' @details
+#' First version: 2015-09 
+#' Last modification: 2015-09
+#'
+#' @param deg.table A table with the results of differential expression. Such tables can be produced by DESeq2, edgeR or other packages.
+#' @param alpha=0.05 Threshold to declare features (genes) as positive or negative.
+#' @param effect.size.col="log2FC" Number or name of the column containing the effect size, whose values will be displayed on the X axis. 
+#' @param control.type = "p.value" Control type. Can be a p-value or an equivalent estimation of significance (FDR, e-value, FWER, ...). This value will be converted to y=-log10(x) to obtain the values displayed on the Y axis. The alpha threshold applies on the non-log-converted values.
+#' @param ... 
+#'
+#' @examples
+#'
+#' @export
+rnaseq.volcanoPlot <- function(deg.table,
+                               alpha=0.05,
+                               effect.size.col = "log2FC",
+                               control.type = "p.value",
+                               ...) {
+  volcanoPlot()
+}
+
+
+
+## Generate a set of plots displaying some sample-wise statistics
+sample.description.plots <- function () {
+  
+  par.ori <- par() ## Save original plot parameters
+  
+  ## Adapt boxplot size to the number of samples and label sizes
+  boxplot.lmargin <- max(nchar(sample.desc$label))/3+5
+  boxplot.height <- length(sample.ids)/3+2
+  
+  ## Sample-wise statistics
+  plot.file <- file.path(dir.DEG, paste(sep = "", "sample_libsum_barplot.pdf"))
+  message("Generating plot", plot.file)
+  pdf(file= plot.file, width=8, height=boxplot.height)
+  par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
+  bplt <- barplot(stats.per.sample$Mreads, names.arg = stats.per.sample$label, horiz = TRUE, las=1,
+                  xlab="libsum (Million reads per sample)",
+                  main="Read library sizes (libsum per sample)",
+                  col=stats.per.sample$color)
+  grid(col="white", lty="solid",ny = 0)
+  text(x=pmax(stats.per.sample$Mreads, 3), labels=stats.per.sample$Mreads, y=bplt,pos=2, font=2)
+  silence <- dev.off()
+  
+  ## Boxplots of raw counts and CPMs, in linear + log axes. 
+  ## These plots give a pretty good intuition of the raw data per sample: 
+  ## library sizes, outliers, dispersion of gene counts.
+  
+  ## Boxplot of raw counts
+  plot.file <- file.path(dir.DEG, paste(sep = "", "sample_boxplots_raw_counts.pdf"))
+  message("Generating plot file", plot.file)
+  pdf(file= plot.file, width=8, height=boxplot.height)
+  par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
+  boxplot(all.counts.mapped, horizontal=TRUE, col=sample.desc$color,
+          xlab="Raw counts", names=sample.desc$label,
+          main="Box plots per sample: raw counts", las=1)
+  quiet <- dev.off()
+  
+  ## Boxplot of log10-transformed counts
+  plot.file <- file.path(dir.DEG, paste(sep = "", "sample_boxplots_log10_counts.pdf"))
+  message("Generating plot file", plot.file)
+  pdf(file= plot.file, width=8, height=boxplot.height)
+  par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
+  boxplot(all.counts.mapped.log10, horizontal=TRUE, col=sample.desc$color,
+          xlab="log10(counts)", names=sample.desc$label,
+          main="Box plots per sample: log10(counts)", las=1)
+  quiet <- dev.off()
+  
+  ## Boxplot of CPMs
+  plot.file <- file.path(dir.DEG, paste(sep = "", "sample_boxplots_CPM.pdf"))
+  message("Generating plot file", plot.file)
+  pdf(file=plot.file, width=8, height=boxplot.height)
+  par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
+  boxplot(cpms, horizontal=TRUE, col=sample.desc$color,
+          xlab="CPM", names=sample.desc$label,
+          main="Box plots per sample: counts per million reads (CPM)", las=1)
+  quiet <- dev.off()
+  
+  ## Boxplot of log10-transformed CPMs
+  plot.file <- file.path(dir.DEG, paste(sep = "", "sample_boxplots_log10_CPM.pdf"))
+  message("Generating plot file")
+  pdf(file=plot.file, width=8, height=boxplot.height)
+  par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
+  boxplot(cpms.log10, horizontal=TRUE, col=sample.desc$color,
+          xlab="log10(CPM)", names=sample.desc$label,
+          main="Box plots per sample: counts per million reads (CPM)", las=1)
+  quiet <- dev.off()
+  
+  
+  par <- par.ori ## Restore original plot parameters
+  par(mar=c(4.1,5.1,4.1,1.1))
+  
+  ## Draw sample correlation heatmaps for the raw read counts
+  pdf(file=paste(sep="", prefix["general.file"],"_sample_correl_heatmap_counts.pdf"))
+  hm <- heatmap.2(as.matrix(cor(all.counts.mapped)),  scale="none", trace="none", 
+                  main="Correlation between raw counts", margins=c(8,8),
+                  col=cols.heatmap) #, breaks=seq(-1,1,2/length(cols.heatmap)))
+  quiet <- dev.off()
+  
+  ## Draw sample correlation heatmaps for CPM. Actually it gives exactly the 
+  ## same result as correlation between raw counts, since the correlation has a 
+  ## standardizing effect. 
+  # pdf(file=paste(sep="", prefix["general.file"],"_sample_correl_heatmap_cpms.pdf"))
+  # hm <- heatmap.2(as.matrix(cor(cpms)),  scale="none", trace="none", 
+  #                 main="Correlation between CPM",
+  #                 col=cols.heatmap) #, breaks=seq(-1,1,2/length(cols.heatmap)))
+  # quiet <- dev.off()
+  
+  ## Plot the first versus second components of samples
+  cpms.pc <- prcomp(t(cpms))
+  pdf(file=paste(sep="", prefix["general.file"],"_CPM_PC1-PC2.pdf"))
+  plot(cpms.pc$x[,1:2], panel.first=grid(), type="n", main="First components from PCA-transformed CPMs")
+  text(cpms.pc$x[,1:2], labels = sample.conditions, col=sample.desc$color)
+  quiet <- dev.off()
+  
+  
+  
+  ## Exploratory plots, should not be done for all projects.
+  if (run.param$exploratory.plots) {
+    verbose("Drawing generic plots from the whole count table", 1)
+    
+    ## Plot the impact of the normalization factor (library sum , median or percentile 75)
+    png(file= file.path(dir.DEG, paste(sep = "", "CPM_libsum_vs_median_vs_perc75.png")), 
+        width=1000, height=1000)
+    cols.counts <- as.data.frame(matrix(sample.desc$color, nrow=nrow(all.counts.mapped), ncol=ncol(all.counts.mapped), byrow = TRUE))
+    colnames(cols.counts) <- names(all.counts.mapped)
+    rownames(cols.counts) <- rownames(all.counts.mapped)
+    plot(data.frame("libsum" = as.vector(as.matrix(cpms.libsum)),
+                    "median" = as.vector(as.matrix(cpms.median)),
+                    "perc75" = as.vector(as.matrix(cpms.perc75))),
+         col=as.vector(as.matrix(cols.counts)))
+    quiet <- dev.off()
+    
+    ## Plot some sample-wise statistics
+    pdf(file= file.path(dir.DEG, paste(sep = "", "sample_statistics_plots.pdf")), width=10, height=10)
+    par(mar=c(5,5,1,1)) ## adpt axes
+    par(mfrow=c(2,2))
+    ## Median versus mean
+    plot(stats.per.sample[,c("mean", "median")], 
+         panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
+         las=1, col=sample.desc$color)
+    
+    ## First versus third quartile
+    plot(stats.per.sample[,c("perc25", "perc75")], 
+         panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
+         las=1, col=sample.desc$color)
+    
+    ## Sum versus third quartile. 
+    plot(stats.per.sample[,c("sum", "perc75")], 
+         panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
+         las=1, col=sample.desc$color)
+    
+    ## Mean versus third quartile. 
+    plot(stats.per.sample[,c("mean", "perc75")], 
+         panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
+         las=1, col=sample.desc$color)
+    par(mfrow=c(1,1))
+    quiet <- dev.off()
+  }
+}
+
