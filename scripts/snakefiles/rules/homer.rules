@@ -3,46 +3,44 @@
 #
 # /!\ Options yet to be implemented and refined
 
-if not "version" in config["genome"].keys():
-    sys.exit("The parameter genome version must be defined in the JSON file")
+if not "genome_version" in config["genome"].keys():
+	sys.exit("The parameter genome version must be defined in the JSON file")
 
 if not "homer" in config.keys():
-    config["homer"] = {}
+	config["homer"] = {}
 
 if not "other_options" in config["homer"].keys():
-    config["homer"]["other_options"] = ""
+	config["homer"]["other_options"] = ""
 
 rule homer:
 	"""Peak-calling with HOMER software, findPeaks algorithm (!).
-	Input formats: .sam, .bam, .bed 
+	Input formats: .sam, .bam, .bed (bam input requires samtools to be installed)
 
 	Required parameters:
 		config["genome"]["genome_version"]
 		config["qsub"]
 
 	Usage:
-		PEAKS_HOMER = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_homer_peaks.bed",
+		PEAKS_HOMER = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/homer/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_homer_peaks.bed",
                		zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
 
 	/!\ Lots of updates to be done before use
 	"""
-       input: 	treatment="{result_dir}/{treatment}/{treatment}" + config["suffixes"]["mapped"] + ".bed", \
+	input: 	treatment="{result_dir}/{treatment}/{treatment}" + config["suffixes"]["mapped"] + ".bed", \
 		control="{result_dir}/{control}/{control}" + config["suffixes"]["mapped"] + ".bed"
 	output: "{result_dir}/{treatment}_vs_{control}/homer/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_homer_peaks.bed"
-
 	log: "{result_dir}/{treatment}_vs_{control}/homer/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_homer.log"
-        benchmark: "{result_dir}/{treatment}_vs_{control}/homer/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_homer_benchmark.json"
-        params: outdir="{result_dir}/{treatment}_vs_{control}", \
-            	name="{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_homer", \
-		treatment_tag="treatment_{treatment}_tag", \
-		control_tag="control_{control}_tag", \
+	benchmark: "{result_dir}/{treatment}_vs_{control}/homer/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_homer_benchmark.json"
+	params: name="{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_homer", \
+		treatment_tag="{result_dir}/{treatment}_vs_{control}/homer/treatment_{treatment}_tag", \
+		control_tag="{result_dir}/{treatment}_vs_{control}/homer/control_{control}_tag", \
 		genome=config['genome']['genome_version'], \
- 		other_options = config["homer"]["other_options"], \
+		other_options = config["homer"]["other_options"], \
 		qsub=config["qsub"] \
-                  + " -q long -e {result_dir}/{treatment}_vs_{control}/homer/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_homer_qsub.err" \
-                  + " -q long -e {result_dir}/{treatment}_vs_{control}/homer/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_homer_qsub.out" 
-	shell:"""makeTagDirectory {params.chip_tag} -genome {params.genome} -checkGC {input.chip}
-		makeTagDirectory {params.input_tag} -genome {params.genome} -checkGC {input.inp}
-		findPeaks {params.chip_tag} -style factor -o auto -i {params.input_tag}
-		pos2bed.pl {params.chip_tag}/peaks.txt > {output}
+		+ " -q long -e {result_dir}/{treatment}_vs_{control}/homer/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_homer_qsub.err" \
+		+ " -q long -e {result_dir}/{treatment}_vs_{control}/homer/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_homer_qsub.out" 
+	shell:"""makeTagDirectory {params.treatment_tag} -genome {params.genome} -checkGC {input.treatment} -format bed
+		makeTagDirectory {params.control_tag} -genome {params.genome} -checkGC {input.control} -format bed
+		findPeaks {params.treatment_tag} -style factor -o auto -i {params.control_tag}
+		pos2bed.pl {params.treatment_tag}/peaks.txt > {output}
 		"""

@@ -21,23 +21,21 @@ output:
 
 ## Prérequis
 
-Avant de pouvoir éditer les pages du **wiki France Génomique ChIP-seq**, il faut disposer d'un compte Renater ([https://www.renater.fr/](https://www.renater.fr/)). Ces comptes sont accessibles à tout membre d'une institution française universitaire ou de recherche. Pour les personnes extérieures il est également possible de demander un compte réseau universel. 
+Avant de pouvoir éditer les pages du **wiki France Génomique ChIP-seq**, il faut disposer d'un compte Renater ([https://www.renater.fr/](https://www.renater.fr/)). Ces comptes sont accessibles à tout membre d'une institution française universitaire ou de recherche. Pour les personnes extérieures il est également possible de demander un [compte réseau universel](https://services.renater.fr/federation/participants/sac). 
 
 
 ## S'inscrire à la liste de diffusion "France Génomique ChIP-seq"
 
 1. Connectez vous au site de diffusion [https://groupes.renater.fr/sympa/info/france_genomique_chip-seq](https://groupes.renater.fr/sympa/info/france_genomique_chip-seq).
 
-2. Cliquez sur le lien ***s'abonner*** et suivez les instructions.
+2. Cliquez sur le lien ***S'abonner*** et suivez les instructions.
 
-## Editer des pages du wiki
+## Éditer des pages du wiki
 
 
 1. A partir d'un navigateur Web, connectez-vous au site [wiki France Génomique ChIP-seq](https://groupes.renater.fr/wiki/france_genomique_chip-seq/).
 
 2. Cliquez sur le bouton ***Connexion*** dans le coin supérieur droit et identifiez-vous.
 
-3. Ouvrez la page que vous désirez éditer, et cliquez sur le lien 
-
-** Editer cette page***, qui apparaît dans le menu 
+3. Ouvrez la page que vous désirez éditer, et cliquez sur le lien ***Éditer cette page***, qui apparaît dans le menu 
 

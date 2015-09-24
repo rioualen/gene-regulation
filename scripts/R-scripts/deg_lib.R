@@ -340,13 +340,14 @@ functional.enrichment <- function(geneset,
   if (run.clusterProfiler) {
     library("clusterProfiler")
     ## Check the organism
-    if (is.na(organism["clusterProfiler"])) {
-      message("Skipping clusterProfiler analysis because organisms is not specified")
+    if (is.na(organism.names["clusterProfiler"])) {
+      message("Skipping clusterProfiler analysis because organism.names[\"clusterProfiler\"] is not specified")
     } else {
       ## Compute the enrichment of the gene list for Biological Processes of the Gene Ontology
       ## We intently set all cutoffs to a value > than the possible max, in order to get the full table.
       ## We then perform the filter only if requested.
-      ego <- enrichGO(gene = geneset, organism = organism["clusterProfiler"],
+      ego <- enrichGO(gene = geneset, 
+                      organism = organism.names["clusterProfiler"],
                       pvalueCutoff = 2,
                       qvalueCutoff = 2,
                       ont = ontology, readable = T)  
@@ -417,7 +418,7 @@ complete.enrich.table <- function(enrich.table,
 
   ## q-value according to Benjamini-Hochberg method, which does not consider the prior proportions of null and non-null hypotheses
   enrich.table$qvalue <- enrich.table[,pvalue.column] * nb.tests/enrich.table$pvalue.rank
-  
+  # TO DO: cummax(x) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   
   ## Compute the q-value according to Benjamini-Hochberg method
   

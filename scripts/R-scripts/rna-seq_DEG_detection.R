@@ -7,6 +7,8 @@
 ## Last update: 2015-08-23
 ################################################################
 
+
+##Load libraries
 library("edgeR", warn.conflicts = FALSE, quietly=TRUE)
 library("DESeq2", warn.conflicts = FALSE, quietly=TRUE, verbose=FALSE)
 library("limma", warn.conflicts = FALSE, quietly=TRUE) ## Required for vennCounts and vennDiagram
@@ -14,46 +16,77 @@ library(gplots, warn.conflicts = FALSE, quietly=TRUE) ## Required for heatmaps.2
 library(RColorBrewer, warn.conflicts = FALSE, quietly=TRUE)
 library("GenomicFeatures")
 library("clusterProfiler")
+library("stats4bioinfo")
 
 ## Load library of functions for differential analysis
 dir.fg <- "~/fg-chip-seq/"
 source(file.path(dir.fg, "scripts/R-scripts/deg_lib.R"))
 
-
-verbosity <- 1
+## Define parameters
+run.param <- list()
+run.param$exploratory.plots <- FALSE
 deg.tools <- c("edgeR", "DESeq2")
 
-## Elements that should be added to the parameters
-org.db <- "org.EcK12.eg.db" ## Should be added to parameters
-gene.info.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655_GCA_000005845.2_gene_info.tab"
-organism.names <- c("name" = "Escherichia coli",
-                    "clusterProfiler" = NA,
-                    "kegg"="eco")
-gtf.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.gtf"
-gtf.source <- "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-28/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655/"
-#   pet.gene <- "b2531"
-go.map.file <- 'genome/Escherichia_coli_str_k_12_substr_mg1655_GCA_000005845.2_gene_GO.tab'
-go.description.file <- "genome/GO_description.tab"
+verbosity <- 1
+save.image <- TRUE ## Save memory image in an RData file
 
 ## The only argument is the file containing all the parameters for the analysis
 if (is.na(commandArgs(trailingOnly = FALSE)[6])) {
   #   stop("Parameter file must be passed as command-line argument.")
-  ## TEMPORARY FOR DEBUGGING: 
-  setwd("~/BeatriceRoche/")
-  r.params.path <- "results/DEG/sickle_pe_q20_bowtie2_pe_sorted_name_params.R"  
+  ## Elements that should be added to the parameters
+  #org <- "dm"
+  org <- "eco"
+  if (org == "eco") {
+    ## TEMPORARY FOR DEBUGGING: 
+    dir.main <- "~/BeatriceRoche/"
+    setwd(dir.main)
+    r.params.path <- "results/DEG/sickle_pe_q20_bowtie2_pe_sorted_name_params.R"  
+    org.db <- "org.EcK12.eg.db" ## Should be added to parameters
+    gene.info.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655_GCA_000005845.2_gene_info.tab"
+    organism.names <- c("name" = "Escherichia coli",
+                        "clusterProfiler" = NA,
+                        "kegg"="eco")
+    gtf.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.gtf"
+    gtf.source <- "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-28/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655/"
+    #   pet.gene <- "b2531"
+    genes.of.interest <- c("b2531")
+    go.map.file <- 'genome/Escherichia_coli_str_k_12_substr_mg1655_GCA_000005845.2_gene_GO.tab'
+    go.description.file <- "genome/GO_description.tab"
+  } else if (org=="dm") {
+    dir.main <- "~/dr-chip-rna-seq/"
+    setwd(dir.main)
+    r.params.path <- "results/rna-seq/DEG/sickle_se_q20_subread_featurecounts_params.R"  
+    sample.description.file <- "data/rna-seq/abdA_overexpr_sample_descriptions.tab" 
+    design.file <- "data/rna-seq/analysis_description.tab"
+    gtf.file <- "genomes/ftp.ensemblgenomes.org/pub/metazoa/release-28/gtf/drosophila_melanogaster/Drosophila_melanogaster.BDGP6.28.gtf"
+    gtf.source <- "ftp://ftp.ensemblgenomes.org/pub/metazoa/release-28/gtf/drosophila_melanogaster/Drosophila_melanogaster.BDGP6.28.gtf"
+    dir.DEG <- "results/rna-seq/DEG/"
+    suffix.deg <- "sickle_se_q20_subread_featurecounts"
+    suffix.DESeq2 <- paste(sep="_", suffix.deg, "DESeq2")
+    suffix.edgeR <- paste(sep="_", suffix.deg, "edgeR")
+    org.db <- "org.Dm.eg.db"
+    organism.names <- c("name" = "Drosophila melanogaster",
+                        "clusterProfiler" = "fly",
+                        "kegg"="dme")
+  } else {
+    message(paste("No info for org", org))
+  }
 } else {
   r.params.path <- commandArgs(trailingOnly = FALSE)[6]  
 }
 verbose(paste("Reading parameters", r.params.path), 1)
 source(r.params.path)
 setwd(dir.main)
+# getwd()
 
 ################################################################
 ## Check parameters + define additional ones
 
+## Experimental: we would like to compare gene lists obtained by applying thresholds on different scores. 
+## At the end we can choose any combination of these threshold to select the relevant gene list.
 ## Choose default value for thresholds if they were not defined in the config file
 if (!exists("thresholds")) {
-  thresholds <- c("padj"=0.05, "evalue"=1, "FC"=1.5)
+  thresholds <- c("padj"=0.05, "evalue"=1, "FC"=1.5) 
 }
 
 
@@ -64,7 +97,6 @@ cols.heatmap <- rev(colorRampPalette(brewer.pal(9,"RdBu"))(100))
 
 ## A trick: to enable log-scaled plots for 0 values, I add an epsilon increment
 epsilon <- 0.01
-
 
 ## Read the sample description file, which indicates the 
 ## condition associated to each sample ID.
@@ -77,15 +109,21 @@ sample.ids <- row.names(sample.desc)
 ## Experimental conditions
 sample.conditions <- as.vector(sample.desc[,1]) ## Condition associated to each sample
 names(sample.conditions) <- sample.ids
+# print(sample.conditions)
+
+## Build sample labels by concatenating their ID and condition
+sample.desc$label <- paste(sep="_", sample.ids, sample.conditions)
 
 ## Define a specific color for each distinct condition
-exp.conditions <- unique(sample.conditions) ## Set of distinct conditions
-cols.conditions <- brewer.pal(length(exp.conditions),"Dark2")
-names(cols.conditions) <- exp.conditions
+conditions <- unique(sample.conditions) ## Set of distinct conditions
+cols.conditions <- brewer.pal(max(3, length(conditions)),"Dark2")[1:length(conditions)]
+names(cols.conditions) <- conditions
+# print(cols.conditions)
 
 ## Define a color per sample according to its condition
-cols.samples <- cols.conditions[sample.conditions]
-names(cols.samples) <- sample.ids
+sample.desc$color <- cols.conditions[sample.conditions]
+#names(cols.samples) <- sample.ids
+# print(cols.samples)
 
 ## Read the design file, which indicates the anlayses to be done.
 ## Each row specifies one differential expression analysis, which 
@@ -93,16 +131,19 @@ names(cols.samples) <- sample.ids
 verbose("Reading design", 1)
 design <- read.delim(design.file, sep="\t", 
                      comment=";", header = TRUE, row.names=NULL)
+# print(design)
 
 ## Prefix for output files concerning the whole count table (all samples together)
 ## prefix["general.file"] <- sub(pattern = ".tab", replacement="", all.counts.table)
 prefix <- vector()
 prefix["general.file"] <- file.path(dir.DEG, suffix.deg)
+# print(prefix)
 
 ## Read the count table
 verbose("Loading count table", 1)
 all.counts <- read.delim(all.counts.table, row.names=1, sep="\t")
 # names(all.counts)
+# dim(all.counts)
 
 verbose("Computing count-derived metrics (log-transformed)", 1)
 
@@ -124,6 +165,7 @@ all.counts.mapped.log10 <- log10(all.counts.mapped.epsilon)
 ## Load gene information from the GTF file 
 ## (should be the same as used to count tags per gene)
 if (exists("gtf.file")) {
+  verbose(paste("Loading gene information from GTF file", gtf.file))
   #   library(rtracklayer)  # for the import() function
   #   gr <- import(gtf.file)
   txdb <- makeTxDbFromGFF(file=gtf.file,
@@ -142,6 +184,7 @@ if (exists("gtf.file")) {
   gene.info$entrez.id <- NA
   gene.info$description <- "no description"
 } else {
+  verbose(paste("No GTF file has been specified"))
   g <- nrow(all.counts.mapped)
   gene.info <- data.frame("seqnames"=rep(NA, times=g),
                           "start"=rep(NA, times=g),
@@ -159,9 +202,11 @@ if (exists("gtf.file")) {
 
 
 ################################################################
-## TEMPORARY: load gene information from a tab-delimited file generated with RSAT, 
+## TEMPORARY: load additional gene information from a tab-delimited file generated with RSAT, 
 ## because for bacterial genomes there is no obvious way to obtain EntrezIDs.
 if (exists("gene.info.file")) {
+  verbose(paste("Loading gene information from tab-delimited file", gene.info.file))
+  
   gene.info.rsat <- read.delim(gene.info.file, sep="\t", skip=3, header=1)  
   ## A bit tricky: we need to discard rows starting with ";", but we cannot use ";" as comment.char since it is found in descriptions and as separator for names
   comment.lines <- grep(gene.info.rsat[,1], pattern = ";")
@@ -178,12 +223,12 @@ if (exists("gene.info.file")) {
   # dim(gene.info.rsat)
   # names(gene.info.rsat)
   # View(gene.info.rsat)
-  # View(gene.info)
 } 
+# View(gene.info)
 
 ## Export the gene information table to keep a trace of what has been used. 
-verbose("Exporting gene information table", 1)
 gene.info.out <- paste(sep="", prefix["general.file"], "_gene_descriptions.tab")
+verbose(paste("Exporting gene information table", gene.info.out), 1)
 write.table(x = gene.info, row.names = FALSE,
             file = gene.info.out, sep = "\t", quote=FALSE)
 verbose(paste(sep="", "\tGene info table\t", gene.info.out), 1)
@@ -194,23 +239,31 @@ verbose(paste(sep="", "\tGene info table\t", gene.info.out), 1)
 ################################################################
 verbose("Computing statistics per sample", 1)
 
-stats.per.sample <- data.frame(
-  "sum" = apply(all.counts.mapped, 2, sum, na.rm=TRUE),
-  "mean" = apply(all.counts.mapped, 2, mean, na.rm=TRUE),
-  "min" = apply(all.counts.mapped, 2, min, na.rm=TRUE),
-  "perc05" = apply(all.counts.mapped, 2, quantile, probs=0.05, na.rm=TRUE),
-  "perc25" = apply(all.counts.mapped, 2, quantile, probs=0.25, na.rm=TRUE),
-  "median" = apply(all.counts.mapped, 2, median, na.rm=TRUE),
-  "perc75" = apply(all.counts.mapped, 2, quantile, probs=0.75, na.rm=TRUE),
-  "perc95" = apply(all.counts.mapped, 2, quantile, probs=0.95, na.rm=TRUE),
-  "max" = apply(all.counts.mapped, 2, max, na.rm=TRUE)
+stats.per.sample <- cbind(  
+  sample.desc[names(all.counts.mapped), ],
+  data.frame(
+    "sum" = apply(all.counts.mapped, 2, sum, na.rm=TRUE),
+    "mean" = apply(all.counts.mapped, 2, mean, na.rm=TRUE),
+    "min" = apply(all.counts.mapped, 2, min, na.rm=TRUE),
+    "perc05" = apply(all.counts.mapped, 2, quantile, probs=0.05, na.rm=TRUE),
+    "perc25" = apply(all.counts.mapped, 2, quantile, probs=0.25, na.rm=TRUE),
+    "median" = apply(all.counts.mapped, 2, median, na.rm=TRUE),
+    "perc75" = apply(all.counts.mapped, 2, quantile, probs=0.75, na.rm=TRUE),
+    "perc95" = apply(all.counts.mapped, 2, quantile, probs=0.95, na.rm=TRUE),
+    "max" = apply(all.counts.mapped, 2, max, na.rm=TRUE)
+  )
 )
-
+stats.per.sample$Mreads <- round(stats.per.sample$sum/1e6, digits = 1)
+  
 ## Count number and the fraction of samples with counts below the mean. 
 ## This shows the impact of very large counts: in my test samples, 
 ## 85% of the samples have a value below the mean (i.e. the mean is at the percentile 85 !)
 stats.per.sample$below.mean <- apply(t(all.counts.mapped) < stats.per.sample$mean, 1, sum, na.rm=TRUE)
 stats.per.sample$fract.below.mean <- stats.per.sample$below.mean/nrow(all.counts.mapped)
+# View(stats.per.sample)
+
+
+
 
 ################################################################
 ## Compute the counts per million reads 
@@ -224,121 +277,163 @@ verbose("Computing CPMs", 1)
 ## beause it gives a nice alignment on the boxplots.
 cpms.libsum <- cpm(all.counts.mapped.epsilon)    ## Counts per million reads, normalised by library sum
 cpms.perc75 <- cpm(all.counts.mapped.epsilon, lib.size = stats.per.sample$perc75)    ## Counts per million reads, normalised by 75th percentile
+cpms.perc95 <- cpm(all.counts.mapped.epsilon, lib.size = stats.per.sample$perc95)    ## Counts per million reads, normalised by 95th percentile
 cpms.median <- cpm(all.counts.mapped.epsilon, lib.size = stats.per.sample$median)    ## Counts per million reads, normalised by sample-wise median count
+#cpms <- cpms.median ## Choose one normalization factor for the CPMs used below
 cpms <- cpms.perc75 ## Choose one normalization factor for the CPMs used below
 cpms.log10 <- log10(cpms) ## Log-10 transformed CPMs, with the epsilon for 0 counts
 cpms.log2 <- log2(cpms) ## Log-10 transformed CPMs, with the epsilon for 0 counts
+
+stats.per.sample$cpm.mean <- apply(cpms, 2, mean)
+stats.per.sample$log2.cpm.mean <- apply(cpms.log2, 2, mean)
+stats.per.sample$log10.cpm.mean <- apply(cpms.log10, 2, mean)
+
+################################################################
+## Export stats per sample
+#
+# names(stats.per.sample)
+# head(stats.per.sample)
+verbose("Exporting stats per sample", 1)
+sample.summary.file <- paste(sep="", prefix["general.file"], "_summary_per_sample.tab")
+write.table(x = t(stats.per.sample), row.names = TRUE, col.names=NA, 
+            file = sample.summary.file, sep = "\t", quote=FALSE)
+verbose(paste(sep="", "\tSummary per sample\t", sample.summary.file), 1)
 
 ################################################################
 ## Draw some generic plots
 ################################################################
 
-verbose("Drawing generic plots from the whole count table", 1)
-
-
-## Plot the impact of the normalization factor (library sum , median or percentile 75)
-png(file= file.path(dir.DEG, paste(sep = "", "CPM_libsum_vs_median_vs_perc75.png")), 
-    width=1000, height=1000)
 par.ori <- par() ## Save original plot parameters
-cols.counts <- as.data.frame(matrix(cols.samples, nrow=nrow(all.counts.mapped), ncol=ncol(all.counts.mapped), byrow = TRUE))
-colnames(cols.counts) <- names(all.counts.mapped)
-rownames(cols.counts) <- rownames(all.counts.mapped)
-plot(data.frame("libsum" = as.vector(as.matrix(cpms.libsum)),
-                "median" = as.vector(as.matrix(cpms.median)),
-                "perc75" = as.vector(as.matrix(cpms.perc75))),
-     col=as.vector(as.matrix(cols.counts)))
-quiet <- dev.off()
 
-## Plot some sample-wise statistics
-pdf(file= file.path(dir.DEG, paste(sep = "", "sample_statistics_plots.pdf")), width=10, height=10)
-par(mar=c(5,5,1,1)) ## adpt axes
-par(mfrow=c(2,2))
-## Median versus mean
-plot(stats.per.sample[,c("mean", "median")], 
-     panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
-     las=1, col=cols.samples)
+## Adapt boxplot size to the number of samples and label sizes
+boxplot.lmargin <- max(nchar(sample.desc$label))/3+5
+boxplot.height <- length(sample.ids)/3+2
 
-## First versus third quartile
-plot(stats.per.sample[,c("perc25", "perc75")], 
-     panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
-     las=1, col=cols.samples)
+## Sample-wise statistics
+pdf(file= file.path(dir.DEG, paste(sep = "", "sample_libsum_barplot.pdf")), width=8, height=boxplot.height)
+par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
+bplt <- barplot(stats.per.sample$Mreads, names.arg = stats.per.sample$label, horiz = TRUE, las=1,
+                xlab="libsum (Million reads per sample)",
+                main="Read library sizes (libsum per sample)",
+                col=stats.per.sample$color)
+grid(col="white", lty="solid",ny = 0)
+text(x=pmax(stats.per.sample$Mreads, 3), labels=stats.per.sample$Mreads, y=bplt,pos=2, font=2)
+silence <- dev.off()
 
-## Sum versus third quartile. 
-plot(stats.per.sample[,c("sum", "perc75")], 
-     panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
-     las=1, col=cols.samples)
-
-## Mean versus third quartile. 
-plot(stats.per.sample[,c("mean", "perc75")], 
-     panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
-     las=1, col=cols.samples)
-par(mfrow=c(1,1))
-quiet <- dev.off()
-
-################################################################
-## Boxplots of raw counts and derived counting measures
-par(mar=c(5,7,4,1)) ## adapt axes
+## Boxplots of raw counts and CPMs, in linear + log axes. 
+## These plots give a pretty good intuition of the raw data per sample: 
+## library sizes, outliers, dispersion of gene counts.
 
 ## Boxplot of raw counts
-pdf(file= file.path(dir.DEG, paste(sep = "", "sample_boxplots_raw_counts.pdf")), width=7, height=7)
-boxplot(all.counts.mapped, horizontal=TRUE, col=cols.samples,
-        xlab="Raw counts",
+pdf(file= file.path(dir.DEG, paste(sep = "", "sample_boxplots_raw_counts.pdf")), width=8, height=boxplot.height)
+par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
+boxplot(all.counts.mapped, horizontal=TRUE, col=sample.desc$color,
+        xlab="Raw counts", names=sample.desc$label,
         main="Box plots per sample: raw counts", las=1)
 quiet <- dev.off()
 
 ## Boxplot of log10-transformed counts
-pdf(file= file.path(dir.DEG, paste(sep = "", "sample_boxplots_log10_counts.pdf")), width=7, height=7)
-boxplot(all.counts.mapped.log10, horizontal=TRUE, col=cols.samples,
-        xlab="log10(counts)",
+pdf(file= file.path(dir.DEG, paste(sep = "", "sample_boxplots_log10_counts.pdf")), width=8, height=boxplot.height)
+par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
+boxplot(all.counts.mapped.log10, horizontal=TRUE, col=sample.desc$color,
+        xlab="log10(counts)", names=sample.desc$label,
         main="Box plots per sample: log10(counts)", las=1)
 quiet <- dev.off()
 
 ## Boxplot of CPMs
-pdf(file= file.path(dir.DEG, paste(sep = "", "sample_boxplots_CPM.pdf")), width=7, height=7)
-boxplot(cpms, horizontal=TRUE, col=cols.samples,
-        xlab="CPM",
+pdf(file= file.path(dir.DEG, paste(sep = "", "sample_boxplots_CPM.pdf")), width=8, height=boxplot.height)
+par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
+boxplot(cpms, horizontal=TRUE, col=sample.desc$color,
+        xlab="CPM", names=sample.desc$label,
         main="Box plots per sample: counts per million reads (CPM)", las=1)
 quiet <- dev.off()
 
 ## Boxplot of log10-transformed CPMs
-pdf(file= file.path(dir.DEG, paste(sep = "", "sample_boxplots_log10_CPM.pdf")), width=7, height=7)
-boxplot(cpms.log10, horizontal=TRUE, col=cols.samples,
-        xlab="log10(CPM)",
+pdf(file= file.path(dir.DEG, paste(sep = "", "sample_boxplots_log10_CPM.pdf")), width=8, height=boxplot.height)
+par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
+boxplot(cpms.log10, horizontal=TRUE, col=sample.desc$color,
+        xlab="log10(CPM)", names=sample.desc$label,
         main="Box plots per sample: counts per million reads (CPM)", las=1)
 quiet <- dev.off()
 
-par <- par.ori ## Restore original plot parameters
 
+par <- par.ori ## Restore original plot parameters
+par(mar=c(4.1,5.1,4.1,1.1))
 
 ## Draw sample correlation heatmaps for the raw read counts
 pdf(file=paste(sep="", prefix["general.file"],"_sample_correl_heatmap_counts.pdf"))
 hm <- heatmap.2(as.matrix(cor(all.counts.mapped)),  scale="none", trace="none", 
-                main="Correlation between raw counts",
+                main="Correlation between raw counts", margins=c(8,8),
                 col=cols.heatmap) #, breaks=seq(-1,1,2/length(cols.heatmap)))
 quiet <- dev.off()
 
-## Draw sample correlation heatmaps for CPM
-#heatmap(cor(all.counts.mapped), scale = "none")
-pdf(file=paste(sep="", prefix["general.file"],"_sample_correl_heatmap_cpms.pdf"))
-hm <- heatmap.2(as.matrix(cor(cpms)),  scale="none", trace="none", 
-                main="Correlation between CPM",
-                col=cols.heatmap) #, breaks=seq(-1,1,2/length(cols.heatmap)))
-quiet <- dev.off()
+## Draw sample correlation heatmaps for CPM. Actually it gives exactly the 
+## same result as correlation between raw counts, since the correlation has a 
+## standardizing effect. 
+# pdf(file=paste(sep="", prefix["general.file"],"_sample_correl_heatmap_cpms.pdf"))
+# hm <- heatmap.2(as.matrix(cor(cpms)),  scale="none", trace="none", 
+#                 main="Correlation between CPM",
+#                 col=cols.heatmap) #, breaks=seq(-1,1,2/length(cols.heatmap)))
+# quiet <- dev.off()
 
 ## Plot the first versus second components of samples
 cpms.pc <- prcomp(t(cpms))
 pdf(file=paste(sep="", prefix["general.file"],"_CPM_PC1-PC2.pdf"))
 plot(cpms.pc$x[,1:2], panel.first=grid(), type="n", main="First components from PCA-transformed CPMs")
-text(cpms.pc$x[,1:2], labels = sample.conditions, col=cols.samples)
+text(cpms.pc$x[,1:2], labels = sample.conditions, col=sample.desc$color)
 quiet <- dev.off()
 
+
+
+## Exploratory plots, should not be done for all projects.
+if (run.param$exploratory.plots) {
+  verbose("Drawing generic plots from the whole count table", 1)
+  
+  ## Plot the impact of the normalization factor (library sum , median or percentile 75)
+  png(file= file.path(dir.DEG, paste(sep = "", "CPM_libsum_vs_median_vs_perc75.png")), 
+      width=1000, height=1000)
+  cols.counts <- as.data.frame(matrix(sample.desc$color, nrow=nrow(all.counts.mapped), ncol=ncol(all.counts.mapped), byrow = TRUE))
+  colnames(cols.counts) <- names(all.counts.mapped)
+  rownames(cols.counts) <- rownames(all.counts.mapped)
+  plot(data.frame("libsum" = as.vector(as.matrix(cpms.libsum)),
+                  "median" = as.vector(as.matrix(cpms.median)),
+                  "perc75" = as.vector(as.matrix(cpms.perc75))),
+       col=as.vector(as.matrix(cols.counts)))
+  quiet <- dev.off()
+  
+  ## Plot some sample-wise statistics
+  pdf(file= file.path(dir.DEG, paste(sep = "", "sample_statistics_plots.pdf")), width=10, height=10)
+  par(mar=c(5,5,1,1)) ## adpt axes
+  par(mfrow=c(2,2))
+  ## Median versus mean
+  plot(stats.per.sample[,c("mean", "median")], 
+       panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
+       las=1, col=sample.desc$color)
+  
+  ## First versus third quartile
+  plot(stats.per.sample[,c("perc25", "perc75")], 
+       panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
+       las=1, col=sample.desc$color)
+  
+  ## Sum versus third quartile. 
+  plot(stats.per.sample[,c("sum", "perc75")], 
+       panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
+       las=1, col=sample.desc$color)
+  
+  ## Mean versus third quartile. 
+  plot(stats.per.sample[,c("mean", "perc75")], 
+       panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
+       las=1, col=sample.desc$color)
+  par(mfrow=c(1,1))
+  quiet <- dev.off()
+}
 
 ################################################################
 ## Analyse between-replicate reproducibility
 ################################################################
 verbose("Plotting betwen-replicate comparisons", 1)
-cond <- "cyay"
-for (cond in exp.conditions) {
+cond <- conditions[1] ## Choose first condition for testing without the loop
+for (cond in conditions) {
   verbose(paste(sep="", "\tcondition\t", cond), 2)
   
   max.rep.to.plot <- 5 ## Restrict the number of replicates to plot, for the sale of readability
@@ -347,6 +442,7 @@ for (cond in exp.conditions) {
   dir.condition <- file.path(dir.DEG, "per_condition", cond)
   dir.create(path = dir.condition, showWarnings = FALSE, recursive = TRUE)
   
+  ## Select the specific data for the current condition (samples, counts, CPMs)
   current.samples <- names(all.counts.mapped)[sample.conditions == cond]
   nrep <- length(current.samples)
   
@@ -362,37 +458,41 @@ for (cond in exp.conditions) {
   current.cpm.var <- apply(current.cpms, 1, var)
   current.cpm.var[current.cpm.var==0] <- min(current.cpm.var[current.cpm.var>0])/100
   
-  
-  ## Plot pairwise comparisons between replicates
+  ################################################################
+  ## Plot pairwise comparisons between replicates (result file can be heavy to open)
   pdf(file= file.path(dir.condition, paste(sep = "", "between-replicate_counts_plot_", cond, ".pdf")), width=10, height=10)
-  plot(current.counts[,1:min(max.rep.to.plot, nrep)], log="xy", col=cols.conditions[cond], 
-       main=paste(cond, " ; raw counts per replicate (log scale)"))
-  dev.off()
-  
-  ## Plot mean versus variance of raw counts for the current condition
-  pdf(file= file.path(dir.condition, paste(sep = "", "counts_variance-mean_plot_", cond, ".pdf")), width=10, height=10)
-  plot(current.counts.mean, 
-       current.counts.var, 
+  # dim(current.counts[,1:min(max.rep.to.plot, nrep)])
+  plot(current.counts[,1:min(max.rep.to.plot, nrep)], 
        log="xy", col=cols.conditions[cond], 
-       panel.first=grid(lty="solid", col="#DDDDDD"),
-       xlab=paste("mean counts for condition", cond),
-       ylab=paste("variance of counts for condition", cond),
-       main=paste(cond, " ; Counts variance/Mean plot"))
-  abline(a=0,b=1, lty="dashed", col="green", lwd=2) ## Milestone for Poisson distributions: var = mean
-  quiet <- dev.off()
+       #       panel.first=grid(col="#BBBBBB", lty="solid"), ## this does not work, I should check why
+       main=paste(cond, " ; raw counts per replicate (log scale)")
+  )
+  silence <- dev.off()
   
-  ## Plot mean versus variance of CPMs for the current condition
-  pdf(file= file.path(dir.condition, paste(sep = "", "CPM_variance-mean_plot_", cond, ".pdf")), width=10, height=10)
-  plot(current.cpm.mean, 
-       current.cpm.var, 
-       log="xy", col=cols.conditions[cond], 
-       panel.first=grid(lty="solid", col="#DDDDDD"),
-       xlab=paste("CPM mean for condition", cond),
-       ylab=paste("CPM variance for condition", cond),
-       main=paste(cond, " ; CPM variance/Mean plot"))
-  abline(a=0,b=1, lty="dashed", col="green", lwd=2) ## Milestone for Poisson distributions: var = mean
-  quiet <- dev.off()
-  
+  ################################################################
+  ## Plot mean versus variance of CPMs for the current condition.
+  ## BEWARE! This is the between-replicate variance computed for each gene separately, 
+  ## which is quite different from the smoothed estimate of variance used by 
+  ## DESeq2 or edgeR for the negative binomial.
+  ## 
+  ## This "real" variance plot  can be useful to highlight some genes that show 
+  ## an extremely high variance compared to other genes. 
+  ##
+  ## We draw the plot in linear + log scales. Linear scales better highlight the outliers, 
+  ## log scale better shows the general distribution, which covers several orders of magnitude.
+  log.axes <- "xy"
+  for (log.axes in c("", "xy")) {
+    pdf(file= file.path(dir.condition, paste(sep = "", "CPM_variance-mean_plot_", cond, "_",  log.axes, ".pdf")), width=10, height=10)
+    plot(current.cpm.mean, 
+         current.cpm.var, 
+         log=log.axes, col=cols.conditions[cond], 
+         panel.first=grid(lty="solid", col="#DDDDDD"),
+         xlab=paste("Mean CPM per gene for condition", cond),
+         ylab=paste("Between replicate CPM variance per gene for condition", cond),
+         main=paste(cond, " ; CPM variance/Mean plot"))
+    abline(a=0,b=1, lty="dashed", col="green", lwd=2) ## Milestone for Poisson distributions: var = mean
+    silence <- dev.off() 
+  }
 }
 
 ################################################################
@@ -407,10 +507,16 @@ for (i in 1:nrow(design)) {
   ## Identify samples for the first condition
   cond1 <- as.vector(design[i,1])  ## First condition for the current comparison
   samples1 <- sample.ids[sample.conditions == cond1]
+  if (length(samples1) < 2) {
+    stop(paste("Cannot perform differential analysis. The count table contains less than 2 samples for condition", cond1))
+  }
   
   ## Identify samples for the second condition
   cond2 <- as.vector(design[i,2])  ## Second condition for the current comparison
   samples2 <- sample.ids[sample.conditions == cond2]
+  if (length(samples2) < 2) {
+    stop(paste("Cannot perform differential analysis. The count table contains less than 2 samples for condition", cond2))
+  }
   
   verbose(paste(sep="", "\tDifferential analysis\t", i , "/", nrow(design), "\t", cond1, " vs ", cond2), 1)
   
@@ -445,17 +551,15 @@ for (i in 1:nrow(design)) {
   row.names(result.table) <- all.gene.ids
   result.table$entrez.id <- gene.info[all.gene.ids,"entrez.id"]
   result.table$description <- gene.info[all.gene.ids,"description"]
-  #   result.table$mean.cpm1 <- apply(cpms[,samples1],1, mean)
-  #   result.table$mean.cpm2 <- apply(cpms[,samples2],1, mean)
-  #   result.table$A <- log2(result.table$mean.cpm1*result.table$mean.cpm2)/2
-  #   result.table$M <- log2(result.table$mean.cpm1/result.table$mean.cpm2)
-  # dim(result.table)
+  
+  result.table <- cbind(result.table, counts=current.counts) ## Include the original counts in the big result table
+  result.table <- cbind(result.table, cpm=current.cpms) ## Include CPMs in the big result table
   
   ## Tag genes detected in less than min.rep samples, which is defined as 
   ## the minimal number of replicates per condition.
   min.rep <- min(length(samples1), length(samples2))
   result.table$undetected <- rowSums(current.counts > 1) < min.rep
-  #current.counts <- current.counts[rowSums(current.counts > 1) >= min.rep,]
+  # table(result.table$undetected)
   # dim(current.counts)
   
   result.table$cpm.mean <- apply(cpms,1, mean)
@@ -517,7 +621,7 @@ for (i in 1:nrow(design)) {
     deseq2.result.table, 
     paste(sep="_", "DESeq2", prefix["comparison"]),
     sort.column = "padj",
-    thresholds=c("padj"=0.05, "evalue"=1, "FC"=1.5),
+    thresholds=thresholds,
     round.digits = 3,
     dir.figures=dir.figures)
   result.table <- cbind(result.table, "DESeq2" = deseq2.result.table[row.names(result.table),])
@@ -536,6 +640,7 @@ for (i in 1:nrow(design)) {
   ################################################################
   ## Export DESeq2 plots
   verbose("\t\tExporting DESeq2 plots", 2)
+  
   
   # Transform the raw discretely distributed counts to apply 
   # some multivariate methods such as PCA, clustering etc.
@@ -613,13 +718,13 @@ for (i in 1:nrow(design)) {
   ## Smear plot
   verbose("\t\t\tedgeR Smear plot", 3)
   edger.deg <- rownames(edger.tt$table)[edger.tt$table$FDR < thresholds["padj"]] ## List of differentially expressed genes reported by edgeR
-  pdf(file=paste(sep="", prefix["DESeq2_figure"], "_plotSmear.pdf"))
+  pdf(file=paste(sep="", prefix["edgeR_figure"], "_plotSmear.pdf"))
   plotSmear(d, de.tags = edger.deg)
   quiet <- dev.off()
   
   ## MDS plot (Multidimensional scaling plot of distances between gene expression profiles)
   verbose("\t\t\tedgeR MDS plot", 3)
-  pdf(file=paste(sep="", prefix["DESeq2_figure"], "_plotMDS.pdf"))
+  pdf(file=paste(sep="", prefix["edgeR_figure"], "_plotMDS.pdf"))
   #  pdf(file=file.path(dir.figures, paste(sep="", "edgeR_MDS_plot_", prefix["comparison"], ".pdf")))
   plotMDS(d, labels=current.labels, 
           col=c("darkgreen","blue")[factor(sample.conditions[names(current.counts)])])
@@ -627,14 +732,14 @@ for (i in 1:nrow(design)) {
   
   # Mean-variance relationship
   verbose("\t\t\tedgeR mean-variance relationship", 3)
-  pdf(file=paste(sep="", prefix["DESeq2_figure"], "_plotMeanVar.pdf"))
+  pdf(file=paste(sep="", prefix["edgeR_figure"], "_plotMeanVar.pdf"))
   plotMeanVar(d, show.tagwise.vars=TRUE, NBline=TRUE)
   quiet <- dev.off()
   
   
   # BCV (Biological Coefficient of Variation)
   verbose("\t\t\tedgeR BCV plot", 3)
-  pdf(file=paste(sep="", prefix["DESeq2_figure"], "_plotBCV.pdf"))
+  pdf(file=paste(sep="", prefix["edgeR_figure"], "_plotBCV.pdf"))
   #pdf(file= file.path(dir.figures, paste(sep = "", "edgeR_plotBCV_", prefix["comparison"], ".pdf")))
   plotBCV(d)
   quiet <- dev.off()
@@ -642,9 +747,15 @@ for (i in 1:nrow(design)) {
   ################################################################
   ## Compare gene selections by edgeR and DESeq2
   verbose("\t\tComparing DESeq2 and edgeR results", 2)    
-  ## Add tags indicating the combinations of edgeR/DESeq2 selections
-  for (s in c("padj", "evalue", "FC")) {
-    selection.column <- paste(sep="_", s, thresholds[s])
+  ## Add tags indicating the combinations of edgeR/DESeq2 selections for the DEG, and then for each threshold criterion taken separately.
+  selection.columns <- vector()
+  for (s in c("DEG", names(thresholds))) {
+    if (s == "DEG") {
+      selection.column <- "DEG"
+    } else {
+      selection.column <- paste(sep="_", s, thresholds[s])
+    }
+    selection.columns[s] <- selection.column
     
     ## Tag gnes selected by both edgeR and DESeq2
     result.table[, paste(sep="_", s, "edgeR_and_DESeq2")] <- 
@@ -666,7 +777,6 @@ for (i in 1:nrow(design)) {
       1*(!result.table[,paste(sep="", "edgeR.", selection.column)] 
          & !result.table[,paste(sep="", "DESeq2.", selection.column)])
   }
-  
   # View(result.table)
   
   ## Save result table
@@ -678,10 +788,10 @@ for (i in 1:nrow(design)) {
   verbose(paste(sep="", "\t\tMerged result file\t", result.file), 1)
   
   ## Define point colors according to the test results
-  both <- result.table$padj_edgeR_and_DESeq2 == 1
-  edgeR.only <- result.table$padj_edgeR_not_DESeq2 == 1
-  DESeq2.only <- result.table$padj_DESeq2_not_edgeR == 1
-  none <- result.table$padj_none
+  both <- result.table$DEG_edgeR_and_DESeq2 == 1
+  edgeR.only <- result.table$DEG_edgeR_not_DESeq2 == 1
+  DESeq2.only <- result.table$DEG_DESeq2_not_edgeR == 1
+  none <- result.table$DEG_none
   gene.palette <- c("both"="darkgreen", 
                     "none"="#BBBBBB",
                     "edgeR.only" = "red",
@@ -694,6 +804,7 @@ for (i in 1:nrow(design)) {
   ################################################################
   ## P-value comparison plot
   ## Compare DESeq2 and edgeR nominal p-values
+  #png(file=paste(sep = "", prefix["comparison_figure"], suffix.deg, "_DESeq2_vs_edgeR_pvalues", ".png"))
   pdf(file=paste(sep = "", prefix["comparison_figure"], suffix.deg, "_DESeq2_vs_edgeR_pvalues", ".pdf"))
   plot.cex=0.7
   plot(result.table$edgeR.pvalue, 
@@ -734,8 +845,7 @@ for (i in 1:nrow(design)) {
   
   
   ## For each threshold separately
-  for (s in names(thresholds)) {
-    
+  for (s in names(thresholds)) {   
     venn.counts.one.threshold <- vennCounts(
       result.table[,c(paste(sep="", "edgeR.",s,"_", thresholds[s]), 
                       paste(sep="", "DESeq2.",s,"_", thresholds[s]))])
@@ -778,7 +888,7 @@ for (i in 1:nrow(design)) {
                     paste(sum(DESeq2.only, na.rm=TRUE), "DESeq2 only"),
                     paste(sum(edgeR.only, na.rm=TRUE), "edgeR only"),
                     paste(sum(none, na.rm=TRUE), "none")))
-  dev.off()
+  silence <- dev.off()
   
   
   ################################################################
@@ -805,17 +915,83 @@ for (i in 1:nrow(design)) {
                     paste(sum(DESeq2.only, na.rm=TRUE), "DESeq2 only"),
                     paste(sum(edgeR.only, na.rm=TRUE), "edgeR only"),
                     paste(sum(none, na.rm=TRUE), "none")))
-  dev.off()
+  silence <- dev.off()
   
+ 
+  ## Volcano plot
+  for (deg.tool in deg.tools) {
+    criterion <- "padj"
+    for (criterion in c("padj", "evalue")) {
+      verbose(paste(sep=" ", "\t\t", deg.tool, criterion, "Volcano plot"), 3)
+      pdf(file=paste(sep="_", prefix[paste(sep="", deg.tool, "_figure")], 
+                     criterion, thresholds[criterion], "VolcanoPlot.pdf"))
+      control.col <- paste(sep=".", deg.tool, criterion)
+      effect.col <- paste(sep=".", deg.tool, "log2FC")
+      VolcanoPlot(na.omit(result.table[,c(control.col, effect.col)]), 
+                  control.type=control.col, alpha = thresholds[criterion], 
+                  effect.size.col=effect.col, xlab="log2(fold-change)", effect.threshold=log2(thresholds["FC"]),
+                  main=paste(sep=" ", cond1, "vs", cond2, "; ", deg.tool, " ", criterion, "volcano plot"),
+                  sort.by.pval = TRUE, plot.points = TRUE,
+                  legend.corner = "topleft")
+      quiet <- dev.off()
+    }
+   }  
+  
+  ################################################################
+  ## Store the Differentally expressed genes in a two-column file
+  # names(result.table)
+  DEG.columns  <- c("DEG_edgeR_and_DESeq2", "edgeR.DEG", "DESeq2.DEG", "padj_edgeR_and_DESeq2", "evalue_edgeR_and_DESeq2")
+  # column <- DEG.columns[3]
+  deg.id.lists <- list()
+  column <- DEG.columns[1]
+  for (column in DEG.columns) {
+    is.DEG <- !is.na(result.table[,column]) & result.table[,column] == 1
+    # table(is.DEG)
+    DEG.ids <- na.omit(row.names(result.table[is.DEG,]))
+    deg.id.lists[[column]] <- DEG.ids
+    # length(DEG.ids)
+    # table(is.na(DEG.ids))
+    DEG.genes <- data.frame(gene.id=DEG.ids, "cluster"=rep(column, times=length(DEG.ids)))
+    if (column == DEG.columns[1]) {
+      cluster.table <- DEG.genes
+    } else {
+      cluster.table <- rbind(cluster.table, DEG.genes)
+    }
+  }
+  # View(cluster.table)
+  # table(cluster.table$cluster)
+  # grep (cluster.table$gene.id, pattern="NA", value=TRUE)
+  ## Save gene clusters
+  cluster.file <- paste(sep = "", 
+                        prefix["comparison_file"], 
+                        "_", suffix.deg, "_DESeq2_edgeR_clusters.tab")
+  write.table(x = cluster.table, row.names = FALSE,
+              file = cluster.file, sep = "\t", quote=FALSE)
+  verbose(paste(sep="", "\t\tCluster file\t", cluster.file), 1)
   
   ################################################################
   ## Functional enrichment analysis
-  if (exists("org.db") & !is.na(org.db) & !is.null(org.db) & exists("gene.info.rsat")) {
+  run.functional.enrichment <- FALSE
+  if (run.functional.enrichment & exists("org.db") & !is.na(org.db) & !is.null(org.db) & exists("gene.info.rsat")) {
+    library(org.db, character.only = TRUE)
+    verbose("Starting the analysis of functional enrichment")
     
     ## Convert IDs to entrez IDs
+    verbose("Converting gene names to Entrez IDs")
     all.gene.ids <- row.names(result.table)
-    all.entrez.ids <- as.vector(gene.info[all.gene.ids,"entrez.id"])
+    if (sum(!is.na(gene.info$entrez.id)) == 0) {
+      gg <- bitr(row.names(result.table), fromType="SYMBOL", toType="ENTREZID", annoDb=org.db, drop=FALSE)
+      row.names(gg) <- gg$SYMBOL
+      # dim(gg)
+      # dim(result.table)
+      # head(gg)
+      all.entrez.ids <- gg[all.gene.ids, "ENTREZID"]
+    } else {
+      all.entrez.ids <- as.vector(gene.info[all.gene.ids,"entrez.id"])      
+    }
     names(all.entrez.ids) <- gene.info[all.gene.ids,"gene_id"]
+    # table(!is.na(all.entrez.ids))
+    all.entrez.ids <- unique(na.omit(all.entrez.ids))
     # length(all.entrez.ids)
     
     ## Select the selection columns on wchich enrichment analysis will be performed.
@@ -832,21 +1008,31 @@ for (i in 1:nrow(design)) {
     
     col <- "edgeR.DEG"
     for (col in geneset.selection.columns) {
+      verbose(paste("Gene selection column", col))
+      
       geneset.ids <- as.vector(as.matrix(all.gene.ids[result.table[,col] == 1]))
       geneset <- all.entrez.ids[geneset.ids]
-      # sum(is.na(entrez.ids))
+      # table(is.na(geneset))
       geneset <- geneset[!is.na(geneset)]
+      gene.nb <- length(geneset)
+      verbose(paste("\t", gene.nb, "selected genes"))
+      if (gene.nb == 0) {
+        verbose(paste("\t", "Skipping: not a single gene selected"))
+        next
+      }
+      
       # length(geneset)
+      verbose(paste("\tGeneFunctional enrichment"))
       enrich.result <- functional.enrichment(geneset=geneset,
-                            allgenes=all.entrez.ids,
-                            db=org.db,
-                            ontology="BP",
-                            thresholds = c("evalue"=1, "qvalue"=0.05),
-                            select.positives=FALSE,
-                            run.GOstats = TRUE,
-                            run.clusterProfiler = FALSE,
-                            organism.names=organism.names,
-                            plot.adjust = TRUE)
+                                             allgenes=all.entrez.ids,
+                                             db=org.db,
+                                             ontology="BP",
+                                             thresholds = c("evalue"=1, "qvalue"=0.05),
+                                             select.positives=FALSE,
+                                             run.GOstats = TRUE,
+                                             run.clusterProfiler = FALSE,
+                                             organism.names=organism.names,
+                                             plot.adjust = TRUE)
       
       ## Select GO Biological process result table
       go.bp.table <- enrich.result$go.bp.table
@@ -865,20 +1051,20 @@ for (i in 1:nrow(design)) {
       
       ## Save positive associations in a separate file
       go.bp.file.positive <- paste(sep = "", prefix["comparison_file"], 
-                          "_", suffix.deg,
-                          "_", col,
-                          "_GOstats_positive.tab")
+                                   "_", suffix.deg,
+                                   "_", col,
+                                   "_GOstats_positive.tab")
       write.table(x = go.bp.table.positive, row.names = FALSE,
                   file = go.bp.file.positive, sep = "\t", quote=FALSE)
       verbose(paste(sep="", "\tGOstats BP over-representation\t", 
                     nrow(go.bp.table.positive), " rows\t", go.bp.file.positive), 1)
       
-#       kk <- enrichKEGG(gene = geneset,
-#                        organism = "eco",
-#                        pvalueCutoff = 1,
-#                        readable = TRUE)
-#       head(summary(kk))
-#       
+      #       kk <- enrichKEGG(gene = geneset,
+      #                        organism = "eco",
+      #                        pvalueCutoff = 1,
+      #                        readable = TRUE)
+      #       head(summary(kk))
+      #       
       ## Build a custom GO map from 2-column data.frame with GO, gene (entrez ID)
       if ((exists("go.map.file")) & (exists("go.description.file"))) {
         ## Read description of GO terms
@@ -923,12 +1109,12 @@ for (i in 1:nrow(design)) {
                     file = go.enricher.file, sep = "\t", quote=FALSE)
         verbose(paste(sep="", "\tGO clusterProfiles::enricher\t", 
                       nrow(go.enricher.table), " rows\t", go.enricher.file), 1)
-
+        
         ## Save result table
         go.enricher.file.positive <- paste(sep = "", prefix["comparison_file"], 
-                                  "_", suffix.deg,
-                                  "_", col,
-                                  "_GO_enricher_positive.tab")
+                                           "_", suffix.deg,
+                                           "_", col,
+                                           "_GO_enricher_positive.tab")
         write.table(x = go.enricher.table.positive, row.names = FALSE,
                     file = go.enricher.file.positive, sep = "\t", quote=FALSE)
         verbose(paste(sep="", "\tGO clusterProfiles::enricher\t", 
@@ -999,10 +1185,25 @@ for (i in 1:nrow(design)) {
   } 
 }
 
+########################################################################
 ## Export summary table
 verbose("Exporting summary table", 1)
 summary.file <- paste(sep="", prefix["general.file"], "_summary_per_analysis.tab")
-write.table(x = summary.per.analysis, row.names = FALSE,
+write.table(x = t(summary.per.analysis), row.names = TRUE, col.names=FALSE,
             file = summary.file, sep = "\t", quote=FALSE)
 verbose(paste(sep="", "\tSummary per analysis\t", summary.file), 1)
+
+########################################################################
+## Save an image of memory in order to reload the whole analysis without 
+## re-computing everything. 
+## This memory image can also be directly loaded into memory on another computer.
+if (save.image) {
+  image.file <- paste(sep="", prefix["general.file"], "_memory_image.RData")
+  verbose(paste("Working directory", getwd()), 1)
+  verbose(paste("Saving memory image", image.file), 1)
+  save.image(file=image.file, compress=TRUE)
+} else {
+  verbose("Skipping memory image saving")
+}
+
 

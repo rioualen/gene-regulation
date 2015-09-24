@@ -1,7 +1,6 @@
 library("knitr")
-library('clusterProfiler')
-library(GO.db)
-#library("org.Dm.eg.db")
+library("clusterProfiler")
+library("GO.db")
 
 
 
@@ -9,29 +8,50 @@ library(GO.db)
 ## Parameters
 dir.main <- "~/dr-chip-rna-seq"
 setwd(dir.main)
+
 ## Source : M. Carlson. How To Use GOstats and Category to do Hypergeometric testing with unsupported model organisms. 
 org <- "dme"
-# org <- "eco"
+#org <- "eco"
 if (org == "eco") {
   organism <- "Escherichia coli K12 MG1655"
   #annot.schema <- "ECOLI_DB"
   org.db <- "org.EcK12.eg.db"
+  dir.main <- "~/BeatriceRoche"
+  organism.names <- c("name" = "Escherichia coli",
+                      "clusterProfiler" = NA,
+                      "kegg"="eco")
+  
 } else if (org =="dme") {
   organism <- "Drosophila melanogaster"
   annot.schema <- "FLY_DB"
   org.db <- "org.Dm.eg.db"
+  cond1 <- "abdA-over"
+  cond2 <- "untreated"
+  dir.main <- "~/dr-chip-rna-seq"
+  organism.names <- c("name" = "Drosophila melanogaster",
+                      "clusterProfiler" = "fly",
+                      "kegg"="dme")
 }
 
-dir.deg <- file.path(dir.main, "results/rna-seq/DEG")
-dir.enrichment <- file.path(dir.deg, "enrichment_analysis")
-dir.create(dir.enrichment, showWarnings = FALSE, recursive = TRUE)
+## Set working directory to the main directory
+setwd(dir.main)
 
-cond1 <- "S2"
-cond2 <- "WT"
+## Prefix for the comparison between 2 conditions
 comparison <- paste(sep="", cond1, "_vs_", cond2)
+
+## Parameters
+dir.deg <- file.path(dir.main, "results/rna-seq/DEG")
+dir.create(dir.deg, showWarnings = FALSE, recursive = TRUE)
+
+dir.compa <- file.path(dir.deg, comparison)
+dir.create(dir.compa, showWarnings = FALSE, recursive = TRUE)
+
+dir.enrichment <- file.path(dir.compa, "enrichment_analysis")
+dir.create(dir.enrichment, showWarnings = FALSE, recursive = TRUE)
 
 parameters <- list(
   "dir.deg" = dir.deg,
+  "dir.compa" =  dir.compa,
   "dir.enrichment" =  dir.enrichment,
   "condition1" = cond1,
   "condition1" = cond2,
@@ -61,12 +81,13 @@ deg.summary <- data.frame() ## Summary table for differentially expressed genes 
 enrich.summary <- data.frame() ## Summary table for functional enrichment analysis
 genesets <- list()
 ## Iterate over DEG analysis tools
-deg.tool <- "edgeR" ## Default tool for testing
+deg.tool <- "DESeq2" ## Default tool for testing
 for (deg.tool in deg.tools) {
 
   ## Load the DEG analysis result table
-  deg.table <- read.table(parameters[[deg.tool]], row.names=1)
-  #dim(deg.table)
+  deg.table <- read.table(parameters[[deg.tool]], row.names=1, header=1)
+  # View(deg.table)
+  
   
   ## Select the threshold column according to the DEG tool.
   ## Give similar names to similar columns.
@@ -79,14 +100,17 @@ for (deg.tool in deg.tools) {
   }
   threshold.column <- "padj" ## Select genes based on adjusted p-values
   deg.table$FC <- 2^deg.table$log2FC
-
+  # View(deg.table)
+  
   ## Select genes according to the user-specified threshold
   deg.table$positive <- deg.table[,threshold.column] < parameters$deg.threshold
   deg.table$positive[is.na(deg.table$positive)] <- FALSE ## Replace the NA values by FALSE to avoid problems with selection
+  # table(deg.table$positive)
   
   ## Select up- and down-regulated genes
   deg.table$up <- deg.table$positive & deg.table$log2FC > 0
   deg.table$down <- deg.table$positive & deg.table$log2FC < 0
+  # table(deg.table$up, deg.table$down)
   
   ## Summarize the results
   deg.summary <- rbind(
@@ -108,6 +132,8 @@ for (deg.tool in deg.tools) {
   
   ## Convert gene names into Entrez IDs
   gg <- bitr(row.names(deg.table), fromType="SYMBOL", toType="ENTREZID", annoDb="org.Dm.eg.db")
+
+  
   ## Add a column with the "entrez.id" column in the deg.table
   deg.table[gg[,1], "entrez.id"] = gg[,2]
   all.entrez.ids <- deg.table$entrez.id[!is.na(deg.table$entrez.id)]
@@ -119,13 +145,15 @@ for (deg.tool in deg.tools) {
   group <- "positive" ## Default group for testing
   ## Iterate over groups  
   for (group in groups) {
-
+    message(paste(sep=" ", "Analyzing group", group))
+    
     ## Iterate over selection criteria (significant genes versus random selections)
     selection.criteria <- c("signif", "random")
     selection.criterion <- "signif"
     for (selection.criterion in selection.criteria) {
+      message(paste(sep=" ", "Analyzing", selection.criterion, "genes in group", group))
       
-      ## Selet significant genes
+      ## Select Entrez IDs significant genes
       gene.ids <- deg.table[deg.table[,group], "entrez.id"] ## IDs of the significant genes for the group of interest      
       if (selection.criterion == "random") {
         ## Select random gene list of the same size as the significant genes
@@ -136,7 +164,7 @@ for (deg.tool in deg.tools) {
       
       ## Iterate over ontology types (biological process, cellular component, molecular function)
       ontologies <- c("BP", "CC", "MF")
-      ontology <- "MF" ## Select biological processes
+      ontology <- "BP" ## Select one particular biological processes for testing without the loop
       for (ontology in ontologies) {
         message(paste(sep=" ", "Enrichment analysis for", 
                       ontology, "classfication; ",
@@ -152,9 +180,8 @@ for (deg.tool in deg.tools) {
                                                select.positives=FALSE,
                                                run.GOstats = TRUE,
                                                run.clusterProfiler = TRUE,
-                                               clusterProfiler.org="fly",
-                                               plot.adjust = TRUE,
-                                               verbosity=1)
+                                               organism.names=organism.names,
+                                               plot.adjust = TRUE)
         
         ## Compute the enrichment of the gene list for Biological Processes of the Gene Ontology
         ego <- enrichGO(gene = gene.ids, organism = "fly",
@@ -256,6 +283,7 @@ for (deg.tool in deg.tools) {
   } 
 }
 
+stop("The rest of the script is still under construction")
 
 ################################################################
 ## Build custom annotation table

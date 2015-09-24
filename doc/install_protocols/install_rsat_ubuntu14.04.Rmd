@@ -14,6 +14,8 @@ Unless stated otherwise, the following commands will be executed as root.
 
 **/!\\ TODO** Check this protocole with VirtualBox appliance.
 
+**/!\\ TODO** Handle mkvtree licence
+
 ## 1. First steps
 
 ### Set the locales manually if needed.
@@ -225,14 +227,14 @@ echo "${PACKAGES_PERL}"
 for LIB in ${PACKAGES} ${PACKAGES_PERL}; \
 do \
    echo "`date '+%Y/%m/%d %H:%M:%S'`  installing apt-get library ${LIB}" ; \
-   apt-get install --quiet --assume-yes ${LIB} > /packages/install_logs/apt-get_install_${LIB}.txt ; \
+   sudo apt-get install --quiet --assume-yes ${LIB} > /packages/install_logs/apt-get_install_${LIB}.txt ; \
    df -m > /packages/install_logs/df_$(date +%Y-%m-%d_%H-%M-%S)_${LIB}_installed.txt ; \
 done
 echo "Log files are in folder /packages/install_logs"
 grep ${DEVICE} /packages/install_logs/df_*.txt
 ```
 
-### Warning messages: 
+### Warning messages? (Note 15/09/02: no such issue on IFB VM)
 ```
 Warning: there was a problem reading the certificate file /etc/ssl/certs/EBG_Elektronik_Sertifika_Hizmet_Sa?lay?c?s?.pem. Message:
   /etc/ssl/certs/EBG_Elektronik_Sertifika_Hizmet_Sa?lay?c?s?.pem (No such file or directory)
@@ -304,8 +306,10 @@ sudo pip3 install snakemake
 -->
 
 ### Check disk usage
+```
 df -m > /packages/install_logs/df_$(date +%Y-%m-%d_%H-%M-%S)_pip_libraries_installed.txt
 grep ${DEVICE} /packages/install_logs/df_*.txt
+```
 
 ## 4. Apache Web server configuration
 
@@ -346,7 +350,7 @@ chown root.root /usr/lib/cgi-bin
 a2enmod cgi
 service apache2 restart
 ```
-You can check whether apache server was successfully configured and started by opening a web connection to `http://192.54.201.178`.
+You can check whether apache server was successfully configured and started by opening a web connection to `http://{IP}`.
 
 #### OK til here for IFB VM.
 
@@ -535,19 +539,23 @@ Note: Object::InsideOut always displays "Fail", whereas it is OK during installa
 
 
 ### Measure remaining disk space.
+
+```
 df -m > /packages/install_logs/df_$(date +%Y-%m-%d_%H-%M-%S)_perl_modules_installed.txt
 grep ${DEVICE} /packages/install_logs/df_*.txt
-
+```
 
 ## 8. Configure RSAT web server
 
 > Uh?
 >
 > Edit the file to replace [RSAT_PARENT_FOLDER] byt the parent directory of the rsat directory.
->
-> cd ${RSAT}
-> sudo rsync -ruptvl RSAT_config.conf /etc/apache2/sites-enabled/rsat.conf
-> apache2ctl restart
+
+```
+cd ${RSAT}
+sudo rsync -ruptvl RSAT_config.conf /etc/apache2/sites-enabled/rsat.conf
+apache2ctl restart
+```
 
 ### RSAT Web server URL
 ```
@@ -578,6 +586,14 @@ make -f makefiles/install_software.mk install_ext_apps
 df -m > /packages/install_logs/df_$(date +%Y-%m-%d_%H-%M-%S)_rsat_extapp_installed.txt
 ```
 
+### Mkvtree licence / Vmatch ? Not OK
+
+**To be changed?**
+
+copy-paste from other RSAT distrib...
+```
+rsync -ruptvl /packages/rsat/bin/vmatch.lic root@192.54.201.166:/packages/rsat/bin/
+```
 # TODO from here
 
 ## 10. Data management
@@ -608,6 +624,10 @@ download-organism -v 1 -org Caenorhabditis_elegans
 download-organism -v 1 -org Arabidopsis_thaliana
 ```
 
+/!\\ (15/09/02) For some reason there's a problem w/ At & Ce installation... Missing disk space?
+Stopping installs for IFB VM.
+How to uninstall organisms?
+
 ### Get the list of organisms supported on your computer.
 ```
 supported-organisms
@@ -618,7 +638,7 @@ supported-organisms
 sudo df -m > /packages/install_logs/df_$(date +%Y-%m-%d_%H-%M-%S)_rsat_organism_installed.txt
 ```
 
-## 11. Install selected R librairies
+## 11. Install selected R librairies 
 
 ### Packages required for some RSAT scripts.
 
@@ -661,47 +681,48 @@ Not sure what to do with this?
 
 
 ### Check remaining disk space
+```
 df -m > /packages/install_logs/df_$(date +%Y-%m-%d_%H-%M-%S)_R_packages_installed.txt
 grep ${DEVICE} /packages/install_logs/df_*.txt
-
+```
 
 ## 12. Testing RSAT & external programs
 
-### Test a simple Perl script that does not require for organisms to be installed.
+### Test a simple Perl script that does not require for organisms to be installed.(OK)
 ```
 which random-seq
 random-seq -l 100
 ```
 
-### Test a simple python script that does not require organisms to be installed.
+### Test a simple python script that does not require organisms to be installed.(OK)
 ```
 random-motif -l 10 -c 0.90
 ```
 
-### vmatch (used in purge-sequence) **/!\\ TODO** Install mkvtree -> licence ?
+### vmatch (used in purge-sequence) **/!\\ TODO** Install mkvtree -> licence ?(Not OK licence expired)
 ```
 random-seq -l 100 | purge-sequence
 ```
 
-### seqlogo **/!\\ TODO**
+### seqlogo (oK)
 ```
 which seqlogo
 seqlogo
 ```
 
-### weblogo 3 **/!\\ TODO**
+### weblogo 3 (OK)
 ```
 which weblogo
 weblogo --help
 ```
 
-### ghostscript
+### ghostscript (OK)
 ```
 which gs
 gs --version
 ```
 
-### Check that the model genomes have been correctly installed **/!\\ TODO** once data/ properly handled. 
+### Check that the model genomes have been correctly installed OK
 ```
 # Retrieve all the start codons and count oligonucleotide frequencies (most should be ATG).
 retrieve-seq -org Saccharomyces_cerevisiae -all -from 0 -to +2 | oligo-analysis -l 3 -1str -return occ,freq -sort
@@ -715,34 +736,34 @@ cd $RSAT
 #echo $RSAT_WS
 ```
 
-### Get the current IP address
+### Get the current IP address O K
 ```
 export IP=`/sbin/ifconfig eth0 | awk '/inet /{print $2}' | cut -f2 -d':'`
 echo ${IP}
 export  RSAT_WS=http://${IP}/rsat/
 ```
 
-### Initialize the Web services stub. 
+### Initialize the Web services stub. OK
 ```
 make -f makefiles/init_rsat.mk ws_init RSAT_WS=${RSAT_WS}
 ```
 
-### After this, re-generate the web services stubb, with the following command.
+### After this, re-generate the web services stubb, with the following command. seems OK
 ```
 make -f makefiles/init_rsat.mk ws_stub RSAT_WS=${RSAT_WS}
 ```
 
-### Test the local web services
+### Test the local web services OK
 ```
 make -f makefiles/init_rsat.mk ws_stub_test
 ```
 
-### Test RSAT Web services (local and remote) without using the SOAP/WSDL stubb (direct parsing of the remote WSDL file)
+### Test RSAT Web services (local and remote) without using the SOAP/WSDL stubb (direct parsing of the remote WSDL file) OK
 ```
 make -f makefiles/init_rsat.mk ws_nostub_test
 ```
 
-### Test the program supported-organisms-server, which relies on Web services without stub
+### Test the program supported-organisms-server, which relies on Web services without stub (not OK)
 ```
 supported-organisms-server -url ${RSAT_WS} | wc
 supported-organisms-server -url http://localhost/rsat/ | wc

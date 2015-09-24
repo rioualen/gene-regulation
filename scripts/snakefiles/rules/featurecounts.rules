@@ -16,7 +16,8 @@
 """
 
 rule featurecounts:
-	"""Assign sequence reads to genomic features"""
+	"""Assign sequence reads to genomic features
+"""
 	input: "{data_dir}/{reads}.bam"
 	output: count_table = "{data_dir}/{reads}_featurecounts.tab", \
                 stat_table = "{data_dir}/{reads}_featurecounts_stat.tab"
