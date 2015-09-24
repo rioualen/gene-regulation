@@ -225,13 +225,13 @@ ruleorder: macs2 > bam_to_bed > sam2bam
 ruleorder: count_reads_bam > sam2bam
 
 rule all: 
-	"""
-	Run all the required analyses
-	"""
+    """Run all the required analyses.
+
+    """
 #    input: GRAPHICS, RAW_READNB, RAW_QC, TRIMMED_QC, SORTED_MAPPED_READS_BWA, SORTED_READS_BED
 #    input: RAW_QC, TRIMMED_READS_SICKLE, TRIMMED_QC, MAPPED_READS_BWA, BAM_READNB, BED_READNB, PEAKS_MACS2, PEAKS_SWEMBL
-#    input: RAW_QC, TRIMMED_READS_SICKLE, TRIMMED_QC, MAPPED_READS_BWA, BAM_READNB, BED_READNB, PEAKS_MACS2
-	input: IMPORT
+     input: RAW_QC, TRIMMED_READS_SICKLE, TRIMMED_QC, MAPPED_READS_BWA, BAM_READNB, BED_READNB, PEAKS_MACS2
+#	input: IMPORT
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
