@@ -160,7 +160,7 @@ COUNT_FILES = HTSEQ_COUNT
 OUT_HTSEQ = PARAMS_R, ALL_COUNTS
 
 ## These inclusions have to be done after having defined the variable COUNT_FILES
-include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/HTseq_allcount_params.rules"
+include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/allcount_params.rules"
 include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/diff_expr.rules"
 #include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/edgeR.rules"
 #include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/DESeq2.rules"

@@ -224,7 +224,7 @@ if (verbosity >= 2):
 
 # Note: these rules must be loaded after having defined some global
 # variables COUNT_FILES, PARAMS_R, ALL_COUNTS.
-include: config["dir"]["rules"] + "/HTseq_allcount_params.rules"    ## Produce the count table from sample-based count files + the parameters for differential analysis
+include: config["dir"]["rules"] + "/allcount_params.rules"    ## Produce the count table from sample-based count files + the parameters for differential analysis
 
 
 # Read the analysis design file
