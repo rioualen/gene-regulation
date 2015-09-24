@@ -26,36 +26,16 @@ library("org.Dm.eg.db")
 dir.main <- "~/mountrsat/dr-chip-rna-seq"
 setwd(dir.main)
 
-#Presence de ligne dans les fichier bed qui ne sont precede par aucun caratere particulier
-#Pose probleme a la lecture 
-# track name='WT1_327_vs_WT_Input_4runs_casava_swembl_R0.01.swembl' description='WT1_327_vs_WT#_Input_4runs_casava_swembl_R0.01.swembl' visibility=3 itemRgb='On' use_score=0
-# browser dense WT1_327_vs_WT_Input_4runs_casava_swembl_R0.01.swembl
-#Presence de commentaire en fin de fichier
-# ; convert-features  -v 1 -from swembl -to bed -i results-chip/WT1_327_vs_WT_Input_4runs_casava_swembl_R0.01/WT1_327_vs_WT_Input_4runs_casava_swembl_R0.01.swembl -o results-chip/WT1_327_vs_WT_Input_4runs_casava_swembl_R0.01/WT1_327_vs_WT_Input_4runs_casava_swembl_R0.01.bed
-# ; Input files
-# ;  input	results-chip/WT1_327_vs_WT_Input_4runs_casava_swembl_R0.01/WT1_327_vs_WT_Input_4runs_casava_swembl_R0.01.swembl
-# ; Output files
-# ;	output	results-chip/WT1_327_vs_WT_Input_4runs_casava_swembl_R0.01/WT1_327_vs_WT_Input_4runs_casava_swembl_R0.01.bed
-# ; Input format	swembl
-# ; Output format	bed
-# ; Host name	rsat-tagc
-# ; Job started	2015-08-05.112619
-# ; Job done	2015-08-05.112628
-# ; Seconds	9.43
-# ;	user	9.43
-# ;	system	0.07
-# ;	cuser	0
-# ;	csystem	0
-
-peaks <- toGRanges("results/chip-seq/WT1_327_vs_WT_Input_4runs_casava_swembl_R0.01/WT1_327_vs_WT_Input_4runs_casava_swembl_R0.01.bed", format="BED", header=FALSE, sep = "\t")
+peaks <- toGRanges("results/chip-seq/WT2_327_vs_WT_Input_4runs_casava_MACS2_call_summits_1e-6/WT2_327_vs_WT_Input_4runs_casava_MACS2_call_summits_1e-6.bed", format="BED", header=FALSE, sep = "\t")
 
 ```
 
 
 ```{r locations peaks}
 #visualize the peak locations over the whole genome
+pdf("results/chip-seq/WT2_327_vs_WT_Input_4runs_casava_MACS2_call_summits_1e-6/WT2_327_vs_WT_Input_4runs_casava_MACS2_call_summits_1e-6_covplot.pdf", height = 10,width = 10)
 covplot(peaks, weightCol = "score")
-
+dev.off()
 ```
 
 ```{r  Heatmap of ChIP binding to TSS regions}
@@ -65,8 +45,9 @@ peakHeatmap(peak = peaks, TxDb = TxDb.Dmelanogaster.UCSC.dm3.ensGene, upstream=3
 ```
 
 ```{r Average Profile of ChIP peaks binding to TSS region}
-
+pdf("results/chip-seq/WT2_327_vs_WT_Input_4runs_casava_MACS2_call_summits_1e-6/WT2_327_vs_WT_Input_4runs_casava_MACS2_call_summits_1e-6_plotAvgProf.pdf", height = 8,width = 10)
 plotAvgProf2(peak = peaks, TxDb = TxDb.Dmelanogaster.UCSC.dm3.ensGene, upstream=3000, downstream=3000, xlab="Genomic Region (5'->3')", ylab = "Read Count Frequency", weightCol = "score")
+dev.off()
 ```
 
 ```{r  Peak Annotation}
