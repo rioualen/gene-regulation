@@ -34,8 +34,8 @@ save.image <- TRUE ## Save memory image in an RData file
 if (is.na(commandArgs(trailingOnly = FALSE)[6])) {
   #   stop("Parameter file must be passed as command-line argument.")
   ## Elements that should be added to the parameters
-  org <- "dm"
-  #org <- "eco"
+  #org <- "dm"
+  org <- "eco"
   if (org == "eco") {
     ## TEMPORARY FOR DEBUGGING: 
     dir.main <- "~/BeatriceRoche/"
@@ -112,7 +112,7 @@ names(sample.conditions) <- sample.ids
 # print(sample.conditions)
 
 ## Build sample labels by concatenating their ID and condition
-sample.labels <- paste(sep="_", sample.ids, sample.conditions)
+sample.desc$label <- paste(sep="_", sample.ids, sample.conditions)
 
 ## Define a specific color for each distinct condition
 conditions <- unique(sample.conditions) ## Set of distinct conditions
@@ -121,8 +121,8 @@ names(cols.conditions) <- conditions
 # print(cols.conditions)
 
 ## Define a color per sample according to its condition
-cols.samples <- cols.conditions[sample.conditions]
-names(cols.samples) <- sample.ids
+sample.desc$color <- cols.conditions[sample.conditions]
+#names(cols.samples) <- sample.ids
 # print(cols.samples)
 
 ## Read the design file, which indicates the anlayses to be done.
@@ -253,7 +253,8 @@ stats.per.sample <- cbind(
     "max" = apply(all.counts.mapped, 2, max, na.rm=TRUE)
   )
 )
-
+stats.per.sample$Mreads <- round(stats.per.sample$sum/1e6, digits = 1)
+  
 ## Count number and the fraction of samples with counts below the mean. 
 ## This shows the impact of very large counts: in my test samples, 
 ## 85% of the samples have a value below the mean (i.e. the mean is at the percentile 85 !)
@@ -289,6 +290,9 @@ stats.per.sample$log10.cpm.mean <- apply(cpms.log10, 2, mean)
 
 ################################################################
 ## Export stats per sample
+#
+# names(stats.per.sample)
+# head(stats.per.sample)
 verbose("Exporting stats per sample", 1)
 sample.summary.file <- paste(sep="", prefix["general.file"], "_summary_per_sample.tab")
 write.table(x = t(stats.per.sample), row.names = TRUE, col.names=NA, 
@@ -301,89 +305,54 @@ verbose(paste(sep="", "\tSummary per sample\t", sample.summary.file), 1)
 
 par.ori <- par() ## Save original plot parameters
 
+## Adapt boxplot size to the number of samples and label sizes
+boxplot.lmargin <- max(nchar(sample.desc$label))/3+5
+boxplot.height <- length(sample.ids)/3+2
 
-## Exploratory plots, should not be done for all projects.
+## Sample-wise statistics
+pdf(file= file.path(dir.DEG, paste(sep = "", "sample_libsum_barplot.pdf")), width=8, height=boxplot.height)
+par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
+bplt <- barplot(stats.per.sample$Mreads, names.arg = stats.per.sample$label, horiz = TRUE, las=1,
+                xlab="libsum (Million reads per sample)",
+                main="Read library sizes (libsum per sample)",
+                col=stats.per.sample$color)
+grid(col="white", lty="solid",ny = 0)
+text(x=pmax(stats.per.sample$Mreads, 3), labels=stats.per.sample$Mreads, y=bplt,pos=2, font=2)
+silence <- dev.off()
 
-if (run.param$exploratory.plots) {
-  verbose("Drawing generic plots from the whole count table", 1)
-  
-  ## Plot the impact of the normalization factor (library sum , median or percentile 75)
-  png(file= file.path(dir.DEG, paste(sep = "", "CPM_libsum_vs_median_vs_perc75.png")), 
-      width=1000, height=1000)
-  cols.counts <- as.data.frame(matrix(cols.samples, nrow=nrow(all.counts.mapped), ncol=ncol(all.counts.mapped), byrow = TRUE))
-  colnames(cols.counts) <- names(all.counts.mapped)
-  rownames(cols.counts) <- rownames(all.counts.mapped)
-  plot(data.frame("libsum" = as.vector(as.matrix(cpms.libsum)),
-                  "median" = as.vector(as.matrix(cpms.median)),
-                  "perc75" = as.vector(as.matrix(cpms.perc75))),
-       col=as.vector(as.matrix(cols.counts)))
-  quiet <- dev.off()
-  
-  ## Plot some sample-wise statistics
-  pdf(file= file.path(dir.DEG, paste(sep = "", "sample_statistics_plots.pdf")), width=10, height=10)
-  par(mar=c(5,5,1,1)) ## adpt axes
-  par(mfrow=c(2,2))
-  ## Median versus mean
-  plot(stats.per.sample[,c("mean", "median")], 
-       panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
-       las=1, col=cols.samples)
-  
-  ## First versus third quartile
-  plot(stats.per.sample[,c("perc25", "perc75")], 
-       panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
-       las=1, col=cols.samples)
-  
-  ## Sum versus third quartile. 
-  plot(stats.per.sample[,c("sum", "perc75")], 
-       panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
-       las=1, col=cols.samples)
-  
-  ## Mean versus third quartile. 
-  plot(stats.per.sample[,c("mean", "perc75")], 
-       panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
-       las=1, col=cols.samples)
-  par(mfrow=c(1,1))
-  quiet <- dev.off()
-}
-
-################################################################
 ## Boxplots of raw counts and CPMs, in linear + log axes. 
 ## These plots give a pretty good intuition of the raw data per sample: 
 ## library sizes, outliers, dispersion of gene counts.
 
-## Adapt boxplot size to the number of samples and label sizes
-boxplot.lmargin <- max(nchar(sample.labels))/3+5
-boxplot.height <- length(sample.ids)/3+2
-
 ## Boxplot of raw counts
 pdf(file= file.path(dir.DEG, paste(sep = "", "sample_boxplots_raw_counts.pdf")), width=8, height=boxplot.height)
 par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
-boxplot(all.counts.mapped, horizontal=TRUE, col=cols.samples,
-        xlab="Raw counts", names=sample.labels,
+boxplot(all.counts.mapped, horizontal=TRUE, col=sample.desc$color,
+        xlab="Raw counts", names=sample.desc$label,
         main="Box plots per sample: raw counts", las=1)
 quiet <- dev.off()
 
 ## Boxplot of log10-transformed counts
 pdf(file= file.path(dir.DEG, paste(sep = "", "sample_boxplots_log10_counts.pdf")), width=8, height=boxplot.height)
 par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
-boxplot(all.counts.mapped.log10, horizontal=TRUE, col=cols.samples,
-        xlab="log10(counts)", names=sample.labels,
+boxplot(all.counts.mapped.log10, horizontal=TRUE, col=sample.desc$color,
+        xlab="log10(counts)", names=sample.desc$label,
         main="Box plots per sample: log10(counts)", las=1)
 quiet <- dev.off()
 
 ## Boxplot of CPMs
 pdf(file= file.path(dir.DEG, paste(sep = "", "sample_boxplots_CPM.pdf")), width=8, height=boxplot.height)
 par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
-boxplot(cpms, horizontal=TRUE, col=cols.samples,
-        xlab="CPM", names=sample.labels,
+boxplot(cpms, horizontal=TRUE, col=sample.desc$color,
+        xlab="CPM", names=sample.desc$label,
         main="Box plots per sample: counts per million reads (CPM)", las=1)
 quiet <- dev.off()
 
 ## Boxplot of log10-transformed CPMs
 pdf(file= file.path(dir.DEG, paste(sep = "", "sample_boxplots_log10_CPM.pdf")), width=8, height=boxplot.height)
 par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
-boxplot(cpms.log10, horizontal=TRUE, col=cols.samples,
-        xlab="log10(CPM)", names=sample.labels,
+boxplot(cpms.log10, horizontal=TRUE, col=sample.desc$color,
+        xlab="log10(CPM)", names=sample.desc$label,
         main="Box plots per sample: counts per million reads (CPM)", las=1)
 quiet <- dev.off()
 
@@ -394,7 +363,7 @@ par(mar=c(4.1,5.1,4.1,1.1))
 ## Draw sample correlation heatmaps for the raw read counts
 pdf(file=paste(sep="", prefix["general.file"],"_sample_correl_heatmap_counts.pdf"))
 hm <- heatmap.2(as.matrix(cor(all.counts.mapped)),  scale="none", trace="none", 
-                main="Correlation between raw counts",
+                main="Correlation between raw counts", margins=c(8,8),
                 col=cols.heatmap) #, breaks=seq(-1,1,2/length(cols.heatmap)))
 quiet <- dev.off()
 
@@ -411,9 +380,53 @@ quiet <- dev.off()
 cpms.pc <- prcomp(t(cpms))
 pdf(file=paste(sep="", prefix["general.file"],"_CPM_PC1-PC2.pdf"))
 plot(cpms.pc$x[,1:2], panel.first=grid(), type="n", main="First components from PCA-transformed CPMs")
-text(cpms.pc$x[,1:2], labels = sample.conditions, col=cols.samples)
+text(cpms.pc$x[,1:2], labels = sample.conditions, col=sample.desc$color)
 quiet <- dev.off()
 
+
+
+## Exploratory plots, should not be done for all projects.
+if (run.param$exploratory.plots) {
+  verbose("Drawing generic plots from the whole count table", 1)
+  
+  ## Plot the impact of the normalization factor (library sum , median or percentile 75)
+  png(file= file.path(dir.DEG, paste(sep = "", "CPM_libsum_vs_median_vs_perc75.png")), 
+      width=1000, height=1000)
+  cols.counts <- as.data.frame(matrix(sample.desc$color, nrow=nrow(all.counts.mapped), ncol=ncol(all.counts.mapped), byrow = TRUE))
+  colnames(cols.counts) <- names(all.counts.mapped)
+  rownames(cols.counts) <- rownames(all.counts.mapped)
+  plot(data.frame("libsum" = as.vector(as.matrix(cpms.libsum)),
+                  "median" = as.vector(as.matrix(cpms.median)),
+                  "perc75" = as.vector(as.matrix(cpms.perc75))),
+       col=as.vector(as.matrix(cols.counts)))
+  quiet <- dev.off()
+  
+  ## Plot some sample-wise statistics
+  pdf(file= file.path(dir.DEG, paste(sep = "", "sample_statistics_plots.pdf")), width=10, height=10)
+  par(mar=c(5,5,1,1)) ## adpt axes
+  par(mfrow=c(2,2))
+  ## Median versus mean
+  plot(stats.per.sample[,c("mean", "median")], 
+       panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
+       las=1, col=sample.desc$color)
+  
+  ## First versus third quartile
+  plot(stats.per.sample[,c("perc25", "perc75")], 
+       panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
+       las=1, col=sample.desc$color)
+  
+  ## Sum versus third quartile. 
+  plot(stats.per.sample[,c("sum", "perc75")], 
+       panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
+       las=1, col=sample.desc$color)
+  
+  ## Mean versus third quartile. 
+  plot(stats.per.sample[,c("mean", "perc75")], 
+       panel.first=c(grid(lty="solid", col="#DDDDDD"), abline(a=0,b=1)),
+       las=1, col=sample.desc$color)
+  par(mfrow=c(1,1))
+  quiet <- dev.off()
+}
 
 ################################################################
 ## Analyse between-replicate reproducibility
