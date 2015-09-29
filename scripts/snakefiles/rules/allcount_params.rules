@@ -48,9 +48,9 @@ rule allcounts_and_params:
     input: COUNT_FILES
     output: R_params = PARAMS_R, \
             all_counts_file = ALL_COUNTS
-    log: config["dir"]["results"] + "/DEG/all_count.log"
-    benchmark: config["dir"]["results"] + "/DEG/all_count_benchmark.json"
-    params: qsub = config["qsub"] + " -q short -e " + config["dir"]["results"] + "/DEG/all_count_qsub.err -o " + config["dir"]["results"] + "/DEG/all_count_qsub.out", \
+    log: config["dir"]["results"] + "DEG/all_count.log"
+    benchmark: config["dir"]["results"] + "DEG/all_count_benchmark.json"
+    params: qsub = config["qsub"] + " -q short -e " + config["dir"]["results"] + "DEG/all_count_qsub.err -o " + config["dir"]["results"] + "DEG/all_count_qsub.out", \
 #            dir_results = config["dir"]["results"], \
             sample_desc_file = config["files"]["samples"], \
             design_file = config["files"]["analyses"], \
@@ -59,8 +59,6 @@ rule allcounts_and_params:
         verbosity = int(config["verbosity"])
         if verbosity >= 2:
             print("COUNT_FILES\t" + ";".join(COUNT_FILES))
-        
-        return()
 
         if verbosity >= 2:
             print("allcounts_and_params" + "\tReading sample descriptions")
@@ -77,8 +75,8 @@ rule allcounts_and_params:
         ## indicates the first condition, second column the second
         ## condition.
         design = read_table(params.design_file, verbosity=verbosity)
-        condition_1 = DESIGN.iloc[:,0] ## First column MUST contain the first condition for each analysis
-        condition_2 = DESIGN.iloc[:,1] ## Second column MUST contain the second condition for each analysis
+        condition_1 = design.iloc[:,0] ## First column MUST contain the first condition for each analysis
+        condition_2 = design.iloc[:,1] ## Second column MUST contain the second condition for each analysis
         if (verbosity >= 1):
             print("Analysis design:\t" + config["files"]["analyses"])
             if (verbosity >= 2):
