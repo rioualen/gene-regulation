@@ -1,3 +1,21 @@
+# Check if each required parameter has been defined in the JSON
+# configuration file, otherwise use default values.
+
+if not "peak-motifs" in config.keys():
+    config["peak-motifs"] = {}
+
+if not "tasks" in config["peak-motifs"].keys():
+    config["peak-motifs"]["tasks"] = "purge,seqlen,composition,disco" # ...
+
+if not "disco" in config["peak-motifs"].keys():
+    config["peak-motifs"]["disco"] =  "oligos,positions" # ...
+
+if not "motif_db" in config["peak-motifs"].keys():
+    config["peak-motifs"]["motif_db"] = "jaspar_core_vertebrates tf $RSAT/public_html/motif_databases/JASPAR/jaspar_core_vertebrates_2013-11.tf" # ...
+
+if not "outdir" in config["peak-motifs"].keys():
+    config["peak-motifs"]["outdir"] =  config["dir"]["results"] + "peak-motifs" # ...   
+
 rule peak_motifs:
 	"""Motif discovery using the peak-motifs pipeline.
 
