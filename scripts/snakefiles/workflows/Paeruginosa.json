@@ -73,6 +73,11 @@
         "mfold_max": "50",
         "call_summits": "--call-summits",
         "other_options": ""
+    },
+
+
+    "swembl": {
+	"R": "0.01"
     }
 
 }

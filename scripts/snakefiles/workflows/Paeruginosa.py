@@ -93,7 +93,7 @@ include: os.path.join(RULES, "convert_bam_to_bed.rules")
 include: os.path.join(RULES, "count_oligo.rules")
 include: os.path.join(RULES, "fastqc.rules")
 include: os.path.join(RULES, "flowcharts.rules")
-#include: os.path.join(RULES, "homer.rules")
+include: os.path.join(RULES, "homer.rules")
 include: os.path.join(RULES, "macs2.rules")
 include: os.path.join(RULES, "peak_length.rules")
 #include: os.path.join(RULES, "peak_motifs.rules")
@@ -102,7 +102,7 @@ include: os.path.join(RULES, "sickle_se.rules")
 #include: os.path.join(RULES, "sorted_bam.rules")
 #include: os.path.join(RULES, "spp.rules")
 #include: os.path.join(RULES, "sra_to_fastq.rules")
-#include: os.path.join(RULES, "swembl.rules")
+include: os.path.join(RULES, "swembl.rules")
 
 
 #================================================================#
@@ -201,9 +201,9 @@ PEAKS_MACS2 = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2/{treat}_vs_{c
 #if verbosity >= 3: 
 #    print("\nPEAKS_MACS2\n\t" + "\n\t".join(PEAKS_MACS2))
 
-### Peak-calling with SWEMBL
-#PEAKS_SWEMBL = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/swembl/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_swembl-R" + config["swembl"]["R"] + ".bed", 
-#               zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
+# Peak-calling with SWEMBL
+PEAKS_SWEMBL = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/swembl/{treat}_vs_{ctrl}_{{aligner}}_swembl-R" + config["swembl"]["R"] + ".bed", 
+               zip, treat=TREATMENT, ctrl=CONTROL), aligner=config["bwa"]["suffix"])
 #if verbosity >= 3: 
 #    print("\nPEAKS_SWEMBL\n\t" + "\n\t".join(PEAKS_SWEMBL))
 
@@ -213,13 +213,13 @@ PEAKS_MACS2 = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2/{treat}_vs_{c
 #if verbosity >= 3: 
 #    print("\nPEAKS_SPP\n\t" + "\n\t".join(PEAKS_SPP))
 
-#PEAKS_HOMER = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/homer/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_homer_peaks.bed", 
-#               zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
+#PEAKS_HOMER = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/homer/{treat}_vs_{ctrl}_{{aligner}}_homer_peaks.bed", 
+ #              zip, treat=TREATMENT, ctrl=CONTROL), aligner=config["bwa"]["suffix"])
 #if verbosity >= 3: 
 #    print("\nPEAKS_SPP\n\t" + "\n\t".join(PEAKS_SPP))
 
 ### Peaks returned by the different peak callers
-#PEAKS = PEAKS_MACS2 + PEAKS_HOMER + PEAKS_SWEMBL
+PEAKS = PEAKS_MACS2 + PEAKS_SWEMBL
 
 ## ----------------------------------------------------------------
 ## Peak analysis
@@ -258,9 +258,9 @@ PEAKS_MACS2 = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2/{treat}_vs_{c
 
 
 ## Rule Order: pipeline still works when commented?...
-##ruleorder: macs2 > bam_to_bed > sam2bam
-##ruleorder: count_reads_bam > sam2bam
-##ruleorder: bed_to_fasta > purge_sequence
+#ruleorder: macs2 > bam_to_bed > sam2bam
+#ruleorder: count_reads_bam > sam2bam
+#ruleorder: bed_to_fasta > purge_sequence
 
 
 ## tests ruleorder
@@ -272,7 +272,7 @@ rule all:
 	Run all the required analyses
 	"""
 ##	input: GRAPHICS, IMPORT, TRIMMED_READS_SICKLE, TRIMMED_QC, RAW_QC, MAPPED_READS_BWA, RAW_READNB, BAM_READNB, BED_READNB, PEAKS_MACS2, FETCH_MACS2_PEAKS, PURGE_MACS2_PEAKS #redundant for flowcharts
-	input: RAW_QC, BWA_INDEX, MAPPED_READS_BWA, PEAKS_MACS2
+	input: RAW_QC, PEAKS_MACS2, GRAPHICS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
