@@ -3,7 +3,7 @@
     "__author__": "Claire Rioualen",
     "data_source": "Gene Expression Omnibus, modENCODE", 
     "qsub": "-V -m a -d /workspace/france_genomique/Scerevisiae-Pho4",
-    "verbosity": "1",
+    "verbosity": "0",
 
     "genome": {
 	"organism": "Saccharomyces_cerevisiae",
@@ -86,7 +86,7 @@
     "oligo_analysis": {
         "count_oligo": "1 2 4 6"
     },
-    "peak-motifs_parameters": {
+    "peak-motifs": {
 		"tasks": "purge,seqlen,composition,disco,collect_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan",
 		"max_seq_len": "1000",
 		"nmotifs": "",

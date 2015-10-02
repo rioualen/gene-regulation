@@ -266,9 +266,9 @@ ruleorder: swembl > bam_to_bed > sort_bam_by_pos > sam2bam
 
 
 rule all: 
-	"""
-	Run all the required analyses
-	"""
+    """Run all the required analyses.
+
+    """
 #	input: GRAPHICS, IMPORT, TRIMMED_READS_SICKLE, TRIMMED_QC, RAW_QC, MAPPED_READS_BWA, RAW_READNB, BAM_READNB, BED_READNB, PEAKS_MACS2, FETCH_MACS2_PEAKS, PURGE_MACS2_PEAKS #redundant for flowcharts
 	input: GRAPHICS, REPORT, TRIMMED_QC, RAW_QC, RAW_READNB, BAM_READNB, BED_READNB, PEAKS, PURGE_PEAKS
 	params: qsub=config["qsub"]

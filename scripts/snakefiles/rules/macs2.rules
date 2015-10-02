@@ -1,5 +1,5 @@
 # Check if each required parameter has been defined in the JSON
-# configuration file, otherwise use default values
+# configuration file, otherwise use default values.
 
 if not "size" in config["genome"].keys():
     sys.exit("The parameter genome size must be defined in the JSON file")
@@ -46,12 +46,6 @@ rule macs2:
 	"""
         input: 	treatment="{result_dir}/{treatment}/{treatment}" + config["suffixes"]["mapped"] + ".bed", \
             	control="{result_dir}/{control}/{control}" + config["suffixes"]["mapped"] + ".bed"
-	output: narrowpeaks = "{result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2_peaks.narrowPeak", \
-                peaks_bed = "{result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2_peaks.bed", \
-                peak_len = "{result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2_peaklen.tab", \
-                summits = "{result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2_summits.bed"
-        log: "{result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2.log"
-        benchmark: "{result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2_benchmark.json"
         params: outdir="{result_dir}/{treatment}_vs_{control}/macs2/", \
             name="{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2", \
             qval = config["macs2"]["qval"], \
@@ -65,6 +59,13 @@ rule macs2:
             qsub=config["qsub"] \
                   + " -q long -e {result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2_qsub.err" \
                   + " -q long -e {result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2_qsub.out" 
+	    output: narrowpeaks = "{result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2_peaks.narrowPeak", \
+                peaks_bed = "{result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2_peaks.bed", \
+                peak_len = "{result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2_peaklen.tab", \
+                summits = "{result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2_summits.bed"
+        log: "{result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2.log"
+        benchmark: "{result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_macs2_benchmark.json"
+        
 	shell: "(macs2 \
 callpeak -t {input.treatment} -c {input.control} --gsize {params.genome_size} \
 --qvalue {params.qval} \

@@ -2,6 +2,30 @@
 
 """
 
+if not "dir" in config.keys():
+    sys.exit('The key ["dir"] must be defined in the JSON file')
+
+if not "results" in config["dir"].keys():
+    sys.exit('The key ["dir"]["results"] must be defined in the JSON file')
+
+if not "suffix" in config.keys():
+    sys.exit('The key ["suffix"] must be defined in the JSON file')
+
+if not "reads_fwd" in config["suffix"].keys():
+    sys.exit('The key ["suffix"]["reads_fwd"] must be defined in the JSON file')
+
+if not "reads_rev" in config["suffix"].keys():
+    sys.exit('The key ["suffix"]["reads_rev"] must be defined in the JSON file')
+
+if not "qual_type" in config["sickle"].keys():
+    config["sickle"]["qual_type"] = "sanger"
+
+if not "threshold" in config["sickle"].keys():
+    config["sickle"]["threshold"] = "20"
+
+if not "other_options" in config["sickle"].keys():
+    config["sickle"]["other_options"] = ""
+
 rule sickle_paired_ends:
     """Trim paired-end reads (fastq.gz format) using sickle.
 

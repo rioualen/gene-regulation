@@ -15,7 +15,9 @@
         "features_gtf": "Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28",
         "base_url_gff3": "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-28/gff3/escherichia_coli_str_k_12_substr_mg1655/",
         "features_gff3": "Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28",
-	"gene_info": "genome/Escherichia_coli_str_k_12_substr_mg1655_GCA_000005845.2_gene_info.tab"
+	"gene_info": "genome/Escherichia_coli_str_k_12_substr_mg1655_GCA_000005845.2_gene_info.tab",
+	"gene2GO": "genome/gene2GO_full.tab",
+	"go_names": "genome/genome/GO_description.tab"
     },
 
     "files": {
@@ -34,7 +36,7 @@
 	"python_lib": "/Users/jvanheld/fg-chip-seq/scripts/snakefiles/python_lib/",
 	"rules": "/Users/jvanheld/fg-chip-seq/scripts/snakefiles/rules/",
 	"reads_source": "data/reads_ori",
-	"results": "results",
+	"results": "results/",
 	"DEG": "results/DEG",
 	"reads": "results/reads",
         "reports": "reports",
