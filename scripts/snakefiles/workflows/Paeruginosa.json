@@ -1,0 +1,78 @@
+{
+    "__description__": "",
+    "__author__": "Claire Rioualen",
+    "data_source": "", 
+    "qsub": "-V -m a -d /workspace/france_genomique/Paeruginosa",
+
+    "genome": {
+	"organism": "Pseudomonas_aeruginosa",
+	"size": "6000000",
+	"genome_version": "pa",
+	"base_url_fasta": "-",
+	"sequence": "",
+	"features": "",
+	"RefSeq_to_std": "",
+        "install_dir": ""
+    },
+
+    "files": {
+	"samples": "/root/mydisk/data/Paeruginosa/samples.tab",
+	"design": "/root/mydisk/data/Paeruginosa/design.tab"
+    },
+
+    "reads": {
+       	"qual_type": "sanger"
+    },
+
+    "suffixes": {
+	"trimmed": "_sickle-se-q20",
+	"mapped":  "_sickle-se-q20_bwa",
+	"macs2":  "_sickle-se-q20_bwa_macs2",
+	"swembl":  "_sickle-se-q20_bwa_swembl_R0.01"
+    },
+
+    "dir": {
+	"base": ".",
+	"fg_lib": ".",
+	"reads_source": "/root/mydisk/data/Paeruginosa/",
+	"results": "/root/mydisk/results/",
+	"reports": "/root/mydisk/results/",
+	"genome": "/root/mydisk/genomes/",
+	"logs": "logs/"
+    },
+
+    "reports" : {
+	"dag": "/root/mydisk/results/dag",
+	"rulegraph": "/root/mydisk/results/rule"
+    },
+
+    "sickle":  { 
+        "threshold": "20",
+        "other_options": ""
+    },
+
+    "fastqc": {
+	"other_options": ""
+    },
+
+    "bwa": {
+	"index": "/root/mydisk/genomes/pa/BWAIndex/pa.fa",
+	"suffix": "bwa",
+	"threads": "10"
+    },
+
+    "samtools": {
+        "sort_by_name": ""    
+    },
+
+    "macs2": {
+        "qval": "0.05",
+        "keep_dup": "all",
+        "band_width": "250",
+        "mfold_min": "2",
+        "mfold_max": "50",
+        "call_summits": "--call-summits",
+        "other_options": ""
+    }
+
+}
