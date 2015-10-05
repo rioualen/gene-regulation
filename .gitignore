@@ -2,6 +2,7 @@
 *.bed
 *.bam
 *.pyc
+*.html
 
 ## Claire
 
