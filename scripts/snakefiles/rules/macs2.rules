@@ -14,7 +14,7 @@ if not "keep_dup" in config["macs2"].keys():
     config["macs2"]["keep_dup"] = "all"
 
 if not "band_width" in config["macs2"].keys():
-    config["macs2"]["band_width"] = 250
+    config["macs2"]["band_width"] = 300
 
 if not "mfold_min" in config["macs2"].keys():
     config["macs2"]["mfold_min"] = 2
@@ -70,6 +70,7 @@ rule macs2:
 callpeak -t {input.treatment} -c {input.control} --gsize {params.genome_size} \
 --qvalue {params.qval} \
 --keep-dup {params.keep_dup} \
+--bdg \
 --bw {params.band_width} \
 --mfold {params.mfold_min} {params.mfold_max} \
 --outdir {params.outdir} --name {params.name} \
