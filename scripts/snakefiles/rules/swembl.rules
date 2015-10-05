@@ -7,10 +7,6 @@ if not "swembl" in config.keys():
 if not "R" in config["swembl"].keys():
     config["swembl"]["R"] = "0.01"
 
-#if not "mapped" in config["suffixes"].keys():
- #   sys.exit(111)
-
-#print('config["suffixes"]["mapped"] = ', config["suffixes"]["mapped"])
 
 rule swembl:
     """Peak-calling with SWEMBL.
