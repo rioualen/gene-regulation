@@ -516,7 +516,12 @@ rnaseq.volcanoPlot <- function(deg.table,
 
 
 ## Generate a set of plots displaying some sample-wise statistics
-sample.description.plots <- function () {
+sample.description.plots <- function (sample.desc,
+                                      stats.per.sample,
+                                      dir.DEG,
+                                      exploratory.plots=FALSE) {
+  
+  plot.files <- c() ## To retun: list of files with plots
   
   par.ori <- par() ## Save original plot parameters
   
@@ -526,6 +531,7 @@ sample.description.plots <- function () {
   
   ## Sample-wise statistics
   plot.file <- file.path(dir.DEG, paste(sep = "", "sample_libsum_barplot.pdf"))
+  plot.files["Mreads_barplot"] <- plot.file
   message("Generating plot", plot.file)
   pdf(file= plot.file, width=8, height=boxplot.height)
   par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
@@ -542,7 +548,8 @@ sample.description.plots <- function () {
   ## library sizes, outliers, dispersion of gene counts.
   
   ## Boxplot of raw counts
-  plot.file <- file.path(dir.DEG, paste(sep = "", "sample_boxplots_raw_counts.pdf"))
+  plot.file <- file.path(dir.DEG, paste(sep = "", "sample_boxplots_counts.pdf"))
+  plot.files["sample_boxplot_counts"] <- plot.file
   message("Generating plot file", plot.file)
   pdf(file= plot.file, width=8, height=boxplot.height)
   par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
@@ -552,7 +559,8 @@ sample.description.plots <- function () {
   quiet <- dev.off()
   
   ## Boxplot of log10-transformed counts
-  plot.file <- file.path(dir.DEG, paste(sep = "", "sample_boxplots_log10_counts.pdf"))
+  plot.file <- file.path(dir.DEG, paste(sep = "", "sample_boxplots_counts_log10.pdf"))
+  plot.files["sample_boxplot_counts_log10"] <- plot.file
   message("Generating plot file", plot.file)
   pdf(file= plot.file, width=8, height=boxplot.height)
   par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
@@ -563,6 +571,7 @@ sample.description.plots <- function () {
   
   ## Boxplot of CPMs
   plot.file <- file.path(dir.DEG, paste(sep = "", "sample_boxplots_CPM.pdf"))
+  plot.files["sample_boxplot_CPM"] <- plot.file
   message("Generating plot file", plot.file)
   pdf(file=plot.file, width=8, height=boxplot.height)
   par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
@@ -572,8 +581,9 @@ sample.description.plots <- function () {
   quiet <- dev.off()
   
   ## Boxplot of log10-transformed CPMs
-  plot.file <- file.path(dir.DEG, paste(sep = "", "sample_boxplots_log10_CPM.pdf"))
-  message("Generating plot file")
+  plot.file <- file.path(dir.DEG, paste(sep = "", "sample_boxplots_CPM_log10.pdf"))
+  plot.files["sample_boxplot_CPM_log10"] <- plot.file
+  message("Generating plot", plot.file)
   pdf(file=plot.file, width=8, height=boxplot.height)
   par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
   boxplot(cpms.log10, horizontal=TRUE, col=sample.desc$color,
@@ -586,7 +596,10 @@ sample.description.plots <- function () {
   par(mar=c(4.1,5.1,4.1,1.1))
   
   ## Draw sample correlation heatmaps for the raw read counts
-  pdf(file=paste(sep="", prefix["general.file"],"_sample_correl_heatmap_counts.pdf"))
+  plot.file <- paste(sep="", prefix["general.file"],"_sample_correl_heatmap_counts.pdf")
+  plot.files["sample_correl_heatmap_counts"] <- plot.file
+  message("Generating plot", plot.file)
+  pdf(file=plot.file, width=8, height=8)
   hm <- heatmap.2(as.matrix(cor(all.counts.mapped)),  scale="none", trace="none", 
                   main="Correlation between raw counts", margins=c(8,8),
                   col=cols.heatmap) #, breaks=seq(-1,1,2/length(cols.heatmap)))
@@ -603,7 +616,10 @@ sample.description.plots <- function () {
   
   ## Plot the first versus second components of samples
   cpms.pc <- prcomp(t(cpms))
-  pdf(file=paste(sep="", prefix["general.file"],"_CPM_PC1-PC2.pdf"))
+  plot.file <- paste(sep="", prefix["general.file"],"_CPM_PC1-PC2.pdf")
+  plot.files["CPM_PC1-PC2"] <- plot.file
+  message("Generating plot", plot.file)
+  pdf(file=plot.file)
   plot(cpms.pc$x[,1:2], panel.first=grid(), type="n", main="First components from PCA-transformed CPMs")
   text(cpms.pc$x[,1:2], labels = sample.conditions, col=sample.desc$color)
   quiet <- dev.off()
@@ -611,12 +627,14 @@ sample.description.plots <- function () {
   
   
   ## Exploratory plots, should not be done for all projects.
-  if (run.param$exploratory.plots) {
+  if (exploratory.plots) {
     verbose("Drawing generic plots from the whole count table", 1)
     
     ## Plot the impact of the normalization factor (library sum , median or percentile 75)
-    png(file= file.path(dir.DEG, paste(sep = "", "CPM_libsum_vs_median_vs_perc75.png")), 
-        width=1000, height=1000)
+    plot.file <- file.path(dir.DEG, paste(sep = "", "CPM_libsum_vs_median_vs_perc75.png"))
+    plot.files["CPM_libsum_vs_median_vs_perc75"] <- plot.file
+    message("Generating plot", plot.file)
+    png(file= plot.file, width=1000, height=1000)
     cols.counts <- as.data.frame(matrix(sample.desc$color, nrow=nrow(all.counts.mapped), ncol=ncol(all.counts.mapped), byrow = TRUE))
     colnames(cols.counts) <- names(all.counts.mapped)
     rownames(cols.counts) <- rownames(all.counts.mapped)
@@ -627,7 +645,10 @@ sample.description.plots <- function () {
     quiet <- dev.off()
     
     ## Plot some sample-wise statistics
-    pdf(file= file.path(dir.DEG, paste(sep = "", "sample_statistics_plots.pdf")), width=10, height=10)
+    plot.file <- file.path(dir.DEG, paste(sep = "", "sample_statistics_plots.pdf"))
+    plot.files["sample_statistics_plots"] <- plot.file
+    message("Generating plot", plot.file)
+    pdf(file=plot.file, width=10, height=10)
     par(mar=c(5,5,1,1)) ## adpt axes
     par(mfrow=c(2,2))
     ## Median versus mean
@@ -652,5 +673,7 @@ sample.description.plots <- function () {
     par(mfrow=c(1,1))
     quiet <- dev.off()
   }
+  
+  return(plot.files)
 }
 
