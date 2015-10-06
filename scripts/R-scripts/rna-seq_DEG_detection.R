@@ -40,20 +40,21 @@ if (is.na(commandArgs(trailingOnly = FALSE)[6])) {
   org <- "eco"
   if (org == "eco") {
     ## TEMPORARY FOR DEBUGGING: 
-    dir.main <- "~/BeatriceRoche/"
-    setwd(dir.main)
-    r.params.path <- "results/DEG/sickle_pe_q20_bowtie2_pe_sorted_name_params.R"  
-    org.db <- "org.EcK12.eg.db" ## Should be added to parameters
-    gene.info.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655_GCA_000005845.2_gene_info.tab"
-    organism.names <- c("name" = "Escherichia coli",
-                        "clusterProfiler" = NA,
-                        "kegg"="eco")
-    gtf.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.gtf"
-    gtf.source <- "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-28/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655/"
-    #   pet.gene <- "b2531"
-    genes.of.interest <- c("b2531")
-    go.map.file <- 'genome/Escherichia_coli_str_k_12_substr_mg1655_GCA_000005845.2_gene_GO.tab'
-    go.description.file <- "genome/GO_description.tab"
+    source ("~/BeatriceRoche/config_files/roche-loiseau_config.R")
+#     dir.main <- "~/BeatriceRoche/"
+#     setwd(dir.main)
+#     r.params.path <- "results/DEG/sickle_pe_q20_bowtie2_pe_sorted_name_params.R"  
+#     org.db <- "org.EcK12.eg.db" ## Should be added to parameters
+#     gene.info.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655_GCA_000005845.2_gene_info.tab"
+#     organism.names <- c("name" = "Escherichia coli",
+#                         "clusterProfiler" = NA,
+#                         "kegg"="eco")
+#     gtf.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.gtf"
+#     gtf.source <- "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-28/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655/"
+#     #   pet.gene <- "b2531"
+#     genes.of.interest <- c("b2531")
+#     go.map.file <- 'genome/Escherichia_coli_str_k_12_substr_mg1655_GCA_000005845.2_gene_GO.tab'
+#     go.description.file <- "genome/GO_description.tab"
   } else if (org=="dm") {
     dir.main <- "~/dr-chip-rna-seq/"
     setwd(dir.main)
@@ -319,7 +320,9 @@ verbose(paste(sep="", "\tSummary per sample\t", sample.summary.file), 1)
 ## Draw some generic plots to display sample-wise statistics.
 ################################################################
 
-sample.description.plots()
+plot.files <- sample.description.plots(
+  sample.desc, stats.per.sample, dir.DEG, 
+  exploratory.plots=run.param$exploratory.plots)
 
 ################################################################
 ## Analyse between-replicate reproducibility
@@ -395,6 +398,8 @@ verbose("Starting differential analysis", 1)
 
 ## Iterate over analyses
 i <- 1
+comparison.results <- design
+comparison.results$prefixes <- paste(sep="_", design$cond1, "vs", design$cond2)
 for (i in 1:nrow(design)) {
   
   ## Identify samples for the first condition
@@ -414,10 +419,12 @@ for (i in 1:nrow(design)) {
   verbose(paste(sep="", "\tDifferential analysis\t", i , "/", nrow(design), "\t", cond1, " vs ", cond2), 1)
   
   ## Create a specific result directory for this differential analysis
-  prefix["comparison"] <- paste(sep="_", cond1, "vs", cond2)
+  prefix["comparison"] <- comparison.results$prefixes[i]
   dir.analysis <- file.path(dir.DEG, paste(sep="", prefix["comparison"]))
+  comparison.results$dir.analysis <- dir.analysis
   dir.create(path = dir.analysis, showWarnings = FALSE, recursive = TRUE)
   dir.figures <- file.path(dir.analysis, "figures")
+  comparison.results$dir.figures <- dir.figures
   dir.create(path = dir.figures, showWarnings = FALSE, recursive = TRUE)
   prefix["comparison_file"] <- file.path(dir.analysis, prefix["comparison"])
   prefix["comparison_figure"] <- file.path(
@@ -435,8 +442,8 @@ for (i in 1:nrow(design)) {
   }
   
   ## Define conditions and labels for the samples of the current analysis
-  current.conditions <- sample.conditions[current.samples]
-  current.labels <- paste(current.conditions, names(current.counts), sep="_")
+  current.sample.conditions <- sample.conditions[current.samples]
+  current.labels <- paste(current.sample.conditions, names(current.counts), sep="_")
   
   ## Initiate a result table with the CPMs and derived statistics
   all.gene.ids <- row.names(cpms)
@@ -489,7 +496,7 @@ for (i in 1:nrow(design)) {
   prefix["DESeq2_figure"] <- paste(sep="", prefix["comparison_figure"], "_", suffix.DESeq2)
   
   ## Create a DESeqDataSet object from the count table + conditions
-  condition <- as.factor(as.vector(current.conditions))
+  condition <- as.factor(as.vector(current.sample.conditions))
   deseq2.dds <- DESeqDataSetFromMatrix(
     countData = current.counts, 
     colData = DataFrame(condition),
@@ -527,6 +534,7 @@ for (i in 1:nrow(design)) {
   
   ## Save the completed DESeq2 result table
   deseq2.result.file <- paste(sep = "", prefix["DESeq2_file"], ".tab")
+  comparison.results[i,"deseq2"] <- deseq2.result.file
   write.table(x = deseq2.result.table, 
               row.names = FALSE, file = deseq2.result.file, sep = "\t", quote=FALSE)
   verbose(paste(sep="", "\t\tDESeq2 result file\t", deseq2.result.file), 1)
@@ -600,6 +608,8 @@ for (i in 1:nrow(design)) {
   
   ## Export edgeR result table
   edger.result.file <- paste(sep="", prefix["edgeR_file"], ".tab")
+  comparison.results[i,"edger"] <- edger.result.file
+  
   write.table(x = edger.result.table, 
               row.names = FALSE, file = edger.result.file, sep = "\t", quote=FALSE)
   verbose(paste(sep="", "\t\tedgeR result file\t", edger.result.file), 1)
@@ -677,9 +687,15 @@ for (i in 1:nrow(design)) {
   result.file <- paste(sep = "", 
                        prefix["comparison_file"], 
                        "_", suffix.deg, "_DESeq2_and_edgeR.tab")
+  comparison.results[i,"result.table"] <- result.file
+  
   write.table(x = result.table, row.names = FALSE,
               file = result.file, sep = "\t", quote=FALSE)
   verbose(paste(sep="", "\t\tMerged result file\t", result.file), 1)
+  
+  
+  ################################################################
+  ## Plots to compare edgeR and DESeq2 results
   
   ## Define point colors according to the test results
   both <- result.table$DEG_edgeR_and_DESeq2 == 1
