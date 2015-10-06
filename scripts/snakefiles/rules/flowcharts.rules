@@ -1,11 +1,5 @@
 import os
 
-# import sys
-# print("argv\t" + " ".join(sys.argv))
-# print("workflow.snakefile\t" + workflow.snakefile)
-# print("workflow.basedir\t" + workflow.basedir)
-
-
 ## Use the default Snakefile unless a specific snakefile is defined in the config file.
 if not "files" in config.keys():
     config["files"] = {}

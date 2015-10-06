@@ -1,0 +1,75 @@
+{
+    "__description__": "",
+    "__author__": "Claire Rioualen",
+    "data_source": "", 
+    "qsub": "-V -m a -d /data",
+    "verbosity": "0",
+
+    "genome": {
+	"organism": "Pseudomonas_aeruginosa",
+	"size": "6300000",
+	"genome_version": "pa",
+	"base_url_fasta": "-",
+	"sequence": "",
+	"features": "",
+	"RefSeq_to_std": "",
+        "install_dir": ""
+    },
+
+    "files": {
+	"samples": "/data/Paeruginosa/samples.tab",
+	"design": "/data/Paeruginosa/design.tab"
+    },
+
+    "reads": {
+       	"qual_type": "sanger"
+    },
+
+    "dir": {
+	"base": ".",
+	"fg_lib": ".",
+	"reads_source": "/data/Paeruginosa/",
+	"results": "/data/results/Paeruginosa/",
+	"reports": "/data/results/Paeruginosa/",
+	"genome": "/data/genomes/"
+    },
+
+    "reports" : {
+	"dag": "/data/results/Paeruginosa/dag",
+	"rulegraph": "/data/results/Paeruginosa/rule"
+    },
+
+    "sickle":  { 
+        "threshold": "20",
+        "other_options": ""
+    },
+
+    "fastqc": {
+	"other_options": ""
+    },
+
+    "bwa": {
+	"index": "/data/genomes/pa/BWAIndex/pa.fa",
+	"threads": "10"
+    },
+
+    "samtools": {
+        "sort_by_name": ""    
+    },
+
+    "macs2": {
+        "qval": "0.05",
+        "keep_dup": "all",
+        "band_width": "250",
+        "mfold_min": "2",
+        "mfold_max": "50",
+        "call_summits": "--call-summits",
+        "other_options": ""
+    },
+
+
+    "swembl": {
+	"R": "0.01"
+    }
+
+}

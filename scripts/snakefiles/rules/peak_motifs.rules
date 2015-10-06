@@ -1,3 +1,21 @@
+# Check if each required parameter has been defined in the JSON
+# configuration file, otherwise use default values.
+
+if not "peak-motifs" in config.keys():
+    config["peak-motifs"] = {}
+
+if not "tasks" in config["peak-motifs"].keys():
+    config["peak-motifs"]["tasks"] = "purge,seqlen,composition,disco" # ...
+
+if not "disco" in config["peak-motifs"].keys():
+    config["peak-motifs"]["disco"] =  "oligos,positions" # ...
+
+if not "motif_db" in config["peak-motifs"].keys():
+    config["peak-motifs"]["motif_db"] = "jaspar_core_vertebrates tf $RSAT/public_html/motif_databases/JASPAR/jaspar_core_vertebrates_2013-11.tf" # ...
+
+if not "outdir" in config["peak-motifs"].keys():
+    config["peak-motifs"]["outdir"] =  config["dir"]["results"] + "peak-motifs" # ...   
+
 rule peak_motifs:
 	"""Motif discovery using the peak-motifs pipeline.
 
@@ -5,10 +23,10 @@ rule peak_motifs:
 	
 	Required parameters:
 		config['qsub']
-		config['peak-motifs_parameters']['tasks']
-		config['peak-motifs_parameters']['disco']
-		config['peak-motifs_parameters']['motif_db']
-		config['peak-motifs_parameters']['outdir']
+		config['peak-motifs']['tasks']
+		config['peak-motifs']['disco']
+		config['peak-motifs']['motif_db']
+		config['peak-motifs']['outdir']
 
 	Usage example: 
 		input: expand("peak-motifs_synthesis.html")
@@ -20,10 +38,10 @@ rule peak_motifs:
 	output: "{peaks}.html"
 	params:
 		qsub = config['qsub'], \
-		tasks = config['peak-motifs_parameters']['tasks'], \
-		disco = config['peak-motifs_parameters']['disco'], \
-		motif_db = config['peak-motifs_parameters']['motif_db'], \
-		outdir = config['peak-motifs_parameters']['outdir']
+		tasks = config['peak-motifs']['tasks'], \
+		disco = config['peak-motifs']['disco'], \
+		motif_db = config['peak-motifs']['motif_db'], \
+		outdir = config['peak-motifs']['outdir']
 	log: "{peaks}_peak-motifs.log"
 	benchmark: "{peaks}_peak-motifs_bench.json"
 	shell: "peak-motifs  -v 1 -i  {input} -disco {params.disco} -motif_db {params.motif_db} -task {params.tasks} -prefix peak-motifs -outdir {params.outdir}"

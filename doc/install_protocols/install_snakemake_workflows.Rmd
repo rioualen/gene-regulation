@@ -390,6 +390,33 @@ $ git clone https://github.com/taoliu/MACS.git
 ...
 ```
 
+## HOMER
+
+[Web page](http://homer.salk.edu/)
+
+[Install instructions:](http://homer.salk.edu/homer/introduction/install.html)
+
+wget "http://homer.salk.edu/homer/configureHomer.pl"
+rsync -> VM
+copy configureHomer.pl to /home/rg/bin/HOMER
+cd /home/rg/bin/HOMER
+perl configureHomer.pl -install homer
+
+add to path : PATH="$HOME/bin/HOMER/bin:$PATH"
+
+
+The basic Homer installation does not contain any sequence data.  To download sequences for use with homer, use the configureHomer.pl script.  To get a list of available packages:
+perl /path-to-homer/configureHomer.pl -list
+To install packages, simply use the -install option and the name(s) of the package(s).
+perl /path-to-homer/configureHomer.pl -install mouse (to download the mouse promoter set)
+perl /path-to-homer/configureHomer.pl -install mm8    (to download the mm8 version of the mouse genome)
+perl /path-to-homer/configureHomer.pl -install hg19    (to download the hg19 version of the human genome)
+
+
+Available genomes
+Supported Organisms: Human (hg17, hg18, hg19), Mouse (mm8, mm9, mm10), Rat (rn4, rn5), Frog (xenTro2, xenTro3), Zebrafish (danRer7), Drosophila (dm3), C elegans (ce6, ce10), S. cerevisiae (sacCer2, sacCer3), pombe (ASM294v1), Arabidopsis (tair10), Rice (msu6), and also works with custom genomes in FASTA format and gene annotations in GTF format.
+
+
 ## SWEMBL
 
 * [SWEMBL beginner's manual](http://www.ebi.ac.uk/~swilder/SWEMBL/beginners.html)

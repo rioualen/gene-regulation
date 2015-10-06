@@ -36,7 +36,7 @@
 	"python_lib": "/Users/jvanheld/fg-chip-seq/scripts/snakefiles/python_lib/",
 	"rules": "/Users/jvanheld/fg-chip-seq/scripts/snakefiles/rules/",
 	"reads_source": "data/reads_ori",
-	"results": "results",
+	"results": "results/",
 	"DEG": "results/DEG",
 	"reads": "results/reads",
         "reports": "reports",

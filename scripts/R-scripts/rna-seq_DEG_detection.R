@@ -22,6 +22,7 @@ library("stats4bioinfo")
 
 ## Load library of functions for differential analysis
 dir.fg <- "~/fg-chip-seq/"
+#dir.fg <- "~/mountrsatlocal/fg-chip-seq/"
 source(file.path(dir.fg, "scripts/R-scripts/deg_lib.R"))
 
 ## Define parameters
@@ -37,7 +38,8 @@ if (is.na(commandArgs(trailingOnly = FALSE)[6])) {
   #   stop("Parameter file must be passed as command-line argument.")
   ## Elements that should be added to the parameters
   #org <- "dm"
-  org <- "eco"
+  #org <- "dm_sepsis"
+  #org <- "eco"
   if (org == "eco") {
     ## TEMPORARY FOR DEBUGGING: 
     source ("~/BeatriceRoche/config_files/roche-loiseau_config.R")
@@ -71,7 +73,23 @@ if (is.na(commandArgs(trailingOnly = FALSE)[6])) {
     organism.names <- c("name" = "Drosophila melanogaster",
                         "clusterProfiler" = "fly",
                         "kegg"="dme")
-  } else {
+  }else if (org=="dm_sepsis") {
+    dir.main <- "/home/lkhamvongsa/mountrsatlocal/droso_sepsis"
+    setwd(dir.main)
+    r.params.path <- "results/DEG/sickle-se-q20_subread_featurecounts_params.R"  
+    sample.description.file <- "data/Trauma_induced_sepsis_sample_description.tab"
+    design.file <- "data/Trauma_induced_sepsis_analysis_description.tab"
+    gtf.file <- "genome/genes.gtf"
+    gtf.source <- "/home/lkhamvongsa/mountrsatlocal/workspace/genomes/Drosophila_melanogaster_UCSC_dm3/dm3/Annotation/Genes/genes.gtf"
+    dir.DEG <- "results/DEG/"
+    suffix.deg <- "sickle-se-q20_subread_featurecounts"
+    suffix.DESeq2 <- paste(sep="_", suffix.deg, "DESeq2")
+    suffix.edgeR <- paste(sep="_", suffix.deg, "edgeR")
+    org.db <- "org.Dm.eg.db"
+    organism.names <- c("name" = "Drosophila melanogaster",
+                        "clusterProfiler" = "fly",
+                        "kegg"="dme")
+  }else {
     message(paste("No info for org", org))
   }
 } else {
@@ -79,7 +97,7 @@ if (is.na(commandArgs(trailingOnly = FALSE)[6])) {
 }
 verbose(paste("Reading parameters", r.params.path), 1)
 source(r.params.path)
-setwd(dir.main)
+#setwd(dir.main)
 # getwd()
 
 ################################################################
@@ -133,7 +151,7 @@ sample.desc$color <- cols.conditions[sample.conditions]
 ## consists in comparing two conditions. 
 verbose("Reading design", 1)
 design <- read.delim(design.file, sep="\t", 
-                     comment=";", header = TRUE, row.names=NULL)
+                     comment=";", header = T, row.names=NULL)
 # print(design)
 
 ## Prefix for output files concerning the whole count table (all samples together)
@@ -328,8 +346,10 @@ plot.files <- sample.description.plots(
 ## Analyse between-replicate reproducibility
 ################################################################
 verbose("Plotting betwen-replicate comparisons", 1)
+#conditions.with.replicate <- setdiff(conditions, "CI_CI_0H")
 cond <- conditions[1] ## Choose first condition for testing without the loop
 for (cond in conditions) {
+#for (cond in conditions.with.replicate) {
   verbose(paste(sep="", "\tcondition\t", cond), 2)
   
   max.rep.to.plot <- 5 ## Restrict the number of replicates to plot, for the sale of readability
@@ -339,6 +359,7 @@ for (cond in conditions) {
   dir.create(path = dir.condition, showWarnings = FALSE, recursive = TRUE)
   
   ## Select the specific data for the current condition (samples, counts, CPMs)
+  #all.counts.mapped.with.replicate <- setdiff(names(all.counts.mapped), "CI_CI_0H_1")
   current.samples <- names(all.counts.mapped)[sample.conditions == cond]
   nrep <- length(current.samples)
   
@@ -405,16 +426,16 @@ for (i in 1:nrow(design)) {
   ## Identify samples for the first condition
   cond1 <- as.vector(design[i,1])  ## First condition for the current comparison
   samples1 <- sample.ids[sample.conditions == cond1]
-  if (length(samples1) < 2) {
-    stop(paste("Cannot perform differential analysis. The count table contains less than 2 samples for condition", cond1))
-  }
+   if (length(samples1) < 2) {
+     stop(paste("Cannot perform differential analysis. The count table contains less than 2 samples for condition", cond1))
+   }
   
   ## Identify samples for the second condition
   cond2 <- as.vector(design[i,2])  ## Second condition for the current comparison
   samples2 <- sample.ids[sample.conditions == cond2]
-  if (length(samples2) < 2) {
-    stop(paste("Cannot perform differential analysis. The count table contains less than 2 samples for condition", cond2))
-  }
+   if (length(samples2) < 2) {
+     stop(paste("Cannot perform differential analysis. The count table contains less than 2 samples for condition", cond2))
+   }
   
   verbose(paste(sep="", "\tDifferential analysis\t", i , "/", nrow(design), "\t", cond1, " vs ", cond2), 1)
   
@@ -464,25 +485,25 @@ for (i in 1:nrow(design)) {
   # dim(current.counts)
   
   result.table$cpm.mean <- apply(cpms,1, mean)
-  result.table$cpm1.mean <- apply(cpms[,samples1],1, mean)
-  result.table$cpm2.mean <- apply(cpms[,samples2],1, mean)
+  result.table$cpm1.mean <- apply(as.data.frame(cpms[,samples1]),1, mean)
+  result.table$cpm2.mean <- apply(as.data.frame(cpms[,samples2]),1, mean)
   result.table$A = log2(result.table$cpm1.mean*result.table$cpm2.mean)/2
   result.table$M = log2(result.table$cpm1.mean/result.table$cpm2.mean)
   result.table$cpm.median <- apply(cpms,1, median)
-  result.table$cpm1.median <- apply(cpms[,samples1],1, median)
-  result.table$cpm2.median <- apply(cpms[,samples2],1, median)
+  result.table$cpm1.median <- apply(as.data.frame(cpms[,samples1]),1, median)
+  result.table$cpm2.median <- apply(as.data.frame(cpms[,samples2]),1, median)
   result.table$cpm.min <-  apply(cpms,1, min)
-  result.table$cpm1.min <- apply(cpms[,samples1],1, min)
-  result.table$cpm2.min <- apply(cpms[,samples2],1, min)
+  result.table$cpm1.min <- apply(as.data.frame(cpms[,samples1]),1, min)
+  result.table$cpm2.min <- apply(as.data.frame(cpms[,samples2]),1, min)
   result.table$cpm.max <-  apply(cpms,1, max)
-  result.table$cpm1.max <- apply(cpms[,samples1],1, max)
-  result.table$cpm2.max <- apply(cpms[,samples2],1, max)
+  result.table$cpm1.max <- apply(as.data.frame(cpms[,samples1]),1, max)
+  result.table$cpm2.max <- apply(as.data.frame(cpms[,samples2]),1, max)
   result.table$cpm.sd <-  apply(cpms,1, sd)
-  result.table$cpm1.sd <- apply(cpms[,samples1],1, sd)
-  result.table$cpm2.sd <- apply(cpms[,samples2],1, sd)
+  result.table$cpm1.sd <- apply(as.data.frame(cpms[,samples1]),1, sd)
+  result.table$cpm2.sd <- apply(as.data.frame(cpms[,samples2]),1, sd)
   result.table$cpm.var <-  apply(cpms,1, var)
-  result.table$cpm1.var <- apply(cpms[,samples1],1, sd)
-  result.table$cpm2.var <- apply(cpms[,samples2],1, sd)
+  result.table$cpm1.var <- apply(as.data.frame(cpms[,samples1]),1, sd)
+  result.table$cpm2.var <- apply(as.data.frame(cpms[,samples2]),1, sd)
   # View(result.table)
   
   ################################################################
@@ -829,28 +850,28 @@ for (i in 1:nrow(design)) {
   
  
   ## Volcano plot
-  for (deg.tool in deg.tools) {
-    criterion <- "padj"
-    for (criterion in c("padj", "evalue")) {
-      verbose(paste(sep=" ", "\t\t", deg.tool, criterion, "Volcano plot"), 3)
-      pdf(file=paste(sep="_", prefix[paste(sep="", deg.tool, "_figure")], 
-                     criterion, thresholds[criterion], "VolcanoPlot.pdf"))
-      control.col <- paste(sep=".", deg.tool, criterion)
-      effect.col <- paste(sep=".", deg.tool, "log2FC")
-      VolcanoPlot(na.omit(result.table[,c(control.col, effect.col)]), 
-                  control.type=control.col, alpha = thresholds[criterion], 
-                  effect.size.col=effect.col, xlab="log2(fold-change)", effect.threshold=log2(thresholds["FC"]),
-                  main=paste(sep=" ", cond1, "vs", cond2, "; ", deg.tool, " ", criterion, "volcano plot"),
-                  sort.by.pval = TRUE, plot.points = TRUE,
-                  legend.corner = "topleft")
-      quiet <- dev.off()
-    }
-   }  
+#   for (deg.tool in deg.tools) {
+#     criterion <- "padj"
+#     for (criterion in c("padj", "evalue")) {
+#       verbose(paste(sep=" ", "\t\t", deg.tool, criterion, "Volcano plot"), 3)
+#       pdf(file=paste(sep="_", prefix[paste(sep="", deg.tool, "_figure")], 
+#                      criterion, thresholds[criterion], "VolcanoPlot.pdf"))
+#       control.col <- paste(sep=".", deg.tool, criterion)
+#       effect.col <- paste(sep=".", deg.tool, "log2FC")
+#       VolcanoPlot(na.omit(result.table[,c(control.col, effect.col)]), 
+#                   control.type=control.col, alpha = thresholds[criterion], 
+#                   effect.size.col=effect.col, xlab="log2(fold-change)", effect.threshold=log2(thresholds["FC"]),
+#                   main=paste(sep=" ", cond1, "vs", cond2, "; ", deg.tool, " ", criterion, "volcano plot"),
+#                   sort.by.pval = TRUE, plot.points = TRUE,
+#                   legend.corner = "topleft")
+#       quiet <- dev.off()
+#     }
+#    }  
   
   ################################################################
   ## Store the Differentally expressed genes in a two-column file
   # names(result.table)
-  DEG.columns  <- c("DEG_edgeR_and_DESeq2", "edgeR.DEG", "DESeq2.DEG", "padj_edgeR_and_DESeq2", "evalue_edgeR_and_DESeq2")
+  DEG.columns  <- c("DEG_edgeR_and_DESeq2", "edgeR.DEG", "DESeq2.DEG", "padj_edgeR_and_DESeq2")
   # column <- DEG.columns[3]
   deg.id.lists <- list()
   column <- DEG.columns[1]
