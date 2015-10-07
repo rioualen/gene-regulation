@@ -11,18 +11,19 @@ rule spp:
 	"""
 	input: 	treatment="{result_dir}/{treatment}/{treatment}" + config["suffixes"]["mapped"] + ".bam", \
             	control="{result_dir}/{control}/{control}" + config["suffixes"]["mapped"] + ".bam"
-        log: "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_spp.log"
-        benchmark: "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_spp_benchmark.json"
-	params:	qsub=config["qsub"] \
-                  + " -q long -e {result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_spp_qsub.err" \
-                  + " -q long -e {result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_spp_qsub.out" 
-	output: peaks_narrowPeak = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_spp.narrowPeak", \
-		peaks_bed = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_spp.bed", \
-		pdf = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_spp.crosscorrelation.pdf", \
-		sm_density_wig = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_spp.smoothed.density.wig", \
-		enrich_est_wig = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_spp.enrichment.estimates.wig", \
-		peaks_broadPeak = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_spp.broadPeak", \
-		bdg_positions = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_spp.binding.positions.txt"
+	params:	FDR = config["SPP"]["FDR"], \
+			qsub=config["qsub"] \
+                  + " -q long -e {result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_FDR{FDR}_spp_qsub.err" \
+                  + " -q long -e {result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_FDR{FDR}_spp_qsub.out" 
+	log: "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_FDR{FDR}_spp.log"
+	benchmark: "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_FDR{FDR}_spp_benchmark.json"
+	output: peaks_narrowPeak = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_FDR{FDR}_spp.narrowPeak", \
+		peaks_bed = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_FDR{FDR}_spp.bed", \
+		pdf = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_FDR{FDR}_spp.crosscorrelation.pdf", \
+		sm_density_wig = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_FDR{FDR}_spp.smoothed.density.wig", \
+		enrich_est_wig = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_FDR{FDR}_spp.enrichment.estimates.wig", \
+		peaks_broadPeak = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_FDR{FDR}_spp.broadPeak", \
+		bdg_positions = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_FDR{FDR}_spp.binding.positions.txt"
 	run:
 		R("""library(spp)
 
@@ -56,7 +57,7 @@ rule spp:
 		broad.clusters <- get.broad.enrichment.clusters(treatment.data.qua, control.data.qua, window.size=1e3, z.thr=3,tag.shift=round(binding.characteristics$peak$x/2))
 		write.broadpeak.info(broad.clusters,"{output.peaks_broadPeak}")
 
-		fdr <- 5e-2
+		fdr <- {params.FDR}
 		detection.window.halfsize <- binding.characteristics$whs;
 		bp <- find.binding.positions(signal.data=treatment.data.qua,control.data=control.data.qua,fdr=fdr,whs=detection.window.halfsize)
 		print(paste("detected",sum(unlist(lapply(bp$npl,function(d) length(d$x)))),"peaks"))

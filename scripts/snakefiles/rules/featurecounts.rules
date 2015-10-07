@@ -26,6 +26,7 @@ rule featurecounts:
                 feature_type = config["subread"]["feature_type"], \
                 multi_overlaps = config["subread"]["multi_overlaps"], \
                 paired_ends = config["subread"]["paired_ends"], \
+                ignore_duplicate = config["subread"]["ignore_dup"], \
                 qsub = config["qsub"] \
                 + " -q short -e {data_dir}/{reads}_featurecounts_qsub.err" \
                 + " -o {data_dir}/{reads}_featurecounts_qsub.out"
@@ -41,6 +42,7 @@ count.features <- featureCounts(
                 GTF.featureType="{params.feature_type}",
                 GTF.attrType="{params.attr_type}",
                 isPairedEnd = {params.paired_ends},
+                ignoreDup ={params.ignore_duplicate},
                 allowMultiOverlap = {params.multi_overlaps})
 write.table(count.features$counts, file="{output.count_table}", sep="\t", col.names = FALSE, quote=FALSE)
 write.table(count.features$stat, file="{output.stat_table}", sep="\t", quote=FALSE)
