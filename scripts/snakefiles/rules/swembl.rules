@@ -19,7 +19,7 @@ rule swembl:
           control =  "{result_dir}/{gsm_control}/{gsm_control}_{aligner}_sorted_pos.bed"
     params: 	swembl_r =  config["swembl"]["R"], \
             qsub = config["qsub"]  \
-            + " -e {result_dir}/{gsm_treatment}_vs_{gsm_control}/swembl/{gsm_treatment}_vs_{gsm_control}_{aligner}_swembl-R{swembl_r}" + "_qsub.err" \
+            + " - q long -e {result_dir}/{gsm_treatment}_vs_{gsm_control}/swembl/{gsm_treatment}_vs_{gsm_control}_{aligner}_swembl-R{swembl_r}" + "_qsub.err" \
             + " -o {result_dir}/{gsm_treatment}_vs_{gsm_control}/swembl/{gsm_treatment}_vs_{gsm_control}_{aligner}_swembl-R{swembl_r}" + "_qsub.out" 
     log: "{result_dir}/{gsm_treatment}_vs_{gsm_control}/swembl/{gsm_treatment}_vs_{gsm_control}_{aligner}_swembl-R{swembl_r}" + ".log"
     benchmark: "{result_dir}/{gsm_treatment}_vs_{gsm_control}/swembl/{gsm_treatment}_vs_{gsm_control}_{aligner}_swembl-R{swembl_r}" + "_benchmark.json"

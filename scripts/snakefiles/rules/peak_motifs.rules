@@ -35,9 +35,10 @@ rule peak_motifs:
 			-task purge,seqlen,composition,disco,synthesis,small_summary,motifs_vs_db,scan -prefix peak-motifs -outdir results/peak-motifs"
 	"""
 	input: "{peaks}.fasta"
-	output: "{peaks}.html"
+	output: "{peaks}_synthesis.html"
 	params:
-		qsub = config['qsub'], \
+		qsub = config['qsub'] + " -q long -e {peaks}_qsub.err" \
+                  + " -q long -o {peaks}_qsub.out" , \
 		tasks = config['peak-motifs']['tasks'], \
 		disco = config['peak-motifs']['disco'], \
 		motif_db = config['peak-motifs']['motif_db'], \

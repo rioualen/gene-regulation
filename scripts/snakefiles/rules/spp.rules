@@ -14,7 +14,7 @@ rule spp:
 	params:	FDR = config["SPP"]["FDR"], \
 			qsub=config["qsub"] \
                   + " -q long -e {result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_FDR{FDR}_spp_qsub.err" \
-                  + " -q long -e {result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_FDR{FDR}_spp_qsub.out" 
+                  + " -o {result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_FDR{FDR}_spp_qsub.out" 
 	log: "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_FDR{FDR}_spp.log"
 	benchmark: "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_FDR{FDR}_spp_benchmark.json"
 	output: peaks_narrowPeak = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}" + config["suffixes"]["mapped"] + "_FDR{FDR}_spp.narrowPeak", \

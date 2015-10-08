@@ -58,7 +58,7 @@ rule macs2:
             genome_size = config["genome"]["size"], \
             qsub=config["qsub"] \
                   + " -q long -e {result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}_{aligner}_qval{qval}_macs2_qsub.err" \
-                  + " -q long -e {result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}_{aligner}_qval{qval}_macs2_qsub.out" 
+                  + " -o {result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}_{aligner}_qval{qval}_macs2_qsub.out" 
 	output: narrowpeaks = "{result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}_{aligner}_qval{qval}_macs2_peaks.narrowPeak", \
                 peaks_bed = "{result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}_{aligner}_qval{qval}_macs2_peaks.bed", \
                 peak_len = "{result_dir}/{treatment}_vs_{control}/macs2/{treatment}_vs_{control}_{aligner}_qval{qval}_macs2_peaklen.tab", \
