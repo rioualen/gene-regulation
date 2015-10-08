@@ -49,7 +49,7 @@ include: os.path.join(RULES, "util.rules")
 include: os.path.join(RULES, "count_reads.rules")
 include: os.path.join(RULES, "bwa_index.rules")
 include: os.path.join(RULES, "bwa_se.rules")
-#include: os.path.join(RULES, "bed_to_fasta.rules")
+include: os.path.join(RULES, "bed_to_fasta.rules")
 include: os.path.join(RULES, "convert_bam_to_bed.rules")
 include: os.path.join(RULES, "count_oligo.rules")
 include: os.path.join(RULES, "fastqc.rules")
@@ -61,7 +61,7 @@ include: os.path.join(RULES, "peak_length.rules")
 #include: os.path.join(RULES, "purge_sequence.rules")
 include: os.path.join(RULES, "sickle_se.rules")
 #include: os.path.join(RULES, "sorted_bam.rules")
-#include: os.path.join(RULES, "spp.rules")
+include: os.path.join(RULES, "spp.rules")
 #include: os.path.join(RULES, "sra_to_fastq.rules")
 include: os.path.join(RULES, "swembl.rules")
 
@@ -75,10 +75,7 @@ READS = config["dir"]["reads_source"]
 # Samples
 SAMPLES = read_table(config["files"]["samples"], verbosity=verbosity)
 SAMPLE_IDS = SAMPLES.iloc[:,0] ## First column MUST contain the sample ID
-SAMPLE_CONDITIONS = SAMPLES.iloc[:,1] ## Second column MUST contain condition for each sample
-SAMPLE_EXT_DB = SAMPLES.iloc[:,2] ## External database from which the raw reads will be downloaded
-SAMPLE_EXT_ID = SAMPLES.iloc[:,3] ## Sample ID in the external database
-SAMPLE_DESCR = SAMPLES.iloc[:,7] ## First column MUST contain the sample ID
+
 
 ## Design
 DESIGN = read_table(config["files"]["design"], verbosity=verbosity)
@@ -148,25 +145,25 @@ PEAKS_MACS2 = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2/{treat}_vs_{c
 PEAKS_SWEMBL = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/swembl/{treat}_vs_{ctrl}_{{aligner}}_swembl-R" + config["swembl"]["R"] + ".bed", 
                zip, treat=TREATMENT, ctrl=CONTROL), aligner=ALIGNER)
 
-#PEAKS_SPP = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/spp/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_spp.narrowPeak", 
-#               zip, treat=TREATMENT, ctrl=CONTROL), trimming=TRIMMING, aligner=ALIGNER)
+PEAKS_SPP = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/spp/{treat}_vs_{ctrl}_{{aligner}}_spp-fdr" + config["spp"]["fdr"] + ".narrowPeak", 
+               zip, treat=TREATMENT, ctrl=CONTROL), aligner=ALIGNER)
 
-#PEAKS_HOMER = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/homer/{treat}_vs_{ctrl}_{{aligner}}_homer_peaks.bed", 
-#              zip, treat=TREATMENT, ctrl=CONTROL), aligner=ALIGNER)
+PEAKS_HOMER = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/homer/{treat}_vs_{ctrl}_{{aligner}}_homer_peaks.bed", 
+              zip, treat=TREATMENT, ctrl=CONTROL), aligner=ALIGNER)
 
-PEAKS = PEAKS_MACS2 + PEAKS_SWEMBL
+PEAKS = PEAKS_MACS2 + PEAKS_SWEMBL + PEAKS_HOMER + PEAKS_SPP
 
-## ----------------------------------------------------------------
-## Peak analysis
-## ----------------------------------------------------------------
+# ----------------------------------------------------------------
+# Peak analysis
+# ----------------------------------------------------------------
 
-## File conversion / fetching fasta
-#FETCH_MACS2_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_macs2_peaks.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=TRIMMING, aligner=ALIGNER)
-#FETCH_SWEMBL_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/swembl/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_swembl-R0.01.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=TRIMMING, aligner=ALIGNER)
-#FETCH_SPP_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/spp/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_spp.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=TRIMMING, aligner=ALIGNER)
-#FETCH_HOMER_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/homer/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_homer_peaks.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=TRIMMING, aligner=ALIGNER)
+# File conversion / fetching fasta
+FETCH_MACS2_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2/{treat}_vs_{ctrl}_{{aligner}}_macs2_peaks.fasta", zip, treat=TREATMENT, ctrl=CONTROL), aligner=ALIGNER)
+FETCH_SWEMBL_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/swembl/{treat}_vs_{ctrl}_{{aligner}}_swembl-R0.01.fasta", zip, treat=TREATMENT, ctrl=CONTROL), aligner=ALIGNER)
+FETCH_SPP_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/spp/{treat}_vs_{ctrl}_{{aligner}}_spp.fasta", zip, treat=TREATMENT, ctrl=CONTROL), aligner=ALIGNER)
+FETCH_HOMER_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/homer/{treat}_vs_{ctrl}_{{aligner}}_homer_peaks.fasta", zip, treat=TREATMENT, ctrl=CONTROL), aligner=ALIGNER)
 
-#FETCH_PEAKS = FETCH_MACS2_PEAKS + FETCH_HOMER_PEAKS
+FETCH_PEAKS = FETCH_MACS2_PEAKS + FETCH_HOMER_PEAKS
 
 ## Sequence purge
 #PURGE_MACS2_PEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_macs2_peaks_purged.fasta", zip, treat=TREATMENT, ctrl=CONTROL), trimming=TRIMMING, aligner=ALIGNER)
@@ -207,7 +204,7 @@ rule all:
 	Run all the required analyses
 	"""
 ##	input: GRAPHICS, IMPORT, TRIMMED_READS_SICKLE, TRIMMED_QC, RAW_QC, MAPPED_READS_BWA, RAW_READNB, BAM_READNB, BED_READNB, PEAKS_MACS2, FETCH_MACS2_PEAKS, PURGE_MACS2_PEAKS #redundant for flowcharts
-	input: GRAPHICS, RAW_QC, PEAKS_MACS2, PEAKS_SWEMBL
+	input: GRAPHICS, RAW_QC, PEAKS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
