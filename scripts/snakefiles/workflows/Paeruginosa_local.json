@@ -31,7 +31,8 @@
 	"reads_source": "/data/Paeruginosa/",
 	"results": "/data/results/Paeruginosa/",
 	"reports": "/data/results/Paeruginosa/",
-	"genome": "/data/genomes/"
+	"genome": "/data/genomes/",
+	"logs": "/data/results/Paeruginosa/logs/"
     },
 
     "reports" : {
@@ -60,7 +61,7 @@
     "macs2": {
         "qval": "0.05",
         "keep_dup": "all",
-        "band_width": "250",
+        "band_width": "180",
         "mfold_min": "2",
         "mfold_max": "50",
         "call_summits": "--call-summits",
@@ -70,6 +71,17 @@
 
     "swembl": {
 	"R": "0.01"
-    }
+    },
 
+    "homer": {
+	"genome": "/data/genomes/pa/BWAIndex/pa.fa",
+	"style": "factor"
+    },
+
+    "spp": {
+	"fdr": "0.05"
+    },
+    "rsat": {
+	"verbosity": "1"
+    }
 }
