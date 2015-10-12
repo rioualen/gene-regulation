@@ -717,6 +717,7 @@ for (i in 1:nrow(design)) {
   
   ################################################################
   ## Plots to compare edgeR and DESeq2 results
+  verbose("\t\tComparison plots between edgeR and DESeq2", 2)
   
   ## Define point colors according to the test results
   both <- result.table$DEG_edgeR_and_DESeq2 == 1
@@ -736,7 +737,9 @@ for (i in 1:nrow(design)) {
   ## P-value comparison plot
   ## Compare DESeq2 and edgeR nominal p-values
   #png(file=paste(sep = "", prefix["comparison_figure"], suffix.deg, "_DESeq2_vs_edgeR_pvalues", ".png"))
-  pdf(file=paste(sep = "", prefix["comparison_figure"], suffix.deg, "_DESeq2_vs_edgeR_pvalues", ".pdf"))
+  plot.file <- paste(sep = "", prefix["comparison_figure"], suffix.deg, "_DESeq2_vs_edgeR_pvalues", ".pdf")
+  message(plot.file)
+  pdf(file=plot.file)
   plot.cex=0.7
   plot(result.table$edgeR.pvalue, 
        result.table$DESeq2.pvalue,
@@ -763,7 +766,9 @@ for (i in 1:nrow(design)) {
   ## Lists of differentially expressed genes (DEG) based on all thresholds together
   venn.counts.deg <- vennCounts(result.table[,c("edgeR.DEG", "DESeq2.DEG")])
   
-  pdf(file=paste(sep = "", prefix["comparison_figure"], suffix.deg, "_DESeq2_vs_edgeR_Venn_DEG", ".pdf"))
+  plot.file <- paste(sep = "", prefix["comparison_figure"], suffix.deg, "_DESeq2_vs_edgeR_Venn_DEG", ".pdf")
+  message(plot.file)
+  pdf(file=plot.file)
   #   pdf(file= file.path(
   #     dir.figures, 
   #     paste(sep = "", "DESeq2_vs_edgeR_Venn",
@@ -781,8 +786,10 @@ for (i in 1:nrow(design)) {
       result.table[,c(paste(sep="", "edgeR.",s,"_", thresholds[s]), 
                       paste(sep="", "DESeq2.",s,"_", thresholds[s]))])
     
-    pdf(file=paste(sep = "", prefix["comparison_figure"], suffix.deg, "_DESeq2_vs_edgeR_Venn", 
-                   "_", s, "_", thresholds[s], ".pdf"))
+    plot.file <- paste(sep = "", prefix["comparison_figure"], suffix.deg, "_DESeq2_vs_edgeR_Venn", 
+                       "_", s, "_", thresholds[s], ".pdf")
+    message(plot.file)
+    pdf(file=plot.file)
     #     pdf(file= file.path(
     #       dir.figures, 
     #       paste(sep = "", "DESeq2_vs_edgeR_Venn",
@@ -798,7 +805,9 @@ for (i in 1:nrow(design)) {
   ## This is just to get an intuitive idea, since CPMs are 
   ## not recommended for diffferential detection.
   verbose("\t\tmean CPM plot", 2)
-  pdf(file=paste(sep = "", prefix["comparison_figure"], "CPM_plot",  ".pdf"))
+  plot.file <- paste(sep = "", prefix["comparison_figure"], "CPM_plot",  ".pdf")
+  message(plot.file)
+  pdf(file=plot.file)
   plot(result.table[,c("cpm1.mean", "cpm2.mean")], 
        log="xy",
        main = "Mean counts per million reads (log scales)",
@@ -825,7 +834,9 @@ for (i in 1:nrow(design)) {
   ################################################################
   ## Draw MA plot with CPMs
   verbose("\t\tCPM MA plot", 2)
-  pdf(file=paste(sep = "", prefix["comparison_figure"], "_CPM_MA_plot.pdf"))
+  plot.file <- paste(sep = "", prefix["comparison_figure"], "_CPM_MA_plot.pdf")
+  message(plot.file)
+  pdf(file=plot.file)
   #pdf(file=file.path(dir.figures, paste(sep = "", "CPM_MA_plot_", prefix["comparison"], ".pdf")))
   plot(result.table[,c("A", "M")],
        main = paste(sep=" ", cond1, "vs", cond2, ": CPMs MA plot"),
@@ -871,6 +882,7 @@ for (i in 1:nrow(design)) {
   ################################################################
   ## Store the Differentally expressed genes in a two-column file
   # names(result.table)
+  verbose("Storing differentially expressed genes in a two-column file (gene-cluster)", 1)
   DEG.columns  <- c("DEG_edgeR_and_DESeq2", "edgeR.DEG", "DESeq2.DEG", "padj_edgeR_and_DESeq2")
   # column <- DEG.columns[3]
   deg.id.lists <- list()
