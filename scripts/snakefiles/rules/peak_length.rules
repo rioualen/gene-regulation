@@ -11,9 +11,11 @@ rule peak_length:
 	input: "{peaks}.fasta"
 	output: "{peaks}_length.png"
 	benchmark: "{peaks}_length_benchmark.json"
+	log: "{peaks}_length.log"
 	params: qsub = config['qsub']
 	run:
-		R("""library("Biostrings")
+		R("""sink("{log}")
+		library("Biostrings")
 
 		s = readDNAStringSet("{input}")
 
