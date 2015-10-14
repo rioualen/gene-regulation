@@ -13,7 +13,8 @@
 	"sequence": "",
 	"features": "",
 	"RefSeq_to_std": "",
-        "install_dir": ""
+        "install_dir": "",
+	"file": "/data/genomes/pa/BWAIndex/pa.fa"
     },
 
     "files": {
@@ -74,8 +75,8 @@
     },
 
     "homer": {
-	"genome": "/data/genomes/pa/BWAIndex/pa.fa",
-	"style": "factor"
+	"style": "factor",
+	"genome": "/data/genomes/pa/BWAIndex/pa.fa"
     },
 
     "spp": {
@@ -83,5 +84,20 @@
     },
     "rsat": {
 	"verbosity": "1"
+    },
+
+    "oligo_analysis": {
+	"count_oligo": "1 2 6"
+    },
+    
+    "peak-motifs": {
+		"tasks": "purge,seqlen,composition,disco,collect_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan",
+		"max_seq_len": "0",
+		"nmotifs": "",
+		"minol": "",
+		"maxol": "",
+		"motif_db": "jaspar_core_vertebrates tf $RSAT/public_html/motif_databases/JASPAR/jaspar_core_vertebrates_2013-11.tf",
+		"disco": "oligos,positions"
     }
+
 }
