@@ -34,18 +34,17 @@ rule peak_motifs:
 			-motif_db jaspar_core_vertebrates tf $RSAT/public_html/motif_databases/JASPAR/jaspar_core_vertebrates_2013-11.tf \
 			-task purge,seqlen,composition,disco,synthesis,small_summary,motifs_vs_db,scan -prefix peak-motifs -outdir results/peak-motifs"
 	"""
-	input: "{peaks}.fasta"
-	output: "{peaks}_synthesis.html"
+	input: "{dir_peaks}/{peaks}.fasta"
+	output: "{dir_peaks}/{peaks}_synthesis.html"
 	params:
-		qsub = config['qsub'] + " -q long -e {peaks}_qsub.err" \
-                  + " -q long -o {peaks}_qsub.out" , \
+		qsub = config['qsub'] + " -q long -e {dir_peaks}/{peaks}_qsub.err -o {dir_peaks}/{peaks}_qsub.out" , \
 		tasks = config['peak-motifs']['tasks'], \
 		disco = config['peak-motifs']['disco'], \
 		motif_db = config['peak-motifs']['motif_db'], \
 		outdir = config['peak-motifs']['outdir']
-	log: "{peaks}_peak-motifs.log"
-	benchmark: "{peaks}_peak-motifs_bench.json"
-	shell: "peak-motifs  -v 1 -i  {input} -disco {params.disco} -motif_db {params.motif_db} -task {params.tasks} -prefix peak-motifs -outdir {params.outdir}"
+	log: "{dir_peaks}/{peaks}_peak-motifs.log"
+	benchmark: "{dir_peaks}/{peaks}_peak-motifs_bench.json"
+	shell: "peak-motifs  -v 1 -i  {input} -disco {params.disco} -motif_db {params.motif_db} -task {params.tasks} -prefix {wildcards.peaks} -outdir {params.outdir}"
 
 
 #peak-motifs -v 1 -i SWEMBL_mmus_CEBPA_vs_mmus_Input_peaks_R0.01_nof_purge.fasta  -disco oligos,positions -motif_db jaspar_core_vertebrates tf $RSAT/public_html/motif_databases/JASPAR/jaspar_core_vertebrates_2013-11.tf -task purge,seqlen,composition,disco,synthesis,small_summary,motifs_vs_db,scan -prefix peak-motifs -outdir .
