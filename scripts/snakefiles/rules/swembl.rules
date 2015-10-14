@@ -18,13 +18,13 @@ rule swembl:
 		control =  "{result_dir}/{control}/{control}_{aligner}_sorted_pos.bed"
     params:	swembl_r =  config["swembl"]["R"], \
 		qsub = config["qsub"]  \
-		+ " - q long -e {result_dir}/{treatment}_vs_{control}/swembl/{treatment}_vs_{control}_{aligner}_swembl-R" + config["swembl"]["R"] + "_qsub.err" \
-		+ " -o {result_dir}/{treatment}_vs_{control}/swembl/{treatment}_vs_{control}_{aligner}_swembl-R" + config["swembl"]["R"] + "_qsub.out" 
-    log: "{result_dir}/{treatment}_vs_{control}/swembl/{treatment}_vs_{control}_{aligner}_swembl-R" + config["swembl"]["R"] + ".log"
-    benchmark: "{result_dir}/{treatment}_vs_{control}/swembl/{treatment}_vs_{control}_{aligner}_swembl-R" + config["swembl"]["R"] + "_benchmark.json"
-    output:	peaks_swembl = "{result_dir}/{treatment}_vs_{control}/swembl/{treatment}_vs_{control}_{aligner}_swembl-R" + config["swembl"]["R"] + ".swembl", \
-		peaks_bed = "{result_dir}/{treatment}_vs_{control}/swembl/{treatment}_vs_{control}_{aligner}_swembl-R" + config["swembl"]["R"] + ".bed", \
-		peak_len ="{result_dir}/{treatment}_vs_{control}/swembl/{treatment}_vs_{control}_{aligner}_swembl-R" + config["swembl"]["R"] + "_peaklen.tab"  
+		+ " - q long -e {result_dir}/{treatment}_vs_{control}/swembl-R" + config["swembl"]["R"] + "/{treatment}_vs_{control}_{aligner}_swembl-R" + config["swembl"]["R"] + "_qsub.err" \
+		+ " -o {result_dir}/{treatment}_vs_{control}/swembl-R" + config["swembl"]["R"] + "/{treatment}_vs_{control}_{aligner}_swembl-R" + config["swembl"]["R"] + "_qsub.out" 
+    log: "{result_dir}/{treatment}_vs_{control}/swembl-R" + config["swembl"]["R"] + "/{treatment}_vs_{control}_{aligner}_swembl-R" + config["swembl"]["R"] + ".log"
+    benchmark: "{result_dir}/{treatment}_vs_{control}/swembl-R" + config["swembl"]["R"] + "/{treatment}_vs_{control}_{aligner}_swembl-R" + config["swembl"]["R"] + "_benchmark.json"
+    output:	peaks_swembl = "{result_dir}/{treatment}_vs_{control}/swembl-R" + config["swembl"]["R"] + "/{treatment}_vs_{control}_{aligner}_swembl-R" + config["swembl"]["R"] + ".swembl", \
+		peaks_bed = "{result_dir}/{treatment}_vs_{control}/swembl-R" + config["swembl"]["R"] + "/{treatment}_vs_{control}_{aligner}_swembl-R" + config["swembl"]["R"] + ".bed", \
+		peak_len ="{result_dir}/{treatment}_vs_{control}/swembl-R" + config["swembl"]["R"] + "/{treatment}_vs_{control}_{aligner}_swembl-R" + config["swembl"]["R"] + "_peaklen.tab"  
     shell: "(SWEMBL -i {input.treatment} -r {input.control} -B -R " + config["swembl"]["R"] + " -o {output.peaks_swembl}; \
 convert-features -from swembl -to bed -i {output.peaks_swembl} -o {output.peaks_bed}; \
 sequence-lengths -i {output.peaks_bed} -in_format bed | classfreq -ci 10 -v 1 -o {output.peak_len}) &> {log} "
