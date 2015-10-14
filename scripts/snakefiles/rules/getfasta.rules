@@ -1,0 +1,23 @@
+"""To all: rename to fetch-sequences.rules?"""
+
+rule getfasta:
+	"""get fasta from bed file.
+
+	Usage: 
+		bedtools getfasta -fi input.fa -bed some_peaks.bed -fo output.fa
+        
+	Parameters:
+	        config["qsub"] : qsub options
+        	config["genome"]["file"] 
+	"""
+	input: "{regions}.bed"
+	output: "{regions}.fasta"
+	log: "{regions}_getfasta.log"
+	benchmark: "{regions}_getfasta_benchmark.json"
+	params: genome = config["genome"]["file"], \
+                qsub = config["qsub"] + " -q short -e {regions}_getfasta_qsub.err -o {regions}_getfasta_qsub.out"
+	shell:"""bedtools getfasta -fi {params.genome} -bed {input} -fo {output} 2> {log}"""
+
+
+#bedtools getfasta -fi /data/genomes/pa/BWAIndex/pa.fa -bed ~/Desktop/5_ACAGTG_L002_R1_001_vs_5T_GGCTAC_L002_R1_001/homer/5_ACAGTG_L002_R1_001_vs_5T_GGCTAC_L002_R1_001_bwa_homer_peaks.bed -fo test.fa
+
