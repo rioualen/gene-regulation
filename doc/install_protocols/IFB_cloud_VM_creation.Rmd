@@ -4,7 +4,7 @@ author: "Claire Rioualen"
 date: "July 30, 2015"
 output:
   html_document:
-    css: /packages/rsat/public_html/course.css
+    css: ../styles.css
     fig_caption: yes
   pdf_document:
     toc: yes

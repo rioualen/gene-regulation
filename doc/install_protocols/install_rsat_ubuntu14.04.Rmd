@@ -2,7 +2,7 @@
 title: "Installation of RSAT on an Ubuntu device"
 output:
   html_document:
-    css: /packages/rsat/public_html/course.css
+    css: ../styles.css
     fig_caption: yes
     toc: yes
   pdf_document:
