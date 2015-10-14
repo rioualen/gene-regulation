@@ -173,6 +173,15 @@ apt-get install python3.4-dev
 
 ## R
 
+**/!\\* R lib 
+
+```
+> .libPaths()
+```
+``` 
+$ export R_LIBS="/home/your_username/R_libs"
+```
+
 ### Python 3 package rpy2
 
 ```
@@ -186,6 +195,15 @@ doesnt work
 ```
 Problems solved after rsat install (including loads of python packages)?
 
+### spp (spp peak-calling)
+
+depends on caTools. curr not working !
+
+### Biostrings (peak length)
+
+```
+> install.packages("Biostrings")
+```
 
 ## Snakemake
 

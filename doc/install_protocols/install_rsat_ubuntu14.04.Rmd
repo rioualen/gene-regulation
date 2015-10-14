@@ -381,10 +381,10 @@ git config --global user.mail claire.rioualen@inserm.fr
 git config --global user.name "reg-genomics VM user"
 ``` 
 
-### Archive download. /!\\ To be checked.
+### Archive download. /!\\ Check version number/url. /!!!\\ Password?
 
 ```
-export RSAT_DISTRIB=rsat_2015-06-06.tar.gz
+export RSAT_DISTRIB=rsat_2015-09-29.tar.gz
 export RSAT_DISTRIB_URL=http://pedagogix-tagc.univ-mrs.fr/download_rsat/${RSAT_DISTRIB}
 ```
 ```
@@ -586,6 +586,20 @@ make -f makefiles/install_software.mk install_ext_apps
 df -m > /packages/install_logs/df_$(date +%Y-%m-%d_%H-%M-%S)_rsat_extapp_installed.txt
 ```
 
+**/!\\** Seems ok but in the end:
+```
+Installing ghostscript (gs) for operating system linux
+make -f /packages/rsat/makefiles/install_software.mk _install_ghostscript_linux
+make[2]: Entering directory '/packages/rsat'
+make[2]: *** No rule to make target '_install_ghostscript_linux'.  Stop.
+make[2]: Leaving directory '/packages/rsat'
+/packages/rsat/makefiles/install_software.mk:255: recipe for target 'install_ghostscript' failed
+make[1]: *** [install_ghostscript] Error 2
+make[1]: Leaving directory '/packages/rsat'
+makefiles/install_software.mk:68: recipe for target 'install_ext_apps' failed
+make: *** [install_ext_apps] Error 2
+```
+
 ### Mkvtree licence / Vmatch ? Not OK
 
 **To be changed?**
@@ -616,17 +630,12 @@ ln -s ${RSAT_DATA_DIR} data
 cd $RSAT
 ```
 
-### Install two model organisms, required for some of the Web tools.
+### Install model organisms, required for some of the Web tools.
 ```
 download-organism -v 1 -org Saccharomyces_cerevisiae -org Escherichia_coli_K_12_substr__MG1655_uid57779
 download-organism -v 1 -org Drosophila_melanogaster
 download-organism -v 1 -org Caenorhabditis_elegans
-download-organism -v 1 -org Arabidopsis_thaliana
 ```
-
-/!\\ (15/09/02) For some reason there's a problem w/ At & Ce installation... Missing disk space?
-Stopping installs for IFB VM.
-How to uninstall organisms?
 
 ### Get the list of organisms supported on your computer.
 ```
@@ -642,6 +651,8 @@ sudo df -m > /packages/install_logs/df_$(date +%Y-%m-%d_%H-%M-%S)_rsat_organism_
 
 ### Packages required for some RSAT scripts.
 
+NB: possible to check which packages already installed ? Cause it's super long even when everything's supposed to be installed already...
+
 ```
 cd $RSAT
 make -f makefiles/install_rsat.mk install_r_packages
@@ -651,7 +662,7 @@ make -f makefiles/install_rsat.mk install_r_packages
 cd $RSAT; make -f makefiles/install_rsat.mk update ## install R packages + compile the C programs
 ```
 
-Done first...
+NB: second only if git repo 
 
 <!---
 Not sure what to do with this?
@@ -774,13 +785,113 @@ supported-organisms-server -url http://rsat-tagc.univ-mrs.fr/ | wc
 
 Run the demo of the following tools
 
-* retrieve-seq to check the access to local genomes (at least Saccharomyces cerevisiae)
-* feature-map to check the GD library
-* retrieve-ensembl-seq to check the interface to Ensembl
-* fetch-sequences to ceck the interface to UCSC
-* some NeAT tools (they rely on web services)
-* peak-motifs because it mobilises half of the RSAT tools -> a good control for the overall installation.
-* footprint-discovery to check the tools depending on homology tables (blast tables).
+* retrieve-seq to check the access to local genomes (at least Saccharomyces cerevisiae) **OK**
+* feature-map to check the GD library **OK** 
+* retrieve-ensembl-seq to check the interface to Ensembl **Bug**
+
+```
+Can't locate MyInterfaces/RSATWebServices/RSATWSPortType.pm in @INC (you may need to install the MyInterfaces::RSATWebServices::RSATWSPortType module) (@INC contains: ../ws_clients/perl_clients/RSATWS /etc/perl /usr/local/lib/x86_64-linux-gnu/perl/5.20.2 /usr/local/share/perl/5.20.2 /usr/lib/x86_64-linux-gnu/perl5/5.20 /usr/share/perl5 /usr/lib/x86_64-linux-gnu/perl/5.20 /usr/share/perl/5.20 /usr/local/lib/site_perl .) at /packages/rsat/public_html/ws_async.cgi line 16.
+BEGIN failed--compilation aborted at /packages/rsat/public_html/ws_async.cgi line 16.
+```
+
+* fetch-sequences to check the interface to UCSC **OK**
+* some NeAT tools (they rely on web services) **Running indefinitely**
+* peak-motifs because it mobilises half of the RSAT tools -> a good control for the overall installation. **Bugged**
+
+if email:
+```
+Software error:
+
+no sender
+
+Trace begun at /usr/share/perl5/Email/Sender/Simple.pm line 117
+Email::Sender::Simple::send_email('Email::Sender::Simple', 'Email::Abstract=ARRAY(0x32d6a70)', 'HASH(0x3a1c240)') called at /usr/share/perl5/Email/Sender/Role/CommonSending.pm line 45
+Email::Sender::Role::CommonSending::try {...}  at /usr/share/perl5/Try/Tiny.pm line 81
+eval {...} at /usr/share/perl5/Try/Tiny.pm line 72
+Try::Tiny::try('CODE(0x3a0c8c0)', 'Try::Tiny::Catch=REF(0x3266d28)') called at /usr/share/perl5/Email/Sender/Role/CommonSending.pm line 58
+Email::Sender::Role::CommonSending::send('Email::Sender::Simple', 'Email::Simple=HASH(0x3a0c770)', 'HASH(0x3a0cb78)') called at /packages/rsat/public_html/lib/RSAT/server.pm line 731
+RSAT::server::send_mail('[RSAT] peak-motifs 2015-10-13.162504^J^J^JCommand: nice -n 19 $RSAT/perl-scripts/peak-motifs  -v 1 -title \'Oct4_Chen2008_sites_from_Jaspar\' -i $RSAT/public_html/tmp/www-data/2015/10/13/peak-motifs.2015-10-13.162504_2015-10-13.162504_Q4TLMy/peak-motifspeak_seq  -markov auto -disco oligos,positions -nmotifs 5  -minol 6 -maxol 7  -no_merge_lengths -2str  -origin center  -motif_db jaspar_core_vertebrates tf $RSAT/public_html/motif_databases/JASPAR/jaspar_core_vertebrates_2015_03.tf -scan_markov 1 -source galaxy  -task purge,seqlen,composition,disco,merge_motifs,split_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan -prefix peak-motifs -noov -img_format png  -outdir $RSAT/public_html/tmp/www-data/2015/10/13/peak-motifs.2015-10-13.162504_2015-10-13.162504_Q4TLMy^J^JYour task has been submitted to the RSAT server.^J^JAfter completion of the task, an email will be sent to claire.rioualen@inserm.fr^J^JThe result will become available at^J^Ihttp://localhost/rsat/tmp/www-data/2015/10/13/peak-motifs.2015-10-13.162504_2015-10-13.162504_Q4TLMy/peak-motifs_synthesis.html^J^J', 'claire.rioualen@inserm.fr', '[RSAT] peak-motifs 2015-10-13.162504 ; Job submitted') called at /packages/rsat/public_html/lib/RSAT/util.pm line 1250
+RSAT::util::EmailTheResult('/packages/rsat/perl-scripts/peak-motifs  -v 1 -title \'Oct4_Chen2008_sites_from_Jaspar\' -i /packages/rsat/public_html/tmp/www-data/2015/10/13/peak-motifs.2015-10-13.162504_2015-10-13.162504_Q4TLMy/peak-motifspeak_seq  -markov auto -disco oligos,positions -nmotifs 5  -minol 6 -maxol 7  -no_merge_lengths -2str  -origin center  -motif_db jaspar_core_vertebrates tf /packages/rsat/public_html/motif_databases/JASPAR/jaspar_core_vertebrates_2015_03.tf -scan_markov 1 -source galaxy  -task purge,seqlen,composition,disco,merge_motifs,split_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan -prefix peak-motifs -noov -img_format png  -outdir /packages/rsat/public_html/tmp/www-data/2015/10/13/peak-motifs.2015-10-13.162504_2015-10-13.162504_Q4TLMy', 'claire.rioualen@inserm.fr', '/packages/rsat/public_html/tmp/www-data/2015/10/13/peak-motifs.2015-10-13.162504_2015-10-13.162504_Q4TLMy/peak-motifs_synthesis.html', 'title', '[RSAT] peak-motifs 2015-10-13.162504') called at /packages/rsat/public_html/lib/RSA2.cgi.lib line 1948
+main::EmailTheResult('/packages/rsat/perl-scripts/peak-motifs  -v 1 -title \'Oct4_Chen2008_sites_from_Jaspar\' -i /packages/rsat/public_html/tmp/www-data/2015/10/13/peak-motifs.2015-10-13.162504_2015-10-13.162504_Q4TLMy/peak-motifspeak_seq  -markov auto -disco oligos,positions -nmotifs 5  -minol 6 -maxol 7  -no_merge_lengths -2str  -origin center  -motif_db jaspar_core_vertebrates tf /packages/rsat/public_html/motif_databases/JASPAR/jaspar_core_vertebrates_2015_03.tf -scan_markov 1 -source galaxy  -task purge,seqlen,composition,disco,merge_motifs,split_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan -prefix peak-motifs -noov -img_format png  -outdir /packages/rsat/public_html/tmp/www-data/2015/10/13/peak-motifs.2015-10-13.162504_2015-10-13.162504_Q4TLMy', 'claire.rioualen@inserm.fr', '/packages/rsat/public_html/tmp/www-data/2015/10/13/peak-motifs.2015-10-13.162504_2015-10-13.162504_Q4TLMy/peak-motifs_synthesis.html', 'title', '[RSAT] peak-motifs 2015-10-13.162504') called at /packages/rsat/public_html/peak-motifs.cgi line 328
+
+```
+
+else in localhost:
+
+```
+     Error: OpenInputFile: File tmp/www-data/2015/10/13/peak-motifs.2015-10-13.162611_2015-10-13.162611_zUIWbr/results/composition/peak-motifs_test_freq-1str-ovlp_1nt.tab does not exist.
+    Error occurred on RSAT site: local_claire; host server: dell3b31852; admin: claire.rioualen@inserm.fr 
+
+
+    Error: OpenInputFile: File tmp/www-data/2015/10/13/peak-motifs.2015-10-13.162611_2015-10-13.162611_zUIWbr/results/composition/peak-motifs_test_freq-1str-ovlp_1nt.tab does not exist.
+    Error occurred on RSAT site: local_claire; host server: dell3b31852; admin: claire.rioualen@inserm.fr 
+
+
+    Error: OpenInputFile: File tmp/www-data/2015/10/13/peak-motifs.2015-10-13.162611_2015-10-13.162611_zUIWbr/results/composition/peak-motifs_test_freq-1str-ovlp_2nt.tab does not exist.
+    Error occurred on RSAT site: local_claire; host server: dell3b31852; admin: claire.rioualen@inserm.fr 
+
+
+    Error: OpenInputFile: File tmp/www-data/2015/10/13/peak-motifs.2015-10-13.162611_2015-10-13.162611_zUIWbr/results/composition/peak-motifs_test_freq-1str-ovlp_2nt.tab does not exist.
+    Error occurred on RSAT site: local_claire; host server: dell3b31852; admin: claire.rioualen@inserm.fr 
+
+
+    Error: X axis data (column
+    1
+    ) are not numeric.
+    Error occurred on RSAT site: local_claire; host server: dell3b31852; admin: claire.rioualen@inserm.fr 
+
+
+    Error: X axis data (column
+    1
+    ) are not numeric.
+    Error occurred on RSAT site: local_claire; host server: dell3b31852; admin: claire.rioualen@inserm.fr 
+```
+
+locally:
+```
+CGI will be removed from the Perl core distribution in the next major release. Please install the separate libcgi-pm-perl package. It is being used at /packages/rsat/perl-scripts/lib/RSA2.cgi.lib, line 2.
+CGI::Util will be removed from the Perl core distribution in the next major release. Please install the separate libcgi-pm-perl package. It is being used at /usr/share/perl/5.20/CGI.pm, line 29.
+# sequence length: 19847, number of masked symbols: 0 (0.00 percent of the sequences)
+sh: 1: Syntax error: word unexpected (expecting ")")
+Error
+	OpenInputFile: File /data/results/Paeruginosa/2_CGATGT_L002_R1_001_vs_2T_ACTTGA_L002_R1_001/homer/peak-motifs/results/composition/peak-motifs_test_freq-1str-ovlp_1nt.tab does not exist.
+Error
+	OpenInputFile: File /data/results/Paeruginosa/2_CGATGT_L002_R1_001_vs_2T_ACTTGA_L002_R1_001/homer/peak-motifs/results/composition/peak-motifs_test_freq-1str-ovlp_1nt.tab does not exist.
+sh: 1: Syntax error: word unexpected (expecting ")")
+Error
+	OpenInputFile: File /data/results/Paeruginosa/2_CGATGT_L002_R1_001_vs_2T_ACTTGA_L002_R1_001/homer/peak-motifs/results/composition/peak-motifs_test_freq-1str-ovlp_2nt.tab does not exist.
+Error
+	OpenInputFile: File /data/results/Paeruginosa/2_CGATGT_L002_R1_001_vs_2T_ACTTGA_L002_R1_001/homer/peak-motifs/results/composition/peak-motifs_test_freq-1str-ovlp_2nt.tab does not exist.
+sh: 1: Syntax error: word unexpected (expecting ")")
+grep: /data/results/Paeruginosa/2_CGATGT_L002_R1_001_vs_2T_ACTTGA_L002_R1_001/homer/peak-motifs/results/composition/peak-motifs_test_profiles-1str-ovlp_1nt_ci20.tab: No such file or directory
+Error
+	X axis data (column 	1	) are not numeric.
+sh: 1: Syntax error: word unexpected (expecting ")")
+grep: /data/results/Paeruginosa/2_CGATGT_L002_R1_001_vs_2T_ACTTGA_L002_R1_001/homer/peak-motifs/results/composition/peak-motifs_test_profiles-1str-ovlp_2nt_ci20.tab: No such file or directory
+Error
+	X axis data (column 	1	) are not numeric.
+sh: 1: Syntax error: word unexpected (expecting ")")
+sh: 1: Syntax error: word unexpected (expecting ")")
+cat: /data/results/Paeruginosa/2_CGATGT_L002_R1_001_vs_2T_ACTTGA_L002_R1_001/homer/peak-motifs/results/oligos_6nt_mkv4/peak-motifs_oligos-2str-noov_6nt_mkv4.tab: No such file or directory
+cat: /data/results/Paeruginosa/2_CGATGT_L002_R1_001_vs_2T_ACTTGA_L002_R1_001/homer/peak-motifs/results/oligos_7nt_mkv5/peak-motifs_oligos-2str-noov_7nt_mkv5.tab: No such file or directory
+sh: 1: Syntax error: word unexpected (expecting ")")
+sh: 1: Syntax error: word unexpected (expecting ")")
+sh: 1: Syntax error: word unexpected (expecting ")")
+cat: /data/results/Paeruginosa/2_CGATGT_L002_R1_001_vs_2T_ACTTGA_L002_R1_001/homer/peak-motifs/results/positions_6nt/peak-motifs_positions-2str-noov_6nt_ci50.tab: No such file or directory
+cat: /data/results/Paeruginosa/2_CGATGT_L002_R1_001_vs_2T_ACTTGA_L002_R1_001/homer/peak-motifs/results/positions_7nt/peak-motifs_positions-2str-noov_7nt_ci50.tab: No such file or directory
+sh: 1: Syntax error: word unexpected (expecting ")")
+Use of uninitialized value in numeric gt (>) at /packages/rsat/perl-scripts/lib/RSAT/MarkovModel.pm line 576.
+Use of uninitialized value in numeric eq (==) at /packages/rsat/perl-scripts/lib/RSAT/MarkovModel.pm line 578.
+Illegal division by zero at /packages/rsat/perl-scripts/lib/RSAT/MarkovModel.pm line 878.
+
+```
+À intégrer dans le protocole d'install:
+```
+sudo apt-get install libcgi-pm-perl
+```
+
+
+* footprint-discovery to check the tools depending on homology tables (blast tables). **Not supported, see configure_rsat**
 
 ## 14. Install the cluster management system (torque, qsub, ...)
 
