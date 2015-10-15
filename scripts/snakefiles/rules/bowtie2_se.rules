@@ -1,0 +1,39 @@
+if not "bowtie2" in config.keys():
+    config["bowtie2"] = {}
+
+if not "index" in config["bowtie2"].keys():
+#    config["bwa"]["index"] = ""
+    sys.exit("The parameter bowtie2 index must be defined in the JSON file")
+
+if not "threads" in config["bowtie2"].keys():
+    config["bowtie2"]["threads"] = "1"
+
+rule bowtie2_se:
+	"""Read mapping for single end data using Bowtie2. 
+
+	Requires the indexing to have previously been done (using the
+	rule bowtie2_index).  This is checked by testing the presence of
+	file {genome}.fa.1.bt2
+
+	Parameters:
+		config["bwa"]["index"]
+		config["bwa"]["threads"]
+		config["qsub"]
+
+	Usage:
+		input:expand()
+
+        """
+	input: 	reads="{reads}.fastq", \
+		index=config["bowtie2"]["index"]
+	output: sam="{reads}_bowtie2.sam", \
+		summary="{reads}_bowtie2_summary.txt"
+	log: "{reads}_bowtie2.log"
+	benchmark: "{reads}_bowtie2_benchmark.json"
+	params:	max_mismatches = config["bowtie2"]["max_mismatches"], \
+		qsub=config["qsub"] + " -q long -e {reads}_bowtie2_qsub.err -o {reads}_bowtie2_qsub.out", \
+		threads = config["bowtie2"]["threads"], \
+		stats = "{reads}_bowtie2_sam_stat.txt"
+	shell: "bowtie2 -x {input.index} -U {input.reads} -S {output.sam} --threads {params.threads} --phred33 -N {params.max_mismatches} > {output.summary} 2> {log}"
+
+
