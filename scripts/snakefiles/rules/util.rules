@@ -16,8 +16,10 @@ rule sam_to_bam:
     output: bam="{reads}.bam"
     log: "{reads}_sam_to_bam.log"
     benchmark: "{reads}_sam_to_bam_benchmark.json"
-    params: qsub = config["qsub"] + " -e {reads}_sam_to_bam_qsub.err -o {reads}_sam_to_bam_qsub.out"
-    shell: "samtools view -b -S {input.sam} > {output.bam} 2> {log}"
+    params: 	qsub = config["qsub"] + " -e {reads}_sam_to_bam_qsub.err -o {reads}_sam_to_bam_qsub.out", \
+		stats = "{reads}_bam_stat.txt"
+    shell:	"samtools view -b -S {input.sam} > {output.bam} 2> {log}; \
+		samtools flagstat {output} > {params.stats}"
 
 """
     =======================================
