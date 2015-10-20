@@ -2,48 +2,43 @@
     "__description__": "",
     "__author__": "Claire Rioualen",
     "data_source": "", 
-    "qsub": "-V -m a -d /workspace/france_genomique/Paeruginosa",
+    "qsub": "-V -m a -d /data",
+    "verbosity": "0",
 
     "genome": {
 	"organism": "Pseudomonas_aeruginosa",
-	"size": "6000000",
-	"genome_version": "pa",
+	"size": "6300000",
+	"version": "pa",
 	"base_url_fasta": "-",
 	"sequence": "",
 	"features": "",
 	"RefSeq_to_std": "",
-        "install_dir": ""
+        "install_dir": "",
+	"file": "/data/genomes/pa/BWAIndex/pa.fa"
     },
 
     "files": {
-	"samples": "/root/mydisk/data/Paeruginosa/samples.tab",
-	"design": "/root/mydisk/data/Paeruginosa/design.tab"
+	"samples": "/data/Paeruginosa/samples.tab",
+	"design": "/data/Paeruginosa/design.tab"
     },
 
     "reads": {
        	"qual_type": "sanger"
     },
 
-    "suffixes": {
-	"trimmed": "_sickle-se-q20",
-	"mapped":  "_sickle-se-q20_bwa",
-	"macs2":  "_sickle-se-q20_bwa_macs2",
-	"swembl":  "_sickle-se-q20_bwa_swembl_R0.01"
-    },
-
     "dir": {
 	"base": ".",
 	"fg_lib": ".",
-	"reads_source": "/root/mydisk/data/Paeruginosa/",
-	"results": "/root/mydisk/results/",
-	"reports": "/root/mydisk/results/",
-	"genome": "/root/mydisk/genomes/",
-	"logs": "logs/"
+	"reads_source": "/data/Paeruginosa/",
+	"results": "/data/results/Paeruginosa/",
+	"reports": "/data/results/Paeruginosa/",
+	"genome": "/data/genomes/",
+	"logs": "/data/results/Paeruginosa/logs/"
     },
 
     "reports" : {
-	"dag": "/root/mydisk/results/dag",
-	"rulegraph": "/root/mydisk/results/rule"
+	"dag": "/data/results/Paeruginosa/dag",
+	"rulegraph": "/data/results/Paeruginosa/rule"
     },
 
     "sickle":  { 
@@ -56,9 +51,14 @@
     },
 
     "bwa": {
-	"index": "/root/mydisk/genomes/pa/BWAIndex/pa.fa",
-	"suffix": "bwa",
+	"index": "/data/genomes/pa/BWAIndex/pa.fa",
 	"threads": "10"
+    },
+
+    "bowtie2": {
+	"index": "/data/genomes/pa/Bowtie2Index/pa.fa",
+	"threads": "10", 
+        "max_mismatches": "1"
     },
 
     "samtools": {
@@ -68,7 +68,7 @@
     "macs2": {
         "qval": "0.05",
         "keep_dup": "all",
-        "band_width": "250",
+        "band_width": "180",
         "mfold_min": "2",
         "mfold_max": "50",
         "call_summits": "--call-summits",
@@ -77,7 +77,38 @@
 
 
     "swembl": {
-	"R": "0.01"
+	"R": "0.1",
+	"x": "1.2"
+    },
+
+    "homer": {
+	"style": "factor",
+	"genome": "/data/genomes/pa/BWAIndex/pa.fa",
+	"F": "2",
+	"L": "2",
+	"P": "0.01",
+	"fdr": "0.01"
+    },
+
+    "spp": {
+	"fdr": "0.01"
+    },
+    "rsat": {
+	"verbosity": "1"
+    },
+
+    "oligo_analysis": {
+	"count_oligo": "1 2 6"
+    },
+    
+    "peak-motifs": {
+		"tasks": "purge,seqlen,composition,disco,collect_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan",
+		"max_seq_len": "0",
+		"nmotifs": "",
+		"minol": "",
+		"maxol": "",
+		"motif_db": "prodoric tf $RSAT/public_html/motif_databases/prodoric_from_meme_151016.tf",
+		"disco": "oligos,positions"
     }
 
 }

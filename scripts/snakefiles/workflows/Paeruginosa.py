@@ -46,6 +46,8 @@ include: os.path.join(RULES, "util.rules")
 include: os.path.join(RULES, "count_reads.rules")
 include: os.path.join(RULES, "bwa_index.rules")
 include: os.path.join(RULES, "bwa_se.rules")
+include: os.path.join(RULES, "bowtie2_index.rules")
+include: os.path.join(RULES, "bowtie2_se.rules")
 include: os.path.join(RULES, "convert_bam_to_bed.rules")
 include: os.path.join(RULES, "count_oligo.rules")
 include: os.path.join(RULES, "fastqc.rules")
@@ -77,7 +79,7 @@ TREATMENT = DESIGN.iloc[:,0]
 CONTROL = DESIGN.iloc[:,1]
 
 ## Ref genome
-GENOME = config["genome"]["genome_version"]
+GENOME = config["genome"]["version"]
 
 ## Results dir
 RESULTS_DIR = config["dir"]["results"]
@@ -99,10 +101,10 @@ REPORT = expand(RESULTS_DIR + "report.html")
 
 ## Suffixes (beta) (! implement several values for each param)
 
-ALIGNER="bwa"
+ALIGNER="bwa bowtie2".split()
 ALIGNMENT=expand("{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)
 
-PEAKCALLER="homer_peaks swembl-R" + config["swembl"]["R"] # macs2_peaks spp-fdr" + config["spp"]["fdr"] + " 
+PEAKCALLER="homer_peaks spp-fdr" + config["spp"]["fdr"] + " swembl-R" + config["swembl"]["R"] # macs2_peaks 
 PEAKCALLER=PEAKCALLER.split()
 PEAKCALLING=expand(expand("{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER)
 
@@ -119,7 +121,9 @@ RAW_READNB = expand(RESULTS_DIR + "{samples}/{samples}_fastq_readnb.txt", sample
 # Alignment
 #----------------------------------------------------------------#
 
+## to avoid duplicates, fasta sequence should be moved to {genome} directly...
 BWA_INDEX = expand(config["dir"]["genome"] + "{genome}/BWAIndex/{genome}.fa.bwt", genome=GENOME)
+BOWTIE2_INDEX = expand(config["dir"]["genome"] + "{genome}/Bowtie2Index/{genome}.fa.1.bt2", genome=GENOME)
 
 MAPPING = expand(RESULTS_DIR + "{alignment}.sam", alignment=ALIGNMENT)
 
@@ -141,16 +145,13 @@ PEAKS = expand(RESULTS_DIR + "{peakcalling}.bed", peakcalling=PEAKCALLING)
 # ----------------------------------------------------------------
 
 GET_FASTA = expand(RESULTS_DIR + "{peakcalling}.fasta", peakcalling=PEAKCALLING)
-
 PURGE_PEAKS = expand(RESULTS_DIR + "{peakcalling}_purged.fasta", peakcalling=PEAKCALLING)
+PEAKS_LENGTH = expand(RESULTS_DIR + "{peakcalling}_purged_length.png", peakcalling=PEAKCALLING)
+PEAK_MOTIFS = expand(RESULTS_DIR + "{motifs}_peak-motifs_synthesis.html", motifs=MOTIFS)
 
 ## Oligo analysis # ! missing f* input exception
 OLIGO = config['oligo_analysis']['count_oligo'].split()
 OLIGO_ANALYSIS = expand(RESULTS_DIR + "{peakcalling}_purged_oligo{oligo}.txt", peakcalling=PEAKCALLING, oligo=OLIGO)
-
-PEAKS_LENGTH = expand(RESULTS_DIR + "{peakcalling}_purged_length.png", peakcalling=PEAKCALLING)
-
-PEAK_MOTIFS = expand(RESULTS_DIR + "{motifs}_peak-motifs_synthesis.html", motifs=MOTIFS)
 
 #================================================================#
 #                        Rule all                                #
@@ -160,7 +161,8 @@ rule all:
 	"""
 	Run all the required analyses
 	"""
-	input: GRAPHICS, RAW_QC, BED_FEAT_COUNT, PURGE_PEAKS, PEAK_MOTIFS
+	input: GRAPHICS, RAW_QC, PEAKS_LENGTH, PEAK_MOTIFS
+	#BED_FEAT_COUNT, PURGE_PEAKS, PEAKS_LENGTH
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
