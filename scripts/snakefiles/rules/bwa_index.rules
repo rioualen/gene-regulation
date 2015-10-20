@@ -8,6 +8,13 @@ if not "index" in config["bwa"].keys():
 #    config["bwa"]["index"] = ""
     sys.exit("The parameter bwa index must be defined in the JSON file")
 
+if not "version" in config["genome"].keys():
+    sys.exit("Genome version must be defined in the JSON file")
+
+## to complete
+
+## to clean (config / params)
+
 rule bwa_index:
 	"""Rule for the creation of BWA index. Has to be done only once.  The
 	output file is used to test whether the index already exists
@@ -21,11 +28,18 @@ rule bwa_index:
 		input:expand()
 
         """
-	input: "{genome}.fa"
-	output: "{genome}.fa.bwt"
-	log: "{genome}_bwa-index.log"
-	benchmark: "{genome}_bwa-index_benchmark.json"
+	input: "{genome_dir}/{genome_version}.fa"
+	output: "{genome_dir}/BWAIndex/{genome_version}.fa.bwt"
+	log: "{genome_dir}_bwa-index.log"
+	benchmark: "{genome_dir}_bwa-index_benchmark.json"
 	params:
 		index = config["bwa"]["index"], \
-		qsub = config["qsub"] + " -e {genome}_bwa-index_qsub.err -o {genome}_bwa-index_qsub.out"
-	shell: "bwa index {params.index} 2> {log}"
+		dir_genome = config["dir"]["genome"], \
+		genome_version = config["genome"]["version"], \
+		qsub = config["qsub"] + " -e {genome_dir}_bwa-index_qsub.err -o {genome_dir}_bwa-index_qsub.out"
+	shell: """
+mkdir -p {params.dir_genome}{params.genome_version}/BWAIndex
+cp {input} {params.dir_genome}{params.genome_version}/BWAIndex
+cd {params.dir_genome}{params.genome_version}/BWAIndex
+bwa index {params.index} 2> {log}
+"""
