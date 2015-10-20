@@ -24,4 +24,6 @@ rule peak_length:
 		png("{output}")
 		plot(d)
 		dev.off()
+
+		sink()
 		""")
