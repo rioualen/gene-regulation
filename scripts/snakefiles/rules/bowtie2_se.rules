@@ -8,6 +8,9 @@ if not "index" in config["bowtie2"].keys():
 if not "threads" in config["bowtie2"].keys():
     config["bowtie2"]["threads"] = "1"
 
+if not "max_mismatches" in config["bowtie2"].keys():
+    config["bowtie2"]["max_mismatches"] = "1"
+
 rule bowtie2_se:
 	"""Read mapping for single end data using Bowtie2. 
 
@@ -25,7 +28,7 @@ rule bowtie2_se:
 
         """
 	input: 	reads="{reads}.fastq", \
-		index=config["bowtie2"]["index"]
+		index=config["bowtie2"]["index"]+".1.bt2"
 	output: sam="{reads}_bowtie2.sam", \
 		summary="{reads}_bowtie2_summary.txt"
 	log: "{reads}_bowtie2.log"
@@ -33,7 +36,8 @@ rule bowtie2_se:
 	params:	max_mismatches = config["bowtie2"]["max_mismatches"], \
 		qsub=config["qsub"] + " -q long -e {reads}_bowtie2_qsub.err -o {reads}_bowtie2_qsub.out", \
 		threads = config["bowtie2"]["threads"], \
+		index=config["bowtie2"]["index"], \
 		stats = "{reads}_bowtie2_sam_stat.txt"
-	shell: "bowtie2 -x {input.index} -U {input.reads} -S {output.sam} --threads {params.threads} --phred33 -N {params.max_mismatches} > {output.summary} 2> {log}"
+	shell: "bowtie2 -x {params.index} -U {input.reads} -S {output.sam} --threads {params.threads} --phred33 -N {params.max_mismatches} > {output.summary} 2> {log}"
 
 
