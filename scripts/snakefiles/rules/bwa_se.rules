@@ -5,7 +5,6 @@ if not "bwa" in config.keys():
     config["bwa"] = {}
 
 if not "index" in config["bwa"].keys():
-#    config["bwa"]["index"] = ""
     sys.exit("The parameter bwa index must be defined in the JSON file")
 
 if not "threads" in config["bwa"].keys():
