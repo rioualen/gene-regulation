@@ -192,6 +192,8 @@ Issue when installing packages:
 ```
 Select CRAN, CRAN extras, bioc...
 
+Beware of using "http" mirrors rather than "https" mirrors (why exactly?)
+
 ### Python 3 package rpy2
 
 ```
