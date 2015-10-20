@@ -20,7 +20,7 @@ rule import_sra_to_fastq:
 		results = config['dir']['results'], \
 		samples = "{sample}"
 	shell:"""
-echo "SHELL: $SHELL"
+(echo "SHELL: $SHELL"
 samples={params.samples}
 for sam in ${{samples[@]}}
 do
@@ -51,7 +51,7 @@ do
 		mv  {params.results}$sam/$base.fastq {params.results}$sam/$sam.fastq
 	fi
 done
-echo "Job done."
+echo "Job done.") &> {log}
 """
 
 
