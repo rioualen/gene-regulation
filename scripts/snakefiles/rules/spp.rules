@@ -2,7 +2,7 @@ if not "spp" in config.keys():
     config["spp"] = {}
 
 if not "fdr" in config["spp"].keys():
-    config["spp"]["fdr"] = "0.05"
+    config["spp"]["fdr"] = "0.01"
 
 rule spp:
 	"""Peak-calling with SPP.
@@ -79,4 +79,5 @@ rule spp:
 		bed <- read.table("{output.peaks_narrowPeak}")
 		write.table(bed, "{output.peaks_bed}", row.names=FALSE, col.names=FALSE, sep="\t", quote=FALSE)
 
+		sink()
 		""") 
