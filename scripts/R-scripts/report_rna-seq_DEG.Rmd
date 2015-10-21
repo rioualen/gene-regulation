@@ -17,7 +17,7 @@ date: '`r Sys.Date()`'
 ---
 
 ```{r knitr setup, include=FALSE,  eval=TRUE, echo=FALSE, warning=FALSE}
-knitr::opts_chunk$set(echo=FALSE, eval=TRUE, cache=TRUE, message=FALSE, warning=FALSE)
+knitr::opts_chunk$set(echo=FALSE, eval=TRUE, cache=FALSE, message=FALSE, warning=FALSE)
 ```
 
 
@@ -299,14 +299,14 @@ verbose(paste(sep="", "\tSummary per sample\t", sample.summary.file), 1)
 
 ### Sample sizes
 
-```{r library_sizes_barplot, fig.width=6, fig.height=6}
+```{r library_sizes_barplot, fig.width=6, fig.height=6, fig.cap="Library size barplot. Bars indicate the sum of read counts per sample (library)."}
 libsize.barplot(stats.per.sample, plot.file=NULL)
 ```
 
 
 ### Read count distributions
 
-```{r count_boxplots, fig.width=10, fig.height=10}
+```{r count_boxplots, fig.width=10, fig.height=10, fig.cap="Read count distributions. Top: raw counts. Bottom: counts per millon reads (CPMs). Left panels: linear scale, which emphasizes  outlier features denoted by very high counts. Rigt panels log counts permit to perceive the distribution of its whole range, including small count values. Null counts are replaced by an epsilon < 1, and appearas negative numbers after log transformation."}
 par(mfrow=c(2,2))
   ## Boxplot of raw counts
   count.boxplot(all.counts, stats.per.sample, xlab="Raw counts", 
@@ -329,15 +329,101 @@ par(mfrow=c(1,1))
 
 ### Count correlations between samples
 
+Note: count correlations from raw rads are highly impacted by outlier features. 
+<font color="red">TO DO</font>
+I should adapt the method to trim the upper and lower count values.
+
 ```{r count_correl_heatmap, fig.width=8, fig.height=8}
 count.correl.heatmap(all.counts)
+```
+
+
+## Between-replicate reproducibility
+
+Between-replicate count comparisons highlight the general reproducibility of the experiment. In some cases they reveal a strong variability of some particular features, which appear very distant from the diagonal. 
+
+<font color="RED">TO DO</font>
+I should develop a method to tag the irreproducible features and/or filter them out from the lists of DEG. 
+
+```{r between-replicate_reproducibility, fig.width=10, fig.height=10, fig.cap="Each plot shows the reproducibility between replicates of a given condition."}
+
+################################################################
+## Analyse between-replicate reproducibility
+################################################################
+verbose("Plotting betwen-replicate comparisons", 2)
+#conditions.with.replicate <- setdiff(conditions, "CI_CI_0H")
+cond <- conditions[1] ## Choose first condition for testing without the loop
+for (cond in conditions) {
+#for (cond in conditions.with.replicate) {
+  verbose(paste(sep="", "\tcondition\t", cond), 3)
+  
+  min.rep.to.plot <- 2 ## Not worth plotting replicates for conditions without replicate
+  max.rep.to.plot <- 5 ## Restrict the number of replicates to plot, for the sale of readability
+  
+  ## Create a specific result directory for this condition
+  dir.condition <- file.path(dir.DEG, "per_condition", cond)
+  dir.create(path = dir.condition, showWarnings = FALSE, recursive = TRUE)
+  
+  ## Select the specific data for the current condition (samples, counts, CPMs)
+  #all.counts.with.replicate <- setdiff(names(all.counts), "CI_CI_0H_1")
+  current.samples <- names(all.counts)[sample.conditions == cond]
+  nrep <- length(current.samples)
+
+  current.counts <- all.counts[,current.samples]
+  current.counts[current.counts==0] <- epsilon
+  current.counts.mean <- apply(current.counts, 1, mean)
+  current.counts.var <- apply(current.counts, 1, var)
+  current.counts.var[current.counts.var==0] <- min(current.counts.var[current.counts.var>0])/100
+  
+  current.cpms <- cpms[,current.samples] + epsilon
+  current.cpms[current.cpms==0] <- epsilon
+  current.cpm.mean <- apply(current.cpms, 1, mean)
+  current.cpm.var <- apply(current.cpms, 1, var)
+  current.cpm.var[current.cpm.var==0] <- min(current.cpm.var[current.cpm.var>0])/100
+  
+  ################################################################
+  ## Plot pairwise comparisons between replicates (result file can be heavy to open)
+#   pdf(file= file.path(dir.condition, paste(sep = "", "between-replicate_counts_plot_", cond, ".pdf")), width=10, height=10)
+#   # dim(current.counts[,1:min(max.rep.to.plot, nrep)])
+  plot(current.counts[,1:min(max.rep.to.plot, nrep)], 
+       log="xy", col=cols.conditions[cond], 
+#       panel.first=grid(col="#BBBBBB", lty="solid"), ## this does not work, I should check why
+       main=paste(cond, " ; raw counts per replicate (log scale)")
+  )
+#  silence <- dev.off()
+  
+#   ################################################################
+#   ## Plot mean versus variance of CPMs for the current condition.
+#   ## BEWARE! This is the between-replicate variance computed for each gene separately, 
+#   ## which is quite different from the smoothed estimate of variance used by 
+#   ## DESeq2 or edgeR for the negative binomial.
+#   ## 
+#   ## This "real" variance plot  can be useful to highlight some genes that show 
+#   ## an extremely high variance compared to other genes. 
+#   ##
+#   ## We draw the plot in linear + log scales. Linear scales better highlight the outliers, 
+#   ## log scale better shows the general distribution, which covers several orders of magnitude.
+#   log.axes <- "xy"
+#   for (log.axes in c("", "xy")) {
+# #     pdf(file= file.path(dir.condition, paste(sep = "", "CPM_variance-mean_plot_", cond, "_",  log.axes, ".pdf")), width=10, height=10)
+#     plot(current.cpm.mean, 
+#          current.cpm.var, 
+#          log=log.axes, col=cols.conditions[cond], 
+#          panel.first=grid(lty="solid", col="#DDDDDD"),
+#          xlab=paste("Mean CPM per gene for condition", cond),
+#          ylab=paste("Between replicate CPM variance per gene for condition", cond),
+#          main=paste(cond, " ; CPM variance/Mean plot"))
+#     abline(a=0,b=1, lty="dashed", col="green", lwd=2) ## Milestone for Poisson distributions: var = mean
+#     # silence <- dev.off() 
+#   }
+}
+
 ```
 
 
 ## Detection of differentially expressed genes
 
 ### Design
-
 
 ```{r Read the design, warning=FALSE}
 
@@ -347,12 +433,102 @@ count.correl.heatmap(all.counts)
 verbose(paste("Reading design file: ", design.file), 2)
 design <- read.delim(design.file, sep="\t", 
                      comment=";", header = T, row.names=NULL)
-
-
 ```
 
 <!-- TO DO: print a table with the design -->
 
+
+```{r}
+i <- 1
+comparison.results <- design ## Initialize a summary table for each DEG analysis
+comparison.results$prefixes <- paste(sep="_", design$cond1, "vs", design$cond2)
+
+for (i in 1:nrow(design)) {
+  ## Identify samples for the first condition
+  cond1 <- as.vector(design[i,1])  ## First condition for the current comparison
+  samples1 <- sample.ids[sample.conditions == cond1]
+   if (length(samples1) < 2) {
+     stop(paste("Cannot perform differential analysis. The count table contains less than 2 samples for condition", cond1))
+   }
+  
+  ## Identify samples for the second condition
+  cond2 <- as.vector(design[i,2])  ## Second condition for the current comparison
+  samples2 <- sample.ids[sample.conditions == cond2]
+   if (length(samples2) < 2) {
+     stop(paste("Cannot perform differential analysis. The count table contains less than 2 samples for condition", cond2))
+   }
+  
+  verbose(paste(sep="", "\tDifferential analysis\t", i , "/", nrow(design), "\t", cond1, " vs ", cond2), 1)
+  
+  ## Create a specific result directory for this differential analysis
+  prefix["comparison"] <- comparison.results$prefixes[i]
+  dir.analysis <- file.path(dir.DEG, paste(sep="", prefix["comparison"]))
+  comparison.results$dir.analysis <- dir.analysis
+  dir.create(path = dir.analysis, showWarnings = FALSE, recursive = TRUE)
+  dir.figures <- file.path(dir.analysis, "figures")
+  comparison.results$dir.figures <- dir.figures
+  dir.create(path = dir.figures, showWarnings = FALSE, recursive = TRUE)
+  prefix["comparison_file"] <- file.path(dir.analysis, prefix["comparison"])
+  prefix["comparison_figure"] <- file.path(
+    dir.figures, 
+    paste(sep="", prefix["comparison"], "_",  suffix.deg))
+  
+  ## Select counts for the samples belonging to the two conditions
+  current.samples <- c(samples1, samples2)
+  current.counts <- all.counts[,current.samples]
+  # dim(current.counts)  ## For test
+  # names(current.counts)
+  
+  if (sum(!names(current.counts) %in% sample.ids) > 0) {
+    stop("Count table contains column names without ID in sample description file.")
+  }
+  
+  ## Define conditions and labels for the samples of the current analysis
+  current.sample.conditions <- sample.conditions[current.samples]
+  current.labels <- paste(current.sample.conditions, names(current.counts), sep="_")
+  
+  ## Initiate a result table with the CPMs and derived statistics
+  all.gene.ids <- row.names(cpms)
+  result.table <- data.frame("gene_id" = all.gene.ids,
+                             "name"=gene.info[all.gene.ids,"name"])
+  row.names(result.table) <- all.gene.ids
+  result.table$entrez.id <- gene.info[all.gene.ids,"entrez.id"]
+  result.table$description <- gene.info[all.gene.ids,"description"]
+  
+  result.table <- cbind(result.table, counts=current.counts) ## Include the original counts in the big result table
+  result.table <- cbind(result.table, cpm=current.cpms) ## Include CPMs in the big result table
+  
+  ## Tag genes detected in less than min.rep samples, which is defined as 
+  ## the minimal number of replicates per condition.
+  min.rep <- min(length(samples1), length(samples2))
+  result.table$undetected <- rowSums(current.counts > 1) < min.rep
+  # table(result.table$undetected)
+  # dim(current.counts)
+  
+  result.table$cpm.mean <- apply(cpms,1, mean)
+  result.table$cpm1.mean <- apply(as.data.frame(cpms[,samples1]),1, mean)
+  result.table$cpm2.mean <- apply(as.data.frame(cpms[,samples2]),1, mean)
+  result.table$A = log2(result.table$cpm1.mean*result.table$cpm2.mean)/2
+  result.table$M = log2(result.table$cpm1.mean/result.table$cpm2.mean)
+  result.table$cpm.median <- apply(cpms,1, median)
+  result.table$cpm1.median <- apply(as.data.frame(cpms[,samples1]),1, median)
+  result.table$cpm2.median <- apply(as.data.frame(cpms[,samples2]),1, median)
+  result.table$cpm.min <-  apply(cpms,1, min)
+  result.table$cpm1.min <- apply(as.data.frame(cpms[,samples1]),1, min)
+  result.table$cpm2.min <- apply(as.data.frame(cpms[,samples2]),1, min)
+  result.table$cpm.max <-  apply(cpms,1, max)
+  result.table$cpm1.max <- apply(as.data.frame(cpms[,samples1]),1, max)
+  result.table$cpm2.max <- apply(as.data.frame(cpms[,samples2]),1, max)
+  result.table$cpm.sd <-  apply(cpms,1, sd)
+  result.table$cpm1.sd <- apply(as.data.frame(cpms[,samples1]),1, sd)
+  result.table$cpm2.sd <- apply(as.data.frame(cpms[,samples2]),1, sd)
+  result.table$cpm.var <-  apply(cpms,1, var)
+  result.table$cpm1.var <- apply(as.data.frame(cpms[,samples1]),1, sd)
+  result.table$cpm2.var <- apply(as.data.frame(cpms[,samples2]),1, sd)
+  # View(result.table)
+}
+
+```
 
 * * * 
 
