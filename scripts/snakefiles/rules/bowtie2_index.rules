@@ -21,6 +21,6 @@ rule bowtie2_index:
 mkdir -p {params.dir_genome}{params.genome_version}/Bowtie2Index
 cp {input} {params.dir_genome}{params.genome_version}/Bowtie2Index
 cd {params.dir_genome}{params.genome_version}/Bowtie2Index
-bowtie2-build {input} {params.index} &> {log}
+bowtie2-build {params.dir_genome}{params.genome_version}/Bowtie2Index/{params.genome_version}.fa {output} &> {log}
 """
 
