@@ -8,14 +8,19 @@ rule bowtie2_index:
 	"""
 	Build index for bowtie version 2 (gapped read mapping).
 	"""
-	input: "{genome}.fa"
-	output: "{genome}.fa.1.bt2"
-	params: index = config["bowtie2"]["index"], \
-		qsub = config["qsub"] \
-		+ " -q short -e " + config["dir"]["genome"] + "/" + config["genome"]["sequence"] + "_qsub.err" \
-		+ " -o " + config["dir"]["genome"] + "/" + config["genome"]["sequence"] + "_qsub.out"
-	log:  "{genome}_bowtie2-index.log"
-	message: "Building bowtie index in directory:\t{params.index}"
-	benchmark: "{genome}_bowtie2-index_benchmark.json"
-	shell: "bowtie2-build {input} {params.index} &> {log}"
+	input: "{genome_dir}/{genome_version}.fa"
+	output: "{genome_dir}/Bowtie2Index/{genome_version}.fa.1.bt2"
+	log: "{genome_dir}/Bowtie2Index/{genome_version}_bwa-index.log"
+	benchmark: "{genome_dir}/Bowtie2Index/{genome_version}_bwa-index_benchmark.json"
+	params:
+		index = config["bowtie2"]["index"], \
+		genome_version = config["genome"]["version"], \
+		dir_genome = config["dir"]["genome"], \
+		qsub = config["qsub"] + " -e {genome_dir}_bowtie2-index_qsub.err -o {genome_dir}_bowtie2-index_qsub.out"
+	shell: """
+mkdir -p {params.dir_genome}{params.genome_version}/Bowtie2Index
+cp {input} {params.dir_genome}{params.genome_version}/Bowtie2Index
+cd {params.dir_genome}{params.genome_version}/Bowtie2Index
+bowtie2-build {input} {params.index} &> {log}
+"""
 

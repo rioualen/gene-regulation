@@ -29,7 +29,7 @@ import datetime
 import pandas as pd
 
 ## Config
-configfile: "scripts/snakefiles/workflows/Paeruginosa_local.json"
+configfile: "scripts/snakefiles/workflows/Paeruginosa.json"
 workdir: config["dir"]["base"]
 verbosity = int(config["verbosity"])
 
@@ -161,7 +161,7 @@ rule all:
 	"""
 	Run all the required analyses
 	"""
-	input: GRAPHICS, RAW_QC, PEAKS_LENGTH, PEAK_MOTIFS
+	input: GRAPHICS, MAPPING#RAW_QC, PEAKS_LENGTH, PEAK_MOTIFS
 	#BED_FEAT_COUNT, PURGE_PEAKS, PEAKS_LENGTH
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
