@@ -29,7 +29,7 @@ import datetime
 import pandas as pd
 
 ## Config
-configfile: "scripts/snakefiles/workflows/Paeruginosa.json"
+configfile: "scripts/snakefiles/workflows/Paeruginosa_VM.json"
 workdir: config["dir"]["base"]
 verbosity = int(config["verbosity"])
 
@@ -93,7 +93,7 @@ if not os.path.exists(RESULTS_DIR):
 ## Data import & merging.
 
 ## À revoir, rsync output du texte -> plante flowcharts...
-#os.system("rsync -rupltv --exclude '*.tab' " + READS + " " + RESULTS_DIR)
+os.system("rsync -rupltv --exclude '*.tab' " + READS + " " + RESULTS_DIR)
 
 ## Graphics & reports
 GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
@@ -161,7 +161,7 @@ rule all:
 	"""
 	Run all the required analyses
 	"""
-	input: GRAPHICS, MAPPING#RAW_QC, PEAKS_LENGTH, PEAK_MOTIFS
+	input: GRAPHICS, RAW_QC, PEAKS_LENGTH, PEAK_MOTIFS
 	#BED_FEAT_COUNT, PURGE_PEAKS, PEAKS_LENGTH
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
