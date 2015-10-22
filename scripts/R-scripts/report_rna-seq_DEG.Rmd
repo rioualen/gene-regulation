@@ -1,15 +1,15 @@
 ---
 title: "RNA-seq differential analysis report - Beatrice Roche"
 output:
+  pdf_document:
+    fig_caption: yes
+    highlight: zenburn
+    toc: yes
+    toc_depth: 3
   html_document:
     fig_caption: yes
     highlight: zenburn
     theme: cerulean
-    toc: yes
-    toc_depth: 3
-  pdf_document:
-    fig_caption: yes
-    highlight: zenburn
     toc: yes
     toc_depth: 3
   word_document: default
@@ -75,6 +75,8 @@ all.counts.table <- 'results/DEG/sickle_pe_q20_bowtie2_pe_sorted_name_all_counts
 organism.name <- "Escherichia coli"
 gtf.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.gtf"
 gtf.source <- "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-28/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655/"
+
+gene.info.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655_GCA_000005845.2_gene_info.tab"
 
 ################################################################
 ## Output parameters
@@ -165,6 +167,42 @@ if (exists("gtf.file")) {
   row.names(gene.info) <- row.names(all.counts)
 }
 # View(gene.info)
+
+
+
+################################################################
+## TEMPORARY: load additional gene information from a tab-delimited file generated with RSAT, 
+## because for bacterial genomes there is no obvious way to obtain EntrezIDs.
+if (exists("gene.info.file")) {
+  verbose(paste("Loading gene information from tab-delimited file", gene.info.file))
+  
+  gene.info.rsat <- read.delim(gene.info.file, sep="\t", skip=3, header=1)  
+  ## A bit tricky: we need to discard rows starting with ";", but we cannot use ";" as comment.char since it is found in descriptions and as separator for names
+  comment.lines <- grep(gene.info.rsat[,1], pattern = ";")
+  gene.info.rsat <- gene.info.rsat[-comment.lines,]
+  row.names(gene.info.rsat) <- gene.info.rsat[,1]
+  gene.info.rsat <- gene.info.rsat[row.names(gene.info), ] ## Ensure gene.info.rsat contains same IDs in the same order as gene.info
+  
+  
+  ## Extract additional attributes for the gene.info table
+  gene.info$name <- gene.info.rsat[row.names(gene.info), "name"]
+  gene.info$entrez.id <- gene.info.rsat[row.names(gene.info), 2]
+  gene.info$description <- gene.info.rsat[row.names(gene.info), "description"]
+  gene.info$names <- gene.info.rsat[row.names(gene.info), "names"]
+  # dim(gene.info.rsat)
+  # names(gene.info.rsat)
+  # View(gene.info.rsat)
+} 
+# View(gene.info)
+
+## Export the gene information table to keep a trace of what has been used. 
+gene.info.out <- paste(sep="", prefix["general.file"], "_gene_descriptions.tab")
+verbose(paste("Exporting gene information table", gene.info.out), 1)
+write.table(x = gene.info, row.names = FALSE,
+            file = gene.info.out, sep = "\t", quote=FALSE)
+verbose(paste(sep="", "\tGene info table\t", gene.info.out), 1)
+
+
 
 ## Export the gene information table to keep a trace of what has been used. 
 gene.info.out <- paste(sep="", prefix["general.file"], "_gene_descriptions.tab")
@@ -463,7 +501,8 @@ design <- read.delim(design.file, sep="\t",
 <!-- TO DO: print a table with the design -->
 
 
-```{r}
+```{r differential expression analysis}
+setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
 
 i <- 1
 comparison.summary <- design ## Initialize a summary table for each DEG analysis
@@ -652,7 +691,7 @@ print(xtable(comparison.summary.to.print))
 # library(pander)
 # pandoc.table(comparison.summary.to.print)
 ```
-```{r eval=TRUE, cache=FALSE}
+```{r eval=TRUE, eval=FALSE}
 library(pander)
 pander(comparison.summary.to.print, style = 'rmarkdown')
 ```
@@ -682,10 +721,6 @@ pander(comparison.summary.to.print, style = 'rmarkdown')
 
 ```{r links_to_results, eval=TRUE, cache=FALSE}
 library(knitr)
-## Output directories per comparison
-kable(comparison.summary[, c("cond1", "cond2", "dir.analysis.link", "dir.figures.link")], 
-      caption="Output directories",
-      row.names=FALSE)
 
 ## Selection of up-regulated genes
 kable(comparison.summary[, c("cond1", "cond2", "deg.table.up.link")], 
@@ -701,6 +736,12 @@ kable(comparison.summary[, c("cond1", "cond2", "deg.table.down.link")],
 kable(comparison.summary[, c("cond1", "cond2", "result.table.link")], 
       caption="Detailed result files",
       row.names=FALSE)
+
+## Output directories per comparison
+kable(comparison.summary[, c("cond1", "cond2", "dir.analysis.link", "dir.figures.link")], 
+      caption="Output directories",
+      row.names=FALSE)
+
 ```
 
 
