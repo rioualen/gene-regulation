@@ -33,7 +33,7 @@ import datetime
 import pandas as pd
 
 ## Config
-configfile: "scripts/snakefiles/workflows/Celegans_new.json"
+configfile: "scripts/snakefiles/workflows/Celegans-H3K27me3.json"
 workdir: config["dir"]["base"]
 verbosity = int(config["verbosity"])
 
@@ -99,6 +99,10 @@ if not os.path.exists(RESULTS_DIR):
 
 IMPORT = expand(RESULTS_DIR + "{samples}/{samples}.fastq", samples=SAMPLE_IDS) 
 
+# /!\ C.elegans data: chromosomes not properly named. Becomes an issue with fetch-sequences or IGV visualization for instance. 
+
+#find . -type f -print0 | xargs -0 sed -i 's/NC_003279.8/chrI/g;s/NC_003280.10/chrII/g;s/NC_003281.10/chrIII/g;s/NC_003282.8/chrIV/g;s/NC_003283.11/chrV/g;s/NC_003284.9/chrX/g'
+
 ## Graphics & reports
 GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
 REPORT = expand(RESULTS_DIR + "report.html")
@@ -111,7 +115,7 @@ TRIMMING=expand("{samples}/{samples}_{trimmer}", samples=SAMPLE_IDS, trimmer=TRI
 ALIGNER="bwa"
 ALIGNMENT=expand("{samples}/{samples}_{trimmer}_{aligner}", samples=SAMPLE_IDS, trimmer=TRIMMER, aligner=ALIGNER)
 
-PEAKCALLER="homer_peaks spp-fdr" + config["spp"]["fdr"] + " swembl-R" + config["swembl"]["R"] # macs2_peaks spp-fdr" + config["spp"]["fdr"] + " 
+PEAKCALLER="homer_peaks swembl-R" + config["swembl"]["R"] # macs2_peaks spp-fdr" + config["spp"]["fdr"] + " spp-fdr" + config["spp"]["fdr"] + " 
 PEAKCALLER=PEAKCALLER.split()
 PEAKCALLING=expand(expand("{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, trimmer=TRIMMER, aligner=ALIGNER)
 
@@ -171,17 +175,20 @@ rule all:
 	"""
 	Run all the required analyses
 	"""
-	input: GRAPHICS, IMPORT, RAW_QC, TRIM_QC, PEAK_MOTIFS
+	input: GRAPHICS, IMPORT, PEAK_MOTIFS#, RAW_QC, TRIM_QC
 	#BED_FEAT_COUNT, PURGE_PEAKS, PEAKS_LENGTH
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
+## /!\ C.elegans chromosomes not properly named, this should be acted upon at the beginning of the workflow
 # tmp
-rule bed_chr_id_conversion:
-	input: "{file}.aligned.bed"
-	output:	"{file}.converted.bed"
-	shell:"awk '{{gsub(\"NC_003279.8\",\"chrI\"); gsub(\"NC_003280.10\",\"chrII\"); gsub(\"NC_003281.10\",\"chrIII\"); gsub(\"NC_003282.8\",\"chrIV\"); gsub(\"NC_003283.11\",\"chrV\"); gsub(\"NC_003284.9\",\"chrX\"); print}}' {input} > {output[0]}"
+#rule bed_chr_id_conversion:
+#	input: "{file}.aligned.bed"
+#	output:	"{file}.converted.bed"
+#	shell:"awk '{{gsub(\"NC_003279.8\",\"chrI\"); gsub(\"NC_003280.10\",\"chrII\"); gsub(\"NC_003281.10\",\"chrIII\"); gsub(\"NC_003282.8\",\"chrIV\"); gsub(\"NC_003283.11\",\"chrV\"); gsub(\"NC_003284.9\",\"chrX\"); print}}' {input} > {output[0]}"
 
+#find . -type f -print0 | xargs -0 sed -i 's/NC_003279.8/chrI/g;s/NC_003280.10/chrII/g;s/NC_003281.10/chrIII/g;s/NC_003282.8/chrIV/g;s/NC_003283.11/chrV/g;s/NC_003284.9/chrX/g'
+ 
 
 #================================================================#
 #                          Report                                #

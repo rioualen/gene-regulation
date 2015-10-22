@@ -395,6 +395,12 @@ Latest : 0.7.12
     * Unzip
     * Add to $PATH (see section 1.3)
     * There you go!
+    
+```
+cd ~/bin
+wget http://sourceforge.net/projects/bowtie-bio/files/bowtie2/2.2.6/bowtie2-2.2.6-linux-x86_64.zip
+unzip bowtie2-2.2.6-linux-x86_64.zip
+```
 
 ## Samtools
 
