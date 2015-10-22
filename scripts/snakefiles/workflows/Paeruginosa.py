@@ -29,7 +29,7 @@ import datetime
 import pandas as pd
 
 ## Config
-configfile: "scripts/snakefiles/workflows/Paeruginosa_VM.json"
+configfile: "scripts/snakefiles/workflows/Paeruginosa.json"
 workdir: config["dir"]["base"]
 verbosity = int(config["verbosity"])
 
@@ -93,7 +93,7 @@ if not os.path.exists(RESULTS_DIR):
 ## Data import & merging.
 
 ## À revoir, rsync output du texte -> plante flowcharts...
-os.system("rsync -rupltv --exclude '*.tab' " + READS + " " + RESULTS_DIR)
+#os.system("rsync -rupltv --exclude '*.tab' " + READS + " " + RESULTS_DIR)
 
 ## Graphics & reports
 GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
@@ -104,7 +104,7 @@ REPORT = expand(RESULTS_DIR + "report.html")
 ALIGNER="bwa bowtie2".split()
 ALIGNMENT=expand("{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)
 
-PEAKCALLER="homer_peaks spp-fdr" + config["spp"]["fdr"] + " swembl-R" + config["swembl"]["R"] # macs2_peaks 
+PEAKCALLER="homer_peaks macs2-qval" + config["macs2"]["qval"] + "_peaks swembl-R" + config["swembl"]["R"] # spp-fdr" + config["spp"]["fdr"] + " 
 PEAKCALLER=PEAKCALLER.split()
 PEAKCALLING=expand(expand("{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER)
 
@@ -161,7 +161,7 @@ rule all:
 	"""
 	Run all the required analyses
 	"""
-	input: GRAPHICS, RAW_QC, PEAKS_LENGTH, PEAK_MOTIFS
+	input: GRAPHICS, RAW_QC, PEAKS#, PEAKS_LENGTH, PEAK_MOTIFS
 	#BED_FEAT_COUNT, PURGE_PEAKS, PEAKS_LENGTH
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
