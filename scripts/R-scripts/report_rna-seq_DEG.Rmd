@@ -55,9 +55,10 @@ source(file.path(dir.fg, "scripts/R-scripts/deg_lib.R"))
 
 ## base directory for the report (links are defined relative to this directory)
 dir.main <- "~/BeatriceRoche/"
+dir.report <- "~/BeatriceRoche/reports/"
 dir.base <- ".." ; ## Path to the main directory relative to the current report, which must be added to the all links
-opts_knit$set(base.dir=dir.main) ## Set the working directory for knitr (generating HTML and pdf reports)
-setwd(dir.main) ## Set the working directory for the console
+opts_knit$set(base.dir=dir.report) ## Set the working directory for knitr (generating HTML and pdf reports)
+setwd(dir.report) ## Set the working directory for the console
 
 ################################################################
 ## Input parameters
@@ -123,7 +124,7 @@ epsilon <- 0.01
 
 
 ```{r Load gene information from GTF file}
-setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
+# setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
 
 ################################################################
 ## Load gene information from the GTF file 
@@ -137,7 +138,7 @@ if (exists("gtf.file")) {
   verbose(paste("Loading gene annotations from GTF file: ", gtf.file), 2)
   #   library(rtracklayer)  # for the import() function
   #   gr <- import(gtf.file)
-  txdb <- makeTxDbFromGFF(file=gtf.file,
+  txdb <- makeTxDbFromGFF(file=file.path(dir.base, gtf.file),
                           organism=organism.name,
                           dataSource=gtf.source)
   #seqlevels(txdb)
@@ -176,7 +177,7 @@ if (exists("gtf.file")) {
 if (exists("gene.info.file")) {
   verbose(paste("Loading gene information from tab-delimited file", gene.info.file))
   
-  gene.info.rsat <- read.delim(gene.info.file, sep="\t", skip=3, header=1)  
+  gene.info.rsat <- read.delim(file.path(dir.base, gene.info.file), sep="\t", skip=3, header=1)  
   ## A bit tricky: we need to discard rows starting with ";", but we cannot use ";" as comment.char since it is found in descriptions and as separator for names
   comment.lines <- grep(gene.info.rsat[,1], pattern = ";")
   gene.info.rsat <- gene.info.rsat[-comment.lines,]
@@ -199,7 +200,7 @@ if (exists("gene.info.file")) {
 gene.info.out <- paste(sep="", prefix["general.file"], "_gene_descriptions.tab")
 verbose(paste("Exporting gene information table", gene.info.out), 1)
 write.table(x = gene.info, row.names = FALSE,
-            file = gene.info.out, sep = "\t", quote=FALSE)
+            file = file.path(dir.base, gene.info.out), sep = "\t", quote=FALSE)
 verbose(paste(sep="", "\tGene info table\t", gene.info.out), 1)
 
 
@@ -208,7 +209,7 @@ verbose(paste(sep="", "\tGene info table\t", gene.info.out), 1)
 gene.info.out <- paste(sep="", prefix["general.file"], "_gene_descriptions.tab")
 verbose(paste("Exporting gene information table", gene.info.out), 1)
 write.table(x = gene.info, row.names = FALSE,
-            file = gene.info.out, sep = "\t", quote=FALSE)
+            file = file.path(dir.base, gene.info.out), sep = "\t", quote=FALSE)
 verbose(paste(sep="", "\tGene info table\t", gene.info.out), 1)
 
 
@@ -230,12 +231,12 @@ verbose(paste(sep="", "\tGene info table\t", gene.info.out), 1)
 
 
 ```{r Read sample description and define condition-specific parameters}
-setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
+#setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
 
 ## Read the sample description file, which indicates the 
 ## condition associated to each sample ID.
 verbose(paste("Reading sample description file: ", sample.description.file), 2)
-sample.desc <- read.delim(sample.description.file, sep="\t", 
+sample.desc <- read.delim(file.path(dir.base, sample.description.file), sep="\t", 
                           comment=";", header = TRUE, row.names=1)
 sample.ids <- row.names(sample.desc)
 
@@ -266,12 +267,12 @@ sample.desc$color <- cols.conditions[sample.conditions]
 
 
 ```{r Loading count table}
-setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
+# setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
 
 ################################################################
 ## Read the count table
 verbose("Loading count table", 2)
-all.counts <- read.delim(all.counts.table, row.names=1, sep="\t")
+all.counts <- read.delim(file.path(dir.base, all.counts.table), row.names=1, sep="\t")
 # names(all.counts)
 # dim(all.counts)
 
@@ -305,7 +306,7 @@ The raw counts table ([`r all.counts.table`](`r file.path(dir.base, all.counts.t
 
 
 ```{r Sample-wise statistics}
-setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
+# setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
 
 ################################################################
 ## Compute sample-wise statistics on mapped counts
@@ -343,12 +344,12 @@ stats.per.sample$log10.cpm.mean <- apply(cpms.log10, 2, mean)
 verbose("Exporting stats per sample", 1)
 sample.summary.file <- paste(sep="", prefix["general.file"], "_summary_per_sample.tab")
 write.table(x = stats.per.sample, row.names = TRUE, col.names=NA, 
-            file = sample.summary.file, sep = "\t", quote=FALSE)
+            file = file.path(dir.base, sample.summary.file), sep = "\t", quote=FALSE)
 verbose(paste(sep="", "\tSummary per sample\t", sample.summary.file), 1)
 ```
 
 ```{r print stats per sample}
-setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
+# setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
 
 ## Statistics per sample
 stats.per.sample.to.print <- c("M.reads", "sum", "min", "perc25", "mean", "median", "perc75", "max", "fract.below.mean")
@@ -407,7 +408,7 @@ Between-replicate count comparisons highlight the general reproducibility of the
 I should develop a method to tag the irreproducible features and/or filter them out from the lists of DEG. 
 
 ```{r between-replicate_reproducibility, fig.width=10, fig.height=10, fig.cap="Each plot shows the reproducibility between replicates of a given condition."}
-setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
+# setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
 
 ################################################################
 ## Analyse between-replicate reproducibility
@@ -488,13 +489,13 @@ for (cond in conditions) {
 ### Design
 
 ```{r Read the design, warning=FALSE}
-setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
+# setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
 
 ## Read the design file, which indicates the anlayses to be done.
 ## Each row specifies one differential expression analysis, which 
 ## consists in comparing two conditions. 
 verbose(paste("Reading design file: ", design.file), 2)
-design <- read.delim(design.file, sep="\t", 
+design <- read.delim(file.path(dir.base, design.file), sep="\t", 
                      comment=";", header = T, row.names=NULL)
 ```
 
@@ -502,7 +503,7 @@ design <- read.delim(design.file, sep="\t",
 
 
 ```{r differential expression analysis}
-setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
+# setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
 
 i <- 1
 comparison.summary <- design ## Initialize a summary table for each DEG analysis
@@ -571,8 +572,8 @@ for (i in 1:nrow(design)) {
   ## Save the completed DESeq2 result table
   deseq2.result.file <- paste(sep = "", prefix["DESeq2_file"], ".tab")
   comparison.summary[i,"deseq2"] <- deseq2.result.file
-  write.table(x = deseq2.result.table, 
-              row.names = FALSE, file = deseq2.result.file, sep = "\t", quote=FALSE)
+  write.table(x = deseq2.result.table, row.names = FALSE, 
+              file = file.path(dir.base, deseq2.result.file), sep = "\t", quote=FALSE)
   verbose(paste(sep="", "\t\tDESeq2 result file\t", deseq2.result.file), 1)
   
 
@@ -587,8 +588,8 @@ for (i in 1:nrow(design)) {
   edger.result.file <- paste(sep="", prefix["edgeR_file"], ".tab")
   comparison.summary[i,"edger"] <- edger.result.file
   
-  write.table(x = edger.result.table, 
-              row.names = FALSE, file = edger.result.file, sep = "\t", quote=FALSE)
+  write.table(x = edger.result.table, row.names = FALSE, 
+              file = file.path(dir.base, edger.result.file), sep = "\t", quote=FALSE)
   verbose(paste(sep="", "\t\tedgeR result file\t", edger.result.file), 1)
 
   ################################################################
@@ -613,7 +614,7 @@ for (i in 1:nrow(design)) {
                        "_", suffix.deg, "_DESeq2_and_edgeR.tab")
   comparison.summary[i,"result.table"] <- result.file
   write.table(x = result.table, row.names = FALSE,
-              file = result.file, sep = "\t", quote=FALSE)
+              file = file.path(dir.base, result.file), sep = "\t", quote=FALSE)
   verbose(paste(sep="", "\t\tMerged result file\t", result.file), 1)
   
   
@@ -636,7 +637,7 @@ for (i in 1:nrow(design)) {
                     "_", suffix.deg, "_selected_DEG_up.tab")
   comparison.summary[i,"deg.table.up"] <- deg.file.up
   write.table(x = result.table[up.genes, selected.columns], row.names = FALSE,
-              file = deg.file.up, sep = "\t", quote=FALSE)
+              file = file.path(dir.base, deg.file.up), sep = "\t", quote=FALSE)
   verbose(paste(sep="", "\t\tSelected DEG file with up-regulated genes\t", deg.file.up), 1)
 
   verbose("Exporting tables with down-regulated genes only")
@@ -645,7 +646,7 @@ for (i in 1:nrow(design)) {
                     "_", suffix.deg, "_selected_DEG_down.tab")
   comparison.summary[i,"deg.table.down"] <- deg.file.down
   write.table(x = result.table[down.genes, selected.columns], row.names = FALSE,
-              file = deg.file.down, sep = "\t", quote=FALSE)
+              file = file.path(dir.base, deg.file.down), sep = "\t", quote=FALSE)
   verbose(paste(sep="", "\t\tSelected DEG file with down-regulated genes\t", deg.file.down), 1)
 
 }
