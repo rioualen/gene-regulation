@@ -7,7 +7,7 @@ if not "swembl" in config.keys():
 if not "R" in config["swembl"].keys():
     config["swembl"]["R"] = "0.01"
 
-if not "R" in config["swembl"].keys():
+if not "x" in config["swembl"].keys():
     config["swembl"]["x"] = "1.2"
 
 
@@ -23,7 +23,7 @@ rule swembl:
     params:	swembl_r =  config["swembl"]["R"], \
 		x = config["swembl"]["x"], \
 		qsub = config["qsub"]  \
-		+ " - q long -e {result_dir}/{treatment}_vs_{control}/swembl-R" + config["swembl"]["R"] + "/{treatment}_vs_{control}_{aligner}_swembl-R" + config["swembl"]["R"] + "_qsub.err" \
+		+ " -q long -e {result_dir}/{treatment}_vs_{control}/swembl-R" + config["swembl"]["R"] + "/{treatment}_vs_{control}_{aligner}_swembl-R" + config["swembl"]["R"] + "_qsub.err" \
 		+ " -o {result_dir}/{treatment}_vs_{control}/swembl-R" + config["swembl"]["R"] + "/{treatment}_vs_{control}_{aligner}_swembl-R" + config["swembl"]["R"] + "_qsub.out" 
     log: "{result_dir}/{treatment}_vs_{control}/swembl-R" + config["swembl"]["R"] + "/{treatment}_vs_{control}_{aligner}_swembl-R" + config["swembl"]["R"] + ".log"
     benchmark: "{result_dir}/{treatment}_vs_{control}/swembl-R" + config["swembl"]["R"] + "/{treatment}_vs_{control}_{aligner}_swembl-R" + config["swembl"]["R"] + "_benchmark.json"
