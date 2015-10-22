@@ -2,7 +2,7 @@ if not "spp" in config.keys():
     config["spp"] = {}
 
 if not "fdr" in config["spp"].keys():
-    config["spp"]["fdr"] = "0.05"
+    config["spp"]["fdr"] = "0.01"
 
 rule spp:
 	"""Peak-calling with SPP.
@@ -13,24 +13,24 @@ rule spp:
 		config["spp"]["fdr"]
 
 	Usage: 
-		PEAKS_SPP = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/spp/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_spp.narrowPeak", 
+		PEAKS_SPP = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/spp-fdr" + config["spp"]["fdr"] + "/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_spp.narrowPeak", 
 	               zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
 	"""
 	input: 	treatment="{result_dir}/{treatment}/{treatment}_{aligner}.bam", \
             	control="{result_dir}/{control}/{control}_{aligner}.bam"
 	params:	fdr = config["spp"]["fdr"], \
 			qsub=config["qsub"] \
-                  + " -q long -e {result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + "_qsub.err" \
-                  + " -o {result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + "_qsub.out" 
-	log: "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".log"
-	benchmark: "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + "_benchmark.json"
-	output: peaks_narrowPeak = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".narrowPeak", \
-		peaks_bed = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".bed", \
-		pdf = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".crosscorrelation.pdf", \
-		sm_density_wig = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".smoothed.density.wig", \
-		enrich_est_wig = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".enrichment.estimates.wig", \
-		peaks_broadPeak = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".broadPeak", \
-		bdg_positions = "{result_dir}/{treatment}_vs_{control}/spp/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".binding.positions.txt"
+                  + " -q long -e {result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + "_qsub.err" \
+                  + " -o {result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + "_qsub.out" 
+	log: "{result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".log"
+	benchmark: "{result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + "_benchmark.json"
+	output: peaks_narrowPeak = "{result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".narrowPeak", \
+		peaks_bed = "{result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".bed", \
+		pdf = "{result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".crosscorrelation.pdf", \
+		sm_density_wig = "{result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".smoothed.density.wig", \
+		enrich_est_wig = "{result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".enrichment.estimates.wig", \
+		peaks_broadPeak = "{result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".broadPeak", \
+		bdg_positions = "{result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".binding.positions.txt"
 	run:
 		R("""sink("{log}")
 
@@ -79,4 +79,5 @@ rule spp:
 		bed <- read.table("{output.peaks_narrowPeak}")
 		write.table(bed, "{output.peaks_bed}", row.names=FALSE, col.names=FALSE, sep="\t", quote=FALSE)
 
+		sink()
 		""") 

@@ -7,15 +7,11 @@
 	ChIP peak annotation, comparison and visualization.
 	Bioinformatics 2015. 31(14): 2382-2383.
 
-	#visualize the peak locations over the whole genome
-		# pdf("{output.covplot}", height=10, width=10)
-		# covplot(peaks, weightCol = "score")
-		# dev.off()
 """
 
 rule peaks_annotation:
 	input: "{regions}.bed"
-	output: #covplot = "{regions}_covplot.pdf", \
+	output: covplot = "{regions}_covplot.pdf", \
 			peakHeatmap = "{regions}_peakHeatmap.pdf", \
 			plotAvgProf2 = "{regions}_plotAvgProf.pdf", \
 			peakAnno_tab = "{regions}_peakAnno.tab", \
@@ -48,7 +44,10 @@ rule peaks_annotation:
 		#load data
 		peaks <- toGRanges("{input}", format="BED", header=FALSE, sep = "\t")
 
-		
+		#visualize the peak locations over the whole genome
+		# pdf("{output.covplot}", height=10, width=10)
+		# covplot(peaks, weightCol = "score")
+		# dev.off()
 
 		#Heatmap of ChIP binding to TSS regions
 		pdf("{output.peakHeatmap}", height=10, width=6)

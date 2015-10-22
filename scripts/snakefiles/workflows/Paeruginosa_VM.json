@@ -6,17 +6,20 @@
     "verbosity": "0",
 
     "genome": {
-	"organism": "Saccharomyces_cerevisiae",
-	"file": "/data/genomes/sacCer3/sacCer3.fa",
-	"size": "12157105",
-	"version": "sacCer3",
+	"organism": "Pseudomonas_aeruginosa",
+	"size": "6300000",
+	"version": "pa",
+	"base_url_fasta": "-",
 	"sequence": "",
-	"features": ""
+	"features": "",
+	"RefSeq_to_std": "",
+        "install_dir": "",
+	"file": "/root/mydisk/genomes/pa/BWAIndex/pa.fa"
     },
 
     "files": {
-	"samples": "/data/Scerevisiae-Pho4/samples.tab",
-	"design": "/data/Scerevisiae-Pho4/design.tab"
+	"samples": "/root/mydisk/data/Paeruginosa/samples.tab",
+	"design": "/root/mydisk/data/Paeruginosa/design.tab"
     },
 
     "reads": {
@@ -26,22 +29,21 @@
     "dir": {
 	"base": ".",
 	"fg_lib": ".",
-	"reads_source": "/data/Scerevisiae-Pho4/",
-	"results": "/data/results/Scerevisiae-Pho4/",
-	"reports": "/data/results/Scerevisiae-Pho4/",
-	"genome": "/data/genomes/",
-	"logs": ""
+	"reads_source": "/root/mydisk/data/Paeruginosa/",
+	"results": "/root/mydisk/data/results/Paeruginosa/",
+	"reports": "/root/mydisk/data/results/Paeruginosa/",
+	"genome": "/root/mydisk/data/genomes/",
+	"logs": "/root/mydisk/data/results/Paeruginosa/logs/"
     },
 
-
     "reports" : {
-	"dag": "/data/results/Scerevisiae-Pho4/dag",
-	"rulegraph": "/data/results/Scerevisiae-Pho4/rule"
+	"dag": "/root/mydisk/data/results/Paeruginosa/dag",
+	"rulegraph": "/root/mydisk/data/results/Paeruginosa/rule"
     },
 
     "sickle":  { 
         "threshold": "20",
-	"qual": "sanger"
+        "other_options": ""
     },
 
     "fastqc": {
@@ -49,8 +51,14 @@
     },
 
     "bwa": {
-	"index": "/data/genomes/sacCer3/BWAIndex/sacCer3.fa",
+	"index": "/root/mydisk/genomes/pa/BWAIndex/pa.fa",
 	"threads": "10"
+    },
+
+    "bowtie2": {
+	"index": "/root/mydisk/genomes/pa/Bowtie2Index/pa.fa",
+	"threads": "10", 
+        "max_mismatches": "1"
     },
 
     "samtools": {
@@ -75,7 +83,7 @@
 
     "homer": {
 	"style": "factor",
-	"genome": "/data/genomes/sacCer3/BWAIndex/sacCer3.fa",
+	"genome": "/root/mydisk/genomes/pa/BWAIndex/pa.fa",
 	"F": "2",
 	"L": "2",
 	"P": "0.01",
@@ -99,7 +107,7 @@
 		"nmotifs": "",
 		"minol": "",
 		"maxol": "",
-		"motif_db": "yeast tf $RSAT/public_html/motif_databases/Yeastract/yeastract_20150629.tf ",
+		"motif_db": "prodoric tf $RSAT/public_html/motif_databases/prodoric_from_meme_151016.tf",
 		"disco": "oligos,positions"
     }
 

@@ -9,12 +9,23 @@ if not "homer" in config.keys():
 if not "genome" in config["homer"].keys():
 	sys.exit("The parameter genome version must be defined in the JSON file")
 
+if not "size" in config["genome"].keys():
+	sys.exit("The parameter genome size must be defined in the JSON file")
+
 if not "style" in config["homer"].keys():
 	config["homer"]["style"] = "factor"
 
-if not "other_options" in config["homer"].keys():
-	config["homer"]["other_options"] = ""
+if not "L" in config["homer"].keys():
+	config["homer"]["L"] = "2"
 
+if not "F" in config["homer"].keys():
+	config["homer"]["F"] = "2"
+
+if not "P" in config["homer"].keys():
+	config["homer"]["P"] = "0.01"
+
+if not "fdr" in config["homer"].keys():
+	config["homer"]["fdr"] = "0.01"
 
 
 rule homer:
@@ -23,37 +34,41 @@ rule homer:
 
 	The genome parameter can be either:
 		- the code of a genome installed in Homer (eg HG18, dm3...)
-		- a fasta file (see http://homer.salk.edu/homer/introduction/update.html)
+		- a fasta file (see http://homer.salk.edu/homer_peaks/introduction/update.html)
 
 	Required parameters:
 		config["homer"]["genome"]
-		config["homer"]["style"] # Can be "factor" (narrow peaks) of "histone" (broad peaks). See http://homer.salk.edu/homer/ngs/peaks.html for more options.
+		config["homer"]["style"] # Can be "factor" (narrow peaks) or "histone" (broad peaks). See http://homer.salk.edu/homer/ngs/peaks.html for more options.
 		config["qsub"]
 
 
 	Usage:
-		PEAKS_HOMER = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/homer/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_homer_peaks.bed",
+		PEAKS_HOMER = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/homer_peaks/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_homer_peaks.bed",
                		zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
 
 	/!\ Lots of updates to be done before use
 	"""
 	input: 	treatment="{result_dir}/{treatment}/{treatment}_{aligner}.bed", \
 		control="{result_dir}/{control}/{control}_{aligner}.bed"
-	output: "{result_dir}/{treatment}_vs_{control}/homer/{treatment}_vs_{control}_{aligner}_homer_peaks.bed"
-	log: "{result_dir}/{treatment}_vs_{control}/homer/{treatment}_vs_{control}_{aligner}_homer.log"
-	benchmark: "{result_dir}/{treatment}_vs_{control}/homer/{treatment}_vs_{control}_{aligner}_homer_benchmark.json"
+	output: "{result_dir}/{treatment}_vs_{control}/homer_peaks/{treatment}_vs_{control}_{aligner}_homer_peaks.bed"
+	log: "{result_dir}/{treatment}_vs_{control}/homer_peaks/{treatment}_vs_{control}_{aligner}_homer.log"
+	benchmark: "{result_dir}/{treatment}_vs_{control}/homer_peaks/{treatment}_vs_{control}_{aligner}_homer_benchmark.json"
 	params: name="{treatment}_vs_{control}_{aligner}_homer", \
-		treatment_tag="{result_dir}/{treatment}_vs_{control}/homer/treatment_{treatment}_tag", \
-		control_tag="{result_dir}/{treatment}_vs_{control}/homer/control_{control}_tag", \
+		treatment_tag="{result_dir}/{treatment}_vs_{control}/homer_peaks/treatment_{treatment}_tag", \
+		control_tag="{result_dir}/{treatment}_vs_{control}/homer_peaks/control_{control}_tag", \
 		genome=config['homer']['genome'], \
 		style=config["homer"]["style"], \
-		other_options = config["homer"]["other_options"], \
+		L = config["homer"]["L"], \
+		P = config["homer"]["P"], \
+		F = config["homer"]["F"], \
+		fdr = config["homer"]["fdr"], \
+		genome_size = config["genome"]["size"], \
 		qsub=config["qsub"] \
-		+ " -q long -e {result_dir}/{treatment}_vs_{control}/homer/{treatment}_vs_{control}_{aligner}_homer_qsub.err" \
-		+ " -q long -e {result_dir}/{treatment}_vs_{control}/homer/{treatment}_vs_{control}_{aligner}_homer_qsub.out" 
+		+ " -q long -e {result_dir}/{treatment}_vs_{control}/homer_peaks/{treatment}_vs_{control}_{aligner}_homer_qsub.err" \
+		+ " -q long -e {result_dir}/{treatment}_vs_{control}/homer_peaks/{treatment}_vs_{control}_{aligner}_homer_qsub.out" 
 	shell:"""(makeTagDirectory {params.treatment_tag} -genome {params.genome} -checkGC {input.treatment} -format bed
 		makeTagDirectory {params.control_tag} -genome {params.genome} -checkGC {input.control} -format bed
-		findPeaks {params.treatment_tag} -style {params.style} -o auto -i {params.control_tag}
+		findPeaks {params.treatment_tag} -style {params.style} -L {params.L} -P {params.P} -F {params.F} -fdr {params.fdr} -gsize {params.genome_size} -o {params.treatment_tag}/peaks.txt -i {params.control_tag}
 		pos2bed.pl {params.treatment_tag}/peaks.txt > {output}
 		makeUCSCfile {params.treatment_tag} -o auto
 		makeUCSCfile {params.control_tag} -o auto) &> {log}

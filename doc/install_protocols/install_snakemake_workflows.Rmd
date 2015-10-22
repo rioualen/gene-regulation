@@ -173,6 +173,27 @@ apt-get install python3.4-dev
 
 ## R
 
+**/!\\* Issues with R lib 
+
+Beware: libPath can be automatically set in rsat distribution, which can cause permission problems etc.
+Check the first path in R:
+```
+> .libPaths()
+```
+Set your preferred path in shell:
+``` 
+$ export R_LIBS="/home/your_username/R_libs"
+```
+
+Issue when installing packages:
+
+```
+> setRepositories() 
+```
+Select CRAN, CRAN extras, bioc...
+
+Beware of using "http" mirrors rather than "https" mirrors (why exactly?)
+
 ### Python 3 package rpy2
 
 ```
@@ -186,6 +207,24 @@ doesnt work
 ```
 Problems solved after rsat install (including loads of python packages)?
 
+### spp (spp peak-calling)
+
+depends on caTools
+```
+source("http://bioconductor.org/biocLite.R")
+biocLite("spp")
+> install.packages("spp")
+```
+```
+R CMD INSTALL spp_1.10.tar.gz
+```
+...
+
+### Biostrings (peak length)
+
+```
+install.packages("Biostrings", lib="/path/to/my/lib")
+```
 
 ## Snakemake
 
@@ -274,7 +313,7 @@ tar -xvzf sratoolkit.2.5.2-ubuntu64.tar.gz
 rm sratoolkit.2.5.2-ubuntu64.tar.g
 ```
  
-Add to path (cf section xx): 
+Add to path (cf section 1.3): 
 ```
 PATH="$HOME/bin/sratoolkit.2.5.2-ubuntu64/bin:$PATH"
 ```
@@ -317,8 +356,8 @@ Sickle is a trimming tool which better the quality of NGS reads.
 
 * [Sickle main page](https://github.com/najoshi/sickle)
 
-* Pre-requisite: install `zlib` (see section XX).
-* Clone the git repository into your bin (see section XX) and run `make`.
+* Pre-requisite: install `zlib` (see section 1.1.4).
+* Clone the git repository into your bin (see section 1.2) and run `make`.
 
 ```
 cd $HOME/bin
@@ -327,7 +366,7 @@ cd sickle
 make
 ```
 
-* Add sickle to your `$PATH` (see section XX).
+* Add sickle to your `$PATH` (see section 1.3).
 
 ```
 PATH="$HOME/bin/sickle:$PATH"
@@ -347,7 +386,15 @@ V: 0.7.5a-r405
 
 Latest : 0.7.12
 
-## Bowtie
+## Bowtie2
+
+* [General documentation](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml)
+* Instructions [here](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#obtaining-bowtie-2)
+    * Download package [here](https://sourceforge.net/projects/bowtie-bio/files/bowtie2/)
+    * Move package to your personnal bin/
+    * Unzip
+    * Add to $PATH (see section 1.3)
+    * There you go!
 
 ## Samtools
 

@@ -7,17 +7,8 @@ if not "sickle" in config.keys():
 if not "threshold" in config["sickle"].keys():
     config["sickle"]["threshold"] = 20
 
-if not "other_options" in config["sickle"].keys():
-    config["sickle"]["other_options"] = ""
-
-if not "suffix" in config["sickle"].keys():
-    config["sickle"]["suffix"] = "_sickle-se-q" + config["sickle"]["threshold"]
-
-if not "reads" in config.keys():
-    config["reads"] = {}
-
-if not "qual_type" in config["reads"].keys():
-    config["reads"]["qual_type"] = "sanger"
+if not "qual" in config["sickle"].keys():
+    config["sickle"]["qual"] = "sanger"
 
 #================================================================#
 # Rule definitions
@@ -34,20 +25,17 @@ rule sickle_se:
 	Usage:
 		SICKLE_TRIMMING = expand(config['dir']['results'] + "{dir_data}/{dataset}_merged_sickle-se-q" + config["sickle"]["threshold"] + ".fastq", dir_data=DIR_DATA, dataset=DATASETS)
 
-	/!\ Claire to all: I replaced sickle_se_q by sickle-se-q in order to keep underscores only between distinct steps, so maybe we avoid confusions in wildcards?
-
 	"""
     input: "{reads}.fastq"	
     output: trimmed = "{reads}_sickle-se-q" + config["sickle"]["threshold"] + ".fastq", \
             summary = "{reads}_sickle-se-q" + config["sickle"]["threshold"] + "_summary.txt"
     params: threshold = config["sickle"]["threshold"], \
             qual_type = config["reads"]["qual_type"], \
-            options = config["sickle"]['other_options'], \
             qsub = config['qsub'] \
             + " -e "+ "{reads}_sickle-se-q" + config["sickle"]["threshold"] + "_qsub.err" \
             + " -o "+ "{reads}_sickle-se-q" + config["sickle"]["threshold"] + "_qsub.out"
     log: "{reads}_sickle-se-q" + config["sickle"]["threshold"] + ".log"
     benchmark: "{reads}_sickle-se-q" + config["sickle"]["threshold"] + "_benchmark.json"
     message: "Trimming single-end raw reads with sickle\n\tInput:\t{input}\n\tOutput:\t{output}\n\tLog:\t{log}"
-    shell: "sickle se --fastq-file {input} --qual-type {params.qual_type} --output-file {output.trimmed}  {params.options} > {output.summary} 2> {log}"
+    shell: "sickle se --fastq-file {input} --qual-type {params.qual_type} --output-file {output.trimmed} > {output.summary} 2> {log}"
 

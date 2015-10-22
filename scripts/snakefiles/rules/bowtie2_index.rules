@@ -1,0 +1,26 @@
+if not "bowtie2" in config.keys():
+    config["bowtie2"] = {}
+
+if not "index" in config["bowtie2"].keys():
+	sys.exit("The parameter bowtie index must be defined in the JSON file")
+
+rule bowtie2_index:
+	"""
+	Build index for bowtie version 2 (gapped read mapping).
+	"""
+	input: "{genome_dir}/{genome_version}.fa"
+	output: "{genome_dir}/Bowtie2Index/{genome_version}.fa.1.bt2"
+	log: "{genome_dir}/Bowtie2Index/{genome_version}_bwa-index.log"
+	benchmark: "{genome_dir}/Bowtie2Index/{genome_version}_bwa-index_benchmark.json"
+	params:
+		index = config["bowtie2"]["index"], \
+		genome_version = config["genome"]["version"], \
+		dir_genome = config["dir"]["genome"], \
+		qsub = config["qsub"] + " -e {genome_dir}_bowtie2-index_qsub.err -o {genome_dir}_bowtie2-index_qsub.out"
+	shell: """
+mkdir -p {params.dir_genome}{params.genome_version}/Bowtie2Index
+cp {input} {params.dir_genome}{params.genome_version}/Bowtie2Index
+cd {params.dir_genome}{params.genome_version}/Bowtie2Index
+bowtie2-build {params.dir_genome}{params.genome_version}/Bowtie2Index/{params.genome_version}.fa {output} &> {log}
+"""
+
