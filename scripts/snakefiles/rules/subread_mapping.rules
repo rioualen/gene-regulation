@@ -24,9 +24,9 @@ rule subread_mapping:
 	"""This rule execute the alignement with the subread tool"""
 	input: file_input = "{data_dir}/{dataset}_{trimmed}.fastq", control_txt = config["dir"]["results"] + "control_buildindex.txt"
 	output: "{data_dir}/{dataset}_{trimmed}_{aligneur}.bam"
-	params: reference_index = config["dir"]["results"] + config["subread"]["basename"], qsub = config["qsub"] + " -q medium -e {data_dir}/{dataset}_{trimmed}_{aligneur}_qsub.err -o {data_dir}/{dataset}_{trimmed}_{aligneur}_qsub.out"
-	log: "{data_dir}/{dataset}_{trimmed}_{aligneur}.log"
-	benchmark: "{data_dir}/{dataset}_{trimmed}_{aligneur}_benchmark.json"
+	params: reference_index = config["dir"]["results"] + config["subread"]["basename"], qsub = config["qsub"] + " -q medium -e {data_dir}/{dataset}_{trimmed}_{aligneur}_subread_mapping_qsub.err -o {data_dir}/{dataset}_{trimmed}_{aligneur}_subread_mapping_qsub.out"
+	log: "{data_dir}/{dataset}_{trimmed}_{aligneur}_subread_mapping.log"
+	benchmark: "{data_dir}/{dataset}_{trimmed}_{aligneur}_subread_mapping_benchmark.json"
 	run: 
 		R(""" 
 			library("Rsubread")

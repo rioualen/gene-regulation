@@ -1,5 +1,4 @@
-"""Looking for parB sites in P.aeruginosa.
-
+"""
 Usage: 
     snakemake -p  -c "qsub {params.qsub}" -j 12 \
         -s scripts/snakefiles/workflows/Scerevisiae-Pho4.py \
@@ -9,7 +8,7 @@ Flowcharts:
     snakemake -p -s scripts/snakefiles/workflows/Paeruginosa.py \
         --force flowcharts
 
-Organism: 		Pseudomonas aeruginosa
+Organism: 		Escherichia coli
 Reference genome:	-
 Sequencing type: 	single end
 
@@ -29,7 +28,7 @@ import datetime
 import pandas as pd
 
 ## Config
-configfile: "scripts/snakefiles/workflows/Paeruginosa.json"
+configfile: "scripts/snakefiles/workflows/Ecoli.json"
 workdir: config["dir"]["base"]
 verbosity = int(config["verbosity"])
 
@@ -59,6 +58,7 @@ include: os.path.join(RULES, "peak_length.rules")
 include: os.path.join(RULES, "peak_motifs.rules")
 include: os.path.join(RULES, "purge_sequence.rules")
 include: os.path.join(RULES, "sickle_se.rules")
+include: os.path.join(RULES, "sra_to_fastq.rules")
 include: os.path.join(RULES, "spp.rules")
 include: os.path.join(RULES, "swembl.rules")
 
@@ -93,7 +93,7 @@ if not os.path.exists(RESULTS_DIR):
 ## Data import & merging.
 
 ## À revoir, rsync output du texte -> plante flowcharts...
-#os.system("rsync -rupltv --exclude '*.tab' " + READS + " " + RESULTS_DIR)
+IMPORT = expand(RESULTS_DIR + "{samples}/{samples}.fastq", samples=SAMPLE_IDS) 
 
 ## Graphics & reports
 GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
@@ -104,7 +104,7 @@ REPORT = expand(RESULTS_DIR + "report.html")
 ALIGNER="bwa bowtie2".split()
 ALIGNMENT=expand("{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)
 
-PEAKCALLER="homer_peaks macs2-qval" + config["macs2"]["qval"] + "_peaks swembl-R" + config["swembl"]["R"] # spp-fdr" + config["spp"]["fdr"] + " 
+PEAKCALLER="homer_peaks macs2-qval" + config["macs2"]["qval"] + "_peaks swembl-R" + config["swembl"]["R"]# + " macs2_peaks"# spp-fdr" + config["spp"]["fdr"] + " 
 PEAKCALLER=PEAKCALLER.split()
 PEAKCALLING=expand(expand("{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER)
 
@@ -161,7 +161,7 @@ rule all:
 	"""
 	Run all the required analyses
 	"""
-	input: GRAPHICS, RAW_QC, PEAKS#, PEAKS_LENGTH, PEAK_MOTIFS
+	input: GRAPHICS, RAW_QC, MAPPING, PEAKS#, PEAK_MOTIFS
 	#BED_FEAT_COUNT, PURGE_PEAKS, PEAKS_LENGTH
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
