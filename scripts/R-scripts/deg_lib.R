@@ -1,4 +1,3 @@
-
 #' @title Display messages at a given verbosity level
 #'
 #' @author Jacques van Helden (\email{Jacques.van-Helden@@univ-amu.fr})
@@ -514,26 +513,53 @@ rnaseq.volcanoPlot <- function(deg.table,
 }
 
 
+################################################################
+## Compute sample-wise statistics
+calc.stats.per.sample <- function(sample.descriptions, 
+                                  count.table) {
+  verbose("Computing statistics per sample", 2)
+  
+  stats.per.sample <- cbind(  
+    sample.desc[names(all.counts), ],
+    data.frame(
+      "sum" = apply(all.counts, 2, sum, na.rm=TRUE),
+      "mean" = apply(all.counts, 2, mean, na.rm=TRUE),
+      "min" = apply(all.counts, 2, min, na.rm=TRUE),
+      "perc05" = apply(all.counts, 2, quantile, probs=0.05, na.rm=TRUE),
+      "perc25" = apply(all.counts, 2, quantile, probs=0.25, na.rm=TRUE),
+      "median" = apply(all.counts, 2, median, na.rm=TRUE),
+      "perc75" = apply(all.counts, 2, quantile, probs=0.75, na.rm=TRUE),
+      "perc95" = apply(all.counts, 2, quantile, probs=0.95, na.rm=TRUE),
+      "max" = apply(all.counts, 2, max, na.rm=TRUE)
+    )
+  )
+  stats.per.sample$Mreads <- round(stats.per.sample$sum/1e6, digits = 1)
+  
+  ## Count number and the fraction of samples with counts below the mean. 
+  ## This shows the impact of very large counts: in some samples, 
+  ## 85% of the samples have a value below the mean (i.e. the mean is at the percentile 85 !)
+  stats.per.sample$below.mean <- apply(t(all.counts) < stats.per.sample$mean, 1, sum, na.rm=TRUE)
+  stats.per.sample$fract.below.mean <- stats.per.sample$below.mean/nrow(all.counts)
+  # View(stats.per.sample)
+  
+  return(stats.per.sample)
+}
 
-## Generate a set of plots displaying some sample-wise statistics
-sample.description.plots <- function (sample.desc,
-                                      stats.per.sample,
-                                      dir.DEG,
-                                      exploratory.plots=FALSE) {
-  
-  plot.files <- c() ## To retun: list of files with plots
-  
-  par.ori <- par() ## Save original plot parameters
-  
+################################################################
+## Draw a barplot with the number of reads per sample
+libsize.barplot <- function(stats.per.sample, 
+                            plot.file=NULL) {
+
   ## Adapt boxplot size to the number of samples and label sizes
   boxplot.lmargin <- max(nchar(sample.desc$label))/3+5
   boxplot.height <- length(sample.ids)/3+2
   
-  ## Sample-wise statistics
-  plot.file <- file.path(dir.DEG, paste(sep = "", "sample_libsum_barplot.pdf"))
-  plot.files["Mreads_barplot"] <- plot.file
-  message("Generating plot", plot.file)
-  pdf(file= plot.file, width=8, height=boxplot.height)
+  ## Sample-wise library sizes
+  if (!is.null(plot.file)) {
+    message("Generating plot", plot.file)
+    pdf(file=plot.file, width=8, height=boxplot.height)
+  }
+  
   par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
   bplt <- barplot(stats.per.sample$Mreads, names.arg = stats.per.sample$label, horiz = TRUE, las=1,
                   xlab="libsum (Million reads per sample)",
@@ -541,70 +567,124 @@ sample.description.plots <- function (sample.desc,
                   col=stats.per.sample$color)
   grid(col="white", lty="solid",ny = 0)
   text(x=pmax(stats.per.sample$Mreads, 3), labels=stats.per.sample$Mreads, y=bplt,pos=2, font=2)
-  silence <- dev.off()
+  if (!is.null(plot.file)) {
+    silence <- dev.off()
+  }
+}
+
+################################################################
+## Draw boxplots with read counts per genes for each sample
+count.boxplot <- function(count.table, 
+                          sample.desc,
+                          xlab="Raw counts",
+                          main="Box plots per sample: raw counts",
+                          plot.file=NULL) {
   
+  ## Adapt boxplot size to the number of samples and label sizes
+  boxplot.lmargin <- max(nchar(sample.desc$label))/3+5
+  boxplot.height <- length(sample.ids)/3+2
+  
+  ## Sample-wise library sizes
+  if (!is.null(plot.file)) {
+    message("Generating plot", plot.file)
+    pdf(file=plot.file, width=8, height=boxplot.height)
+  }
+  
+  par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
+  boxplot(count.table, horizontal=TRUE, col=sample.desc$color,
+          xlab=xlab, names=sample.desc$label,
+          main=main, las=1)
+  grid(col="grey", lty="solid",ny = 0)
+  if (!is.null(plot.file)) {
+    silence <- dev.off()
+  }
+}
+
+################################################################
+## Draw a heatmap with the inter-sample correlation matrix.
+count.correl.heatmap <- function(count.table, 
+                                 main="Correlation between raw counts",
+                                 plot.file=NULL) {
+  
+  ## Define a color palette for heatmaps. I like this Red-Blue palette because 
+  ## - it suggests a subjective feeling of warm (high correlation)/cold (low correlation)
+  ## - it can be seen by people suffering from red–green color blindness.
+  cols.heatmap <- rev(colorRampPalette(brewer.pal(9,"RdBu"))(100))
+  
+  
+  ## Adapt boxplot size to the number of samples and label sizes
+  margin <- max(nchar(names(count.table)))/3+5
+
+  count.cor <- as.matrix(cor(count.table))
+  
+  ## Sample-wise library sizes
+  if (!is.null(plot.file)) {
+    message("Generating plot", plot.file)
+    pdf(file=plot.file, width=8, height=boxplot.height)
+  }
+  
+  hm <- heatmap.2(count.cor,  scale="none", trace="none", 
+                  main=main, margins=c(margin,margin),
+                  col=cols.heatmap) #, breaks=seq(-1,1,2/length(cols.heatmap)))
+  if (!is.null(plot.file)) {
+    silence <- dev.off()
+  }
+}
+
+## Generate a set of plots displaying some sample-wise statistics
+sample.description.plots <- function (sample.desc,
+                                      stats.per.sample,
+                                      dir.figures,
+                                      exploratory.plots=FALSE) {
+  
+  plot.files <- c() ## To retun: list of files with plots
+  
+  par.ori <- par() ## Save original plot parameters
+  
+  
+  ## Library size barplots
+  plot.files["Mreads_barplot"] <- file.path(dir.figures, "sample_libsum_barplot.pdf")
+  libsize.barplot(stats.per.sample, plot.files["Mreads_barplot"])
+  
+  ################################################################
   ## Boxplots of raw counts and CPMs, in linear + log axes. 
   ## These plots give a pretty good intuition of the raw data per sample: 
   ## library sizes, outliers, dispersion of gene counts.
   
   ## Boxplot of raw counts
-  plot.file <- file.path(dir.DEG, paste(sep = "", "sample_boxplots_counts.pdf"))
-  plot.files["sample_boxplot_counts"] <- plot.file
-  message("Generating plot file", plot.file)
-  pdf(file= plot.file, width=8, height=boxplot.height)
-  par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
-  boxplot(all.counts.mapped, horizontal=TRUE, col=sample.desc$color,
-          xlab="Raw counts", names=sample.desc$label,
-          main="Box plots per sample: raw counts", las=1)
-  quiet <- dev.off()
-  
+  plot.files["sample_boxplot_counts"] <- file.path(dir.figures, paste(sep = "", "sample_boxplots_counts.pdf"))
+  count.boxplot(all.counts, stats.per.sample, 
+                xlab="Raw counts", main="Box plots per sample: raw counts",
+                plot.file=plot.files["sample_boxplot_counts"])
+
   ## Boxplot of log10-transformed counts
-  plot.file <- file.path(dir.DEG, paste(sep = "", "sample_boxplots_counts_log10.pdf"))
-  plot.files["sample_boxplot_counts_log10"] <- plot.file
-  message("Generating plot file", plot.file)
-  pdf(file= plot.file, width=8, height=boxplot.height)
-  par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
-  boxplot(all.counts.mapped.log10, horizontal=TRUE, col=sample.desc$color,
-          xlab="log10(counts)", names=sample.desc$label,
-          main="Box plots per sample: log10(counts)", las=1)
-  quiet <- dev.off()
-  
+  plot.files["sample_boxplot_counts_log10"] <- file.path(dir.figures, paste(sep = "", "sample_boxplots_counts_log10.pdf"))
+  count.boxplot(all.counts.log10, stats.per.sample, 
+                xlab="log10(counts)", main="Box plots per sample: log10(counts)",
+                plot.file=plot.files["sample_boxplot_counts_log10"])
+
   ## Boxplot of CPMs
-  plot.file <- file.path(dir.DEG, paste(sep = "", "sample_boxplots_CPM.pdf"))
-  plot.files["sample_boxplot_CPM"] <- plot.file
-  message("Generating plot file", plot.file)
-  pdf(file=plot.file, width=8, height=boxplot.height)
-  par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
-  boxplot(cpms, horizontal=TRUE, col=sample.desc$color,
-          xlab="CPM", names=sample.desc$label,
-          main="Box plots per sample: counts per million reads (CPM)", las=1)
-  quiet <- dev.off()
+  plot.files["sample_boxplot_CPM"] <- file.path(dir.figures, paste(sep = "", "sample_boxplots_CPM.pdf"))
+  count.boxplot(cpms, stats.per.sample, 
+                xlab="CPM", main="Box plots per sample: counts per million reads (CPM)",
+                plot.file=plot.files["sample_boxplot_CPM"])
   
   ## Boxplot of log10-transformed CPMs
-  plot.file <- file.path(dir.DEG, paste(sep = "", "sample_boxplots_CPM_log10.pdf"))
-  plot.files["sample_boxplot_CPM_log10"] <- plot.file
-  message("Generating plot", plot.file)
-  pdf(file=plot.file, width=8, height=boxplot.height)
-  par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
-  boxplot(cpms.log10, horizontal=TRUE, col=sample.desc$color,
-          xlab="log10(CPM)", names=sample.desc$label,
-          main="Box plots per sample: counts per million reads (CPM)", las=1)
-  quiet <- dev.off()
-  
-  
+  plot.files["sample_boxplot_CPM_log10"] <- file.path(dir.figures, paste(sep = "", "sample_boxplots_CPM_log10.pdf"))
+  count.boxplot(cpms.log10, stats.per.sample, 
+                xlab="log10(CPM)", main="Box plots per sample: counts per million reads (CPM)",
+                plot.file=plot.files["sample_boxplot_CPM"])
+
   par <- par.ori ## Restore original plot parameters
   par(mar=c(4.1,5.1,4.1,1.1))
-  
+
   ## Draw sample correlation heatmaps for the raw read counts
-  plot.file <- paste(sep="", prefix["general.file"],"_sample_correl_heatmap_counts.pdf")
-  plot.files["sample_correl_heatmap_counts"] <- plot.file
-  message("Generating plot", plot.file)
-  pdf(file=plot.file, width=8, height=8)
-  hm <- heatmap.2(as.matrix(cor(all.counts.mapped)),  scale="none", trace="none", 
-                  main="Correlation between raw counts", margins=c(8,8),
-                  col=cols.heatmap) #, breaks=seq(-1,1,2/length(cols.heatmap)))
-  quiet <- dev.off()
-  
+  plot.files["sample_correl_heatmap_counts"] <- paste(sep="", prefix["general.file"],"_sample_correl_heatmap_counts.pdf")
+  count.correl.heatmap(all.counts, plot.file=plot.files["sample_correl_heatmap_counts"])
+#   hm <- heatmap.2(,  scale="none", trace="none", 
+#                   main="Correlation between raw counts", margins=c(8,8),
+#                   col=cols.heatmap) #, breaks=seq(-1,1,2/length(cols.heatmap)))
+
   ## Draw sample correlation heatmaps for CPM. Actually it gives exactly the 
   ## same result as correlation between raw counts, since the correlation has a 
   ## standardizing effect. 
@@ -635,9 +715,9 @@ sample.description.plots <- function (sample.desc,
     plot.files["CPM_libsum_vs_median_vs_perc75"] <- plot.file
     message("Generating plot", plot.file)
     png(file= plot.file, width=1000, height=1000)
-    cols.counts <- as.data.frame(matrix(sample.desc$color, nrow=nrow(all.counts.mapped), ncol=ncol(all.counts.mapped), byrow = TRUE))
-    colnames(cols.counts) <- names(all.counts.mapped)
-    rownames(cols.counts) <- rownames(all.counts.mapped)
+    cols.counts <- as.data.frame(matrix(sample.desc$color, nrow=nrow(all.counts), ncol=ncol(all.counts), byrow = TRUE))
+    colnames(cols.counts) <- names(all.counts)
+    rownames(cols.counts) <- rownames(all.counts)
     plot(data.frame("libsum" = as.vector(as.matrix(cpms.libsum)),
                     "median" = as.vector(as.matrix(cpms.median)),
                     "perc75" = as.vector(as.matrix(cpms.perc75))),
@@ -677,3 +757,132 @@ sample.description.plots <- function (sample.desc,
   return(plot.files)
 }
 
+################################################################
+## Initiate a result table with the CPMs and derived statistics
+init.deg.table <- function(cmps) {
+  verbose("\t\tInitializing result table for one differential analysis (two-sample comparison).", 2)
+  all.gene.ids <- row.names(cpms)
+  result.table <- data.frame("gene_id" = all.gene.ids,
+                             "name"=gene.info[all.gene.ids,"name"])
+  row.names(result.table) <- all.gene.ids
+  result.table$entrez.id <- gene.info[all.gene.ids,"entrez.id"]
+  result.table$description <- gene.info[all.gene.ids,"description"]
+  
+  result.table <- cbind(result.table, counts=current.counts) ## Include the original counts in the big result table
+  result.table <- cbind(result.table, cpm=current.cpms) ## Include CPMs in the big result table
+  
+  ## Tag genes detected in less than min.rep samples, which is defined as 
+  ## the minimal number of replicates per condition.
+  min.rep <- min(length(samples1), length(samples2))
+  result.table$undetected <- rowSums(current.counts > 1) < min.rep
+  # table(result.table$undetected)
+  # dim(current.counts)
+  
+  result.table$cpm.mean <- apply(cpms,1, mean)
+  result.table$cpm1.mean <- apply(as.data.frame(cpms[,samples1]),1, mean)
+  result.table$cpm2.mean <- apply(as.data.frame(cpms[,samples2]),1, mean)
+  result.table$A = log2(result.table$cpm1.mean*result.table$cpm2.mean)/2
+  result.table$M = log2(result.table$cpm1.mean/result.table$cpm2.mean)
+  result.table$cpm.median <- apply(cpms,1, median)
+  result.table$cpm1.median <- apply(as.data.frame(cpms[,samples1]),1, median)
+  result.table$cpm2.median <- apply(as.data.frame(cpms[,samples2]),1, median)
+  result.table$cpm.min <-  apply(cpms,1, min)
+  result.table$cpm1.min <- apply(as.data.frame(cpms[,samples1]),1, min)
+  result.table$cpm2.min <- apply(as.data.frame(cpms[,samples2]),1, min)
+  result.table$cpm.max <-  apply(cpms,1, max)
+  result.table$cpm1.max <- apply(as.data.frame(cpms[,samples1]),1, max)
+  result.table$cpm2.max <- apply(as.data.frame(cpms[,samples2]),1, max)
+  result.table$cpm.sd <-  apply(cpms,1, sd)
+  result.table$cpm1.sd <- apply(as.data.frame(cpms[,samples1]),1, sd)
+  result.table$cpm2.sd <- apply(as.data.frame(cpms[,samples2]),1, sd)
+  result.table$cpm.var <-  apply(cpms,1, var)
+  result.table$cpm1.var <- apply(as.data.frame(cpms[,samples1]),1, sd)
+  result.table$cpm2.var <- apply(as.data.frame(cpms[,samples2]),1, sd)
+  return(result.table)
+}
+
+################################################################
+## DESeq2 analysis
+## 
+## Detect differentially expressed genes (DEG) using the package DESeq2, 
+## and add a few custom columns (e-value, ...) to the result table. 
+deseq2.analysis <- function() {
+  verbose("\t\tDESeq2 analysis", 2)
+  
+  ## Path prefix to save DESeq2 result files
+  prefix["DESeq2_file"] <- paste(sep="", prefix["comparison_file"], "_", suffix.DESeq2)
+  prefix["DESeq2_figure"] <- paste(sep="", prefix["comparison_figure"], "_", suffix.DESeq2)
+  
+  ## Create a DESeqDataSet object from the count table + conditions
+  condition <- as.factor(as.vector(current.sample.conditions))
+  deseq2.dds <- DESeqDataSetFromMatrix(
+    countData = current.counts, 
+    colData = DataFrame(condition),
+    ~ condition)
+  
+  
+  ## Indicate that second condition is the reference condition. 
+  ## If not done, the conditions are considered by alphabetical order, 
+  ## which may be misleading to interpret the log2 fold changes. 
+  deseq2.dds$condition <- relevel(deseq2.dds$condition, ref=cond2) 
+  
+  ## Run the differential analysis
+  deseq2.dds <- DESeq(deseq2.dds)      ## Differential analysis with negbin distrib
+  deseq2.res <- results(deseq2.dds, independentFiltering=FALSE, pAdjustMethod = "BH")  ## Collect the result table
+  
+  deseq2.result.table <- data.frame(
+    "gene.id" = row.names(deseq2.res),
+    "mean" = deseq2.res$baseMean,
+    "log2FC" = deseq2.res$log2FoldChange,
+    "pvalue" = deseq2.res$pvalue,
+    "padj" = deseq2.res$padj)
+  deseq2.result.table <- complete.deg.table(
+    deseq2.result.table, 
+    paste(sep="_", "DESeq2", prefix["comparison"]),
+    sort.column = "padj",
+    thresholds=thresholds,
+    round.digits = 3,
+    dir.figures=dir.figures)
+  return(deseq2.result.table)
+}  
+
+edger.analysis <- function() {
+  verbose("\t\tedgeR analysis", 2)
+  
+  prefix["edgeR_file"] <- paste(sep="", prefix["comparison_file"], "_", suffix.edgeR)
+  prefix["edgeR_figure"] <- paste(sep="", prefix["comparison_figure"], "_", suffix.edgeR)
+  
+  ## Convert the count table in a DGEList structure and compute its parameters.
+  d <- DGEList(counts=current.counts, group=sample.conditions[names(current.counts)])
+  d$samples$group <- relevel(d$samples$group, ref=cond2) ## Ensure that condition 2 is considered as the reference
+  d <- calcNormFactors(d, method="RLE")                 ## Compute normalizing factors
+  d <- estimateCommonDisp(d, verbose=FALSE)             ## Estimate common dispersion
+  d <- estimateTagwiseDisp(d, verbose=FALSE)            ## Estimate tagwise dispersion
+  
+  ################################################################
+  ## Detect differentially expressed genes by applying the exact 
+  ## negative binomial test from edgeR package.
+  edger.de <- exactTest(d, pair=c(cond2, cond1))      ## Run the exact negative binomial test
+  
+  ## Sort genes by increasing p-values, i.e. by decreasing significance
+  edger.tt <- topTags(edger.de, n=nrow(d), sort.by = "PValue")
+  
+  ## Complete the analysis of edgeR result table
+  edger.result.table <- data.frame("gene.id" = row.names(edger.tt$table),
+                                   "mean"=edger.tt$table$logCPM,
+                                   "log2FC"=edger.tt$table$logFC,
+                                   "pvalue"=edger.tt$table$PValue,
+                                   "padj"=edger.tt$table$FDR)
+  edger.result.table <- complete.deg.table(
+    deg.table = edger.result.table, 
+    table.name = paste(sep="_","edgeR",prefix["comparison"]),
+    sort.column = "padj",
+    thresholds=c("padj"=0.05, "evalue"=1, "FC"=1.5),
+    round.digits = 3,
+    dir.figures=dir.figures)
+  # dim(edger.result.table)
+  # dim(edger.result.table)
+  # names(edger.result.table)
+  # View(edger.result.table)
+  return (edger.result.table)
+}
