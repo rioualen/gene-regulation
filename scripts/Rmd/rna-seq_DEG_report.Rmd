@@ -46,7 +46,11 @@ PROJECT-SPECIFIC PARAMETERS: THIS PART SHOULD BE ADAPTER FOR EACH PROJECT -->
 | Last update | `r Sys.Date()`
 
 ```{r Required parameters}
-source(file="report_DEG_broche_parameters.R")
+if (!exists("parameter.file"")) {
+  message("Choose the parameter file")
+  X<-file.choose()
+}
+source(file=parameter.file)
 ```
 
 <!-- END OF THE PROJECT-SPECIFIC PARAMETERS 
