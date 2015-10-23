@@ -1,0 +1,75 @@
+---
+title: "Brief NGS glossary"
+author: "Jacques van Helden"
+date: '`r Sys.Date()`'
+output:
+  html_document:
+    fig_caption: yes
+    highlight: zenburn
+    theme: cerulean
+    toc: yes
+    toc_depth: 3
+  pdf_document:
+    fig_caption: yes
+    highlight: zenburn
+    toc: yes
+    toc_depth: 3
+  word_document: default
+---
+
+We define hereafter a series of abbreviations, terms and concepts which appear recurrently in the litterature about NGS analysis. This document aims at providing a support for the interpretation of analysis reports. 
+
+## Abbreviations
+
+| Abbreviation | Meaning |
+|--------------|---------|
+| NGS | Next Generation Sequencing |
+| DEG | Differentially expressed gene(s) |
+| padj | Adjusted p-value |
+| FDR | False Discovery Rate |
+| | |
+
+## Symbols
+
+| Symbol | Meaning |
+|--------------|---------|
+| $m$ | Number of tests in a multiple-testing schema (e.g. number of genes in differential expression analysis) |
+| $P$ | p-value |
+| $E$ | e-value |
+
+
+* * * *
+
+## Multiple testing corrections
+
+### The problem with multiple tests
+
+The **multiple testing** problem arises from the application of a given statistical test to a large number of cases.  For example, in differential expression analysis, each gene/transcript is submitted to a test of equality between two conditions. A single analysis thus typically involves  several tens of thousands tests. 
+
+
+The **nominal p-value** is the p-value attached to one particular element in a series of multiple tests. For example, in differential analysis, one nominal p-value is computed for each gene. This p-value indicates the risk to obtain an effect at least as important as our observation *under the null hypothesis*, i.e. in the absence of regulation. 
+
+The general problem of **multiple testing** id that the risk of false positive indicated by the nominal p-value will be challenged for each element. 
+
+### Adjusted p-value
+
+The so-called **adjusted p-value** is a statistics derived from the nominal p-value in order to correct for the effects of multiple testing. 
+
+Various types of corrections for multiple testing have been defined (Bonferoni, FWER, FDR). The most usual correction is the FDR, which can be estimated in various ways. 
+
+### P-value (nominal p-value)
+
+### E-value
+
+The e-value indicates the number of false positives expected by chance, for a given threshold of p-value. 
+
+$E = P \cdot m$
+
+Where $m$ is the number of tests (e.g. genes), and $pval$ the nominal p-value of the considered gene.
+
+### FDR
+
+The **False Discovery Rate** (**FDR**) indicates the expected proportion of false positives *among the cases declared positive*. For example, if a differential analysis reports 200 differentially expressed genes with an FDR threshold of 0.05, we should expect to have $0.05 \cdot 200=10$ false positive among them. 
+
+* * * 
+
