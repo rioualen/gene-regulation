@@ -56,10 +56,9 @@ thresholds <- c("padj"=0.05, ## Upper threshold on False Discovery Rate (FDR)
                 "FC"=1.5 ## Lower threshold on the fold-change
 )
 
-
 project.info <- c(
   "Customer"="Beatrice Roche",
   "Platform"="TGML/TAGC, Marseille, France",
   "Bioinfo/stat analysis"="Jacques van Helden",
   "Project start"="2015",
-  "Last update"=Sys.Date())
+  "Last update"=format(Sys.time(), "%Y-%m-%d %H:%M"))
