@@ -37,14 +37,6 @@ PROJECT-SPECIFIC PARAMETERS: THIS PART SHOULD BE ADAPTER FOR EACH PROJECT -->
 
 ## Project information
 
-| Project Info |  |
-|--------------|-------------------------|
-| Customer  | Beatrice Roche
-| Platform | TGML/TAGC, Marseille, France
-| Bioinfo/stat analysis | Jacques van Helden
-| Project start | 2015
-| Last update | `r Sys.Date()`
-
 ```{r Required parameters}
 parameter.file <- "~/BeatriceRoche/reports/report_DEG_broche_parameters.R"
 if (!exists("parameter.file")) {
