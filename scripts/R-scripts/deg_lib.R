@@ -806,7 +806,7 @@ init.deg.table <- function(cmps) {
 ## 
 ## Detect differentially expressed genes (DEG) using the package DESeq2, 
 ## and add a few custom columns (e-value, ...) to the result table. 
-deseq2.analysis <- function() {
+deseq2.analysis <- function(dir.figures=NULL) {
   verbose("\t\tDESeq2 analysis", 2)
   
   ## Path prefix to save DESeq2 result files
@@ -846,7 +846,7 @@ deseq2.analysis <- function() {
   return(deseq2.result.table)
 }  
 
-edger.analysis <- function() {
+edger.analysis <- function(dir.figures=NULL) {
   verbose("\t\tedgeR analysis", 2)
   
   prefix["edgeR_file"] <- paste(sep="", prefix["comparison_file"], "_", suffix.edgeR)
