@@ -17,7 +17,7 @@ date: '`r Sys.Date()`'
 ---
 
 ```{r knitr setup, include=FALSE,  eval=TRUE, echo=FALSE, warning=FALSE}
-knitr::opts_chunk$set(echo=FALSE, eval=TRUE, cache=TRUE, message=FALSE, warning=FALSE)
+knitr::opts_chunk$set(echo=FALSE, eval=TRUE, cache=FALSE, message=FALSE, warning=FALSE)
 ```
 
 
@@ -46,9 +46,12 @@ PROJECT-SPECIFIC PARAMETERS: THIS PART SHOULD BE ADAPTER FOR EACH PROJECT -->
 | Last update | `r Sys.Date()`
 
 ```{r Required parameters}
-if (!exists("parameter.file"")) {
-  message("Choose the parameter file")
-  X<-file.choose()
+parameter.file <- "~/BeatriceRoche/reports/report_DEG_broche_parameters.R"
+if (!exists("parameter.file")) {
+  ## The prompt does not seem to work with the Rmd documents
+  #   message("Choose the parameter file")
+  #   parameter.file <- file.choose()
+  stop("This report requires to specify a variable named parameter.file, containing the path to an R file describing the parameters for this analysis.")
 }
 source(file=parameter.file)
 ```
@@ -516,7 +519,7 @@ for (i in 1:nrow(design)) {
   ################################################################
   ## DESeq2 analysis
   ################################################################
-  deseq2.result.table <- deseq2.analysis()
+  deseq2.result.table <- deseq2.analysis(dir.figures=file.path(dir.base, dir.figures))
   result.table <- cbind(result.table, 
                         "DESeq2" = deseq2.result.table[row.names(result.table),])
   # dim(deseq2.result.table)
@@ -526,7 +529,7 @@ for (i in 1:nrow(design)) {
   # View(result.table)
   
   ## Save the completed DESeq2 result table
-  deseq2.result.file <- paste(sep = "", prefix["DESeq2_file"], ".tab")
+  deseq2.result.file <- paste(sep = "", prefix["comparison_file"], "DESeq2.tab")
   comparison.summary[i,"deseq2"] <- deseq2.result.file
   write.table(x = deseq2.result.table, row.names = FALSE, 
               file = file.path(dir.base, deseq2.result.file), sep = "\t", quote=FALSE)
@@ -536,12 +539,12 @@ for (i in 1:nrow(design)) {
   ################################################################
   ## edgeR analysis
   ################################################################
-  edger.result.table <- edger.analysis()
+  edger.result.table <- edger.analysis(dir.figures=file.path(dir.base, dir.figures))
   result.table <- cbind(result.table, 
                         "edgeR" = edger.result.table[row.names(result.table),])
  
   ## Export edgeR result table
-  edger.result.file <- paste(sep="", prefix["edgeR_file"], ".tab")
+  edger.result.file <- paste(sep="", prefix["comparison_file"], "edgeR.tab")
   comparison.summary[i,"edger"] <- edger.result.file
   
   write.table(x = edger.result.table, row.names = FALSE, 
@@ -700,6 +703,10 @@ kable(comparison.summary[, c("cond1", "cond2", "dir.analysis.link", "dir.figures
       caption="Output directories",
       row.names=FALSE)
 
+```
+
+```{r job done message}
+message("Job done")
 ```
 
 
