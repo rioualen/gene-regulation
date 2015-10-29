@@ -14,7 +14,7 @@
 	"features": "",
 	"RefSeq_to_std": "",
         "install_dir": "",
-	"file": "/root/mydisk/data/genomes/pa/BWAIndex/pa.fa"
+	"file": "/root/mydisk/genomes/pa/pa.fa"
     },
 
     "files": {
@@ -50,12 +50,12 @@
     },
 
     "bwa": {
-	"index": "/root/mydisk/data/genomes/pa/BWAIndex/pa.fa",
+	"index": "/root/mydisk/genomes/pa/BWAIndex/pa.fa",
 	"threads": "10"
     },
 
     "bowtie2": {
-	"index": "/root/mydisk/data/genomes/pa/Bowtie2Index/pa.fa",
+	"index": "/root/mydisk/genomes/pa/Bowtie2Index/pa.fa",
 	"threads": "10", 
         "max_mismatches": "1"
     },
@@ -82,7 +82,7 @@
 
     "homer": {
 	"style": "factor",
-	"genome": "/root/mydisk/data/genomes/pa/BWAIndex/pa.fa",
+	"genome": "/root/mydisk/genomes/pa/pa.fa",
 	"F": "2",
 	"L": "2",
 	"P": "0.01",
