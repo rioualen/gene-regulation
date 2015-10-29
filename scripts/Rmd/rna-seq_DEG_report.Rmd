@@ -38,7 +38,8 @@ PROJECT-SPECIFIC PARAMETERS: THIS PART SHOULD BE ADAPTER FOR EACH PROJECT -->
 ## Project information
 
 ```{r Required parameters}
-parameter.file <- "~/BeatriceRoche/reports/report_DEG_broche_parameters.R"
+#parameter.file <- "~/BeatriceRoche/reports/report_DEG_broche_parameters.R"
+parameter.file <- "/home/lkhamvongsa/mountrsatlocal/Mathilde/reports/rna-seq_DEG_parameters.R"
 if (!exists("parameter.file")) {
   ## The prompt does not seem to work with the Rmd documents
   #   message("Choose the parameter file")
@@ -154,14 +155,6 @@ write.table(x = gene.info, row.names = FALSE,
             file = file.path(dir.base, gene.info.out), sep = "\t", quote=FALSE)
 verbose(paste(sep="", "\tGene info table\t", gene.info.out), 1)
 
-
-
-## Export the gene information table to keep a trace of what has been used. 
-gene.info.out <- paste(sep="", prefix["general.file"], "_gene_descriptions.tab")
-verbose(paste("Exporting gene information table", gene.info.out), 1)
-write.table(x = gene.info, row.names = FALSE,
-            file = file.path(dir.base, gene.info.out), sep = "\t", quote=FALSE)
-verbose(paste(sep="", "\tGene info table\t", gene.info.out), 1)
 
 
 ```
@@ -303,7 +296,7 @@ verbose(paste(sep="", "\tSummary per sample\t", sample.summary.file), 1)
 # setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
 
 ## Statistics per sample
-stats.per.sample.to.print <- c("M.reads", "sum", "min", "perc25", "mean", "median", "perc75", "max", "fract.below.mean")
+stats.per.sample.to.print <- c("Mreads", "sum", "min", "perc25", "mean", "median", "perc75", "max", "fract.below.mean")
 kable(stats.per.sample[stats.per.sample.to.print], digits=2,
       caption="Sample-wise statistics")
 
@@ -397,7 +390,7 @@ for (cond in conditions) {
   
   ################################################################
   ## Plot pairwise comparisons between replicates (result file can be heavy to open)
-#   pdf(file= file.path(dir.condition, paste(sep = "", "between-replicate_counts_plot_", cond, ".pdf")), width=10, height=10)
+   #pdf(file= file.path(dir.condition, paste(sep = "", "between-replicate_counts_plot_", cond, ".pdf")), width=10, height=10)
 #   # dim(current.counts[,1:min(max.rep.to.plot, nrep)])
   plot(current.counts[,1:min(max.rep.to.plot, nrep)], 
        log="xy", col=cols.conditions[cond], 
