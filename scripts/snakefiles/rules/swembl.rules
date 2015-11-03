@@ -5,10 +5,10 @@ if not "swembl" in config.keys():
     config["swembl"] = {}
 
 if not "R" in config["swembl"].keys():
-    config["swembl"]["R"] = "0.01"
+    config["swembl"]["R"] = "0"
 
 if not "x" in config["swembl"].keys():
-    config["swembl"]["x"] = "1.2"
+    config["swembl"]["x"] = "1"
 
 
 rule swembl:
