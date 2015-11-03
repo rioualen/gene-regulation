@@ -86,7 +86,7 @@ verbose <- function(message.content,
 complete.deg.table <- function(deg.table,
                                table.name,
                                sort.column = "none",
-                               thresholds=c("padj"=0.05, "evalue"=1, "FC"=1.5),
+                               thresholds=thresholds,
                                round.digits = 3,
                                dir.figures=NULL) {
   
@@ -121,7 +121,7 @@ complete.deg.table <- function(deg.table,
   # summary(deg.table)
   
   ## Compute fold-change from log2 fold change
-  ## Beware: for the fold-chante we ake the absolute value of log2FC, 
+  ## Beware: for the fold-change we ake the absolute value of log2FC, 
   ## to have a fold change irrespective of the up- or -down sense
   deg.table$FC <- 2^abs(deg.table$log2FC) 
   
@@ -229,7 +229,7 @@ functional.enrichment <- function(geneset,
                                   db,
                                   organism.names,
                                   ontology="BP",
-                                  thresholds = c("evalue"=1, "qvalue"=0.05),
+                                  thresholds = thresholds,
                                   select.positives=TRUE,
                                   run.GOstats = TRUE,
                                   run.clusterProfiler = FALSE,
@@ -877,7 +877,7 @@ edger.analysis <- function(dir.figures=NULL) {
     deg.table = edger.result.table, 
     table.name = paste(sep="_","edgeR",prefix["comparison"]),
     sort.column = "padj",
-    thresholds=c("padj"=0.05, "evalue"=1, "FC"=1.5),
+    thresholds=thresholds,
     round.digits = 3,
     dir.figures=dir.figures)
   # dim(edger.result.table)
