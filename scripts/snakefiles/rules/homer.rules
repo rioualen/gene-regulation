@@ -16,16 +16,16 @@ if not "style" in config["homer"].keys():
 	config["homer"]["style"] = "factor"
 
 if not "L" in config["homer"].keys():
-	config["homer"]["L"] = "2"
+	config["homer"]["L"] = "4"
 
 if not "F" in config["homer"].keys():
-	config["homer"]["F"] = "2"
+	config["homer"]["F"] = "4"
 
 if not "P" in config["homer"].keys():
-	config["homer"]["P"] = "0.01"
+	config["homer"]["P"] = "0.0001"
 
 if not "fdr" in config["homer"].keys():
-	config["homer"]["fdr"] = "0.01"
+	config["homer"]["fdr"] = "0.001"
 
 
 rule homer:
