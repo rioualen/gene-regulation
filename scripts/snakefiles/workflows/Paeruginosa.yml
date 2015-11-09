@@ -1,0 +1,97 @@
+---
+  description: |
+    This config file is designed to work with the workflow Paeruginosa.py.
+
+    The workflow is intended to find parS binding site for the parB protein
+    in Pseudomonas aeruginosa species.
+
+    Note: yaml format prohibits using tabulations.
+
+    Optional parameters, if not provided, are automatically set to the default value provided for the given program. 
+
+  author: "Claire Rioualen"
+  qsub: "-V -m a -d /data" 
+  verbosity: "0"                                         # beware:    verbosity can interfere with flowcharts creation
+
+  genome: 
+    organism: "Pseudomonas_aeruginosa"
+    size: "6300000"                                      # mandatory: if using macs2 or homer
+    version: "pa"                                        # mandatory: has to match genome filenames and directories
+    file: "/data/genomes/pa/pa.fa"                       # mandatory: fasta file is required for a number of operations
+
+  files: 
+    samples: "/data/Paeruginosa/samples.tab"             # mandatory: has to contain at least sample ids in 1st column of tab-delimited file
+    design: "/data/Paeruginosa/design.tab"               # mandatory: has to contain at least ids of samples to be compared in 1st 2 columns of tab-delimited file
+
+  dir: 
+    base: "."
+    fg_lib: "."
+    reads_source: "/data/Paeruginosa/"                   # directory: contains raw data organized in sub directories named after the samples
+    results: "/data/results/Paeruginosa/"                # directory: path where all result files should be stored
+    reports: "/data/results/Paeruginosa/"
+    genome: "/data/genomes/"
+    r_libs: "lib/R-packages/"                            # mandatory: where to look for installed R libraries (spp, bPeaks...)
+
+  reports: 
+    dag: "/data/results/Paeruginosa/dag"
+    rulegraph: "/data/results/Paeruginosa/rule"
+
+  sickle: 
+    threshold: "20"
+    qual: "sanger"
+
+  fastqc: 
+    other_options: ""
+
+  bwa: 
+    dir: "BWAIndex/"                                     # mandatory: where to index the genome if needed, where to look for index if already existing
+    threads: "10"                                        # optional : number of threads to speed up calculations
+
+  samtools: 
+    sort_by_name: ""                                     # optional 
+
+  macs2: 
+    qval: "0.001"                                        # optional : default will be set to 0.05
+    keep_dup: "all"                                      # optional : default will be set to 1
+    mfold_min: "2"                                       # optional : default will be set to 5
+    mfold_max: "50"                                      # optional : default will be set to 50
+    other_options: "--call-summits"                      # optional : can include --call-summits, --broad...
+
+  swembl:
+    R: "0.1"                                             # optional : default will be set to 0 -- no idea how it works though...
+    x: "1.2"                                             # optional : default will be set to 1 -- no idea how it works though...
+
+  homer: 
+    style: "factor"                                      # optional : default will be set to factor, else can be: histone, groseq, tss, dnase, super, mC (beware of output filenames)
+    genome: "/data/genomes/pa/pa.fa"                     # mandatory: either path to the fasta file or the official genome version (has to be installed manually w/ HOMER)
+    F: "2"                                               # optional : default will be set to 4
+    L: "2"                                               # optional : default will be set to 4
+    P: "0.01"                                            # optional : default will be set to 0.0001
+    fdr: "0.01"                                          # optional : default will be set to 0.001
+
+  spp: 
+    fdr: "0.01"                                          # optional : default will be set to 0.01
+
+  bPeaks: 
+    IPcoeff: "2"                                         # optional : default will be set to 2                                     
+    controlCoeff: "4"                                    # optional : default will be set to 2
+    log2FC: "1"                                          # optional : default will be set to 2
+    averageQuantiles: "0.8"                              # optional : default will be set to 0.9
+    windowSize: "50"                                     # optional : default will be set to 150
+    windowOverlap: "40"                                  # optional : default will be set to 50
+
+  rsat: 
+    verbosity: "1"
+
+  oligo_analysis: 
+    count_oligo: "1 2 6"                                 # optional : 
+
+  peak-motifs: 
+    tasks: "purge,seqlen,composition,disco,collect_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan"
+    max_seq_len: "0"
+    nmotifs: ""
+    minol: ""
+    maxol: ""
+    motif_db: "prodoric tf $RSAT/public_html/motif_databases/prodoric_from_meme_151016.tf"
+    disco: "oligos,positions,dyads"
+
