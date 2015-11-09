@@ -1,26 +1,41 @@
+"""Rule for the creation of Bowtie 2 index. Has to be done only once.  The
+output file is used to test whether the index already exists
+when aligning.
+
+Required parameters:
+    config["qsub"]
+Optional parameters:
+    config["bowtie2"]["dir"]
+
+Usage example:
+    BOWTIE2_INDEX = expand(config["dir"]["genome"] + "{genome}/Bowtie2Index/{genome}.fa.1.bt2", genome=GENOME)
+
+Contributors: 
+    Claire Rioualen
+"""
+
+# Raise an error and exit if required parameter is missing
+# Set optional params to defaults values in case they're not defined in config file.
 if not "bowtie2" in config.keys():
     config["bowtie2"] = {}
+    
+if not "dir" in config["bowtie2"].keys():
+    config["bowtie2"]["dir"] = config["genome"]["dir"] + "Bowtie2Index/"
 
-if not "index" in config["bowtie2"].keys():
-	sys.exit("The parameter bowtie index must be defined in the JSON file")
-
+# Rule index genome with Bowtie2
 rule bowtie2_index:
-	"""
-	Build index for bowtie version 2 (gapped read mapping).
-	"""
-	input: "{genome_dir}/{genome_version}.fa"
-	output: "{genome_dir}/Bowtie2Index/{genome_version}.fa.1.bt2"
-	log: "{genome_dir}/Bowtie2Index/{genome_version}_bwa-index.log"
-	benchmark: "{genome_dir}/Bowtie2Index/{genome_version}_bwa-index_benchmark.json"
-	params:
-		index = config["bowtie2"]["index"], \
-		genome_version = config["genome"]["version"], \
-		dir_genome = config["dir"]["genome"], \
-		qsub = config["qsub"] + " -e {genome_dir}_bowtie2-index_qsub.err -o {genome_dir}_bowtie2-index_qsub.out"
-	shell: """
-mkdir -p {params.dir_genome}{params.genome_version}/Bowtie2Index
-cp {input} {params.dir_genome}{params.genome_version}/Bowtie2Index
-cd {params.dir_genome}{params.genome_version}/Bowtie2Index
-bowtie2-build {params.dir_genome}{params.genome_version}/Bowtie2Index/{params.genome_version}.fa {params.dir_genome}{params.genome_version}/Bowtie2Index/{params.genome_version}.fa &> {log}
+    input: "{genome_dir}{genome_version}/{genome_version}.fa"
+    output: "{genome_dir}{genome_version}/{bowtie2_dir}/{genome_version}.fa.1.bt2"
+    log: "{genome_dir}{genome_version}/{bowtie2_dir}/{genome_version}_bwa-index.log"
+    benchmark: "{genome_dir}{genome_version}/{bowtie2_dir}/{genome_version}_bwa-index_benchmark.json"
+    message: "Indexing genome to " + config["bowtie2"]["dir"]
+    params:
+        bowtie2_dir = config["bowtie2"]["dir"], \
+        qsub = config["qsub"] + " -e {genome_dir}_bowtie2-index_qsub.err -o {genome_dir}_bowtie2-index_qsub.out"
+    shell: """
+mkdir -p {params.bowtie2_dir}
+cp {input} {params.bowtie2_dir}
+cd {params.bowtie2_dir}
+bowtie2-build  {params.bowtie2_dir}{wildcards.genome_version}.fa  {params.bowtie2_dir}{wildcards.genome_version}.fa &> {log}
 """
 
