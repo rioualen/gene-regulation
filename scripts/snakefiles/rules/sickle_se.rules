@@ -1,6 +1,7 @@
-# Check if each required parameter has been defined in the JSON
-# configuration file, otherwise use default values
+# Contributors: 
+#		Claire Rioualen, Lucie Khamvongsa
 
+# Set defaults params in case they're not defined in config file
 if not "sickle" in config.keys():
     config["sickle"] = {}
 
@@ -17,10 +18,7 @@ rule sickle_se:
     """Trim one a single end raw reads file with sickle.
 	
 	Parameters:
-		config["sickle"]["threshold"]
-		config["reads"]["qual_type"]
-		config["sickle"]['other_options']
-		config['qsub']
+		TODO
 
 	Usage:
 		SICKLE_TRIMMING = expand(config['dir']['results'] + "{dir_data}/{dataset}_merged_sickle-se-q" + config["sickle"]["threshold"] + ".fastq", dir_data=DIR_DATA, dataset=DATASETS)
@@ -30,7 +28,7 @@ rule sickle_se:
     output: trimmed = "{reads}_sickle-se-q" + config["sickle"]["threshold"] + ".fastq", \
             summary = "{reads}_sickle-se-q" + config["sickle"]["threshold"] + "_summary.txt"
     params: threshold = config["sickle"]["threshold"], \
-            qual_type = config["reads"]["qual_type"], \
+            qual_type = config["sickle"]["qual"], \
             qsub = config['qsub'] \
             + " -e "+ "{reads}_sickle-se-q" + config["sickle"]["threshold"] + "_qsub.err" \
             + " -o "+ "{reads}_sickle-se-q" + config["sickle"]["threshold"] + "_qsub.out"
