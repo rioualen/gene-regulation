@@ -1,6 +1,25 @@
-# Check if each required parameter has been defined in the JSON
-# configuration file, otherwise use default values.
+"""Peak-calling with MACS2.
+Input: sam, bam, bed... automatically detected by macs' callpeak algorithm. Bed format was used here. 
+Output: bed
 
+Usage example: 
+    PEAKS_MACS2 = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2-qval{qval}/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_macs2-qval{qval}_peaks.bed",
+        zip, treat=TREATMENT, ctrl=CONTROL), trimming=TRIM, aligner=ALIGN)
+        
+Required parameters:
+    config["genome"]["size"]
+Optional parameters:
+    config["macs2"]["qval"]
+    config["macs2"]["keep_dup"]
+    config["macs2"]["band_width"]
+    config["macs2"]["mfold_min"]
+    config["macs2"]["mfold_max"]
+    config["macs2"]["other_options"]
+"""
+# Contributors: 
+#        Claire Rioualen, Lucie Khamvongsa
+
+# Set defaults params in case they're not defined in config file. 
 if not "size" in config["genome"].keys():
     sys.exit("The parameter genome size must be defined in the JSON file")
 
@@ -8,67 +27,48 @@ if not "macs2" in config.keys():
     config["macs2"] = {}
 
 if not "qval" in config["macs2"].keys():
-    config["macs2"]["qval"] = 0.01
+    config["macs2"]["qval"] = "0.05"
 
 if not "keep_dup" in config["macs2"].keys():
-    config["macs2"]["keep_dup"] = "all"
+    config["macs2"]["keep_dup"] = "1"
 
 if not "band_width" in config["macs2"].keys():
-    config["macs2"]["band_width"] = 300
+    config["macs2"]["band_width"] = "300"
 
 if not "mfold_min" in config["macs2"].keys():
-    config["macs2"]["mfold_min"] = 5
+    config["macs2"]["mfold_min"] = "5"
 
 if not "mfold_max" in config["macs2"].keys():
-    config["macs2"]["mfold_max"] = 50
-
-if not "call_summits" in config["macs2"].keys():
-    config["macs2"]["call_summits"] = "--call-summits"
+    config["macs2"]["mfold_max"] = "50"
 
 if not "other_options" in config["macs2"].keys():
     config["macs2"]["other_options"] = ""
 
-## option --broad
-
-
 rule macs2:
-	"""Peak-calling with MACS2.
-	Input: sam, bam, bed... automatically detected by macs' callpeak algorithm. Bed format was used here. 
-	Output: bed
-
-	/!\ Requires RSAT to be installed (maybe we should do this some other way to get rid of the dependency?)
-
-	Required parameters:
-		config['qsub']
-		config["genome"]["size"]
-
-	Usage: 
-		PEAKS_MACS2 = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/macs2-qval{qval}/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_macs2.narrowPeak",
-	               zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
-	"""
-        input: 	treatment="{result_dir}/{treatment}/{treatment}_{aligner}.bed", \
-            	control="{result_dir}/{control}/{control}_{aligner}.bed"
-        params: outdir="{result_dir}/{treatment}_vs_{control}/macs2-qval{qval}_peaks", \
-            name="{treatment}_vs_{control}_{aligner}_macs2-qval" + config["macs2"]["qval"], \
-            qval = config["macs2"]["qval"], \
-            call_summits = config["macs2"]["call_summits"], \
-            keep_dup = config["macs2"]["keep_dup"], \
-            band_width = config["macs2"]["band_width"], \
-            mfold_min = config["macs2"]["mfold_min"], \
-            mfold_max = config["macs2"]["mfold_max"], \
-            other_options = config["macs2"]["other_options"], \
-            genome_size = config["genome"]["size"], \
-            qsub=config["qsub"] \
-                  + " -q long -e {result_dir}/{treatment}_vs_{control}/macs2-qval{qval}_peaks/{treatment}_vs_{control}_{aligner}_macs2-qval{qval}_qsub.err" \
-                  + " -o {result_dir}/{treatment}_vs_{control}/macs2-qval{qval}_peaks/{treatment}_vs_{control}_{aligner}_macs2-qval{qval}_qsub.out" 
-	output: narrowpeaks = "{result_dir}/{treatment}_vs_{control}/macs2-qval{qval}_peaks/{treatment}_vs_{control}_{aligner}_macs2-qval{qval}_peaks.narrowPeak", \
-                peaks_bed = "{result_dir}/{treatment}_vs_{control}/macs2-qval{qval}_peaks/{treatment}_vs_{control}_{aligner}_macs2-qval{qval}_peaks.bed", \
-                peak_len = "{result_dir}/{treatment}_vs_{control}/macs2-qval{qval}_peaks/{treatment}_vs_{control}_{aligner}_macs2-qval{qval}_peaklen.tab", \
-                summits = "{result_dir}/{treatment}_vs_{control}/macs2-qval{qval}_peaks/{treatment}_vs_{control}_{aligner}_macs2-qval{qval}_summits.bed"
-        log: "{result_dir}/{treatment}_vs_{control}/macs2-qval{qval}_peaks/{treatment}_vs_{control}_{aligner}_macs2-qval{qval}.log"
-        benchmark: "{result_dir}/{treatment}_vs_{control}/macs2-qval{qval}_peaks/{treatment}_vs_{control}_{aligner}_macs2-qval{qval}_benchmark.json"
-        
-	shell: "(macs2 \
+    input:
+        treatment="{result_dir}/{treatment}/{treatment}_{aligner}.bed", \
+        control="{result_dir}/{control}/{control}_{aligner}.bed"
+    params: outdir="{result_dir}/{treatment}_vs_{control}/macs2-qval{qval}_peaks", \
+        name="{treatment}_vs_{control}_{aligner}_macs2-qval{qval}", \
+        qval = config["macs2"]["qval"], \
+        keep_dup = config["macs2"]["keep_dup"], \
+        band_width = config["macs2"]["band_width"], \
+        mfold_min = config["macs2"]["mfold_min"], \
+        mfold_max = config["macs2"]["mfold_max"], \
+        other_options = config["macs2"]["other_options"], \
+        genome_size = config["genome"]["size"], \
+        qsub=config["qsub"] \
+          + " -q long -e {result_dir}/{treatment}_vs_{control}/macs2-qval{qval}_peaks/{treatment}_vs_{control}_{aligner}_macs2-qval{qval}_qsub.err" \
+          + " -o {result_dir}/{treatment}_vs_{control}/macs2-qval{qval}_peaks/{treatment}_vs_{control}_{aligner}_macs2-qval{qval}_qsub.out" 
+    output:
+        narrowpeaks = "{result_dir}/{treatment}_vs_{control}/macs2-qval{qval}_peaks/{treatment}_vs_{control}_{aligner}_macs2-qval{qval}_peaks.narrowPeak", \
+        peaks_bed = "{result_dir}/{treatment}_vs_{control}/macs2-qval{qval}_peaks/{treatment}_vs_{control}_{aligner}_macs2-qval{qval}_peaks.bed", \
+        peak_len = "{result_dir}/{treatment}_vs_{control}/macs2-qval{qval}_peaks/{treatment}_vs_{control}_{aligner}_macs2-qval{qval}_peaklen.tab", \
+        summits = "{result_dir}/{treatment}_vs_{control}/macs2-qval{qval}_peaks/{treatment}_vs_{control}_{aligner}_macs2-qval{qval}_summits.bed"
+    log: "{result_dir}/{treatment}_vs_{control}/macs2-qval{qval}_peaks/{treatment}_vs_{control}_{aligner}_macs2-qval{qval}.log"
+    benchmark: "{result_dir}/{treatment}_vs_{control}/macs2-qval{qval}_peaks/{treatment}_vs_{control}_{aligner}_macs2-qval{qval}_benchmark.json"
+    shell: """
+(macs2 \
 callpeak -t {input.treatment} -c {input.control} --gsize {params.genome_size} \
 --qvalue {params.qval} \
 --keep-dup {params.keep_dup} \
@@ -76,9 +76,8 @@ callpeak -t {input.treatment} -c {input.control} --gsize {params.genome_size} \
 --bw {params.band_width} \
 --mfold {params.mfold_min} {params.mfold_max} \
 --outdir {params.outdir} --name {params.name} \
-{params.call_summits} {params.other_options} ; \
+{params.other_options} ; \
 cp {output.narrowpeaks} {output.peaks_bed}; \
-sequence-lengths -i {output.peaks_bed} -in_format bed | classfreq -ci 10 -v 1 -o {output.peak_len}) &> {log}"
-
-#convert-features -from bed3col -to bed3col -i {output.narrowpeaks} -o {output.peaks_bed}; \
+sequence-lengths -i {output.peaks_bed} -in_format bed | classfreq -ci 10 -v 1 -o {output.peak_len}) &> {log}
+"""
 
