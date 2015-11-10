@@ -1,7 +1,5 @@
 {
-    "__description__": "",
     "__author__": "Claire Rioualen",
-    "data_source": "", 
     "qsub": "-V -m a -d /data",
     "verbosity": "0",
 
@@ -9,12 +7,7 @@
 	"organism": "Pseudomonas_aeruginosa",
 	"size": "6300000",
 	"version": "pa",
-	"base_url_fasta": "-",
-	"sequence": "",
-	"features": "",
-	"RefSeq_to_std": "",
-        "install_dir": "",
-	"file": "/data/genomes/pa/BWAIndex/pa.fa"
+	"file": "/data/genomes/pa/pa.fa"
     },
 
     "files": {
@@ -33,7 +26,7 @@
 	"results": "/data/results/Paeruginosa/",
 	"reports": "/data/results/Paeruginosa/",
 	"genome": "/data/genomes/",
-	"logs": "/data/results/Paeruginosa/logs/"
+	"r_libs": "lib/R-packages/"
     },
 
     "reports" : {
@@ -42,8 +35,7 @@
     },
 
     "sickle":  { 
-        "threshold": "20",
-        "other_options": ""
+        "threshold": "20"
     },
 
     "fastqc": {
@@ -51,7 +43,7 @@
     },
 
     "bwa": {
-	"index": "/data/genomes/pa/BWAIndex/pa.fa",
+        "dir": "BWAIndex/",
 	"threads": "10"
     },
 
@@ -66,13 +58,11 @@
     },
 
     "macs2": {
-        "qval": "0.05",
+        "qval": "0.001",
         "keep_dup": "all",
-        "band_width": "180",
         "mfold_min": "2",
         "mfold_max": "50",
-        "call_summits": "--call-summits",
-        "other_options": ""
+        "other_options": "--call-summits"
     },
 
 
@@ -83,7 +73,7 @@
 
     "homer": {
 	"style": "factor",
-	"genome": "/data/genomes/pa/BWAIndex/pa.fa",
+	"genome": "/data/genomes/pa/pa.fa",
 	"F": "2",
 	"L": "2",
 	"P": "0.01",
@@ -93,6 +83,16 @@
     "spp": {
 	"fdr": "0.01"
     },
+
+    "bPeaks": {
+	"IPcoeff": "2",
+	"controlCoeff": "4",
+	"log2FC": "1",
+	"averageQuantiles": "0.8",
+	"windowSize": "50",
+	"windowOverlap": "40"
+    },
+
     "rsat": {
 	"verbosity": "1"
     },
@@ -108,7 +108,7 @@
 		"minol": "",
 		"maxol": "",
 		"motif_db": "prodoric tf $RSAT/public_html/motif_databases/prodoric_from_meme_151016.tf",
-		"disco": "oligos,positions"
+		"disco": "oligos,positions,dyads"
     }
 
 }

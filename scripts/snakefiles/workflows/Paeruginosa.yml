@@ -5,36 +5,37 @@
     The workflow is intended to find parS binding site for the parB protein
     in Pseudomonas aeruginosa species.
 
-    Note: yaml format prohibits using tabulations.
+    Note\: yaml format prohibits using tabulations.
 
-    Optional parameters, if not provided, are automatically set to the default value provided for the given program. 
+    Optional parameters, if not provided, are automatically set to the default value provided with the given program.
 
   author: "Claire Rioualen"
   qsub: "-V -m a -d /data" 
   verbosity: "0"                                         # beware:    verbosity can interfere with flowcharts creation
 
-  genome: 
+  genome:
     organism: "Pseudomonas_aeruginosa"
-    size: "6300000"                                      # mandatory: if using macs2 or homer
-    version: "pa"                                        # mandatory: has to match genome filenames and directories
-    file: "/data/genomes/pa/pa.fa"                       # mandatory: fasta file is required for a number of operations
+    size: "6300000"                                      # required: if using macs2, macs14, homer...
+    version: "pa"                                        # required: has to match genome filenames and directories
+    file: "/data/genomes/pa/pa.fa"                       # required: fasta file is required for a number of operations
+    dir: "/data/genomes/pa/"                             # required
 
   files: 
-    samples: "/data/Paeruginosa/samples.tab"             # mandatory: has to contain at least sample ids in 1st column of tab-delimited file
-    design: "/data/Paeruginosa/design.tab"               # mandatory: has to contain at least ids of samples to be compared in 1st 2 columns of tab-delimited file
+    samples: "/data/Paeruginosa_test/samples.tab"        # required: has to contain at least sample ids in 1st column of tab-delimited file
+    design: "/data/Paeruginosa_test/design.tab"          # required: has to contain at least ids of samples to be compared in 1st 2 columns of tab-delimited file
 
   dir: 
     base: "."
     fg_lib: "."
-    reads_source: "/data/Paeruginosa/"                   # directory: contains raw data organized in sub directories named after the samples
-    results: "/data/results/Paeruginosa/"                # directory: path where all result files should be stored
-    reports: "/data/results/Paeruginosa/"
-    genome: "/data/genomes/"
-    r_libs: "lib/R-packages/"                            # mandatory: where to look for installed R libraries (spp, bPeaks...)
+    reads_source: "/data/Paeruginosa_test/"              # directory: contains raw data organized in sub directories named after the samples
+    results: "/data/results/Paeruginosa_test_bwa/"       # directory: path where all result files should be stored
+    reports: "/data/results/Paeruginosa_test_bwa/"
+    genomes: "/data/genomes/"
+    r_libs: "lib/R-packages/"                            # required: where to look for installed R libraries (spp, bPeaks...)
 
   reports: 
-    dag: "/data/results/Paeruginosa/dag"
-    rulegraph: "/data/results/Paeruginosa/rule"
+    dag: "/data/results/Paeruginosa_test_bwa/dag"
+    rulegraph: "/data/results/Paeruginosa_test_bwa/rule"
 
   sickle: 
     threshold: "20"
@@ -44,54 +45,61 @@
     other_options: ""
 
   bwa: 
-    dir: "BWAIndex/"                                     # mandatory: where to index the genome if needed, where to look for index if already existing
-    threads: "10"                                        # optional : number of threads to speed up calculations
+    dir: "/data/genomes/pa/BWAIndex/"                    # optional: where to index the genome if needed, where to look for index if already existing (def: <genome dir>/BWAIndex)
+    threads: "10"                                        # optional: number of threads to speed up calculations (def: 1)
+
+  bowtie2:
+    dir: "/data/genomes/pa/Bowtie2Index/"                # optional: where to index the genome if needed, where to look for index if already existing (def: <genome dir>/Bowtie2Index)
+    threads: "10"                                        # optional: number of threads to speed up calculations (def: 1)
 
   samtools: 
-    sort_by_name: ""                                     # optional 
+    sort_by_name: ""                                     # optional
+
+  macs14:
+    pval: "0.00001"                                      # opt, to be tested (def: 0.00001)
+    mfold: "10,30"                                       # opt, to be tested (def: 10,30)
+    keep_dup: "auto"                                     # opt, to be tested (def: auto, else int)
+    bandwidth: "300"                                     # opt, to be tested (def: 300)
+    other_options: ""                                    # opt, to be tested can include: -bdg (time-consuming), -wig (time-consuming), --call-summits (requires PeakSplitter)
 
   macs2: 
-    qval: "0.001"                                        # optional : default will be set to 0.05
-    keep_dup: "all"                                      # optional : default will be set to 1
-    mfold_min: "2"                                       # optional : default will be set to 5
-    mfold_max: "50"                                      # optional : default will be set to 50
-    other_options: "--call-summits"                      # optional : can include --call-summits, --broad...
+    qval: "0.001"                                        # optional: default is 0.05
+    keep_dup: "all"                                      # optional: default is 1
+    mfold_min: "2"                                       # optional: default is 5
+    mfold_max: "50"                                      # optional: default is 50
+    other_options: "--call-summits"                      # optional: can include --call-summits, --broad...
 
   swembl:
-    R: "0.1"                                             # optional : default will be set to 0 -- no idea how it works though...
-    x: "1.2"                                             # optional : default will be set to 1 -- no idea how it works though...
+    R: "0.1"                                             # optional: default is 0 -- no idea how it works though...
+    x: "1.2"                                             # optional: default is 1 -- no idea how it works though...
 
   homer: 
-    style: "factor"                                      # optional : default will be set to factor, else can be: histone, groseq, tss, dnase, super, mC (beware of output filenames)
-    genome: "/data/genomes/pa/pa.fa"                     # mandatory: either path to the fasta file or the official genome version (has to be installed manually w/ HOMER)
-    F: "2"                                               # optional : default will be set to 4
-    L: "2"                                               # optional : default will be set to 4
-    P: "0.01"                                            # optional : default will be set to 0.0001
-    fdr: "0.01"                                          # optional : default will be set to 0.001
+    style: "factor"                                      # optional: default is factor, else can be: histone, groseq, tss, dnase, super, mC (beware of output filenames)
+    genome: "/data/genomes/pa/pa.fa"                     # required: either path to the fasta file or the official genome version (has to be installed manually w/ HOMER)
+    F: "2"                                               # optional: default is 4
+    L: "2"                                               # optional: default is 4
+    P: "0.01"                                            # optional: default is 0.0001
+    fdr: "0.01"                                          # optional: default is 0.001
 
   spp: 
-    fdr: "0.01"                                          # optional : default will be set to 0.01
+    fdr: "0.01"                                          # optional: default is 0.01
 
   bPeaks: 
-    IPcoeff: "2"                                         # optional : default will be set to 2                                     
-    controlCoeff: "4"                                    # optional : default will be set to 2
-    log2FC: "1"                                          # optional : default will be set to 2
-    averageQuantiles: "0.8"                              # optional : default will be set to 0.9
-    windowSize: "50"                                     # optional : default will be set to 150
-    windowOverlap: "40"                                  # optional : default will be set to 50
-
-  rsat: 
-    verbosity: "1"
-
-  oligo_analysis: 
-    count_oligo: "1 2 6"                                 # optional : 
+    IPcoeff: "2"                                         # optional: default is 2
+    controlCoeff: "4"                                    # optional: default is 2
+    log2FC: "1"                                          # optional: default is 2
+    averageQuantiles: "0.8"                              # optional: default is 0.9
+    windowSize: "50"                                     # optional: default is 150
+    windowOverlap: "40"                                  # optional: default is 50
 
   peak-motifs: 
-    tasks: "purge,seqlen,composition,disco,collect_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan"
-    max_seq_len: "0"
-    nmotifs: ""
-    minol: ""
-    maxol: ""
-    motif_db: "prodoric tf $RSAT/public_html/motif_databases/prodoric_from_meme_151016.tf"
-    disco: "oligos,positions,dyads"
+    tasks: "all"                                                                                    # optional: default is "all (incl. purge,seqlen,composition,ref_motifs,disco,meme,chipmunk,merge_words,motifs_vs_ref,motifs_vs_db,timelog,synthesis) (what about collect_motifs,motifs_vs_motifs,archive,small_summary,scan ?...)
+    max_seq_len: "0"                                                                                # default ? curr not used
+    motif_db: "prodoric tf $RSAT/public_html/motif_databases/prodoric_from_meme_151016.tf"          # required: name format db_file
+    disco: "oligos,positions,dyads"                                                                  # default ? oligos|dyads|positions|local_words|merged_words|meme|chipmunk
+
+  oligo_analysis: 
+    count_oligo: "1 2 6"                                 # optional: 
+
+
 
