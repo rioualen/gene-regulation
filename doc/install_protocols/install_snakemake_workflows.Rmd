@@ -171,11 +171,11 @@ apt-get install python-dev
 apt-get install python3.4-dev
 ```
 
-## R
+## R (to be revised!)
 
 **/!\\* Issues with R lib 
 
-Beware: libPath can be automatically set in rsat distribution, which can cause permission problems etc.
+* Beware: libPath can be automatically set in rsat distribution, which can cause permission problems etc.
 Check the first path in R:
 ```
 > .libPaths()
@@ -192,7 +192,9 @@ Issue when installing packages:
 ```
 Select CRAN, CRAN extras, bioc...
 
-Beware of using "http" mirrors rather than "https" mirrors (why exactly?)
+* Beware of using "http" mirrors rather than "https" mirrors (why exactly?)
+
+* R-libs dir in fg-chip seq repo, invoke libraries with lib.loc **/!\\**
 
 ### Python 3 package rpy2
 
@@ -425,6 +427,22 @@ sudo apt-get install bedtools
 ````
 V: v2.17.0
 Latest: 2.24.0
+
+## MACS 1.4
+
+* [doc](http://liulab.dfci.harvard.edu/MACS/00README.html)
+* [install](http://liulab.dfci.harvard.edu/MACS/INSTALL.html)
+
+```
+cd $HOME/bin
+wget "https://github.com/downloads/taoliu/MACS/MACS-1.4.2-1.tar.gz"
+tar -xvzf MACS-1.4.2-1.tar.gz
+cd MACS-1.4.2
+sudo python setup.py install
+macs14 --version
+```
+
+Note: deb package wouldn't work with python 2.7, asks for python 2.6.
 
 ## MACS2
 
