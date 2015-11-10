@@ -3,25 +3,25 @@
 
 # Set defaults params in case they're not defined in config file. 
 if not "bPeaks" in config.keys():
-    config["bPeaks"] = {}
+	config["bPeaks"] = {}
 
 if not "IPcoeff" in config["bPeaks"].keys():
-    config["bPeaks"]["IPcoeff"] = "2"
+	config["bPeaks"]["IPcoeff"] = "2"
 
 if not "controlCoeff" in config["bPeaks"].keys():
-    config["bPeaks"]["controlCoeff"] = "2"
+	config["bPeaks"]["controlCoeff"] = "2"
 
 if not "log2FC" in config["bPeaks"].keys():
-    config["bPeaks"]["log2FC"] = "2"
+	config["bPeaks"]["log2FC"] = "2"
 
 if not "averageQuantiles" in config["bPeaks"].keys():
-    config["bPeaks"]["averageQuantiles"] = "0.9"
+	config["bPeaks"]["averageQuantiles"] = "0.9"
 
 if not "windowSize" in config["bPeaks"].keys():
-    config["bPeaks"]["windowSize"] = "150"
+	config["bPeaks"]["windowSize"] = "150"
 
 if not "windowOverlap" in config["bPeaks"].keys():
-    config["bPeaks"]["windowOverlap"] = "50"
+	config["bPeaks"]["windowOverlap"] = "50"
 
 rule bPeaks:
 	"""Peak-calling with bPeaks. 
@@ -30,11 +30,11 @@ rule bPeaks:
 
 	Usage example: 
 		PEAKS_BPEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/bPeaks_allGenome/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_bPeaks.bed",
-	               zip, treat=TREATMENT, ctrl=CONTROL), trimming=TRIM, aligner=ALIGN)
+				   zip, treat=TREATMENT, ctrl=CONTROL), trimming=TRIM, aligner=ALIGN)
 	"""
-        input: 	treatment="{result_dir}/{treatment}/{treatment}_{aligner}.bam", \
-            	control="{result_dir}/{control}/{control}_{aligner}.bam"
-        params:
+	input:	treatment="{result_dir}/{treatment}/{treatment}_{aligner}.bam", \
+		control="{result_dir}/{control}/{control}_{aligner}.bam"
+	params:
 		outdir="{result_dir}/{treatment}_vs_{control}/bPeaks_allGenome/", \
 		name="{treatment}_vs_{control}_{aligner}", \
 		r_libs=config["dir"]["r_libs"], \
@@ -45,22 +45,22 @@ rule bPeaks:
 		windowSize = config["bPeaks"]["windowSize"], \
 		windowOverlap = config["bPeaks"]["windowOverlap"], \
 		qsub=config["qsub"] \
-                  + " -q long -e {result_dir}/{treatment}_vs_{control}/bPeaks_allGenome/{treatment}_vs_{control}_{aligner}_bPeaks_qsub.err" \
-                  + " -o {result_dir}/{treatment}_vs_{control}/bPeaks_allGenome/{treatment}_vs_{control}_{aligner}_bPeaks_qsub.out" 
+		+ " -q long -e {result_dir}/{treatment}_vs_{control}/bPeaks_allGenome/{treatment}_vs_{control}_{aligner}_bPeaks_qsub.err" \
+		+ " -o {result_dir}/{treatment}_vs_{control}/bPeaks_allGenome/{treatment}_vs_{control}_{aligner}_bPeaks_qsub.out" 
 	output: 
-                allgen_bed = "{result_dir}/{treatment}_vs_{control}/bPeaks_allGenome/{treatment}_vs_{control}_{aligner}_bPeaks_allGenome.bed", \
-                params_summary = "{result_dir}/{treatment}_vs_{control}/bPeaks_allGenome/{treatment}_vs_{control}_{aligner}_bPeaks_parameterSummary.txt"
-        log: "{result_dir}/{treatment}_vs_{control}/bPeaks_allGenome/{treatment}_vs_{control}_{aligner}_bPeaks.log"
-        benchmark: "{result_dir}/{treatment}_vs_{control}/bPeaks_allGenome/{treatment}_vs_{control}_{aligner}_bPeaks_benchmark.json"  
+		allgen_bed = "{result_dir}/{treatment}_vs_{control}/bPeaks_allGenome/{treatment}_vs_{control}_{aligner}_bPeaks_allGenome.bed", \
+		params_summary = "{result_dir}/{treatment}_vs_{control}/bPeaks_allGenome/{treatment}_vs_{control}_{aligner}_bPeaks_parameterSummary.txt"
+	log: "{result_dir}/{treatment}_vs_{control}/bPeaks_allGenome/{treatment}_vs_{control}_{aligner}_bPeaks.log"
+	benchmark: "{result_dir}/{treatment}_vs_{control}/bPeaks_allGenome/{treatment}_vs_{control}_{aligner}_bPeaks_benchmark.json"
 	run: 
 		R("""sink("{log}")
 		
-		library("bPeaks", lib.loc={params.r_libs})
+		library("bPeaks", lib.loc="{params.r_libs}")
 
-		setwd("{outdir}")
+		setwd("{params.outdir}")
 
-		system("genomeCoverageBed -ibam {input} -d > INPUT_genomeCoverage.txt")
-		system("genomeCoverageBed -ibam {output} -d > IP_genomeCoverage.txt")
+		system("genomeCoverageBed -ibam {input.control} -d > INPUT_genomeCoverage.txt")
+		system("genomeCoverageBed -ibam {input.treatment} -d > IP_genomeCoverage.txt")
 
 		seqResult = dataReading("IP_genomeCoverage.txt", "INPUT_genomeCoverage.txt")
 
