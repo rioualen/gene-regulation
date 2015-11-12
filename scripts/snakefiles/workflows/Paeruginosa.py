@@ -29,7 +29,7 @@ import datetime
 import pandas as pd
 
 ## Config
-configfile: "scripts/snakefiles/workflows/Paeruginosa.yml"
+configfile: "scripts/snakefiles/workflows/Paeruginosa_VM.yml"
 workdir: config["dir"]["base"]
 verbosity = int(config["verbosity"])
 
@@ -109,7 +109,7 @@ REPORT = expand(RESULTS_DIR + "report.html")
 ALIGNER="bwa".split()# bowtie2
 ALIGNMENT=expand("{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)
 
-PEAKCALLER="homer_peaks macs2-qval" + config["macs2"]["qval"] + "_peaks spp-fdr" + config["spp"]["fdr"] + "swembl-R" + config["swembl"]["R"] + " bPeaks_allGenome"#"macs14-pval" + config["macs14"]["pval"] + "_peaks"
+PEAKCALLER="homer_peaks macs2-qval" + config["macs2"]["qval"] + "_peaks swembl-R" + config["swembl"]["R"] + " bPeaks_allGenome"#"macs14-pval" + config["macs14"]["pval"] + "_peaks"spp-fdr" + config["spp"]["fdr"] + "
 PEAKCALLER=PEAKCALLER.split()
 PEAKCALLING=expand(expand("{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER)
 
