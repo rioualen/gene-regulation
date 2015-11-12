@@ -74,18 +74,18 @@ rule bPeaks:
 
 
 
-library("bPeaks", lib.loc="lib/R-packages")
+#library("bPeaks", lib.loc="lib/R-packages")
 
-setwd(".")
+#setwd(".")
 
-system("genomeCoverageBed -ibam /root/mydisk/results/2T_ACTTGA_L002_R1_001/2T_ACTTGA_L002_R1_001_bwa.bam -d > INPUT_genomeCoverage.txt")
-system("genomeCoverageBed -ibam /root/mydisk/results/2_CGATGT_L002_R1_001/2_CGATGT_L002_R1_001_bwa.bam -d > IP_genomeCoverage.txt")
+#system("genomeCoverageBed -ibam /root/mydisk/results/2T_ACTTGA_L002_R1_001/2T_ACTTGA_L002_R1_001_bwa.bam -d > INPUT_genomeCoverage.txt")
+#system("genomeCoverageBed -ibam /root/mydisk/results/2_CGATGT_L002_R1_001/2_CGATGT_L002_R1_001_bwa.bam -d > IP_genomeCoverage.txt")
 
-seqResult = dataReading("IP_genomeCoverage.txt", "INPUT_genomeCoverage.txt")
+#seqResult = dataReading("IP_genomeCoverage.txt", "INPUT_genomeCoverage.txt")
 
-bPeaksAnalysis(IPdata = seqResult$IPdata, controlData = seqResult$controlData, 
-IPcoeff="2", controlCoeff="4", log2FC="1", averageQuantiles="0.8", windowSize="50", windowOverlap="40", 
-peakDrawing = FALSE, resultName="test")
+#bPeaksAnalysis(IPdata = seqResult$IPdata, controlData = seqResult$controlData, 
+#IPcoeff="2", controlCoeff="4", log2FC="1", averageQuantiles="0.8", windowSize="50", windowOverlap="40", 
+#peakDrawing = FALSE, resultName="test")
 
 
 
