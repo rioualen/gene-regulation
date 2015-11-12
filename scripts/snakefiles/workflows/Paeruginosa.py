@@ -29,7 +29,7 @@ import datetime
 import pandas as pd
 
 ## Config
-configfile: "scripts/snakefiles/workflows/Paeruginosa_VM.yml"
+configfile: "scripts/snakefiles/workflows/Paeruginosa.yml"
 workdir: config["dir"]["base"]
 verbosity = int(config["verbosity"])
 
@@ -109,7 +109,7 @@ REPORT = expand(RESULTS_DIR + "report.html")
 ALIGNER="bwa".split()# bowtie2
 ALIGNMENT=expand("{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)
 
-PEAKCALLER="homer_peaks macs2-qval" + config["macs2"]["qval"] + "_peaks swembl-R" + config["swembl"]["R"] # spp-fdr" + config["spp"]["fdr"] + " bPeaks_allGenome "#"macs14-pval" + config["macs14"]["pval"] + "_peaks"
+PEAKCALLER="homer_peaks macs2-qval" + config["macs2"]["qval"] + "_peaks spp-fdr" + config["spp"]["fdr"] + "swembl-R" + config["swembl"]["R"] + " bPeaks_allGenome"#"macs14-pval" + config["macs14"]["pval"] + "_peaks"
 PEAKCALLER=PEAKCALLER.split()
 PEAKCALLING=expand(expand("{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER)
 
@@ -181,3 +181,94 @@ NOW = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
 #    Generate a report with the list of datasets + summary of the results.
 #    """
 # see Scerevisiae report
+
+#----------------------------------------------------------------#
+# Build the report (including DAG and rulegraph flowcharts).
+from snakemake.utils import report
+
+# Bulleted list of samples for the report
+SAMPLE_IDS_OL=report_numbered_list(SAMPLE_IDS)
+RAW_READS_OL=report_numbered_list(IMPORT)
+RAW_QC_OL=report_numbered_list(RAW_QC)
+
+MAPPING_OL=report_numbered_list(MAPPING)
+
+PEAKFILES_OL=report_numbered_list(PEAKS)
+
+#	input: GRAPHICS, IMPORT, TRIMMED_READS_SICKLE, TRIMMED_QC, RAW_QC, MAPPED_READS_BWA, RAW_READNB, BAM_READNB, BED_READNB, PEAKS_MACS2, FETCH_MACS2_PEAKS, PURGE_MACS2_PEAKS #redundant for flowcharts
+
+NOW = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+
+rule report:
+    """
+    Generate a report with the list of datasets + summary of the results.
+    """
+    input:  dag=config["dir"]["reports"] + "dag.pdf", \
+            dag_png=config["dir"]["reports"] + "dag.png", \
+            rulegraph=config["dir"]["reports"] + "rule.pdf", \
+            rulegraph_png=config["dir"]["reports"] + "rule.png"
+    output: html=config["dir"]["reports"] + "report.html"
+    run:
+        report("""
+        ===========================================
+        ChIP-seq analysis - - - P.aeruginosa ParABS
+        ===========================================
+        
+        :Date:                 {NOW}
+        :Project:              P aeruginosa
+        :Analysis workflow:    Claire Rioualen
+        
+        Contents
+        ========
+        
+        - `Flowcharts`_
+        - `Datasets`_
+             - `Samples`_
+             - `Raw reads`_
+             - `Mapping`_
+             - `Peaks`_
+             - `QC reports`_
+
+        -----------------------------------------------------
+
+        Flowcharts
+        ==========
+
+        - Sample treatment: dag_
+        - Workflow: rulegraph_
+
+        .. image:: rulegraph.png
+
+        -----------------------------------------------------
+
+        Datasets
+        ========
+        
+        Samples
+        -------
+
+        {SAMPLE_IDS_OL} 
+
+        Raw reads 
+        ---------
+
+        {RAW_READS_OL}
+
+        Mapping
+        -------
+
+        {MAPPING_OL}
+
+        Peaks
+        -----
+
+        {PEAKFILES_OL}
+
+        QC reports
+        ----------
+
+        {RAW_QC_OL}
+
+        -----------------------------------------------------
+
+        """, output.html, metadata="Claire Rioualen (claire.rioualen@inserm.fr)", **input)
