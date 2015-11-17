@@ -28,14 +28,20 @@ rule flowcharts:
     	expand(config["dir"]["reports"] + "dag.pdf") 
 
     """
-    output: dag_pdf = config["reports"]["dag"] + ".pdf", \
+    output: dag_dot = config["reports"]["dag"] + ".dot", \
             dag_png = config["reports"]["dag"] + ".png", \
+            dag_pdf = config["reports"]["dag"] + ".pdf", \
+            rulegraph_dot = config["reports"]["rulegraph"] + ".dot", \
             rulegraph_pdf = config["reports"]["rulegraph"] + ".pdf", \
             rulegraph_png = config["reports"]["rulegraph"] + ".png"
     params: scripts = config["files"]["snakefile"]
-    shell: "snakemake --config verbosity=0 -s {params.scripts} --rulegraph | dot -Tpdf -o {output.rulegraph_pdf} " \
-           + "; snakemake --config verbosity=0  -s {params.scripts} --rulegraph | dot -Tpng -o {output.rulegraph_png} " \
-           + "; snakemake  --config verbosity=0 -s {params.scripts} --dag  | perl -pe 's/graph\[/graph\[rankdir='LR', /' | dot -Tpdf -o {output.dag_pdf} " \
-           + "; snakemake  --config verbosity=0 -s {params.scripts} --dag  | perl -pe 's/graph\[/graph\[rankdir='LR', /' | dot -Tpng -o {output.dag_png} "
+    shell: "snakemake  --config verbosity=0 -s {params.scripts} --dag | perl -pe 's/graph\[/graph\[rankdir='LR', /' > {output.dag_dot}" \
+        + "; dot -Tpng -o {output.dag_png} {output.dag_dot}" \
+        + "; dot -Tpdf -o {output.dag_pdf} {output.dag_dot}" \
+        + "; snakemake --config verbosity=0  -s {params.scripts} --rulegraph >  {output.rulegraph_dot}" \
+        + "; dot -Tpng -o {output.rulegraph_png}  {output.rulegraph_dot}" \
+        + "; dot -Tpdf -o {output.rulegraph_pdf}  {output.rulegraph_dot}" \
+
+#          + "; Snakemake  --config verbosity=0 -s {params.scripts} --dag  | perl -pe 's/graph\[/graph\[rankdir='LR', /' | dot -Tpng -o {output.dag_png} "
     
 
