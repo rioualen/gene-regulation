@@ -21,7 +21,7 @@ Optional parameters:
 
 # Set defaults params in case they're not defined in config file. 
 if not "size" in config["genome"].keys():
-    sys.exit("The parameter genome size must be defined in the JSON file")
+    sys.exit("The parameter genome size must be defined in the config file")
 
 if not "macs2" in config.keys():
     config["macs2"] = {}
