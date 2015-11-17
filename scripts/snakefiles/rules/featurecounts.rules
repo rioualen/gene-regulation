@@ -15,6 +15,17 @@
 
 """
 
+# Set defaults params in case they're not defined in config file. 
+if not "subread" in config.keys():
+    sys.exit("Subread parameters must be defined in the config file")
+
+if not "annotations" in config["subread"].keys():
+    sys.exit('The variable config["subreads"]["annotations"] must be defined in the config file ')
+
+if not "ignore_dup" in config["subread"].keys():
+    config["subread"]["ignore_dup"] = "False"
+
+
 rule featurecounts:
 	"""Assign sequence reads to genomic features
 """
