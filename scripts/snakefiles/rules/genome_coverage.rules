@@ -10,21 +10,56 @@ rule install_bedgraphtobigwig:
     params: url="http://hgdownload.cse.ucsc.edu/admin/exe/userApps.src.tgz"
     shell: "wget {params.url}"
 
-rule genome_coverage_bedgraph:
-    """Compute genome coverage from a bam-formatteed file with aligned reads.
 
-    Parameters:
-    config["genome"]["chromsizes"] File describing chromosome sizes
-    
+# # Set defaults params in case they're not defined in config file. 
+# if not "genome_coverage" in config.keys():
+#     config["genome_coverage"] =  {'intervals': 200}
+
+rule genome_coverate_dz:
+    """Compute coverage (reads per position) for each position of a
+    genome, from a bam-formatted file with aligned reads.
+
+    BEWARE: this rule is usefull for small genomes (Bacteria, Fungi)
+    but would produce a very big file for Metazoan or Plant genomes.
+
     """
-    input: "{reads}.bam"
-    output: bw="{reads}_genomecov.bw"
-    log:  "{reads}_genomecov.log"
-    benchmark:  "{reads}_genomecov_benchmark.json"
-    params: chrom_sizes = config["genome"]["chromsizes"], \
-            intervals = config["genome_coverage"]["intervals"], \
-            qsub = config["qsub"] + " -q long -e {reads}_genomecov_qsub.err -o {reads}_genomecov_qsub.out"
-    shell: "bedtools genomecov -bg -scale {params.intervals} -ibam {input} " \
-        + " | bedGraphToBigWig  2> {log}"
+    input: reads="{reads}.bam"
+    output: "{reads}_genomecov_dz.txt"
+    log:  "{reads}_genomecov_dz.log"
+    benchmark:  "{reads}_genomecov_dz_benchmark.json"
+    params: qsub = config["qsub"] + " -q long -e {reads}_genomecov_dz_qsub.err -o {reads}_genomecov_dz_qsub.out"
+    shell: "bedtools genomecov -dz -ibam {input.reads} " \
+        + "  > {output} 2> {log}"
+
+
+
+rule genome_coverage_bedgrah:
+    """Compute genome coverage from a bam-formatted file with aligned reads.
+
+    """
+    input: reads="{reads}.bam"
+    output: bedg="{reads}_genomecov.bedgraph"
+    log:  "{reads}_genomecov_bg.log"
+    benchmark:  "{reads}_genomecov_bg_benchmark.json"
+    params: qsub = config["qsub"] + " -q long -e {reads}_genomecov_bg_qsub.err -o {reads}_genomecov_bg_qsub.out"
+    shell: "bedtools genomecov -bg -ibam {input.reads} " \
+        + "  > {output.bedg} 2> {log}"
+
+# rule genome_coverage_bgwig:
+#     """Compute genome coverage from a bam-formatted file with aligned reads.
+
+#     Parameters:
+#     config["genome"]["chromsizes"] File describing chromosome sizes
+    
+#     """
+#     input: reads="{reads}.bam"
+#     output: bw="{reads}_genomecov.bw"
+#     log:  "{reads}_genomecov.log"
+#     benchmark:  "{reads}_genomecov_benchmark.json"
+#     params: chrom_sizes = config["genome"]["chromsizes"], \
+#             intervals = config["genome_coverage"]["intervals"], \
+#             qsub = config["qsub"] + " -q long -e {reads}_genomecov_qsub.err -o {reads}_genomecov_qsub.out"
+#     shell: "bedtools genomecov -bg -scale {params.intervals} -ibam {input.reads} " \
+#         + " | bedGraphToBigWig  > {output.bw} 2> {log}"
 
 
