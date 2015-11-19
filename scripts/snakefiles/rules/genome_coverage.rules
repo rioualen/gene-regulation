@@ -1,5 +1,11 @@
-"""Compute genome coverage from aligned reads. 
+"""Compute genome coverage from aligned reads.
+
+Requirements: Kent userApps canbe downloaded from.
+
+http://hgdownload.cse.ucsc.edu/admin/exe/userApps.src.tgz
+
 """
+
 rule install_bedgraphtobigwig:
     params: url="http://hgdownload.cse.ucsc.edu/admin/exe/userApps.src.tgz"
     shell: "wget {params.url}"
