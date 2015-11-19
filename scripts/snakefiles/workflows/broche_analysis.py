@@ -30,8 +30,6 @@ DO TO
 - compare paired end counts between htseq-counts and featurecounts,
   with the appropriate options (paired-ends, no multi overlap).
 
-
-
 """
 
 #================================================================#
