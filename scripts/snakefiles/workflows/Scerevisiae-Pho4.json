@@ -1,87 +1,106 @@
 {
-    "__description__": "ChIP-seq of Pho4 in high or no Pi context in S.cerevisiae.",
+    "__description__": "",
     "__author__": "Claire Rioualen",
-    "data_source": "Gene Expression Omnibus, modENCODE", 
-    "qsub": "-V -m a -d /workspace/france_genomique/Scerevisiae-Pho4",
+    "data_source": "", 
+    "qsub": "-V -m a -d /data",
+    "verbosity": "0",
+
     "genome": {
 	"organism": "Saccharomyces_cerevisiae",
+	"file": "/data/genomes/sacCer3/sacCer3.fa",
 	"size": "12157105",
-	"genome_version": "sc",
-	"base_url_fasta": "ftp://ftp.ensemblgenomes.org/pub/fungi/current/fasta/saccharomyces_cerevisiae/dna/",
+	"version": "sacCer3",
 	"sequence": "",
-	"features": "",
-	"RefSeq_to_std": "",
-        "install_dir": ""
+	"features": ""
     },
+
     "files": {
-	"snakefile": "/workspace/france_genomique/Scerevisiae-Pho4/scripts/snakefiles/workflows/Scerevisiae-Pho4.py",
-	"samples": "data/Scerevisiae-Pho4_samples.tab",
-	"design": "data/Scerevisiae-Pho4_design.tab"
+	"samples": "/data/Scerevisiae-Pho4/samples.tab",
+	"design": "/data/Scerevisiae-Pho4/design.tab"
     },
-    "suffixes": {
-	"trimmed": "_sickle-se-q20",
-	"mapped":  "_sickle-se-q20_bwa",
-	"macs2":  "_sickle-se-q20_bwa_macs2",
-	"swembl":  "_sickle-se-q20_bwa_swembl_R0.01"
+
+    "reads": {
+       	"qual_type": "sanger"
     },
+
     "dir": {
 	"base": ".",
-	"reads_source": "data/Scerevisiae-Pho4/",
-	"results": "results/",
-	"reports": "results/",
-	"genome": "genomes/",
-	"python_lib": "/workspace/france_genomique/Scerevisiae-Pho4/scripts/snakefiles/python_lib/",
-	"rules": "/workspace/france_genomique/Scerevisiae-Pho4/scripts/snakefiles/rules/",
-	"logs": "logs/"
+	"fg_lib": ".",
+	"reads_source": "/data/Scerevisiae-Pho4/",
+	"results": "/data/results/Scerevisiae-Pho4/",
+	"reports": "/data/results/Scerevisiae-Pho4/",
+	"genome": "/data/genomes/",
+	"logs": ""
     },
+
+
     "reports" : {
-	"dag": "results/dag",
-	"rulegraph": "results/rule"
+	"dag": "/data/results/Scerevisiae-Pho4/dag",
+	"rulegraph": "/data/results/Scerevisiae-Pho4/rule"
     },
-    "samples": {
-	"input": "GSM730528 GSM730529",
-	"chip": "GSM730517 GSM730518"
-    },
+
     "sickle":  { 
-       	"qual_type": "sanger",
         "threshold": "20",
-        "other_options": ""
+	"qual": "sanger"
     },
+
     "fastqc": {
 	"other_options": ""
     },
+
     "bwa": {
-	"index": "genomes/sc/BWAIndex/sc.fa",
+	"index": "/data/genomes/sacCer3/BWAIndex/sacCer3.fa",
 	"threads": "10"
     },
-    "macs2": {
-	"genome": "ce"
-    },
-    "oligo_stats": "1 2 6",
-    "peak-motifs_parameters": {
-	"tasks" : "purge,seqlen,composition,disco,collect_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan",
-	"max_seq_len" : "1000",
-	"nmotifs" : "",
-	"minol" : "",
-	"maxol" : "",
-	"motif_db jaspar_core_vertebrates" : "tf $RSAT/public_html/data/motif_databases/JASPAR/jaspar_core_vertebrates_2013-11.tf"
-    },
+
     "samtools": {
         "sort_by_name": ""    
+    },
+
+    "macs2": {
+        "qval": "0.05",
+        "keep_dup": "all",
+        "band_width": "180",
+        "mfold_min": "2",
+        "mfold_max": "50",
+        "call_summits": "--call-summits",
+        "other_options": ""
+    },
+
+
+    "swembl": {
+	"R": "0.1",
+	"x": "1.2"
+    },
+
+    "homer": {
+	"style": "factor",
+	"genome": "/data/genomes/sacCer3/BWAIndex/sacCer3.fa",
+	"F": "2",
+	"L": "2",
+	"P": "0.01",
+	"fdr": "0.01"
+    },
+
+    "spp": {
+	"fdr": "0.01"
     },
     "rsat": {
 	"verbosity": "1"
     },
-    "oligo_stats": "1 2 6",
-    "peak-motifs_parameters": {
-	"tasks": "purge,seqlen,composition,disco,collect_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan",
-	"max_seq_len": "1000",
-	"nmotifs": "",
-	"minol": "",
-	"maxol": "",
-	"motif_db jaspar_core_vertebrates": "tf $RSAT/public_html/data/motif_databases/JASPAR/jaspar_core_vertebrates_2013-11.tf",
-	"disco": "oligos,positions",
-	"outdir": "results/peak-motifs"
+
+    "oligo_analysis": {
+	"count_oligo": "1 2 6"
+    },
+    
+    "peak-motifs": {
+		"tasks": "purge,seqlen,composition,disco,collect_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan",
+		"max_seq_len": "0",
+		"nmotifs": "",
+		"minol": "",
+		"maxol": "",
+		"motif_db": "yeast tf $RSAT/public_html/motif_databases/Yeastract/yeastract_20150629.tf ",
+		"disco": "oligos,positions"
     }
 
 }

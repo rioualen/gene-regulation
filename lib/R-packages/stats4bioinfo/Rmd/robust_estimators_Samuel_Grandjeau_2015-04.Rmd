@@ -1,0 +1,55 @@
+---
+title: "sd_estimation_Samuel_Grandjeau_2015-04.Rmd"
+author: "Claire Rioualen & Jacques van Helden"
+date: "15 April 2015"
+output: html_document
+---
+
+From: Samuel GRANJEAUD IR/INSERM <samuel.granjeaud@inserm.fr>
+Subject: SD estimation
+Date: 15 April 2015 22:28:12 CEST
+To: Jacques Van-helden <jacques.van-helden@inserm.fr>
+
+...
+
+L'objet de mon mail. J'ai découvert que tu avais écrit tout un tas de scripts sympathiques, mais je n'en ai parcouru que quelqu'uns. Le calcul du test de Student (alias Gosset, http://blog.minitab.com/blog/michelle-paret/guinness-t-tests-and-proving-a-pint-really-does-taste-better-in-ireland) a attiré mon attention par l'estimation de la variance ou du sd. Je soumets ce petit script à ta sagacité.
+
+Amicalement,
+Samuel
+
+```{r}
+
+compareSdEstimators <- function(S = 10, ## sample size
+                                N = 1000 ## number of repeats
+                                ) {
+
+  ## Estimate standard deviation using the standard deviation of the sample.
+  ## Beware : sd() already includes the correction to estimate population sd
+  ## from sample sd (sample sd is multiplied by S/(S-1))
+  set.seed(1) ; sd.nrm = sapply(1:N, function(i) sd(rnorm(S)))
+  
+  ## Estimate standard deviation using the IQR.
+  ## Beware: IQR returns the sample IQR, and not the estimate of the population IQR, 
+  ## we thus need to multiply by sqrt(S/(S-1)) to get a similar estimate as sd().
+  set.seed(1) ; sd.iqr = sapply(1:N, function(i) IQR(rnorm(S))/(qnorm(0.75) - qnorm(0.25))) * sqrt(S/(S-1))
+  
+  ## Estimate standard deviation using the MAD.
+  ## Beware: MAD returns the sample MAD, and not the estimate of the population MAD, 
+  ## we thus need to multiply by sqrt(S/(S-1)) to get a similar estimate as sd().
+  set.seed(1) ; sd.mad = sapply(1:N, function(i) mad(rnorm(S)))* sqrt(S/(S-1))
+
+  ## Compare the estimators
+  simul = cbind(sd.nrm, sd.mad, sd.iqr)
+  pairs(simul, main = sprintf("%d simulations of %d data points", N, S),col="#888888")
+  return(simul)
+}
+
+## Compare standard dev estimators with increasing sample sizes
+summary(compareSdEstimators(S=3, N=1000))
+summary(compareSdEstimators(S=4, N=1000))
+summary(compareSdEstimators(S=10, N=1000))
+summary(compareSdEstimators(S=100, N=1000))
+summary(compareSdEstimators(S=1000, N=1000))
+
+```
+

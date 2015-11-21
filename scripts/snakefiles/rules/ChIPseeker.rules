@@ -1,0 +1,79 @@
+"""
+	The R package ChIPseeker is a package for annotating ChIP-seq data analysis.
+	It supports annotating ChIP peaks and provides functions to visualize ChIP peaks 
+	coverage over chromosomes and profiles of peaks binding to TSS regions. 
+
+	G Yu, LG Wang, QY He. ChIPseeker: an R/Bioconductor package for
+	ChIP peak annotation, comparison and visualization.
+	Bioinformatics 2015. 31(14): 2382-2383.
+
+"""
+
+rule peaks_annotation:
+	input: "{regions}.bed"
+	output: covplot = "{regions}_covplot.pdf", \
+			peakHeatmap = "{regions}_peakHeatmap.pdf", \
+			plotAvgProf2 = "{regions}_plotAvgProf.pdf", \
+			peakAnno_tab = "{regions}_peakAnno.tab", \
+			plotAnnoPie = "{regions}_plotAnnoPie.pdf", \
+			vennpie = "{regions}_vennpie.pdf"
+	log: "{regions}_ChIPseeker.log"
+	benchmark: "{regions}_ChIPseeker_benchmark.json"
+	params: qsub = config["qsub"] + " -q long -e {regions}_ChIPseeker_qsub.err -o {regions}_ChIPseeker_qsub.out", \
+			dir_main = config["dir"]["base"]
+	run: 
+		R("""
+
+
+
+		library("ChIPseeker")
+		library("TxDb.Dmelanogaster.UCSC.dm3.ensGene")
+		require(TxDb.Dmelanogaster.UCSC.dm3.ensGene)
+		library("clusterProfiler")
+		library("GenomicRanges")
+		library("ChIPpeakAnno")
+		library("org.Dm.eg.db")
+		
+
+
+
+
+		dir.main <- "{params.dir_main}"
+		setwd(dir.main)
+
+		#load data
+		peaks <- toGRanges("{input}", format="BED", header=FALSE, sep = "\t")
+
+		#visualize the peak locations over the whole genome
+		# pdf("{output.covplot}", height=10, width=10)
+		# covplot(peaks, weightCol = "score")
+		# dev.off()
+
+		#Heatmap of ChIP binding to TSS regions
+		pdf("{output.peakHeatmap}", height=10, width=6)
+		peakHeatmap(peak = peaks, TxDb = TxDb.Dmelanogaster.UCSC.dm3.ensGene, upstream=3000, downstream=3000, color="red")
+		dev.off()
+
+		#Average Profile of ChIP peaks binding to TSS region
+		pdf("{output.plotAvgProf2}", height=10, width=10)
+		plotAvgProf2(peak = peaks, TxDb = TxDb.Dmelanogaster.UCSC.dm3.ensGene, upstream=3000, downstream=3000, xlab="Genomic Region (5'->3')", ylab = "Read Count Frequency", weightCol = "score")
+		dev.off()
+
+		#peak annotation
+		peakAnno <- annotatePeak(peak = peaks, tssRegion=c(-3000, 3000), TxDb= TxDb.Dmelanogaster.UCSC.dm3.ensGene, annoDb="org.Dm.eg.db")
+		peakAnno.tab <- as.data.frame(peakAnno)
+		write.table(peakAnno.tab, file="{output.peakAnno_tab}", sep = "\t", col.names = TRUE,row.names = FALSE, quote=FALSE)
+
+		#Visualize Genomic Annotation 
+
+		#circle representation
+		pdf("{output.plotAnnoPie}", height=6, width=7)
+		plotAnnoPie(peakAnno)
+		dev.off()
+
+		#venn representation
+		pdf("{output.vennpie}", height=6, width=7)
+		vennpie(peakAnno)
+		dev.off()
+
+		""")

@@ -1,0 +1,22 @@
+bPeaks-package          bPeaks: an intuitive peak-calling strategy to
+                        detect transcription factor binding sites from
+                        ChIP-seq data in small eukaryotic genomes
+bPeaksAnalysis          Function to run the entire bPeaks procedure
+baseLineCalc            Function to calculate the average number of
+                        reads mapped on each nucleotide in a genome
+dataPDR1                ChIP-seq results (IP and control samples)
+                        obtained with the transcription factor Pdr1 in
+                        yeast Saccharomyces cerevisiae
+dataReading             Function to import sequencing results in R
+dataSmoothing           Function to smooth sequencing coverage along a
+                        chromosome
+peakDetection           Peak calling method, i. e. identification of
+                        genomic regions with a high density of
+                        sequences (reads)
+peakDrawing             Function to draw graphical representations of
+                        genomic regions detected using bPeaks
+                        methodology
+peakLocation            Function to locate detected basic peaks
+                        (bPeaks) according to predifined chromosomal
+                        features
+yeastCDS                Annotations of CDS for different yeast species

@@ -1,0 +1,56 @@
+"""Read mapping for single end data using Bowtie2. 
+Requires the indexing to have previously been done (using the
+rule bwa_index).  This is checked by testing the presence of
+file {genome}.fa.1.bt2
+
+Required parameters:
+    config["genome"]["version"]
+    config["qsub"]
+
+Optional parameters:
+    config["bowtie2"]["dir"]
+    config["bowtie2"]["threads"]
+
+Usage example:
+    MAPPING = expand(RESULTS_DIR + "{alignment}.sam", alignment=ALIGNMENT)
+
+Contributors: 
+    Claire Rioualen
+"""
+#TODO: add # mismatches param
+
+# Raise an error and exit if required parameter is missing
+# Set optional params to defaults values in case they're not defined in config file
+if not "version" in config["genome"].keys():
+    sys.exit("Genome version must be defined in the config file")
+
+if not "bowtie2" in config.keys():
+    config["bowtie2"] = {}
+
+if not "dir" in config["bowtie2"].keys():
+    config["bowtie2"]["dir"] = config["genome"]["dir"] + "Bowtie2Index/"
+
+if not "threads" in config["bowtie2"].keys():
+    config["bowtie2"]["threads"] = "1"
+
+if not "max_mismatches" in config["bowtie2"].keys():
+    config["bowtie2"]["max_mismatches"] = "0"
+
+# Rule for single end reads mapping with Bowtie 2
+rule bowtie2_se:
+    input:
+        reads="{reads}.fastq", \
+        index=config["bowtie2"]["dir"] + config["genome"]["version"] + ".fa.1.bt2"
+    output: sam="{reads}_bowtie2.sam", \
+        summary="{reads}_bowtie2_summary.txt"
+    log: "{reads}_bowtie2.log"
+    benchmark: "{reads}_bowtie2_benchmark.json"
+    message: "Mapping reads on reference genome {input.index} using Bowtie2..."
+    params:
+        max_mismatches = config["bowtie2"]["max_mismatches"], \
+        qsub=config["qsub"] + " -q long -e {reads}_bowtie2_qsub.err -o {reads}_bowtie2_qsub.out", \
+        threads = config["bowtie2"]["threads"], \
+        index=config["bowtie2"]["dir"] + config["genome"]["version"] + ".fa", \
+        stats = "{reads}_bowtie2_sam_stat.txt"
+    shell: "bowtie2 -x {params.index} -U {input.reads} -S {output.sam} --threads {params.threads} --phred33 -N {params.max_mismatches} > {output.summary} 2> {log}"
+

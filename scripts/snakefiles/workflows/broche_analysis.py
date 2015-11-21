@@ -88,6 +88,7 @@ include: config["dir"]["rules"] + "/sickle_paired_ends.rules"       ## Trimming 
 #include: config["dir"]["rules"] + "/bowtie_paired_ends.rules"      ## Paired-ends read mapping with bowtie version 1 (no gap)
 include: config["dir"]["rules"] + "/bowtie2_build.rules"            ## Read mapping with bowtie version 2 (suports gaps)
 include: config["dir"]["rules"] + "/bowtie2_paired_ends.rules"      ## Paired-ends read mapping with bowtie version 2 (support gaps)
+include: config["dir"]["rules"] + "/genome_coverage.rules"          ## Compute density profiles in bedgraph format
 include: config["dir"]["rules"] + "/htseq.rules"                    ## Count reads per gene with htseq-count
 include: config["dir"]["rules"] + "/featurecounts.rules"            ## Count reads per gene with R subread::featurecounts
 
@@ -145,6 +146,9 @@ SAMPLE_L1R1, PAIRED_DIRS, PAIRED_BASENAMES=glob_multi_dir(SAMPLE_DIRS, "*_L001" 
 TRIMMED_MERGED_FWD=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_fwd"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 TRIMMED_MERGED_REV=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_rev"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 TRIMMED_MERGED=TRIMMED_MERGED_FWD + TRIMMED_MERGED_REV
+if verbosity >= 3:
+    print ("PAIRED_DIRS:\n\t" + "\n\t".join(PAIRED_DIRS))
+    print ("PAIRED_BASENAMES:\n\t" + "\n\t".join(PAIRED_BASENAMES))
 
 # Trimmed reads
 #TRIMMED_SUMMARIES = expand(config["dir"]["reads"] + "/{sample_dir}/{reads}_trimmed_thr" + config["sickle"]["threshold"] + "_summary.txt", zip, reads=RAWR_BASENAMES_FWD, sample_dir=RAWR_DIRS_FWD)
@@ -180,10 +184,12 @@ if verbosity >= 3:
 MAPPED_PE_SAM=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["mapped"] + ".sam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 MAPPED_PE_BAM=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["mapped"] + ".bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 MAPPED_PE_SORTED=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["sorted_pos"] + ".bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
-
 MAPPED_PE_SORTED_BY_NAME=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["sorted_name"] + ".bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 if (verbosity >= 3):
     print ("MAPPED_PE_SORTED_BY_NAME:\n\t" + "\n\t".join(MAPPED_PE_SORTED_BY_NAME))
+GENOMECOV=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["sorted_pos"] + "_genomecov.tdf", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+GENOMECOV_PLUS=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["sorted_pos"] + "_genomecov_strand+.tdf", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+GENOMECOV_MINUS=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["sorted_pos"] + "_genomecov_strand-.tdf", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 
 #----------------------------------------------------------------#
 # Read counts per gene (done with htseq-count)
@@ -213,10 +219,11 @@ COUNT_FILES=FEATURECOUNTS
 #----------------------------------------------------------------#
 
 PARAMS_R = config["dir"]["results"] + "/DEG/" + config["suffix"]["deg"] + "_params.R"
-ALL_COUNTS = config["dir"]["results"] + "/DEG/" + config["suffix"]["deg"] + "_allcounts.tab"
+ALL_COUNTS = config["dir"]["results"] + "/DEG/" + config["suffix"]["deg"] + "_all_counts.tab"
 if (verbosity >= 2):
     print ("PARAMS_R:\t" + PARAMS_R)
     print ("ALL_COUNTS:\t" + ALL_COUNTS)
+    print("COUNT_FILES\t" + ";".join(COUNT_FILES))
 
 #================================================================#
 # Rule definitions
@@ -224,7 +231,7 @@ if (verbosity >= 2):
 
 # Note: these rules must be loaded after having defined some global
 # variables COUNT_FILES, PARAMS_R, ALL_COUNTS.
-include: config["dir"]["rules"] + "/HTseq_allcount_params.rules"    ## Produce the count table from sample-based count files + the parameters for differential analysis
+include: config["dir"]["rules"] + "/allcount_params.rules"    ## Produce the count table from sample-based count files + the parameters for differential analysis
 
 
 # Read the analysis design file
@@ -253,8 +260,14 @@ rule all:
     """
 #    input: TRIMMED_SUMMARIES ## Still working ?
 #    input: MERGED_RAWR_QC, RAWR_MERGED, TRIMMED_MERGED, TRIMMED_QC, MAPPED_PE_SAM, MAPPED_PE_BAM, 
-    input: MAPPED_PE_SORTED, MAPPED_PE_SORTED_BY_NAME, HTSEQ_COUNTS, FEATURECOUNTS, ALL_COUNTS, RESULTS_EDGER
-#    input: FEATURECOUNTS
+    input: GENOMECOV, GENOMECOV_PLUS, GENOMECOV_MINUS
+#        MAPPED_PE_SORTED,  \
+#        GENOMECOV, \
+#        HTSEQ_COUNTS, \
+#        FEATURECOUNTS, \
+#        HTSEQ_COUNTS, \
+#        ALL_COUNTS, \
+#        RESULTS_EDGER 
     params: qsub=config["qsub"]
     shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
@@ -294,6 +307,11 @@ RAWR_MERGED_OL=report_numbered_list(RAWR_MERGED)
 TRIMMED_MERGED_OL=report_numbered_list(TRIMMED_MERGED)
 MAPPED_PE_SAM_OL=report_numbered_list(MAPPED_PE_SAM)
 MAPPED_PE_BAM_OL=report_numbered_list(MAPPED_PE_BAM)
+MAPPED_PE_SORTED_OL = report_numbered_list(MAPPED_PE_SORTED)
+MAPPED_PE_SORTED_BY_NAME_OL = report_numbered_list(MAPPED_PE_SORTED_BY_NAME)
+HTSEQ_COUNTS_OL = report_numbered_list(HTSEQ_COUNTS)
+FEATURECOUNTS_OL = report_numbered_list(FEATURECOUNTS)
+COUNT_FILES_OL = report_numbered_list(COUNT_FILES)
 
 rule report:
     """
@@ -302,7 +320,9 @@ rule report:
     input:  dag=config["dir"]["reports"] + "/" + "dag.pdf", \
             dag_png=config["dir"]["reports"] + "/" + "dag.png", \
             rulegraph=config["dir"]["reports"] + "/" + "rulegraph.pdf", \
-            rulegraph_png=config["dir"]["reports"] + "/" + "rulegraph.png"
+            rulegraph_png=config["dir"]["reports"] + "/" + "rulegraph.png", \
+            all_counts = ALL_COUNTS, \
+            params_r = PARAMS_R
     output: html=config["dir"]["reports"] + "/report.html"
     run:
         report("""
@@ -323,6 +343,7 @@ rule report:
              - `Raw reads`_
              - `Trimmed`_
              - `Mapped`_
+             - `Count files`_
 
         -----------------------------------------------------
 
@@ -366,6 +387,43 @@ rule report:
         Bam format (compressed)
 
         {MAPPED_PE_BAM_OL}
+
+        Bam format (sorted by positions)
+
+        {MAPPED_PE_SORTED_OL}
+
+        Bam format (sorted by names)
+
+        {MAPPED_PE_SORTED_BY_NAME_OL}
+
+        Count files
+        -----------
+
+        htseq-count results (paired-ends, no multi overlap)
+
+        {HTSEQ_COUNTS_OL}
+
+        Subread featureCounts results (multi-overlaps)
+
+        ! temporarily: paired-ends option *inactive* due to problem
+
+        {FEATURECOUNTS_OL}
+
+        Count files for differential expression analysis
+
+        {COUNT_FILES_OL}
+
+        Count table
+        -----------
+
+        - Count table (one row per gene, one column per sample): all_counts_
+
+        R parameters
+        ------------
+
+        Parameters passed to R for differential expression anlysis
+
+        params_r_
 
         -----------------------------------------------------
 

@@ -3,10 +3,10 @@
 
 """
 
-ruleorder: sort_bam_by_pos > sam2bam
-ruleorder: sort_bam_by_name > sam2bam
+ruleorder: sort_bam_by_pos > sam_to_bam
+ruleorder: sort_bam_by_name > sam_to_bam
 
-rule sam2bam:
+rule sam_to_bam:
     """
     Convert reads from SAM (sequence alignment map) to BAM (binary
     alignment map) format.
@@ -14,10 +14,12 @@ rule sam2bam:
     """
     input: sam="{reads}.sam"
     output: bam="{reads}.bam"
-    log: "{reads}_sam2bam.log"
-    benchmark: "{reads}_sam2bam_benchmark.json"
-    params: qsub = config["qsub"] + " -e {reads}_sam2bam_qsub.err -o {reads}_sam2bam_qsub.out"
-    shell: "samtools view -b -S {input.sam} > {output.bam} 2> {log}"
+    log: "{reads}_sam_to_bam.log"
+    benchmark: "{reads}_sam_to_bam_benchmark.json"
+    params: 	qsub = config["qsub"] + " -e {reads}_sam_to_bam_qsub.err -o {reads}_sam_to_bam_qsub.out", \
+		stats = "{reads}_bam_stat.txt"
+    shell:	"samtools view -b -S {input.sam} > {output.bam} 2> {log}; \
+		samtools flagstat {output} > {params.stats}"
 
 """
     =======================================

@@ -1,0 +1,749 @@
+---
+title: "RNA-seq differential analysis report - Beatrice Roche"
+output:
+  pdf_document:
+    fig_caption: yes
+    highlight: zenburn
+    toc: yes
+    toc_depth: 3
+  html_document:
+    fig_caption: yes
+    highlight: zenburn
+    theme: cerulean
+    toc: yes
+    toc_depth: 3
+  word_document: default
+date: '`r Sys.Date()`'
+---
+
+```{r knitr setup, include=FALSE,  eval=TRUE, echo=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo=FALSE, eval=TRUE, cache=TRUE, message=FALSE, warning=FALSE)
+```
+
+
+```{r Loading R libraries, warning=FALSE}
+library(knitr)
+library("stats4bioinfo") ## Generic library from Jacques van Helden
+library("edgeR", warn.conflicts = FALSE, quietly=TRUE) ## Differential expression with RNA-seq
+library("DESeq2", warn.conflicts = FALSE, quietly=TRUE, verbose=FALSE) ## Differential expression with RNA-seq
+library("limma", warn.conflicts = FALSE, quietly=TRUE) ## Required for vennCounts and vennDiagram
+library(gplots, warn.conflicts = FALSE, quietly=TRUE) ## Required for heatmaps.2
+library(RColorBrewer, warn.conflicts = FALSE, quietly=TRUE)
+library("GenomicFeatures")
+```
+
+<!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+PROJECT-SPECIFIC PARAMETERS: THIS PART SHOULD BE ADAPTER FOR EACH PROJECT -->
+
+## Project information
+
+| Project Info |  |
+|--------------|-------------------------|
+| Customer  | Beatrice Roche
+| Platform | TGML/TAGC, Marseille, France
+| Bioinfo/stat analysis | Jacques van Helden
+| Project start | 2015
+| Last update | `r Sys.Date()`
+
+```{r Required parameters}
+
+## In this chunk we define the project-specific parameters that are required to enable an analysis. Other (optional) parameters can be defined below to customize the thresholds, figure styles, ... 
+dir.fg <- "~/fg-chip-seq/" ## Directory containing routines from France Génomique
+
+## Load a library with the utilities
+source(file.path(dir.fg, "scripts/R-scripts/deg_lib.R"))
+
+## base directory for the report (links are defined relative to this directory)
+dir.main <- "~/BeatriceRoche/"
+dir.report <- "~/BeatriceRoche/reports/"
+dir.base <- ".." ; ## Path to the main directory relative to the current report, which must be added to the all links
+opts_knit$set(base.dir=dir.report) ## Set the working directory for knitr (generating HTML and pdf reports)
+setwd(dir.report) ## Set the working directory for the console
+
+################################################################
+## Input parameters
+
+## Sample description file (one row per sample)
+sample.description.file <- "data/broche_samples.tab"
+
+## Dsign file (pairs of samples to be compared)
+design.file <- "data/broche_analyses.tab"
+
+## Table containing the counts of reads per gene (rows) for each sample (columns) 
+all.counts.table <- 'results/DEG/sickle_pe_q20_bowtie2_pe_sorted_name_all_counts.tab'
+
+## The GTF file contains genomic annotations for the selected species
+organism.name <- "Escherichia coli"
+gtf.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.gtf"
+gtf.source <- "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-28/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655/"
+
+gene.info.file <- "genome/Escherichia_coli_str_k_12_substr_mg1655_GCA_000005845.2_gene_info.tab"
+
+################################################################
+## Output parameters
+dir.DEG <-'results/DEG' ## Output directory (relative to base dir)
+dir.figures <- file.path(dir.DEG, "figures")
+dir.create(dir.figures, showWarnings = FALSE, recursive = TRUE)
+suffix.deg <- 'broche_project' ## Suffix for the output files
+suffix.DESeq2 <- paste(sep="_", suffix.deg, "DESeq2")
+suffix.edgeR <- paste(sep="_", suffix.deg, "edgeR")
+
+## Prefix for output files concerning the whole count table (all samples together)
+## prefix["general.file"] <- sub(pattern = ".tab", replacement="", all.counts.table)
+prefix <- vector()
+prefix["general.file"] <- file.path(dir.DEG, suffix.deg)
+prefix["general.file"] <- file.path(dir.DEG, suffix.deg) ## Path prefix for the general files
+
+################################################################
+## Thresholds for differential analysis. 
+
+thresholds <- c("padj"=0.05, ## Upper threshold on False Discovery Rate (FDR)
+                "evalue"=1, ## Upper threshold on the expected number of false positives
+                "FC"=1.5 ## Lower threshold on the fold-change
+                )
+
+```
+
+<!-- END OF THE PROJECT-SPECIFIC PARAMETERS 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
+
+```{r Default parameters}
+## In this chunk, we define a set of default parameters for the display and the analysis. 
+## These parameters can be modified but it is not necessary to adapt them to each project.
+
+verbosity <- 0
+
+## Color palette for heatmaps. I like this Red-Blue palette because 
+## - it suggests a subjective feeling of warm (high correlation)/cold (low correlation)
+## - it can be seen by people suffering from red–green color blindness.
+cols.heatmap <- rev(colorRampPalette(brewer.pal(9,"RdBu"))(100))
+
+## A trick: to enable log-scaled plots for 0 values, I add an epsilon increment
+epsilon <- 0.01
+```
+
+
+```{r Load gene information from GTF file}
+# setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
+
+################################################################
+## Load gene information from the GTF file 
+## (should be the same as used to count tags per gene)
+
+if (exists("gtf.file")) {
+  ## Jacques or Lucie, TO DO : check if the method makeTxDbFromGFF allows to get gene names and descriptions.
+  ## In principle it should be possible since this info is in the GTF file. 
+  ## If not, we migh rewite a parser for GTF. 
+  
+  verbose(paste("Loading gene annotations from GTF file: ", gtf.file), 2)
+  #   library(rtracklayer)  # for the import() function
+  #   gr <- import(gtf.file)
+  txdb <- makeTxDbFromGFF(file=file.path(dir.base, gtf.file),
+                          organism=organism.name,
+                          dataSource=gtf.source)
+  #seqlevels(txdb)
+  #   transcripts <- transcriptsBy(txdb, by="gene")
+  #   transcript.table <- as.data.frame(transcripts@unlistData)
+  #   cds <- cdsBy(txdb, by="gene")
+  #   cds.table <- as.data.frame(cds@unlistData)
+  #   exons <- exonsBy(txdb, by="gene")
+  #   exon.table <- as.data.frame(exons@unlistData)
+  all.genes <- genes(txdb)
+  gene.info <- as.data.frame(all.genes)
+  gene.info$name <- gene.info$gene_id
+  gene.info$entrez.id <- NA
+  gene.info$description <- "no description"
+} else {
+  verbose(paste("No GTF file has been specified"))
+  g <- nrow(all.counts)
+  gene.info <- data.frame("seqnames"=rep(NA, times=g),
+                          "start"=rep(NA, times=g),
+                          "end"=rep(NA, times=g),
+                          "width"=rep(NA, times=g),
+                          "strand"=rep(NA, times=g),
+                          "gene_id"=row.names(all.counts),
+                          "name"=row.names(all.counts),
+                          "entrez.id" = rep(NA, times=g),
+                          "description"=rep("no description", times=g))
+  row.names(gene.info) <- row.names(all.counts)
+}
+# View(gene.info)
+
+
+
+################################################################
+## TEMPORARY: load additional gene information from a tab-delimited file generated with RSAT, 
+## because for bacterial genomes there is no obvious way to obtain EntrezIDs.
+if (exists("gene.info.file")) {
+  verbose(paste("Loading gene information from tab-delimited file", gene.info.file))
+  
+  gene.info.rsat <- read.delim(file.path(dir.base, gene.info.file), sep="\t", skip=3, header=1)  
+  ## A bit tricky: we need to discard rows starting with ";", but we cannot use ";" as comment.char since it is found in descriptions and as separator for names
+  comment.lines <- grep(gene.info.rsat[,1], pattern = ";")
+  gene.info.rsat <- gene.info.rsat[-comment.lines,]
+  row.names(gene.info.rsat) <- gene.info.rsat[,1]
+  gene.info.rsat <- gene.info.rsat[row.names(gene.info), ] ## Ensure gene.info.rsat contains same IDs in the same order as gene.info
+  
+  
+  ## Extract additional attributes for the gene.info table
+  gene.info$name <- gene.info.rsat[row.names(gene.info), "name"]
+  gene.info$entrez.id <- gene.info.rsat[row.names(gene.info), 2]
+  gene.info$description <- gene.info.rsat[row.names(gene.info), "description"]
+  gene.info$names <- gene.info.rsat[row.names(gene.info), "names"]
+  # dim(gene.info.rsat)
+  # names(gene.info.rsat)
+  # View(gene.info.rsat)
+} 
+# View(gene.info)
+
+## Export the gene information table to keep a trace of what has been used. 
+gene.info.out <- paste(sep="", prefix["general.file"], "_gene_descriptions.tab")
+verbose(paste("Exporting gene information table", gene.info.out), 1)
+write.table(x = gene.info, row.names = FALSE,
+            file = file.path(dir.base, gene.info.out), sep = "\t", quote=FALSE)
+verbose(paste(sep="", "\tGene info table\t", gene.info.out), 1)
+
+
+
+## Export the gene information table to keep a trace of what has been used. 
+gene.info.out <- paste(sep="", prefix["general.file"], "_gene_descriptions.tab")
+verbose(paste("Exporting gene information table", gene.info.out), 1)
+write.table(x = gene.info, row.names = FALSE,
+            file = file.path(dir.base, gene.info.out), sep = "\t", quote=FALSE)
+verbose(paste(sep="", "\tGene info table\t", gene.info.out), 1)
+
+
+```
+
+
+## Parameters
+
+| Parameter | Value |
+|-----------|-------|
+| Sample descriptions | [`r sample.description.file`](`r file.path(dir.base, sample.description.file)`) |
+| Analyses descriptions | [`r design.file`](`r file.path(dir.base, design.file)`) |
+| Count table | [`r all.counts.table`](`r file.path(dir.base, all.counts.table)`) |
+| Thresholds | E-value $\le$ `r thresholds["evalue"]`; <br>Adjusted p-value (FDR) $\le$ `r thresholds["padj"]`; <br>Fold-change $\ge$ `r thresholds["FC"]`|
+
+
+
+## Samples
+
+
+```{r Read sample description and define condition-specific parameters}
+#setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
+
+## Read the sample description file, which indicates the 
+## condition associated to each sample ID.
+verbose(paste("Reading sample description file: ", sample.description.file), 2)
+sample.desc <- read.delim(file.path(dir.base, sample.description.file), sep="\t", 
+                          comment=";", header = TRUE, row.names=1)
+sample.ids <- row.names(sample.desc)
+
+## Experimental conditions
+sample.conditions <- as.vector(sample.desc[,1]) ## Condition associated to each sample
+names(sample.conditions) <- sample.ids
+# print(sample.conditions)
+
+## Build sample labels by concatenating their ID and condition
+sample.desc$label <- paste(sep="_", sample.ids, sample.conditions)
+
+## Define a specific color for each distinct condition
+conditions <- unique(sample.conditions) ## Set of distinct conditions
+cols.conditions <- brewer.pal(max(3, length(conditions)),"Dark2")[1:length(conditions)]
+names(cols.conditions) <- conditions
+# print(cols.conditions)
+
+## Define a color per sample according to its condition
+sample.desc$color <- cols.conditions[sample.conditions]
+# names(cols.samples) <- sample.ids
+# print(cols.samples)
+```
+
+
+
+<!-- TO DO: PRINT TABLE WITH SAMPLE IDS PER CONDITION -->
+
+
+
+```{r Loading count table}
+# setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
+
+################################################################
+## Read the count table
+verbose("Loading count table", 2)
+all.counts <- read.delim(file.path(dir.base, all.counts.table), row.names=1, sep="\t")
+# names(all.counts)
+# dim(all.counts)
+
+## Check that the header of all.counts match the sample IDs
+ids.not.found <- setdiff(sample.ids, names(all.counts)) ## Identify sample IDs with no column in the count table
+if (length(ids.not.found) > 0) {
+  stop(paste(length(ids.not.found), "Missing columns in count table", all.counts.table), paste(sep="; ", ids.not.found))
+}
+
+################################################################
+## Restrict the count table to the sample IDs found in the sample description file
+all.counts <- all.counts[, sample.ids]
+# names(all.counts)
+# dim(all.counts)
+
+########################################################################
+## Treatment of 0 values.
+## Add an epsilon to 0 values only, in order to enable log-transform and display on logarithmic axes.
+verbose(paste("Treating zero-values by adding epsilon =", epsilon), 2)
+all.counts.epsilon <- all.counts
+all.counts.epsilon[all.counts==0] <- epsilon
+
+## Log-transformed data for some plots. 
+all.counts.log10 <- log10(all.counts.epsilon)
+
+```
+
+### Sample-wise statistics
+
+The raw counts table ([`r all.counts.table`](`r file.path(dir.base, all.counts.table)`)) contains `r nrow(all.counts)` rows (features, genes) and `r ncol(all.counts)` columns (conditions, samples).
+
+
+```{r Sample-wise statistics}
+# setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
+
+################################################################
+## Compute sample-wise statistics on mapped counts
+################################################################
+stats.per.sample <- calc.stats.per.sample(sample.desc, all.counts)
+
+################################################################
+## Compute the counts per million reads 
+################################################################
+verbose("Computing CPMs", 1)
+## Note: the default normalization criterion (scaling by libbrary sum) 
+## is questionable because it is stronly sensitive to outliers 
+## (very highly expressed genes).  A more robust normalisation criterion 
+## is to use the 75th percentile, or the median. We use the median, somewhat arbitrarily, 
+## beause it gives a nice alignment on the boxplots.
+cpms.libsum <- cpm(all.counts.epsilon)    ## Counts per million reads, normalised by library sum
+cpms.perc75 <- cpm(all.counts.epsilon, lib.size = stats.per.sample$perc75)    ## Counts per million reads, normalised by 75th percentile
+cpms.perc95 <- cpm(all.counts.epsilon, lib.size = stats.per.sample$perc95)    ## Counts per million reads, normalised by 95th percentile
+cpms.median <- cpm(all.counts.epsilon, lib.size = stats.per.sample$median)    ## Counts per million reads, normalised by sample-wise median count
+#cpms <- cpms.median ## Choose one normalization factor for the CPMs used below
+cpms <- cpms.perc75 ## Choose one normalization factor for the CPMs used below
+cpms.log10 <- log10(cpms) ## Log-10 transformed CPMs, with the epsilon for 0 counts
+cpms.log2 <- log2(cpms) ## Log-10 transformed CPMs, with the epsilon for 0 counts
+
+## Compute Trimmed Means of M Values (TMM): TO BE DONE
+stats.per.sample$cpm.mean <- apply(cpms, 2, mean)
+stats.per.sample$log2.cpm.mean <- apply(cpms.log2, 2, mean)
+stats.per.sample$log10.cpm.mean <- apply(cpms.log10, 2, mean)
+
+################################################################
+## Export stats per sample
+#
+# names(stats.per.sample)
+# head(stats.per.sample)
+verbose("Exporting stats per sample", 1)
+sample.summary.file <- paste(sep="", prefix["general.file"], "_summary_per_sample.tab")
+write.table(x = stats.per.sample, row.names = TRUE, col.names=NA, 
+            file = file.path(dir.base, sample.summary.file), sep = "\t", quote=FALSE)
+verbose(paste(sep="", "\tSummary per sample\t", sample.summary.file), 1)
+```
+
+```{r print stats per sample}
+# setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
+
+## Statistics per sample
+stats.per.sample.to.print <- c("M.reads", "sum", "min", "perc25", "mean", "median", "perc75", "max", "fract.below.mean")
+kable(stats.per.sample[stats.per.sample.to.print], digits=2,
+      caption="Sample-wise statistics")
+
+```
+
+
+### Sample sizes
+
+```{r library_sizes_barplot, fig.width=6, fig.height=6, fig.cap="Library size barplot. Bars indicate the sum of read counts per sample (library)."}
+libsize.barplot(stats.per.sample, plot.file=NULL)
+```
+
+
+### Read count distributions
+
+```{r count_boxplots, fig.width=10, fig.height=10, fig.cap="Read count distributions. Top: raw counts. Bottom: counts per millon reads (CPMs). Left panels: linear scale, which emphasizes  outlier features denoted by very high counts. Rigt panels log counts permit to perceive the distribution of its whole range, including small count values. Null counts are replaced by an epsilon < 1, and appearas negative numbers after log transformation."}
+par(mfrow=c(2,2))
+  ## Boxplot of raw counts
+  count.boxplot(all.counts, stats.per.sample, xlab="Raw counts", 
+                main="Raw counts per sample")
+
+  ## Boxplot of log10-transformed counts
+  count.boxplot(all.counts.log10, stats.per.sample, xlab="log10(counts)", 
+                main="log10(counts) per sample")
+
+  ## Boxplot of CPMs
+  count.boxplot(cpms, stats.per.sample, xlab="CPM", 
+                main="CPMs per sample")
+  
+  ## Boxplot of log10-transformed CPMs
+  count.boxplot(cpms.log10, stats.per.sample, xlab="log10(CPM)", 
+                main="log10(CPMs) per sample")
+par(mfrow=c(1,1))
+```
+
+
+### Count correlations between samples
+
+Note: count correlations from raw rads are highly impacted by outlier features. 
+<font color="red">TO DO</font>
+I should adapt the method to trim the upper and lower count values.
+
+```{r count_correl_heatmap, fig.width=8, fig.height=8}
+count.correl.heatmap(all.counts)
+```
+
+
+## Between-replicate reproducibility
+
+Between-replicate count comparisons highlight the general reproducibility of the experiment. In some cases they reveal a strong variability of some particular features, which appear very distant from the diagonal. 
+
+<font color="RED">TO DO</font>
+I should develop a method to tag the irreproducible features and/or filter them out from the lists of DEG. 
+
+```{r between-replicate_reproducibility, fig.width=10, fig.height=10, fig.cap="Each plot shows the reproducibility between replicates of a given condition."}
+# setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
+
+################################################################
+## Analyse between-replicate reproducibility
+################################################################
+verbose("Plotting betwen-replicate comparisons", 2)
+#conditions.with.replicate <- setdiff(conditions, "CI_CI_0H")
+cond <- conditions[1] ## Choose first condition for testing without the loop
+for (cond in conditions) {
+#for (cond in conditions.with.replicate) {
+  verbose(paste(sep="", "\tcondition\t", cond), 3)
+  
+  min.rep.to.plot <- 2 ## Not worth plotting replicates for conditions without replicate
+  max.rep.to.plot <- 5 ## Restrict the number of replicates to plot, for the sale of readability
+  
+  ## Create a specific result directory for this condition
+  dir.condition <- file.path(dir.DEG, "per_condition", cond)
+  dir.create(path = dir.condition, showWarnings = FALSE, recursive = TRUE)
+  
+  ## Select the specific data for the current condition (samples, counts, CPMs)
+  #all.counts.with.replicate <- setdiff(names(all.counts), "CI_CI_0H_1")
+  current.samples <- names(all.counts)[sample.conditions == cond]
+  nrep <- length(current.samples)
+
+  current.counts <- all.counts[,current.samples]
+  current.counts[current.counts==0] <- epsilon
+  current.counts.mean <- apply(current.counts, 1, mean)
+  current.counts.var <- apply(current.counts, 1, var)
+  current.counts.var[current.counts.var==0] <- min(current.counts.var[current.counts.var>0])/100
+  
+  current.cpms <- cpms[,current.samples] + epsilon
+  current.cpms[current.cpms==0] <- epsilon
+  current.cpm.mean <- apply(current.cpms, 1, mean)
+  current.cpm.var <- apply(current.cpms, 1, var)
+  current.cpm.var[current.cpm.var==0] <- min(current.cpm.var[current.cpm.var>0])/100
+  
+  ################################################################
+  ## Plot pairwise comparisons between replicates (result file can be heavy to open)
+#   pdf(file= file.path(dir.condition, paste(sep = "", "between-replicate_counts_plot_", cond, ".pdf")), width=10, height=10)
+#   # dim(current.counts[,1:min(max.rep.to.plot, nrep)])
+  plot(current.counts[,1:min(max.rep.to.plot, nrep)], 
+       log="xy", col=cols.conditions[cond], 
+#       panel.first=grid(col="#BBBBBB", lty="solid"), ## this does not work, I should check why
+       main=paste(cond, " ; raw counts per replicate (log scale)")
+  )
+#  silence <- dev.off()
+  
+#   ################################################################
+#   ## Plot mean versus variance of CPMs for the current condition.
+#   ## BEWARE! This is the between-replicate variance computed for each gene separately, 
+#   ## which is quite different from the smoothed estimate of variance used by 
+#   ## DESeq2 or edgeR for the negative binomial.
+#   ## 
+#   ## This "real" variance plot  can be useful to highlight some genes that show 
+#   ## an extremely high variance compared to other genes. 
+#   ##
+#   ## We draw the plot in linear + log scales. Linear scales better highlight the outliers, 
+#   ## log scale better shows the general distribution, which covers several orders of magnitude.
+#   log.axes <- "xy"
+#   for (log.axes in c("", "xy")) {
+# #     pdf(file= file.path(dir.condition, paste(sep = "", "CPM_variance-mean_plot_", cond, "_",  log.axes, ".pdf")), width=10, height=10)
+#     plot(current.cpm.mean, 
+#          current.cpm.var, 
+#          log=log.axes, col=cols.conditions[cond], 
+#          panel.first=grid(lty="solid", col="#DDDDDD"),
+#          xlab=paste("Mean CPM per gene for condition", cond),
+#          ylab=paste("Between replicate CPM variance per gene for condition", cond),
+#          main=paste(cond, " ; CPM variance/Mean plot"))
+#     abline(a=0,b=1, lty="dashed", col="green", lwd=2) ## Milestone for Poisson distributions: var = mean
+#     # silence <- dev.off() 
+#   }
+}
+
+```
+
+
+## Detection of differentially expressed genes
+
+### Design
+
+```{r Read the design, warning=FALSE}
+# setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
+
+## Read the design file, which indicates the anlayses to be done.
+## Each row specifies one differential expression analysis, which 
+## consists in comparing two conditions. 
+verbose(paste("Reading design file: ", design.file), 2)
+design <- read.delim(file.path(dir.base, design.file), sep="\t", 
+                     comment=";", header = T, row.names=NULL)
+```
+
+<!-- TO DO: print a table with the design -->
+
+
+```{r differential expression analysis}
+# setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
+
+i <- 1
+comparison.summary <- design ## Initialize a summary table for each DEG analysis
+comparison.summary$prefixes <- paste(sep="_", design$cond1, "vs", design$cond2)
+
+for (i in 1:nrow(design)) {
+  ## Identify samples for the first condition
+  cond1 <- as.vector(design[i,1])  ## First condition for the current comparison
+  samples1 <- sample.ids[sample.conditions == cond1]
+   if (length(samples1) < 2) {
+     stop(paste("Cannot perform differential analysis. The count table contains less than 2 samples for condition", cond1))
+   }
+  
+  ## Identify samples for the second condition
+  cond2 <- as.vector(design[i,2])  ## Second condition for the current comparison
+  samples2 <- sample.ids[sample.conditions == cond2]
+   if (length(samples2) < 2) {
+     stop(paste("Cannot perform differential analysis. The count table contains less than 2 samples for condition", cond2))
+   }
+  
+  verbose(paste(sep="", "\tDifferential analysis\t", i , "/", nrow(design), "\t", cond1, " vs ", cond2), 1)
+  
+  ## Create a specific result directory for this differential analysis
+  prefix["comparison"] <- comparison.summary$prefixes[i]
+  dir.analysis <- file.path(dir.DEG, paste(sep="", prefix["comparison"]))
+  comparison.summary$dir.analysis <- dir.analysis
+  dir.create(path = dir.analysis, showWarnings = FALSE, recursive = TRUE)
+  dir.figures <- file.path(dir.analysis, "figures")
+  comparison.summary$dir.figures <- dir.figures
+  dir.create(path = dir.figures, showWarnings = FALSE, recursive = TRUE)
+  prefix["comparison_file"] <- file.path(dir.analysis, prefix["comparison"])
+  prefix["comparison_figure"] <- file.path(
+    dir.figures, 
+    paste(sep="", prefix["comparison"], "_",  suffix.deg))
+  
+  ## Select counts for the samples belonging to the two conditions
+  current.samples <- c(samples1, samples2)
+  current.counts <- all.counts[,current.samples]
+  # dim(current.counts)  ## For test
+  # names(current.counts)
+  
+  if (sum(!names(current.counts) %in% sample.ids) > 0) {
+    stop("Count table contains column names without ID in sample description file.")
+  }
+  
+  ## Define conditions and labels for the samples of the current analysis
+  current.sample.conditions <- sample.conditions[current.samples]
+  current.labels <- paste(current.sample.conditions, names(current.counts), sep="_")
+  
+  result.table <- init.deg.table(cpms) 
+# View(result.table)
+    
+  
+  ################################################################
+  ## DESeq2 analysis
+  ################################################################
+  deseq2.result.table <- deseq2.analysis()
+  result.table <- cbind(result.table, 
+                        "DESeq2" = deseq2.result.table[row.names(result.table),])
+  # dim(deseq2.result.table)
+  # dim(deseq2.result.table)
+  # names(deseq2.result.table)
+  # View(deseq2.result.table)
+  # View(result.table)
+  
+  ## Save the completed DESeq2 result table
+  deseq2.result.file <- paste(sep = "", prefix["DESeq2_file"], ".tab")
+  comparison.summary[i,"deseq2"] <- deseq2.result.file
+  write.table(x = deseq2.result.table, row.names = FALSE, 
+              file = file.path(dir.base, deseq2.result.file), sep = "\t", quote=FALSE)
+  verbose(paste(sep="", "\t\tDESeq2 result file\t", deseq2.result.file), 1)
+  
+
+  ################################################################
+  ## edgeR analysis
+  ################################################################
+  edger.result.table <- edger.analysis()
+  result.table <- cbind(result.table, 
+                        "edgeR" = edger.result.table[row.names(result.table),])
+ 
+  ## Export edgeR result table
+  edger.result.file <- paste(sep="", prefix["edgeR_file"], ".tab")
+  comparison.summary[i,"edger"] <- edger.result.file
+  
+  write.table(x = edger.result.table, row.names = FALSE, 
+              file = file.path(dir.base, edger.result.file), sep = "\t", quote=FALSE)
+  verbose(paste(sep="", "\t\tedgeR result file\t", edger.result.file), 1)
+
+  ################################################################
+  ## Compute main stats from edgeR and DESeq2
+  ################################################################
+  result.table$mean.FC <- (result.table$edgeR.FC + result.table$DESeq2.FC)/2 ## Arithmetic mean for fold-changes
+  result.table$mean.log2FC <- (result.table$edgeR.log2FC + result.table$DESeq2.log2FC)/2 ## Arithmetic mean for log-fold-changes
+  result.table$padj.geom.mean <- signif(digits=3, sqrt(result.table$edgeR.padj * result.table$DESeq2.padj)) ## geometric mean for p-values
+  result.table[is.na(result.table$padj.geom.mean), "padj.geom.mean"] <- 1
+  result.table$mean.evalue <- signif(digits=3, sqrt(result.table$edgeR.evalue * result.table$DESeq2.evalue)) ## Geometric mean for e-value
+  result.table$sign <- (result.table$edgeR.sign + result.table$DESeq2.sign)/2
+  result.table[is.na(result.table$sign), "sign"] <- 0
+
+  ## Sort the result table according to the mean adjusted p-value
+  result.table <- result.table[order(result.table$padj.geom.mean),]
+  
+  ################################################################
+  ## Save result table
+  ################################################################
+  result.file <- paste(sep = "", 
+                       prefix["comparison_file"], 
+                       "_", suffix.deg, "_DESeq2_and_edgeR.tab")
+  comparison.summary[i,"result.table"] <- result.file
+  write.table(x = result.table, row.names = FALSE,
+              file = file.path(dir.base, result.file), sep = "\t", quote=FALSE)
+  verbose(paste(sep="", "\t\tMerged result file\t", result.file), 1)
+  
+  
+  ################################################
+  ## Export tables with only the differentially expressed genes 
+  ## for the current analysis, and separate the up- and down-regulated genes
+  ## 
+  selected.columns <- c("gene_id", "name", "description", 
+                        "DESeq2.FC", "edgeR.FC", "mean.FC", "mean.log2FC",
+                        "DESeq2.padj", "edgeR.padj", "padj.geom.mean", "mean.evalue")
+
+  up.genes <- result.table$edgeR.DEG & result.table$DESeq2.DEG & (result.table$sign > 0) 
+  down.genes <- result.table$edgeR.DEG & result.table$DESeq2.DEG & (result.table$sign < 0) 
+  selected.genes <- up.genes + down.genes
+  sum(selected.genes)
+  
+  verbose("Exporting tables with up-regulated genes only")
+  deg.file.up <- paste(sep = "", 
+                    prefix["comparison_file"], 
+                    "_", suffix.deg, "_selected_DEG_up.tab")
+  comparison.summary[i,"deg.table.up"] <- deg.file.up
+  write.table(x = result.table[up.genes, selected.columns], row.names = FALSE,
+              file = file.path(dir.base, deg.file.up), sep = "\t", quote=FALSE)
+  verbose(paste(sep="", "\t\tSelected DEG file with up-regulated genes\t", deg.file.up), 1)
+
+  verbose("Exporting tables with down-regulated genes only")
+  deg.file.down <- paste(sep = "", 
+                    prefix["comparison_file"], 
+                    "_", suffix.deg, "_selected_DEG_down.tab")
+  comparison.summary[i,"deg.table.down"] <- deg.file.down
+  write.table(x = result.table[down.genes, selected.columns], row.names = FALSE,
+              file = file.path(dir.base, deg.file.down), sep = "\t", quote=FALSE)
+  verbose(paste(sep="", "\t\tSelected DEG file with down-regulated genes\t", deg.file.down), 1)
+
+}
+
+## Add a column with links to the result directories
+comparison.summary$dir.analysis.link <- paste (
+  sep="", "[", comparison.summary$dir.analysis, "]",
+  "(", file.path(dir.base, comparison.summary$dir.analysis), ")")
+comparison.summary$dir.figures.link <- paste (
+  sep="", "[",comparison.summary$dir.figures,"]",
+  "(", file.path(dir.base, comparison.summary$dir.figures), ")")
+comparison.summary$deg.table.up.link <- paste (
+  sep="", "[",comparison.summary$deg.table.up,"]",
+  "(", file.path(dir.base, comparison.summary$deg.table.up), ")")
+comparison.summary$deg.table.down.link <- paste (
+  sep="", "[",comparison.summary$deg.table.down,"]",
+  "(", file.path(dir.base, comparison.summary$deg.table.up), ")")
+comparison.summary$result.table.link <- paste (
+  sep="", "[",comparison.summary$result.table,"]",
+  "(", file.path(dir.base, comparison.summary$result.table), ")")
+comparison.summary.to.print <- comparison.summary[
+  c("cond1","cond2", 
+    "dir.analysis.link",
+    "dir.figures.link",
+    "result.table.link")]
+
+```
+
+
+
+
+```{r print_analysis_summary_table, comment="", eval=FALSE}
+library(ascii)
+print(ascii(comparison.summary.to.print), type = 'pandoc')
+```
+
+```{r, comment="", eval=FALSE}
+library(xtable)
+print(xtable(comparison.summary.to.print))
+```
+
+```{r, comment="", eval=FALSE}
+# library(pander)
+# pandoc.table(comparison.summary.to.print)
+```
+```{r eval=TRUE, eval=FALSE}
+library(pander)
+pander(comparison.summary.to.print, style = 'rmarkdown')
+```
+
+
+* * * 
+
+## Directories and files
+
+### Input files
+
+| Content   | File  |
+|-----------|-------|
+| Base directory (relative to this report) | [`r dir.base`](`r dir.base`) |
+| Raw counts | [`r all.counts.table`](`r file.path(dir.base, all.counts.table)`) |
+| Gene annotations (GTF file) | [`r gtf.file`](`r file.path(dir.base, gtf.file)`) |
+
+### General output files
+
+| Content   | File  |
+|-----------|-------|
+| Output directory | [`r dir.DEG`](`r file.path(dir.base, dir.DEG)`) |
+| Gene info table | [`r gene.info.out`](`r file.path(dir.base, gene.info.out)`) |
+| Sample summary table | [`r sample.summary.file`](`r file.path(dir.base, sample.summary.file)`) |
+
+### Differential analysis
+
+```{r links_to_results, eval=TRUE, cache=FALSE}
+library(knitr)
+
+## Selection of up-regulated genes
+kable(comparison.summary[, c("cond1", "cond2", "deg.table.up.link")], 
+      caption="Up-regulated genes",
+      row.names=FALSE)
+
+## Selection of down-regulated genes
+kable(comparison.summary[, c("cond1", "cond2", "deg.table.down.link")], 
+      caption="Down-regulated genes",
+      row.names=FALSE)
+
+## Full result table (with *many* columns)
+kable(comparison.summary[, c("cond1", "cond2", "result.table.link")], 
+      caption="Detailed result files",
+      row.names=FALSE)
+
+## Output directories per comparison
+kable(comparison.summary[, c("cond1", "cond2", "dir.analysis.link", "dir.figures.link")], 
+      caption="Output directories",
+      row.names=FALSE)
+
+```
+
+
+* * *

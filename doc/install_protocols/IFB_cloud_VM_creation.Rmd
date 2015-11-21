@@ -1,10 +1,10 @@
 ---
 title: "Creation of an appliance on the IFB cloud"
-author: "Claire Rioualen & Jacques van Helden"
+author: "Claire Rioualen"
 date: "July 30, 2015"
 output:
   html_document:
-    css: /packages/rsat/public_html/course.css
+    css: ../styles.css
     fig_caption: yes
   pdf_document:
     toc: yes
@@ -43,11 +43,12 @@ You should also make sure that you registered your ssh public key in your user p
         * Ubuntu 14.04 IFB-X2Go
         * Ubuntu v12.02 (base)
 
-    * For some reason, *Ubuntu 14.04 IFB-10GB* raises an *Internal Server Error*.
+    * For some reason, *Ubuntu 14.04 IFB-10GB* raises an *Internal Server Error* (sent mail to Christophe Blanchet 15/08/05).
+    * Seems OK as of 15/08/31.
 
 * Name your instance.
 * Check **Create appliance**. 
-* Select the disk of your choice (should be created prior to the appliance creation).
+* Select the disk of your choice (should be created prior to the appliance creation, see prev. section).
 * Click *Run*.
 
 3. Refresh the page. Your instance should appear in orange because of the creation mode you selected. You can now click on the **ssh** column to see the ssh parameters. It should look like this:
@@ -66,31 +67,25 @@ scp -P 22 ${localfile} root@192.54.201.177:
 sftp -oPort=22 root@192.54.201.177
 ```
 
-4. Connect to the VM using the ssh command in a terminal. 
+<!--- Do it in root or rg settings? -->
+
+4. Export your ssh keys from host machine to appliance. 
 
 ```
-sh -A -p 22 root@192.54.201.177
+rsync -ruptvl ~/.ssh root@192.54.201.177:~
 ```
-
-5. Import your ssh keys from host machine. 
-
-```
-rsync -ruptvl {me}@{myIP}:.ssh .
-```
-
-**/!\\** Does not seem to work. Permission-related problem?
-```
-ssh: connect to host 01.1.1.133 port 22: Connection timed out
-rsync: connection unexpectedly closed (0 bytes received so far) [Receiver]
-rsync error: error in rsync protocol data stream (code 12) at io.c(226) [Receiver=3.1.0]
-```
-
-Using scp from host machine instead.
-
+or
 ```
 rioualen@dell3b31852 ~/.ssh $ scp -r id_rsa.pub  id_rsa root@192.54.201.177:.ssh/
 ```
 
+5. Connect to the VM using the ssh command in a terminal. 
+
+```
+ssh -A -p 22 root@192.54.201.177
+```
+
+**/?\\** Or rsync?
 Back to the VM:
 ```
 ssh-agent > ~/agent
@@ -105,8 +100,40 @@ ssh-add
 ### Create user account.
 
 Followed procedure [here](https://www.digitalocean.com/community/tutorials/how-to-add-and-delete-users-on-an-ubuntu-14-04-vps).
-User: user
-Password: user01
+
+```
+adduser rg
+password: reg-genomics
+```
+
+Grant sudo privileges to rg:
+```
+visudo
+```
+Add line:
+
+
+Quitting root mode:
+```
+su - rg
+```
+
+### Shell coloring
+
+```
+nano ~/.bashrc
+```
+Fetch following paragraph and uncomment command `force-color`.
+```
+# uncomment for a colored prompt, if the terminal has the capability; turned
+# off by default to not distract the user: the focus in a terminal window
+# should be on the output of commands, not on the prompt
+force_color_prompt=yes
+```
+```
+source ~/.bashrc
+```
+
 
 # Then
 

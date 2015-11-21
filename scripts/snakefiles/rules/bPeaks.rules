@@ -1,0 +1,118 @@
+# Contributors: 
+#        Claire Rioualen
+
+# Set defaults params in case they're not defined in config file. 
+if not "bPeaks" in config.keys():
+    config["bPeaks"] = {}
+
+if not "IPcoeff" in config["bPeaks"].keys():
+    config["bPeaks"]["IPcoeff"] = "2"
+
+if not "controlCoeff" in config["bPeaks"].keys():
+    config["bPeaks"]["controlCoeff"] = "2"
+
+if not "log2FC" in config["bPeaks"].keys():
+    config["bPeaks"]["log2FC"] = "2"
+
+if not "averageQuantiles" in config["bPeaks"].keys():
+    config["bPeaks"]["averageQuantiles"] = "0.9"
+
+if not "windowSize" in config["bPeaks"].keys():
+    config["bPeaks"]["windowSize"] = "150"
+
+if not "windowOverlap" in config["bPeaks"].keys():
+    config["bPeaks"]["windowOverlap"] = "50"
+
+rule bPeaks:
+    """Peak-calling with bPeaks. 
+    Input: bam
+    Output: bed
+
+    Usage example: 
+        PEAKS_BPEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/bPeaks_allGenome/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_bPeaks.bed",
+                   zip, treat=TREATMENT, ctrl=CONTROL), trimming=TRIM, aligner=ALIGN)
+    """
+    input:    treatment="{result_dir}/{treatment}/{treatment}_{aligner}.bam", \
+        control="{result_dir}/{control}/{control}_{aligner}.bam"
+    params:
+        outdir="{result_dir}/{treatment}_vs_{control}/bPeaks_allGenome/", \
+        name="{treatment}_vs_{control}_{aligner}", \
+        r_libs=config["dir"]["r_libs"], \
+        IPcoeff = config["bPeaks"]["IPcoeff"], \
+        controlCoeff = config["bPeaks"]["controlCoeff"], \
+        log2FC = config["bPeaks"]["log2FC"], \
+        averageQuantiles = config["bPeaks"]["averageQuantiles"], \
+        windowSize = config["bPeaks"]["windowSize"], \
+        windowOverlap = config["bPeaks"]["windowOverlap"], \
+        qsub=config["qsub"] \
+        + " -q long -e {result_dir}/{treatment}_vs_{control}/bPeaks_allGenome/{treatment}_vs_{control}_{aligner}_bPeaks_qsub.err" \
+        + " -o {result_dir}/{treatment}_vs_{control}/bPeaks_allGenome/{treatment}_vs_{control}_{aligner}_bPeaks_qsub.out" 
+    output: 
+        allgen_bed = "{result_dir}/{treatment}_vs_{control}/bPeaks_allGenome/{treatment}_vs_{control}_{aligner}_bPeaks_allGenome.bed", \
+        params_summary = "{result_dir}/{treatment}_vs_{control}/bPeaks_allGenome/{treatment}_vs_{control}_{aligner}_bPeaks_parameterSummary.txt"
+    log: "{result_dir}/{treatment}_vs_{control}/bPeaks_allGenome/{treatment}_vs_{control}_{aligner}_bPeaks.log"
+    benchmark: "{result_dir}/{treatment}_vs_{control}/bPeaks_allGenome/{treatment}_vs_{control}_{aligner}_bPeaks_benchmark.json"
+    run: 
+        R("""sink("{log}")
+        
+        library("bPeaks", lib.loc="{params.r_libs}")
+
+        setwd("{params.outdir}")
+
+        system("genomeCoverageBed -ibam {input.control} -d > INPUT_genomeCoverage.txt")
+        system("genomeCoverageBed -ibam {input.treatment} -d > IP_genomeCoverage.txt")
+
+        seqResult = dataReading("IP_genomeCoverage.txt", "INPUT_genomeCoverage.txt")
+
+        bPeaksAnalysis(IPdata = seqResult$IPdata, controlData = seqResult$controlData, 
+        IPcoeff={params.IPcoeff}, controlCoeff={params.controlCoeff}, log2FC={params.log2FC}, averageQuantiles={params.averageQuantiles}, windowSize={params.windowSize}, windowOverlap={params.windowOverlap}, 
+        peakDrawing = FALSE, resultName="{params.name}")
+
+        sink()
+
+        """)
+
+
+
+#library("bPeaks", lib.loc="lib/R-packages")
+
+#setwd(".")
+
+#system("genomeCoverageBed -ibam /root/mydisk/results/2T_ACTTGA_L002_R1_001/2T_ACTTGA_L002_R1_001_bwa.bam -d > INPUT_genomeCoverage.txt")
+#system("genomeCoverageBed -ibam /root/mydisk/results/2_CGATGT_L002_R1_001/2_CGATGT_L002_R1_001_bwa.bam -d > IP_genomeCoverage.txt")
+
+#seqResult = dataReading("IP_genomeCoverage.txt", "INPUT_genomeCoverage.txt")
+
+#bPeaksAnalysis(IPdata = seqResult$IPdata, controlData = seqResult$controlData, 
+#IPcoeff="2", controlCoeff="4", log2FC="1", averageQuantiles="0.8", windowSize="50", windowOverlap="40", 
+#peakDrawing = FALSE, resultName="test")
+
+
+
+
+
+## Outputs
+
+
+#bPeaks_bPeaks_allGenome.bed  
+#bPeaks_bPeaks_parameterSummary.txt  
+#bPeaks-CP006832.bed  
+#bPeaks-CP006832_bPeaksDrawing.pdf  
+#bPeaks-CP006832_dataSummary.pdf  
+#peakStats.Robject
+
+## Defaults
+
+#bPeaksAnalysis(IPdata, controlData, cdsPositions = NULL,
+#smoothingValue = 20,
+#windowSize = 150, windowOverlap = 50,
+#IPcoeff = 2, controlCoeff = 2,
+#log2FC = 2, averageQuantiles = 0.9,
+#resultName = "bPeaks",
+#peakDrawing = TRUE, promSize = 800, withoutOverlap = FALSE)
+
+## Analysis
+
+#bPeaksAnalysis(IPdata = seqResult$IPdata, controlData = seqResult$controlData, IPcoeff=c(2,4,6), controlCoeff=c(2,4,6), log2FC = c(1,2,3), averageQuantiles = c(0.7,0.9), windowSize = c(30,100,200), windowOverlap = c(10,30,90,150), peakDrawing = FALSE, resultName = "")
+
+

@@ -3,30 +3,22 @@ based on histone marks ChIP-seq analysis.  Data was downloaded from
 the GEO platform. It is composed of 2 inputs and 2 ChIP targetting
 H3K27me3 in C. elegans.
 
-The workflows should include: 
-	- normalization & QC: fastq merging, trimming, quality control...
-	- formatting rules: bed, bam, sam, narrowPeak, fasta...
-	- alignment: Bowtie, BWA
-	- peak-calling: SWEMBL, MACS, SPP, HOMER
-	- downstream analyses: IDR, sequence purge, peak length
-
 Usage: 
     snakemake -p  -c "qsub {params.qsub}" -j 12 \
         -s scripts/snakefiles/workflows/Scerevisiae-Pho4.py \
         [targets]
 
 Flowcharts:
-    snakemake -p -s scripts/snakefiles/workflows/Scerevisiae-Pho4.py \
+    snakemake -p -s scripts/snakefiles/workflows/Paeruginosa.py \
         --force flowcharts
 
 Organism: 		Saccharomyces cerevisiae
-Reference genome:	
+Reference genome:	sacCer3
 Sequencing type: 	single end
 Data source: 		Gene Expression Omnibus
 
-Author: 		Claire Rioualen
+Author: 		Claire Rioualen, Jacques van Helden
 Contact: 		claire.rioualen@inserm.fr
-
 """
 
 #================================================================#
@@ -36,177 +28,284 @@ Contact: 		claire.rioualen@inserm.fr
 from snakemake.utils import R
 import os
 import sys
-import time
+import time#rm?
+import datetime
+import pandas as pd
 
-#================================================================#
-#                      Data & directories                        #
-#================================================================#
-
-configfile: "scripts/snakefiles/workflows/Scerevisiae-Pho4.json"
-#workdir: config["dir"]["base"] ## does not work??
-
-# Flag indicating whether the debug mode should be activated.  Beware:
-# this mode can create problems, for example for the flowcharts
-# (failure because the debug messages are printed to the STDOUT).
-debug = False
-
-# Rules dir
-RULES = config["dir"]["rules"]
-
-# Raw data
-READS = config["dir"]["reads_source"]
-RESULTSDIR = config["dir"]["results"]	
-
-GENOME = config["genome"]["genome_version"]
-
-# list of suffixes used
-#  /!\ can be a *list* of tools?
-TRIMMING = "sickle-se-q" + config['sickle']['threshold']
-ALIGNER = "bwa"
-PEAK_CALLER = "macs2"
-
+## Config
+configfile: "scripts/snakefiles/workflows/Scerevisiae_new.json"
+workdir: config["dir"]["base"]
+verbosity = int(config["verbosity"])
 
 #================================================================#
 #                         Includes                               #
 #================================================================#
 
-include: config["dir"]["python_lib"] + "util.py"
-include: RULES + "util.rules"
-#include: RULES + "assign_samples.rules"
-#include: RULES + "bed_to_fasta.rules"
-#include: RULES + "bowtie.rules"
-include: RULES + "count_reads.rules"
-include: RULES + "bwa_index.rules"
-include: RULES + "bwa_se.rules"
-include: RULES + "clean.rules"
-include: RULES + "convert_bam_to_bed.rules"
-#include: RULES + "convert_sam_to_bam.rules"
-#include: RULES + "count_oligo.rules"
-include: RULES + "fastqc.rules"
-include: RULES + "flowcharts.rules"
-#include: RULES + "homer.rules"
-#include: RULES + "idr.rules"
-#include: RULES + "macs14.rules"
-include: RULES + "macs2.rules"
-#include: RULES + "merge.rules"
-#include: RULES + "narrowpeak_to_bed.rules"
-#include: RULES + "peak_length.rules"
-#include: RULES + "purge_sequence.rules"
-include: RULES + "sickle_se.rules"
-#include: RULES + "sorted_bam.rules"
-#include: RULES + "spp.rules"
-#include: RULES + "swembl.rules"
-#include: RULES + "trimming.rules"
+FG_LIB = os.path.abspath(config["dir"]["fg_lib"])
+RULES = os.path.join(FG_LIB, "scripts/snakefiles/rules")
+PYTHON = os.path.join(FG_LIB, "scripts/snakefiles/python_lib")
 
+include: os.path.join(PYTHON, "util.py")
+include: os.path.join(RULES, "util.rules")
+include: os.path.join(RULES, "count_reads.rules")
+include: os.path.join(RULES, "bwa_index.rules")
+include: os.path.join(RULES, "bwa_se.rules")
+#include: os.path.join(RULES, "bowtie2_index.rules")
+#include: os.path.join(RULES, "bowtie2_se.rules")
+include: os.path.join(RULES, "convert_bam_to_bed.rules")
+include: os.path.join(RULES, "count_oligo.rules")
+include: os.path.join(RULES, "fastqc.rules")
+include: os.path.join(RULES, "flowcharts.rules")
+include: os.path.join(RULES, "getfasta.rules")
+include: os.path.join(RULES, "homer.rules")
+include: os.path.join(RULES, "macs2.rules")
+include: os.path.join(RULES, "peak_length.rules")
+include: os.path.join(RULES, "peak_motifs.rules")
+include: os.path.join(RULES, "purge_sequence.rules")
+include: os.path.join(RULES, "sickle_se.rules")
+include: os.path.join(RULES, "spp.rules")
+include: os.path.join(RULES, "sra_to_fastq.rules")
+include: os.path.join(RULES, "swembl.rules")
 
 #================================================================#
-#                Read sample IDs and design                      #
+#                      Data & config                             #
 #================================================================#
 
+# Raw data
+READS = config["dir"]["reads_source"]
 
-## Read the list of sample IDs from the sample description file
-# TREATMENT = config["samples"]["chip"].split()
-# CONTROL = config["samples"]["input"].split()
-TREATMENT, CONTROL = read_chipseq_design(config["files"]["design"], test_column=1, input_column=2, verbose=2)
+# Samples
+SAMPLES = read_table(config["files"]["samples"], verbosity=verbosity)
+SAMPLE_IDS = SAMPLES.iloc[:,0] ## First column MUST contain the sample ID
 
-SAMPLES = read_sample_ids(config["files"]["samples"], verbose=1)
-# SAMPLES = TREATMENT + CONTROL ## Read from the sample description file
+## Design
+DESIGN = read_table(config["files"]["design"], verbosity=verbosity)
+TREATMENT = DESIGN.iloc[:,0]
+CONTROL = DESIGN.iloc[:,1]
+
+## Ref genome
+GENOME = config["genome"]["version"]
+
+## Results dir
+RESULTS_DIR = config["dir"]["results"]
+if not os.path.exists(RESULTS_DIR):
+    os.makedirs(RESULTS_DIR)
 
 #================================================================#
 #                         Workflow                               #
 #================================================================#
 
-# ## Data import & merging.
-# ##
-# ## Tricky python code to prepare the data, but this should be
-# ## commented to avoid executing it at each run of the workflow. Should
-# ## be converted to a rule.
-# if not os.path.exists(RESULTSDIR):
-# 	os.makedirs(RESULTSDIR)
-# for sample in SAMPLES:
-# 	indir = READS + sample + "/"
-# 	outdir = RESULTSDIR + sample + "/"
-# 	if not os.path.exists(outdir):
-# 		os.makedirs(outdir)
-# 	sra_files = os.listdir(indir)
-# 	for sra in sra_files:
-# 		os.system("fastq-dump --outdir " + outdir + " " + indir + sra)
-# 	if len(sra_files) > 1:
-# 		os.system("ls -1 " + outdir + "*.fastq | xargs cat > " + outdir + sample + ".fastq")
-# 		os.system("find " + outdir + " -type f -name SRR* | xargs rm")
-# 	else:
-# 		fastq_files = os.listdir(outdir)
-# 		cmd = "ls -1 " + outdir + fastq_files[0] + " | xargs mv " + outdir + sample + ".fastq"
-# 		print("Running command: "+ cmd)
-# 		os.system(cmd)
-	
+## Data import & merging.
 
-# Graphics
-GRAPHICS = expand(RESULTSDIR + "dag.pdf")
+IMPORT = expand(RESULTS_DIR + "{samples}/{samples}.fastq", samples=SAMPLE_IDS) 
 
-# Data trimming
-SICKLE_TRIMMING = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + ".fastq", samples=SAMPLES)
+## Graphics & reports
+GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
+REPORT = expand(RESULTS_DIR + "report.html")
 
+## Suffixes (beta) (! implement several values for each param)
+
+TRIMMER="sickle-se-q" + config["sickle"]["threshold"]
+TRIMMING=expand("{samples}/{samples}_{trimmer}", samples=SAMPLE_IDS, trimmer=TRIMMER)
+
+ALIGNER="bwa"
+ALIGNMENT=expand("{samples}/{samples}_{trimmer}_{aligner}", samples=SAMPLE_IDS, trimmer=TRIMMER, aligner=ALIGNER)
+
+PEAKCALLER="homer_peaks swembl-R" + config["swembl"]["R"] # macs2_peaks spp-fdr" + config["spp"]["fdr"] + " 
+PEAKCALLER=PEAKCALLER.split()
+PEAKCALLING=expand(expand("{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, trimmer=TRIMMER, aligner=ALIGNER)
+
+MOTIFS=expand(expand("{treat}_vs_{control}/{{peakcaller}}/peak-motifs/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}_purged", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, trimmer=TRIMMER, aligner=ALIGNER)
+
+#----------------------------------------------------------------#
 # Quality control
-RAW_QC = expand(RESULTSDIR + "{samples}/{samples}_fastqc/", samples=SAMPLES)
-RAW_READNB = expand(RESULTSDIR + "{samples}/{samples}_fastq_readnb.txt", samples=SAMPLES)
-TRIMMED_QC = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_fastqc/", samples=SAMPLES)
+#----------------------------------------------------------------#
 
-# Mapping
+RAW_QC = expand(RESULTS_DIR + "{samples}/{samples}_fastqc/", samples=SAMPLE_IDS)
+RAW_READNB = expand(RESULTS_DIR + "{samples}/{samples}_fastq_readnb.txt", samples=SAMPLE_IDS)
+
+TRIM = expand(RESULTS_DIR + "{trimming}.fastq", trimming=TRIMMING)
+TRIM_QC = expand(RESULTS_DIR + "{samples}/{samples}_{trimmer}_fastqc/", samples=SAMPLE_IDS, trimmer=TRIMMER)
+
+#----------------------------------------------------------------#
+# Alignment
+#----------------------------------------------------------------#
+
+## to avoid duplicates, fasta sequence should be moved to {genome} directly...
 BWA_INDEX = expand(config["dir"]["genome"] + "{genome}/BWAIndex/{genome}.fa.bwt", genome=GENOME)
-BWA_MAPPING = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}.sam", samples=SAMPLES, aligner=ALIGNER)
+#BOWTIE2_INDEX = expand(config["dir"]["genome"] + "{genome}/Bowtie2Index/{genome}.fa.1.bt2", genome=GENOME)
+
+MAPPING = expand(RESULTS_DIR + "{alignment}.sam", alignment=ALIGNMENT)
 
 # Sorted and converted reads (bam, bed)
-READS_BAM = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.bam", sample=SAMPLES, aligner=ALIGNER)
-SORTED_READS_BAM = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}_sorted_pos.bam", sample=SAMPLES, aligner=ALIGNER)
-BAM_READNB = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}_sorted_pos_bam_readnb.txt", samples=SAMPLES, aligner=ALIGNER)
-SORTED_READS_BED = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}_sorted_pos.bed", sample=SAMPLES, aligner=ALIGNER)
-BED_READNB = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_{aligner}_sorted_pos_bed_nb.txt", samples=SAMPLES, aligner=ALIGNER)
-if debug: 
-    print("SORTED_READS_BED\n\t" + "\n\t".join(SORTED_READS_BED))
-#CONVERTED_BED = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.converted.bed", sample=SAMPLES, aligner=ALIGNER)
+SORTED_MAPPED_READS_BWA = expand(RESULTS_DIR + "{alignment}_sorted_pos.bam", alignment=ALIGNMENT)
+BAM_READNB = expand(RESULTS_DIR + "{alignment}_sorted_pos_bam_readnb.txt", alignment=ALIGNMENT)
+SORTED_READS_BED = expand(RESULTS_DIR + "{alignment}_sorted_pos.bed", alignment=ALIGNMENT)
+BED_FEAT_COUNT = expand(RESULTS_DIR + "{alignment}_sorted_pos_bed_nb.txt", alignment=ALIGNMENT)
 
+# ----------------------------------------------------------------
 # Peak-calling
-# ! In case of use of several peak-callers, beware of specific prefixes or such...
-#MACS2 = expand(RESULTSDIR + "{treat}_vs_{ctrl}/{treat}_vs_{ctrl}_{trimming}_{aligner}_{caller}_peaks.narrowPeak", treat="GSM121459", ctrl="GSM1217457", trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
-MACS2 = expand(expand(RESULTSDIR + "{treat}_vs_{ctrl}/{treat}_vs_{ctrl}_{{trimming}}_{{aligner}}_{{caller}}_summits.bed", 
-               zip, treat=TREATMENT, ctrl=CONTROL), trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
-if debug: 
-    print("MACS2\n\t" + "\n\t".join(MACS2))
+# ----------------------------------------------------------------
 
-# File conversion
-#NARROWPEAK_TO_BED = expand(RESULTSDIR + "{treat}_vs_{ctrl}/{treat}_vs_{ctrl}_{trimming}_{aligner}_{caller}_peaks.bed", treat=TREATMENT, ctrl=CONTROL, trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
-#BED_TO_FASTA = expand(RESULTSDIR + "{treat}_vs_{ctrl}/{treat}_vs_{ctrl}_{trimming}_{aligner}_{caller}_peaks.fasta", treat=TREATMENT, ctrl=CONTROL, trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
-BED_TO_FASTA = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.calling.fasta", sample=SAMPLES, trimming=TRIMMING, aligner=ALIGNER)
+#BEDS = expand(RESULTS_DIR + "{alignment}.bed", alignment=ALIGNMENT)
+PEAKS = expand(RESULTS_DIR + "{peakcalling}.bed", peakcalling=PEAKCALLING)
 
-## Sequence purge
-#PURGED_SEQ = expand(RESULTSDIR + "{sample}_purged.fasta", sample=SAMPLES)
-##PURGED_SEQ = expand("results/H3K27me3/liver/GSM537698_purged.fasta")
+# ----------------------------------------------------------------
+# Peak analysis
+# ----------------------------------------------------------------
 
-## Oligo analysis
-#OLIGO = config['oligo_stats'].split()
-#OLIGO_ANALYSIS = expand(RESULTSDIR + '{sample}_purged_oligo{oligo}.txt', sample=SAMPLES, oligo=OLIGO)
+GET_FASTA = expand(RESULTS_DIR + "{peakcalling}.fasta", peakcalling=PEAKCALLING)
+PURGE_PEAKS = expand(RESULTS_DIR + "{peakcalling}_purged.fasta", peakcalling=PEAKCALLING)
+PEAKS_LENGTH = expand(RESULTS_DIR + "{peakcalling}_purged_length.png", peakcalling=PEAKCALLING)
+PEAK_MOTIFS = expand(RESULTS_DIR + "{motifs}_peak-motifs_synthesis.html", motifs=MOTIFS)
 
-## Peaks length
-#PEAK_LENGTH = expand(RESULTSDIR + '{sample}_purged_length.png', sample=SAMPLES)
+## Oligo analysis # ! missing f* input exception
+OLIGO = config['oligo_analysis']['count_oligo'].split()
+OLIGO_ANALYSIS = expand(RESULTS_DIR + "{peakcalling}_purged_oligo{oligo}.txt", peakcalling=PEAKCALLING, oligo=OLIGO)
 
-ruleorder: macs2 > bam_to_bed > sam2bam
-ruleorder: count_reads_bam > sam2bam
-
-CLEANING = expand(RESULTSDIR + "cleaning.done")
+#================================================================#
+#                        Rule all                                #
+#================================================================#
 
 rule all: 
-    """
-    Run all the required analyses
-    """
-#    input: GRAPHICS, RAW_READNB, RAW_QC, TRIMMED_QC, SORTED_READS_BAM, SORTED_READS_BED
-    input: BAM_READNB, BED_READNB
-#    input: MACS2 ### NOT WORKING YET
-    params: qsub=config["qsub"]
-    shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
-
+	"""
+	Run all the required analyses
+	"""
+	input: GRAPHICS, RAW_QC, TRIM_QC, PEAK_MOTIFS
+	#BED_FEAT_COUNT, PURGE_PEAKS, PEAKS_LENGTH
+	params: qsub=config["qsub"]
+	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
 #================================================================#
-#                       Local rules                              #
+#                          Report                                #
 #================================================================#
+
+NOW = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+
+#rule report:
+#    """
+#    Generate a report with the list of datasets + summary of the results.
+#    """
+# see Scerevisiae report
+
+#----------------------------------------------------------------#
+# Build the report (including DAG and rulegraph flowcharts).
+from snakemake.utils import report
+
+# Bulleted list of samples for the report
+SAMPLE_IDS_OL=report_numbered_list(SAMPLE_IDS)
+RAW_READS_OL=report_numbered_list(IMPORT)
+TRIMMED_READS_OL=report_numbered_list(TRIMMED_READS_SICKLE)
+RAW_QC_OL=report_numbered_list(RAW_QC)
+TRIMMED_QC_OL=report_numbered_list(TRIMMED_QC)
+
+MAPPED_SAM_OL=report_numbered_list(MAPPED_READS_BWA)
+MAPPED_BAM_SORTED_OL=report_numbered_list(SORTED_MAPPED_READS_BWA)
+MAPPED_BED_SORTED_OL=report_numbered_list(SORTED_READS_BED)
+
+RAW_QC_OL=report_numbered_list(RAW_QC)
+TRIMMED_QC_OL=report_numbered_list(TRIMMED_QC)
+
+PEAKFILES_MACS2_OL=report_numbered_list(PEAKS_MACS2)
+
+#	input: GRAPHICS, IMPORT, TRIMMED_READS_SICKLE, TRIMMED_QC, RAW_QC, MAPPED_READS_BWA, RAW_READNB, BAM_READNB, BED_READNB, PEAKS_MACS2, FETCH_MACS2_PEAKS, PURGE_MACS2_PEAKS #redundant for flowcharts
+
+NOW = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+
+rule report:
+    """
+    Generate a report with the list of datasets + summary of the results.
+    """
+    input:  dag=config["dir"]["reports"] + "dag.pdf", \
+            dag_png=config["dir"]["reports"] + "dag.png", \
+            rulegraph=config["dir"]["reports"] + "rule.pdf", \
+            rulegraph_png=config["dir"]["reports"] + "rule.png"
+    output: html=config["dir"]["reports"] + "report.html"
+    run:
+        report("""
+        ===========================================
+        ChIP-seq analysis - S.cerevisiae Pho4 study
+        ===========================================
+        
+        :Date:                 {NOW}
+        :Project:              S cerevisiae
+        :Analysis workflow:    Claire Rioualen
+        
+        Contents
+        ========
+        
+        - `Flowcharts`_
+        - `Datasets`_
+             - `Samples`_
+             - `Raw reads`_
+             - `Trimmed`_
+             - `Mapped`_
+             - `Peaks`_
+             - `QC reports`_
+
+        -----------------------------------------------------
+
+        Flowcharts
+        ==========
+
+        - Sample treatment: dag_
+        - Workflow: rulegraph_
+
+        .. image:: rulegraph.png
+
+        -----------------------------------------------------
+
+        Datasets
+        ========
+        
+        Samples
+        -------
+
+        {SAMPLE_IDS_OL} 
+
+        Raw reads 
+        ---------
+
+        {RAW_READS_OL}
+
+        Trimmed
+        -------
+
+        {TRIMMED_READS_OL}
+
+        Mapped
+        ------
+
+        Sam format (uncompressed)
+
+        {MAPPED_SAM_OL}
+
+        Bam format (sorted by positions)
+
+        {MAPPED_BAM_SORTED_OL}
+
+        Bed format (sorted by positions)
+
+        {MAPPED_BED_SORTED_OL}
+
+        Peaks
+        -----
+
+        Macs2 peaks
+
+        {PEAKFILES_MACS2_OL}
+
+        QC reports
+        ----------
+
+        {RAW_QC_OL}
+
+        {TRIMMED_QC_OL}
+
+        -----------------------------------------------------
+
+        """, output.html, metadata="Claire Rioualen (claire.rioualen@inserm.fr)", **input)
+
+
+
 

@@ -1,37 +1,75 @@
-"""
-    ===============================
-    Definition of MACS14 parameters
-    ===============================
+"""Peak-calling with macs14.
+Input: bed (others supported)
+Output: bed
 
-    TO DO: consider the possibility of obtaining .wig files with the -w option
-    Macs can apply PeakSplitter on its output with the --call-subpeaks option but PeakSplitter is not installed in RSAT
-"""
-rule peak_calling_macs14_all:
-    """Execute a peak-calling program (MACS14) for each sample"""
-    input:expand(CHIP_READ_DIR + "/{gsm_treatment}_vs_{gsm_control}/{gsm_treatment}_input_{gsm_control}_macs14_negative_peaks.xls", \
-                  zip,\
-                  gsm_treatment = list_treatment, \
-                  gsm_control = list_control),
-          expand(CHIP_READ_DIR + "/{gsm_treatment}_vs_{gsm_control}/{gsm_treatment}_input_{gsm_control}_macs14_peaks.xls", \
-                  zip,\
-                  gsm_treatment = list_treatment, \
-                  gsm_control = list_control),
-          expand(CHIP_READ_DIR + "/{gsm_treatment}_vs_{gsm_control}/{gsm_treatment}_input_{gsm_control}_macs14_summits.bed", \
-                  zip,\
-                  gsm_treatment = list_treatment, \
-                  gsm_control = list_control),
-          expand(CHIP_READ_DIR + "/{gsm_treatment}_vs_{gsm_control}/{gsm_treatment}_input_{gsm_control}_macs14_peaks.bed", \
-                  zip,\
-                  gsm_treatment = list_treatment, \
-                  gsm_control = list_control)
+Usage example: 
+    PEAKCALLER="macs14-pval" + config["macs14"]["pval"] + "_peaks"
+    PEAKCALLING=expand(expand("{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER)
+    PEAKS = expand(RESULTS_DIR + "{peakcalling}.bed", peakcalling=PEAKCALLING)
 
-rule macs_14:
-    input: treatment = "{read_dir}/{gsm_treatment}/{gsm_treatment}_bowtie_sorted.bed", control = "{read_dir}/{gsm_control}/{gsm_control}_bowtie_sorted.bed"
-    params: name = "{read_dir}/{gsm_treatment}_vs_{gsm_control}/{gsm_treatment}_input_{gsm_control}_macs14", qsub = config["qsub"] + " -e {read_dir}/{gsm_treatment}_vs_{gsm_control}/{gsm_treatment}_input_{gsm_control}_macs14_qsub.err -o {read_dir}/{gsm_treatment}_vs_{gsm_control}/{gsm_treatment}_input_{gsm_control}_macs14_qsub.out"
-    log: "{read_dir}/{gsm_treatment}_vs_{gsm_control}/{gsm_treatment}_input_{gsm_control}_macs14.log"
-    benchmark: "{read_dir}/{gsm_treatment}_vs_{gsm_control}/{gsm_treatment}_input_{gsm_control}_macs14.json"
-    output: "{read_dir}/{gsm_treatment}_vs_{gsm_control}/{gsm_treatment}_input_{gsm_control}_macs14_negative_peaks.xls", \
-        "{read_dir}/{gsm_treatment}_vs_{gsm_control}/{gsm_treatment}_input_{gsm_control}_macs14_peaks.xls", \
-        "{read_dir}/{gsm_treatment}_vs_{gsm_control}/{gsm_treatment}_input_{gsm_control}_macs14_summits.bed", \
-        "{read_dir}/{gsm_treatment}_vs_{gsm_control}/{gsm_treatment}_input_{gsm_control}_macs14_peaks.bed"
-    shell: "macs14 -t {input.treatment} -c {input.control} -f BED -g dm -n {params.name} 2> {log}"
+Required parameters:
+    config["genome"]["size"]
+Optional parameters:
+    config["macs14"]["pval"]
+    config["macs14"]["keep_dup"]
+    config["macs14"]["bandwidth"]
+    config["macs14"]["mfold"]
+    config["macs14"]["other_options"]
+"""
+# Contributors: 
+#        Lucie Khamvongsa, Claire Rioualen
+
+# Set defaults params in case they're not defined in config file. 
+if not "size" in config["genome"].keys():
+    sys.exit("The parameter genome size must be defined in the JSON file")
+
+if not "macs14" in config.keys():
+    config["macs14"] = {}
+
+if not "pval" in config["macs14"].keys():
+    config["macs14"]["pval"] = "0.00001"
+
+if not "mfold" in config["macs14"].keys():
+    config["macs14"]["mfold"] = "10,30"
+
+if not "bandwidth" in config["macs14"].keys():
+    config["macs14"]["bandwidth"] = "300"
+
+if not "keep_dup" in config["macs14"].keys():
+    config["macs14"]["keep_dup"] = "auto"
+
+if not "other_options" in config["macs14"].keys():
+    config["macs14"]["other_options"] = ""
+
+# Rule
+rule macs14:
+    input:
+        treatment="{result_dir}/{treatment}/{treatment}_{aligner}.bed", \
+        control="{result_dir}/{control}/{control}_{aligner}.bed"
+    params:
+        outdir="{result_dir}/{treatment}_vs_{control}/macs14-pval{pval}_peaks/", \
+        name="{treatment}_vs_{control}_{aligner}_macs14-pval{pval}", \
+        pval = config["macs14"]["pval"], \
+        keep_dup = config["macs14"]["keep_dup"], \
+        mfold = config["macs14"]["mfold"], \
+        bandwidth = config["macs14"]["bandwidth"], \
+        other_options = config["macs14"]["other_options"], \
+        genome_size = config["genome"]["size"], \
+        qsub=config["qsub"] \
+          + " -q long -e {result_dir}/{treatment}_vs_{control}/macs14-pval{pval}_peaks/{treatment}_vs_{control}_{aligner}_macs14_qsub.err" \
+          + " -o {result_dir}/{treatment}_vs_{control}/macs14-pval{pval}_peaks/{treatment}_vs_{control}_{aligner}_macs14_qsub.out"
+    output:
+        peaks_bed = "{result_dir}/{treatment}_vs_{control}/macs14-pval{pval}_peaks/{treatment}_vs_{control}_{aligner}_macs14-pval{pval}_peaks.bed", \
+        summits = "{result_dir}/{treatment}_vs_{control}/macs14-pval{pval}_peaks/{treatment}_vs_{control}_{aligner}_macs14-pval{pval}_summits.bed", \
+        xls = "{result_dir}/{treatment}_vs_{control}/macs14-pval{pval}_peaks/{treatment}_vs_{control}_{aligner}_macs14-pval{pval}_peaks.xls", \
+        negative = "{result_dir}/{treatment}_vs_{control}/macs14-pval{pval}_peaks/{treatment}_vs_{control}_{aligner}_macs14-pval{pval}_negative_peaks.xls"
+        # subpeaks file, see doc. TODO
+    log: "{result_dir}/{treatment}_vs_{control}/macs14-pval{pval}_peaks/{treatment}_vs_{control}_{aligner}_macs14.log"
+    benchmark: "{result_dir}/{treatment}_vs_{control}/macs14-pval{pval}_peaks/{treatment}_vs_{control}_{aligner}_macs14_benchmark.json"
+    shell: """
+mkdir -p {params.outdir}
+cd {params.outdir}
+macs14 -t {input.treatment} -c {input.control} -f BED -g {params.genome_size} -m {params.mfold} --pvalue {params.pval} --keep-dup {params.keep_dup} -n {params.name} --bw {params.bandwidth} {params.other_options} 2> {log}
+"""
+
+

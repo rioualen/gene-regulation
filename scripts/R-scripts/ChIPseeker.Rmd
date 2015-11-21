@@ -1,0 +1,70 @@
+---
+title: "ChIPseeker_test"
+author: "Lucie Khamvongsa & Jacques van Helden"
+date: "19 August 2015"
+output: html_document
+---
+
+Fichier dans lequel l'exploration du package ChIPseeker se fait. Une règle ChIPseeker en snakemake sera dèvellopé pour le workflow ChIP-seq.
+
+
+```{r load packages}
+library("ChIPseeker")
+library("TxDb.Dmelanogaster.UCSC.dm3.ensGene")
+require(TxDb.Dmelanogaster.UCSC.dm3.ensGene)
+library("clusterProfiler")
+library("GenomicRanges")
+library("ChIPpeakAnno")
+library("org.Dm.eg.db")
+
+
+```
+
+
+```{r load peaks}
+
+dir.main <- "~/mountrsat/dr-chip-rna-seq"
+setwd(dir.main)
+
+peaks <- toGRanges("results/chip-seq/WT2_327_vs_WT_Input_4runs_casava_MACS2_call_summits_1e-6/WT2_327_vs_WT_Input_4runs_casava_MACS2_call_summits_1e-6.bed", format="BED", header=FALSE, sep = "\t")
+
+```
+
+
+```{r locations peaks}
+#visualize the peak locations over the whole genome
+pdf("results/chip-seq/WT2_327_vs_WT_Input_4runs_casava_MACS2_call_summits_1e-6/WT2_327_vs_WT_Input_4runs_casava_MACS2_call_summits_1e-6_covplot.pdf", height = 10,width = 10)
+covplot(peaks, weightCol = "score")
+dev.off()
+```
+
+```{r  Heatmap of ChIP binding to TSS regions}
+
+peakHeatmap(peak = peaks, TxDb = TxDb.Dmelanogaster.UCSC.dm3.ensGene, upstream=3000, downstream=3000, color="red")
+
+```
+
+```{r Average Profile of ChIP peaks binding to TSS region}
+pdf("results/chip-seq/WT2_327_vs_WT_Input_4runs_casava_MACS2_call_summits_1e-6/WT2_327_vs_WT_Input_4runs_casava_MACS2_call_summits_1e-6_plotAvgProf.pdf", height = 8,width = 10)
+plotAvgProf2(peak = peaks, TxDb = TxDb.Dmelanogaster.UCSC.dm3.ensGene, upstream=3000, downstream=3000, xlab="Genomic Region (5'->3')", ylab = "Read Count Frequency", weightCol = "score")
+dev.off()
+```
+
+```{r  Peak Annotation}
+
+peakAnno <- annotatePeak(peak = peaks, tssRegion=c(-3000, 3000), TxDb= TxDb.Dmelanogaster.UCSC.dm3.ensGene, annoDb="org.Dm.eg.db")
+
+peakAnno.tab <- as.data.frame(peakAnno)
+```
+
+```{r Visualize Genomic Annotation fig.width=7, fig.height=8}
+
+#circle representation
+plotAnnoPie(peakAnno)
+
+#venn representation
+vennpie(peakAnno)
+
+
+```
+

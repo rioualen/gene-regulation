@@ -1,21 +1,39 @@
+"""Rule for the creation of BWA index. Has to be done only once.  The
+output file is used to test whether the index already exists
+when aligning.
+
+Required parameters:
+    config["qsub"]
+Optional parameters:
+    config["bwa"]["dir"]
+
+Usage example:
+    BWA_INDEX = expand(config["dir"]["genome"] + "{genome}/BWAIndex/{genome}.fa.bwt", genome=GENOME)
+
+Contributors: 
+    Claire Rioualen
+"""
+
+# Set optional params to defaults values in case they're not defined in config file.
+if not "bwa" in config.keys():
+    config["bwa"] = {}
+
+if not "dir" in config["bwa"].keys():
+    config["bwa"]["dir"] = config["genome"]["dir"] + "BWAIndex/"
+
+# Rule index genome with BWA
 rule bwa_index:
-	"""Rule for the creation of BWA index. Has to be done only once.  The
-	output file is used to test whether the index already exists
-	when aligning.
-
-	Required parameters:
-		config["bwa"]["index"]
-		config["qsub"]
-
-	Usage:
-		input:expand()
-
-        """
-	input: "{genome}.fa"
-	output: "{genome}.fa.bwt"
-	log: "{genome}_bwa-index.log"
-	benchmark: "{genome}_bwa-index_benchmark.json"
-	params:
-		index = config["bwa"]["index"], \
-		qsub = config["qsub"] + " -e {genome}_bwa-index_qsub.err -o {genome}_bwa-index_qsub.out"
-	shell: "bwa index {params.index} 2> {log}"
+    input: "{genome_dir}{genome_version}/{genome_version}.fa"
+    output: "{genome_dir}{genome_version}/{bwa_dir}/{genome_version}.fa.bwt"
+    log: "{genome_dir}{genome_version}/{bwa_dir}/{genome_version}_bwa-index.log"
+    benchmark: "{genome_dir}{genome_version}/{bwa_dir}/{genome_version}_bwa-index_benchmark.json"
+    message: "Indexing genome to" + config["bwa"]["dir"]
+    params:
+        bwa_dir = config["bwa"]["dir"], \
+        qsub = config["qsub"] + " -e {genome_dir}_bwa-index_qsub.err -o {genome_dir}_bwa-index_qsub.out"
+    shell: """
+mkdir -p {params.bwa_dir}
+cp {input} {params.bwa_dir}
+cd {params.bwa_dir}
+bwa index {params.bwa_dir}{wildcards.genome_version}.fa 2> {log}
+"""

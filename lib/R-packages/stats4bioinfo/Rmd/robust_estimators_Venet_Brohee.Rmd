@@ -1,0 +1,45 @@
+---
+title: "Robust estimators for t-test"
+output: html_document
+---
+
+## Message from Sylvain Brohée (2015-03-19)
+Cela fait maintenant un moment que je fais mes t-tests au moyen de ta célèbre fonction t.test.multi. J'en ai parlé avec David Venet (que tu connais peut-être), un autre bioinformaticien qui travaille dans le même groupe que moi chez Christos.
+
+Il est assez balèze en stats et il m'a fait remarquer que l'utilisation d'estimateurs robustes ne semble pas être une super idée lorsque l'on fait un test de Student (ou de Welch). En effet, cela rend les p-valeurs beaucoup plus significatives.
+
+Voici le code que nous avons utilisé en R pour regarder ça de plus près.
+
+Bien sûr, plus tu augmentes le nombre d'échantillons, plus la médiane / IQR sont de bons estimateurs.
+
+Les estimateurs robustes sont donc un bon moyen de ne pas être dépendant des extrèmes mais d'un autre côté le calcul des p-valeurs est faussé :-( puisqu'on se retrouve avec une série de p-valeurs trop significatives... Qu'en penses-tu?
+
+## Random control for robust estimators
+
+This test is adapted from Sylvain's email.
+
+```{r}
+## Sylvain's test for robust estimators
+
+
+library(stats4bioinfo)
+x11(width=15, height=10)
+par(mfrow = c(2,3))
+
+## Second test with 500 columns
+nb.rows <- 1e4
+nb.col <- 50
+x <-  matrix(rnorm(nb.rows*nb.col), nrow=nb.rows)
+cl <- seq(0,1,len=nb.col)>.5
+p1 <- tTestPerRow(x, cl, robust.est=T, volcanoPlot=TRUE)
+p2 <- tTestPerRow(x, cl, robust.est=F, volcanoPlot=TRUE)
+plot(p1$p.value, p2$p.value, log = 'xy', xlab = 'P.values with robust estimators', ylab = 'P.values with moments')
+
+## Second test with 200 columns
+nb.col <- 200
+x <-  matrix(rnorm(nb.rows*nb.col), nrow=nb.rows)
+cl <- seq(0,1,len=nb.col)>.5
+p1 <- tTestPerRow(x, cl, robust.est=T, volcanoPlot=TRUE, main="Robust estimators")
+p2 <- tTestPerRow(x, cl, robust.est=F, volcanoPlot=TRUE, main="Moment estimators")
+plot(p1$p.value, p2$p.value, log = 'xy', xlab = 'P.values with robust estimators', ylab = 'P.values with moments')
+```

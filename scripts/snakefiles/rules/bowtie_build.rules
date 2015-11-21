@@ -10,7 +10,7 @@ rule bowtie_download_genome:
     output: reference_genome = config["bowtie"]["genome_dir"] + "/" + config["bowtie"]["reference_genome"], \
             features = config["bowtie"]["genome_dir"] + "/" + config["bowtie"]["annotations"]
     log: config["bowtie"]["genome_dir"] + "/wget_log.txt"
-    params: reference_genome_url = config["config["bowtie"]["reference_genome"], \
+    params: reference_genome_url = config["bowtie"]["reference_genome"], \
             features_url = config["bowtie"]["annotations"]                           
     shell: "wget --timestamping --no-directories " \
         + " --directory-prefix " + config["bowtie"]["genome_dir"] \

@@ -1,21 +1,23 @@
-"""This workflow was designed in order to build and test a pipeline based on histone marks ChIP-seq analysis.
-Data was downloaded from the GEO platform. It is composed of 2 inputs and 2 ChIP targetting H3K27me3 in C. elegans.
+"""This workflow was designed in order to build and test a pipeline
+based on histone marks ChIP-seq analysis.  Data was downloaded from
+the GEO platform. It is composed of 2 inputs and 2 ChIP targetting
+H3K27me3 in C. elegans.
 
-The workflows should include: 
-	- normalization & QC: fastq merging, trimming, quality control...
-	- formatting rules: bed, bam, sam, narrowPeak, fasta...
-	- alignment: Bowtie, BWA
-	- peak-calling: SWEMBL, MACS, SPP, HOMER
-	- downstream analyses: IDR, sequence purge, peak length
+Usage: 
+    snakemake -p  -c "qsub {params.qsub}" -j 12 \
+        -s scripts/snakefiles/workflows/Scerevisiae-Pho4.py \
+        [targets]
 
-Usage: snakemake -s scripts/snakefiles/workflows/Celegans-H3K27me3.py -j 12 --force flowcharts
+Flowcharts:
+    snakemake -p -s scripts/snakefiles/workflows/Paeruginosa.py \
+        --force flowcharts
 
-Organism: 		Caenorhabditis elegans
-Reference genome:	ce10
+Organism: 		C elegans
+Reference genome:	ce10 (WBcel235?)
 Sequencing type: 	single end
 Data source: 		Gene Expression Omnibus
 
-Author: 		Claire Rioualen
+Author: 		Claire Rioualen, Jacques van Helden
 Contact: 		claire.rioualen@inserm.fr
 """
 
@@ -26,153 +28,176 @@ Contact: 		claire.rioualen@inserm.fr
 from snakemake.utils import R
 import os
 import sys
-import time
+import time#rm?
+import datetime
+import pandas as pd
 
-#================================================================#
-#                      Data & directories                        #
-#================================================================#
-
-configfile: "/home/rioualen/Desktop/workspace/fg-chip-seq/scripts/snakefiles/workflows/Celegans-H3K27me3.json"
-workdir: config["dir"]["base"] ## does not work??
-
-# Rules dir
-RULES = config["dir"]["rules"]
-
-# Raw data
-READS = config["dir"]["reads_source"]
-RESULTSDIR = config["dir"]["results"]	
-
-CHIP = config["samples"]["chip"].split()
-INPUT = config["samples"]["input"].split()
-SAMPLES = CHIP + INPUT
-
-GENOME = config["genome"]["genome_version"]
-
-# /!\ lists vs var
-TRIMMING = "sickle-se-q" + config['sickle']['threshold']
-ALIGNER = "bwa"
-PEAK_CALLER = "macs2"
-
-#================================================================#
-#                         Workflow                               #
-#================================================================#
-
-# Import
-IMPORT = expand(RESULTSDIR + "{samples}/{samples}.fastq", samples=SAMPLES)
-
-# Graphics
-GRAPHICS = expand(RESULTSDIR + "dag.pdf")
-
-# Data trimming
-SICKLE_TRIMMING = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + ".fastq", samples=SAMPLES)
-
-# Quality control
-RAW_QC = expand(RESULTSDIR + "{samples}/{samples}_fastqc/", samples=SAMPLES)
-TRIMMED_QC = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_fastqc/", samples=SAMPLES)
-
-# Mapping
-BWA_INDEX = expand(config["dir"]["genome"] + "BWAIndex/{genome}/{genome}.fa.bwt", genome=GENOME)
-BWA_MAPPING = expand(RESULTSDIR + "{samples}/{samples}_" + TRIMMING + "_bwa.aligned.sam", samples=SAMPLES)
-
-# File conversion
-SAM_TO_BAM = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.aligned.bam", sample=SAMPLES, aligner=ALIGNER)
-BAM_TO_BED = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.aligned.bed", sample=SAMPLES, aligner=ALIGNER)
-CONVERTED_BED = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.converted.bed", sample=SAMPLES, aligner=ALIGNER)
-
-# Peak-calling
-# ! In case of use of several peak-callers, beware of specific prefixes or such...
-#MACS2 = expand(RESULTSDIR + "{chip}_vs_{inp}/{chip}_vs_{inp}_{trimming}_{aligner}_{caller}_peaks.narrowPeak", chip="GSM121459", inp="GSM1217457", trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
-MACS2 = expand(RESULTSDIR + "{chip}_vs_{inp}/{chip}_vs_{inp}_{trimming}_{aligner}_{caller}._summits.bed", chip=CHIP, inp=INPUT, trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
-
-# File conversion
-#NARROWPEAK_TO_BED = expand(RESULTSDIR + "{chip}_vs_{inp}/{chip}_vs_{inp}_{trimming}_{aligner}_{caller}_peaks.bed", chip=CHIP, inp=INPUT, trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
-#BED_TO_FASTA = expand(RESULTSDIR + "{chip}_vs_{inp}/{chip}_vs_{inp}_{trimming}_{aligner}_{caller}_peaks.fasta", chip=CHIP, inp=INPUT, trimming=TRIMMING, aligner=ALIGNER, caller=PEAK_CALLER)
-BED_TO_FASTA = expand(RESULTSDIR + "{sample}/{sample}_" + TRIMMING + "_{aligner}.calling.fasta", sample=SAMPLES, trimming=TRIMMING, aligner=ALIGNER)
-
-## Sequence purge
-#PURGED_SEQ = expand(RESULTSDIR + "{sample}_purged.fasta", sample=SAMPLES)
-##PURGED_SEQ = expand("results/H3K27me3/liver/GSM537698_purged.fasta")
-
-## Oligo analysis
-#OLIGO = config['oligo_stats'].split()
-#OLIGO_ANALYSIS = expand(RESULTSDIR + '{sample}_purged_oligo{oligo}.txt', sample=SAMPLES, oligo=OLIGO)
-
-## Peaks length
-#PEAK_LENGTH = expand(RESULTSDIR + '{sample}_purged_length.png', sample=SAMPLES)
-
-#ruleorder: macs2 > bam_to_bed
-
-CLEANING = expand(RESULTSDIR + "cleaning.done")
-
-rule all: 
-    """
-    Run all the required analyses
-    """
-    input: GRAPHICS, RAW_QC, TRIMMED_QC, BAM_TO_BED, CONVERTED_BED, ASSIGNED_SAMPLES
-    params: qsub=config["qsub"]
-    shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
-
-
-#================================================================#
-#                       Local rules                              #
-#================================================================#
-
-rule raw_data:
-	"""
-	Import & convert sra data to fastq format. 
-	/!\ Supposes one file per sample dir /!\
-	"""
-	input: READS + "{samples}/"
-	output: files = RESULTSDIR + "{samples}/{samples}.fastq", \
-		dir = RESULTSDIR + "{samples}/"
-	params: sample = "{samples}"
-	shell: "var=$(ls {input}); fastq-dump --outdir {output.dir} {input}$var; srr=$(basename $var .sra); mv {output.dir}$srr.fastq {output.dir}{params.sample}.fastq"
-
-
-rule bed_chr_id_conversion:
-	input: "{file}.aligned.bed"
-	output:	"{file}.converted.bed"
-	shell:"awk '{{gsub(\"NC_003279.8\",\"chrI\"); gsub(\"NC_003280.10\",\"chrII\"); gsub(\"NC_003281.10\",\"chrIII\"); gsub(\"NC_003282.8\",\"chrIV\"); gsub(\"NC_003283.11\",\"chrV\"); gsub(\"NC_003284.9\",\"chrX\"); print}}' {input} > {output[0]}"
-
-#		out = open(output[0], "w")
-#		with open(input.bed) as bedfile:
-#			for line1 in bedfile:
-#				RefSeq_id_1 = line1.split()[0]
-#				other_info = '\t'.join(line1.split()[1:len(line1.split())])
-#				with open(input.table) as conversion_table:
-#					for line2 in conversion_table:
-#						RefSeq_id_2 = line2.split()[0]
-#						chr_id = line2.split()[1]
-#						if RefSeq_id_1 == RefSeq_id_2:
-#							towrite = chr_id + '\t' + other_info + '\n'
-#							out.write(towrite)
+## Config
+configfile: "scripts/snakefiles/workflows/Celegans-H3K27me3.json"
+workdir: config["dir"]["base"]
+verbosity = int(config["verbosity"])
 
 #================================================================#
 #                         Includes                               #
 #================================================================#
 
-include: RULES + "assign_samples.rules"
-include: RULES + "bed_to_fasta.rules"
-#include: RULES + "bowtie.rules"
-include: RULES + "bwa_index.rules"
-include: RULES + "bwa_se.rules"
-include: RULES + "clean.rules"
-include: RULES + "convert_bam_to_bed.rules"
-include: RULES + "convert_sam_to_bam.rules"
-#include: RULES + "count_oligo.rules"
-include: RULES + "fastqc.rules"
-include: RULES + "flowcharts.rules"
-#include: RULES + "homer.rules"
-#include: RULES + "idr.rules"
-#include: RULES + "macs14.rules"
-include: RULES + "macs2.rules"
-#include: RULES + "merge.rules"
-#include: RULES + "narrowpeak_to_bed.rules"
-#include: RULES + "peak_length.rules"
-#include: RULES + "purge_sequence.rules"
-include: RULES + "sickle_se.rules"
-#include: RULES + "sorted_bam.rules"
-#include: RULES + "spp.rules"
-#include: RULES + "swembl.rules"
-#include: RULES + "trimming.rules"
+FG_LIB = os.path.abspath(config["dir"]["fg_lib"])
+RULES = os.path.join(FG_LIB, "scripts/snakefiles/rules")
+PYTHON = os.path.join(FG_LIB, "scripts/snakefiles/python_lib")
 
+include: os.path.join(PYTHON, "util.py")
+include: os.path.join(RULES, "util.rules")
+include: os.path.join(RULES, "count_reads.rules")
+include: os.path.join(RULES, "bwa_index.rules")
+include: os.path.join(RULES, "bwa_se.rules")
+#include: os.path.join(RULES, "bowtie2_index.rules")
+#include: os.path.join(RULES, "bowtie2_se.rules")
+include: os.path.join(RULES, "convert_bam_to_bed.rules")
+include: os.path.join(RULES, "count_oligo.rules")
+include: os.path.join(RULES, "fastqc.rules")
+include: os.path.join(RULES, "flowcharts.rules")
+include: os.path.join(RULES, "getfasta.rules")
+include: os.path.join(RULES, "homer.rules")
+include: os.path.join(RULES, "macs2.rules")
+include: os.path.join(RULES, "peak_length.rules")
+include: os.path.join(RULES, "peak_motifs.rules")
+include: os.path.join(RULES, "purge_sequence.rules")
+include: os.path.join(RULES, "sickle_se.rules")
+include: os.path.join(RULES, "spp.rules")
+include: os.path.join(RULES, "sra_to_fastq.rules")
+include: os.path.join(RULES, "swembl.rules")
+
+#================================================================#
+#                      Data & config                             #
+#================================================================#
+
+# Raw data
+READS = config["dir"]["reads_source"]
+
+# Samples
+SAMPLES = read_table(config["files"]["samples"], verbosity=verbosity)
+SAMPLE_IDS = SAMPLES.iloc[:,0] ## First column MUST contain the sample ID
+
+## Design
+DESIGN = read_table(config["files"]["design"], verbosity=verbosity)
+TREATMENT = DESIGN.iloc[:,0]
+CONTROL = DESIGN.iloc[:,1]
+
+## Ref genome
+GENOME = config["genome"]["version"]
+
+## Results dir
+RESULTS_DIR = config["dir"]["results"]
+if not os.path.exists(RESULTS_DIR):
+    os.makedirs(RESULTS_DIR)
+
+#================================================================#
+#                         Workflow                               #
+#================================================================#
+
+## Data import & merging.
+
+IMPORT = expand(RESULTS_DIR + "{samples}/{samples}.fastq", samples=SAMPLE_IDS) 
+
+# /!\ C.elegans data: chromosomes not properly named. Becomes an issue with fetch-sequences or IGV visualization for instance. 
+
+#find . -type f -print0 | xargs -0 sed -i 's/NC_003279.8/chrI/g;s/NC_003280.10/chrII/g;s/NC_003281.10/chrIII/g;s/NC_003282.8/chrIV/g;s/NC_003283.11/chrV/g;s/NC_003284.9/chrX/g'
+
+## Graphics & reports
+GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
+REPORT = expand(RESULTS_DIR + "report.html")
+
+## Suffixes (beta) (! implement several values for each param)
+
+TRIMMER="sickle-se-q" + config["sickle"]["threshold"]
+TRIMMING=expand("{samples}/{samples}_{trimmer}", samples=SAMPLE_IDS, trimmer=TRIMMER)
+
+ALIGNER="bwa"
+ALIGNMENT=expand("{samples}/{samples}_{trimmer}_{aligner}", samples=SAMPLE_IDS, trimmer=TRIMMER, aligner=ALIGNER)
+
+PEAKCALLER="homer_peaks swembl-R" + config["swembl"]["R"] # macs2_peaks spp-fdr" + config["spp"]["fdr"] + " spp-fdr" + config["spp"]["fdr"] + " 
+PEAKCALLER=PEAKCALLER.split()
+PEAKCALLING=expand(expand("{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, trimmer=TRIMMER, aligner=ALIGNER)
+
+MOTIFS=expand(expand("{treat}_vs_{control}/{{peakcaller}}/peak-motifs/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}_purged", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, trimmer=TRIMMER, aligner=ALIGNER)
+
+#----------------------------------------------------------------#
+# Quality control
+#----------------------------------------------------------------#
+
+RAW_QC = expand(RESULTS_DIR + "{samples}/{samples}_fastqc/", samples=SAMPLE_IDS)
+RAW_READNB = expand(RESULTS_DIR + "{samples}/{samples}_fastq_readnb.txt", samples=SAMPLE_IDS)
+
+TRIM = expand(RESULTS_DIR + "{trimming}.fastq", trimming=TRIMMING)
+TRIM_QC = expand(RESULTS_DIR + "{samples}/{samples}_{trimmer}_fastqc/", samples=SAMPLE_IDS, trimmer=TRIMMER)
+
+#----------------------------------------------------------------#
+# Alignment
+#----------------------------------------------------------------#
+
+## to avoid duplicates, fasta sequence should be moved to {genome} directly...
+BWA_INDEX = expand(config["dir"]["genome"] + "{genome}/BWAIndex/{genome}.fa.bwt", genome=GENOME)
+#BOWTIE2_INDEX = expand(config["dir"]["genome"] + "{genome}/Bowtie2Index/{genome}.fa.1.bt2", genome=GENOME)
+
+MAPPING = expand(RESULTS_DIR + "{alignment}.sam", alignment=ALIGNMENT)
+
+# Sorted and converted reads (bam, bed)
+SORTED_MAPPED_READS_BWA = expand(RESULTS_DIR + "{alignment}_sorted_pos.bam", alignment=ALIGNMENT)
+BAM_READNB = expand(RESULTS_DIR + "{alignment}_sorted_pos_bam_readnb.txt", alignment=ALIGNMENT)
+SORTED_READS_BED = expand(RESULTS_DIR + "{alignment}_sorted_pos.bed", alignment=ALIGNMENT)
+BED_FEAT_COUNT = expand(RESULTS_DIR + "{alignment}_sorted_pos_bed_nb.txt", alignment=ALIGNMENT)
+
+# ----------------------------------------------------------------
+# Peak-calling
+# ----------------------------------------------------------------
+
+#BEDS = expand(RESULTS_DIR + "{alignment}.bed", alignment=ALIGNMENT)
+PEAKS = expand(RESULTS_DIR + "{peakcalling}.bed", peakcalling=PEAKCALLING)
+
+# ----------------------------------------------------------------
+# Peak analysis
+# ----------------------------------------------------------------
+
+GET_FASTA = expand(RESULTS_DIR + "{peakcalling}.fasta", peakcalling=PEAKCALLING)
+PURGE_PEAKS = expand(RESULTS_DIR + "{peakcalling}_purged.fasta", peakcalling=PEAKCALLING)
+PEAKS_LENGTH = expand(RESULTS_DIR + "{peakcalling}_purged_length.png", peakcalling=PEAKCALLING)
+PEAK_MOTIFS = expand(RESULTS_DIR + "{motifs}_peak-motifs_synthesis.html", motifs=MOTIFS)
+
+## Oligo analysis # ! missing f* input exception
+OLIGO = config['oligo_analysis']['count_oligo'].split()
+OLIGO_ANALYSIS = expand(RESULTS_DIR + "{peakcalling}_purged_oligo{oligo}.txt", peakcalling=PEAKCALLING, oligo=OLIGO)
+
+#================================================================#
+#                        Rule all                                #
+#================================================================#
+
+rule all: 
+	"""
+	Run all the required analyses
+	"""
+	input: GRAPHICS, IMPORT, PEAK_MOTIFS#, RAW_QC, TRIM_QC
+	#BED_FEAT_COUNT, PURGE_PEAKS, PEAKS_LENGTH
+	params: qsub=config["qsub"]
+	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
+
+## /!\ C.elegans chromosomes not properly named, this should be acted upon at the beginning of the workflow
+# tmp
+#rule bed_chr_id_conversion:
+#	input: "{file}.aligned.bed"
+#	output:	"{file}.converted.bed"
+#	shell:"awk '{{gsub(\"NC_003279.8\",\"chrI\"); gsub(\"NC_003280.10\",\"chrII\"); gsub(\"NC_003281.10\",\"chrIII\"); gsub(\"NC_003282.8\",\"chrIV\"); gsub(\"NC_003283.11\",\"chrV\"); gsub(\"NC_003284.9\",\"chrX\"); print}}' {input} > {output[0]}"
+
+#find . -type f -print0 | xargs -0 sed -i 's/NC_003279.8/chrI/g;s/NC_003280.10/chrII/g;s/NC_003281.10/chrIII/g;s/NC_003282.8/chrIV/g;s/NC_003283.11/chrV/g;s/NC_003284.9/chrX/g'
+ 
+
+#================================================================#
+#                          Report                                #
+#================================================================#
+
+NOW = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+
+#rule report:
+#    """
+#    Generate a report with the list of datasets + summary of the results.
+#    """
+# see Scerevisiae report

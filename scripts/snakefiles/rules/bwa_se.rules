@@ -1,29 +1,57 @@
+"""Read mapping for single end data using BWA. 
+Requires the indexing to have previously been done (using the
+rule bwa_index).  This is checked by testing the presence of
+file {genome}.fa.bwt
+
+Required parameters:
+    config["genome"]["version"]
+    config["qsub"]
+
+Optional parameters:
+    config["bwa"]["dir"]
+    config["bwa"]["threads"]
+
+Usage example:
+    MAPPING = expand(RESULTS_DIR + "{alignment}.sam", alignment=ALIGNMENT)
+
+Contributors: 
+    Claire Rioualen
+"""
+#TODO: add # mismatches param
+
+# Raise an error and exit if required parameter is missing
+# Set optional params to defaults values in case they're not defined in config file
+if not "version" in config["genome"].keys():
+    sys.exit("Genome version must be defined in the config file")
+
+if not "bwa" in config.keys():
+    config["bwa"] = {}
+
+if not "dir" in config["bwa"].keys():
+    config["bwa"]["dir"] = config["genome"]["dir"] + "BWAIndex/"
+
+if not "threads" in config["bwa"].keys():
+    config["bwa"]["threads"] = "1"
+
+# Rule for reads mapping with BWA
 rule bwa_se:
-	"""Read mapping using BWA. 
+    input:
+        reads="{reads}.fastq", \
+        index=config["bwa"]["dir"] + config["genome"]["version"] + ".fa.bwt"
+    output: "{reads}_bwa.sam"
+    log: "{reads}_bwa.log"
+    benchmark: "{reads}_bwa_benchmark.json"
+    message: "Mapping reads on reference genome {input.index} using BWA..."
+    params:
+        genome_index = config["bwa"]["dir"] + config["genome"]["version"] + ".fa", \
+        sai= "{reads}_bwa.sai", \
+        qsub = config["qsub"] + " -e {reads}_bwa_qsub.err -o {reads}_bwa_qsub.out", \
+        threads = config["bwa"]["threads"]
+    shell:"""
+bwa aln -t {params.threads} {params.genome_index} {input.reads} > {params.sai} 2> {log}
+bwa samse {params.genome_index} {params.sai} {input.reads} > {output} 2> {log}
+"""
 
-	Requires the indexing to have previously been done (using the
-	rule bwa_index).  This is checked by testing the presence of
-	file {genome}.done
 
-	Required parameters:
-		config["bwa"]["index"]
-		config["bwa"]["threads"]
-		config["qsub"]
 
-	Usage:
-		input:expand("{dataset}/{dataset}_bwa.sam", dataset=DATASET)
 
-        """
-	input: 	reads="{reads}.fastq", \
-		index=config["bwa"]["index"] + ".bwt"
-	output: "{reads}_bwa.sam"
-	log: "{reads}_bwa.log"
-	benchmark: "{reads}_bwa_benchmark.json"
-	params:
-		index = config["bwa"]["index"], \
-		sai= "{reads}_bwa.sai", \
-		qsub = config["qsub"] + " -e {reads}_bwa_qsub.err -o {reads}_bwa_qsub.out", \
-		threads = config["bwa"]["threads"]
-	shell:
-		"bwa aln -t {params.threads} {params.index} {input.reads} > {params.sai} 2> {log}; \
-		bwa samse {params.index} {params.sai} {input.reads} > {output} 2> {log}"

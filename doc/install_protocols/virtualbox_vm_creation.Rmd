@@ -1,14 +1,19 @@
 ---
 title: "Creating a virtual machine with Virtualbox"
 author: "Claire Rioualen & Jacques van Helden"
-date: "July 30, 2015"
 output:
   html_document:
-    css: /packages/rsat/public_html/course.css
     fig_caption: yes
+    highlight: zenburn
+    theme: cerulean
     toc: yes
+    toc_depth: 5
   pdf_document:
+    fig_caption: yes
+    highlight: zenburn
     toc: yes
+    toc_depth: 5
+  word_document: default
 ---
 # Creating an NGS VM under Virtualbox
 
@@ -228,6 +233,10 @@ ssh-agent > ~/agent
 source ~/agent
 ssh-add
 ```
+
+**/!\\ TODO**
+15/08/31 Add visudo edition? How is it not yet?
+
 # VirtualBox hacks and tricks
 
 ## Clipboard sharing between guest and host

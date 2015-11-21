@@ -1,28 +1,39 @@
+# Contributors: 
+#		Claire Rioualen, Lucie Khamvongsa
+
+# Set defaults params in case they're not defined in config file
+if not "sickle" in config.keys():
+    config["sickle"] = {}
+
+if not "threshold" in config["sickle"].keys():
+    config["sickle"]["threshold"] = 20
+
+if not "qual" in config["sickle"].keys():
+    config["sickle"]["qual"] = "sanger"
+
+#================================================================#
+# Rule definitions
+#================================================================#
 rule sickle_se:
     """Trim one a single end raw reads file with sickle.
 	
-	Parameters required:
-		config['sickle']['threshold']
-		config['sickle']['qual_type']
-		config['sickle']['other_options']
-		config['qsub']
-	Usage:
-		SICKLE_TRIMMING = expand(config['dir']['results'] + "{dir_data}/{dataset}_merged_sickle-se-q" + config['sickle']['threshold'] + ".fastq", dir_data=DIR_DATA, dataset=DATASETS)
+	Parameters:
+		TODO
 
-	/!\ Claire to all: I replaced sickle_se_q by sickle-se-q in order to keep underscores only between distinct steps, so maybe we avoid confusions in wildcards?
+	Usage:
+		SICKLE_TRIMMING = expand(config['dir']['results'] + "{dir_data}/{dataset}_merged_sickle-se-q" + config["sickle"]["threshold"] + ".fastq", dir_data=DIR_DATA, dataset=DATASETS)
 
 	"""
     input: "{reads}.fastq"	
-    output: trimmed = "{reads}_sickle-se-q" + config['sickle']['threshold'] + ".fastq", \
-            summary = "{reads}_sickle-se-q" + config['sickle']['threshold'] + "_summary.txt"
-    params: threshold = config['sickle']['threshold'], \
-            qual_type = config['sickle']['qual_type'], \
-            options = config['sickle']['other_options'], \
+    output: trimmed = "{reads}_sickle-se-q" + config["sickle"]["threshold"] + ".fastq", \
+            summary = "{reads}_sickle-se-q" + config["sickle"]["threshold"] + "_summary.txt"
+    params: threshold = config["sickle"]["threshold"], \
+            qual_type = config["sickle"]["qual"], \
             qsub = config['qsub'] \
-            + " -e "+ "{reads}_sickle-se-q" + config['sickle']['threshold'] + "_qsub.err" \
-            + " -o "+ "{reads}_sickle-se-q" + config['sickle']['threshold'] + "_qsub.out"
-    log: "{reads}_sickle-se-q" + config['sickle']['threshold'] + ".log"
-    benchmark: "{reads}_sickle-se-q" + config['sickle']['threshold'] + "_benchmark.json"
+            + " -e "+ "{reads}_sickle-se-q" + config["sickle"]["threshold"] + "_qsub.err" \
+            + " -o "+ "{reads}_sickle-se-q" + config["sickle"]["threshold"] + "_qsub.out"
+    log: "{reads}_sickle-se-q" + config["sickle"]["threshold"] + ".log"
+    benchmark: "{reads}_sickle-se-q" + config["sickle"]["threshold"] + "_benchmark.json"
     message: "Trimming single-end raw reads with sickle\n\tInput:\t{input}\n\tOutput:\t{output}\n\tLog:\t{log}"
-    shell: "sickle se --fastq-file {input} --qual-type {params.qual_type} --output-file {output.trimmed}  {params.options} > {output.summary} 2> {log}"
+    shell: "sickle se --fastq-file {input} --qual-type {params.qual_type} --output-file {output.trimmed} > {output.summary} 2> {log}"
 

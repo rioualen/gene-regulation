@@ -7,14 +7,18 @@
 
     "genome": {
 	"organism": "Escherichia_coli_str_k_12_substr_mg1655",
-        "genome_version": "Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27",
-        "base_url_fasta": "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-27/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655/dna/",
-        "sequence": "Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27.dna.genome",
-        "sequence_top": "Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27.dna.toplevel",
-        "base_url_gtf": "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-27/gtf/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655/",
-        "features_gtf": "Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27",
-        "base_url_gff3": "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-27/gff3/escherichia_coli_str_k_12_substr_mg1655/",
-        "features_gff3": "Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27"   
+        "genome_version": "Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28",
+        "base_url_fasta": "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-28/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655/dna/",
+        "sequence": "Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.dna.genome",
+        "sequence_top": "Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.dna.toplevel",
+        "base_url_gtf": "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-28/gtf/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655/",
+        "features_gtf": "Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28",
+        "base_url_gff3": "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-28/gff3/escherichia_coli_str_k_12_substr_mg1655/",
+        "features_gff3": "Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28",
+        "fasta": "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.dna.genome.fa",
+	"gene_info": "genome/Escherichia_coli_str_k_12_substr_mg1655_GCA_000005845.2_gene_info.tab",
+	"gene2GO": "genome/gene2GO_full.tab",
+	"go_names": "genome/genome/GO_description.tab"
     },
 
     "files": {
@@ -33,7 +37,7 @@
 	"python_lib": "/Users/jvanheld/fg-chip-seq/scripts/snakefiles/python_lib/",
 	"rules": "/Users/jvanheld/fg-chip-seq/scripts/snakefiles/rules/",
 	"reads_source": "data/reads_ori",
-	"results": "results",
+	"results": "results/",
 	"DEG": "results/DEG",
 	"reads": "results/reads",
         "reports": "reports",
@@ -62,15 +66,15 @@
 
     "bowtie": {
 	"genome_dir": "genome",
-        "reference_genome": "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27.dna.genome.fa",
-        "annotations":"genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27.gtf",
+        "reference_genome": "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.dna.genome.fa",
+        "annotations":"genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.gtf",
         "bowtie_index": "genome/Escherichia_coli_str_k_12_substr_mg1655",
         "max_mismatches": "2",
         "reads_iso": "1"
     },
 
     "bowtie2": {
-        "index": "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27",
+        "index": "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28",
         "max_mismatches": "1",
         "other_options": ""
     },
@@ -86,8 +90,8 @@
         "stranded": "no",
         "minaqual": "10",
         "id_attr": "gene_id",
-        "mode": "intersection-nonempty",
-        "gff_file": "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27.gtf",
+        "mode": "union",
+        "gff_file": "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.gtf",
         "other_options": ""
     },
 
@@ -97,8 +101,8 @@
 	"feature_type": "transcript",
 	"paired_ends": "FALSE",
 	"multi_overlaps": "TRUE", 
-        "reference_genome": "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27.dna.genome.fa",
-        "annotations":"genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.27.gtf"
+        "reference_genome": "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.dna.genome.fa",
+        "annotations":"genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.gtf"
     },
 
     "Diff_Exp": {

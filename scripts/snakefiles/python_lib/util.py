@@ -18,7 +18,7 @@ def read_sample_ids(file_path:str, base_dir:str=".", column:int=1, verbosity:int
     backward compatibility.
 
     """
-    if verbosity >= 3:
+    if verbosity >= 4:
         print ("read_sample_ids()\t" +"column\t" + str(column) +"\tfile_path\t" + file_path)
     sample_ids = read_column_from_tab(file_path, column, verbosity)
     return(sample_ids)
@@ -45,7 +45,7 @@ def read_column_from_tab(file_path:str, column:int=1, verbosity:int=0) -> list:
     :return: the list of values from the specified columns.
     :rtype: list of strings
     """
-    if verbosity >= 2:
+    if verbosity >= 4:
         print ("read_column_from_tab()\t" +"column\t" + str(column) +"\tfile_path\t" + file_path)
     values = []
 
@@ -62,7 +62,7 @@ def read_column_from_tab(file_path:str, column:int=1, verbosity:int=0) -> list:
                 current_value = fields[column -1]
 #                current_value = fields[0]
                 values.append(current_value)
-    if verbosity >= 1:
+    if verbosity >= 5:
         print("\t".join(["read_sample_ids()", "Result:", str(len(values)), "sample IDs"]))
     return(values)
     
@@ -76,18 +76,18 @@ def read_table(file:str, verbosity:int=0, header:int=0, skip_blank_lines=True, c
     header. These options can be overwritten in the function call.
 
     """
-    if verbosity >= 3:
+    if verbosity >= 4:
         print ("read_table()\t" + file)
     df = pd.read_csv(file, sep="\t", 
                      header=header, 
                      skip_blank_lines=skip_blank_lines,
                      comment=comment)
-    if verbosity >= 3:
+    if verbosity >= 5:
         print("\tColumns:\t" + ";".join(list(df.columns)))
     return(df)
     
 # ################################################################
-# def read_sample_ids(file, base_dir=".", column=1, verbose=0):
+# def read_sample_ids(file, base_dir=".", column=1, verbosity=0):
 #     """Read sample descriptions from a tab-delimited file. 
 #
 #     The first column of the sample description file contains the
@@ -105,13 +105,13 @@ def read_table(file:str, verbosity:int=0, header:int=0, skip_blank_lines=True, c
 #     :type file: string
 #     :param column: number of the column containing the sample ID (Default: 1)
 #     :type column: Integer >= 1
-#     :param verbose: verbosity level
-#     :type verbose: Integer
+#     :param verbosity: verbosity level
+#     :type verbosity: Integer
 #     :return: a list of sample IDs, taken from the first column of the sample file.
 #     :rtype: list of strings
 #
 #     """
-#     if verbose >= 1:
+#     if verbosity >= 1:
 #         print ("read_sample_ids()\t" +"Reading sample IDs from file\t" + file)
 #     samples = []
 #
@@ -127,12 +127,12 @@ def read_table(file:str, verbosity:int=0, header:int=0, skip_blank_lines=True, c
 #                 fields = line.split("\t")
 #                 samples.append(fields[column-1])
 # #                print(fields[column -1])
-#     if verbose >= 1:
+#     if verbosity >= 1:
 #         print("\t".join(["read_sample_ids()", "Result:", str(len(samples)), "sample IDs"]))
 #     return(samples)
     
 ################################################################
-def read_chipseq_design(file, test_column=1, input_column=2, verbose=0):
+def read_chipseq_design(file, test_column=1, input_column=2, verbosity=0):
     """Read ChIP-seq analysis design from a tab-delimited file. 
 
     Each row describes one analysis, which requires to define two
@@ -154,13 +154,13 @@ def read_chipseq_design(file, test_column=1, input_column=2, verbose=0):
     :type test_column: Integer >= 1
     :param input_column: number of the column containing the input ID (Default: 1)
     :type input_column: Integer >= 1
-    :param verbose: verbosity level
-    :type verbose: Integer
+    :param verbosity: verbosity level
+    :type verbosity: Integer
     :return: two lists giving respectively test and input sample IDs.
     :rtype: lists of strings
 
     """
-    if verbose >= 1:
+    if verbosity >= 4:
         print ("read_sample_ids()\t" +"Reading ChIP-seq design from file\t" + file)
     test_ids = []
     input_ids = []
@@ -179,15 +179,15 @@ def read_chipseq_design(file, test_column=1, input_column=2, verbose=0):
                 test_ids.append(test)
                 input = fields[input_column-1]
                 input_ids.append(input)
-                if verbose >= 2:
+                if verbosity >= 5:
                     print("\t".join(["\tanalysis", test, "versus", input]))
-    if verbose >= 1:
+    if verbosity >= 5:
         print("\t".join(["read_chipseq_design()", "Result:", str(len(test_ids)), "analyses"]))
     return(test_ids, input_ids)
     
 
 ################################################################
-def glob_multi_dir(dir_list, pattern="", base_dir=".", ext="", verbose=0):
+def glob_multi_dir(dir_list, pattern="", base_dir=".", ext="", verbosity=0):
     """Given a list of directories, returns the list of files matching a
     given pattern. In addition to the list of matching files, this
     function returns the list of directories associated to each file,
@@ -209,7 +209,7 @@ def glob_multi_dir(dir_list, pattern="", base_dir=".", ext="", verbose=0):
     files = [] ## List of paths to the files
     file_dirs = [] ## List of directories associated to each file (same length as the "files" list)
     basenames = [] ## List of file basenmes (same length as the "files" list
-    if verbose >= 1:
+    if verbosity >= 4:
         print("\t".join(["glob_multi_dir()", "Listing files in", str(len(dir_list)), "directories", "pattern: " + pattern]))
     import glob
     import os
@@ -230,7 +230,7 @@ def glob_multi_dir(dir_list, pattern="", base_dir=".", ext="", verbose=0):
             basenames.append(basename)
 #            basenames = basenames + [basename]
 #        print ("files_in_dir:\t"+"; ".join(files_in_dir))
-    if verbose >= 1:
+    if verbosity >= 5:
         print("\t".join(["glob_multi_dir()", "Result:", str(len(files)), "files"]))
     return(files, file_dirs, basenames)
 

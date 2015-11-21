@@ -2,6 +2,8 @@
 ## It would be useful because in util.py we define ruleorder, to
 ## ensure that sorting has priority on sam to bam conversion.
 
+## Claire: works for me.
+
 print("convert_sam_to_bam.rules is obsolete, we recommend to use util.rules instead.")
 
 rule sam_to_bam:
