@@ -148,6 +148,8 @@ BOWTIE2 = expand(config["dir"]["results"] + "{sample_ids}/{sample_ids}_{trimmed}
 
 SAM_BAM = expand(config["dir"]["results"] + "{sample_ids}/{sample_ids}_{trimmed}_{alignment}.bam", sample_ids=SAMPLE_IDS, trimmed=TRIMMED, alignment=ALIGNMENT)
 BAM_SORTED = expand(config["dir"]["results"] + "{sample_ids}/{sample_ids}_{trimmed}_{alignment}_{sorting}.bam", sample_ids=SAMPLE_IDS, trimmed=TRIMMED, alignment=ALIGNMENT, sorting=SORTING)
+GENOMECOV = expand(config["dir"]["results"] + "{sample_ids}/{sample_ids}_{trimmed}_{alignment}_{sorting}_genomecov.tfd", sample_ids=SAMPLE_IDS, trimmed=TRIMMED, alignment=ALIGNMENT, sorting=SORTING)
+#BAM_SORTED_BY_NAME = expand(config["dir"]["results"] + "{sample_ids}/{sample_ids}_{trimmed}_{alignment}_sorted_name.bam", sample_ids=SAMPLE_IDS, trimmed=TRIMMED, alignment=ALIGNMENT, sorting=SORTING)
 BAM_INDEX = expand(config["dir"]["results"] + "{sample_ids}/{sample_ids}_{trimmed}_{alignment}_{sorting}.bam.bai", sample_ids=SAMPLE_IDS, trimmed=TRIMMED, alignment=ALIGNMENT, sorting=SORTING)
 
 # Count tags per gene with Htseq
@@ -179,7 +181,9 @@ rule all:
         # BOWTIE2
         # SAM_BAM
         # BAM_SORTED, \
+        #BAM_SORTED_BY_NAME, \
         BAM_INDEX, \
+        GENOMECOV, \
         # HTSEQ_COUNT, \
         FEATURECOUNTS, \
         # OUT_HTSEQ
