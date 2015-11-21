@@ -1,4 +1,6 @@
-"""Compute genome coverage from aligned reads. 
+"""
+Compute genome coverage from aligned reads. 
+
 """
 rule install_bedgraphtobigwig:
     params: url="http://hgdownload.cse.ucsc.edu/admin/exe/userApps.src.tgz"
@@ -22,22 +24,42 @@ rule genome_coverate_dz:
     log:  "{reads}_genomecov_dz.log"
     benchmark:  "{reads}_genomecov_dz_benchmark.json"
     params: qsub = config["qsub"] + " -q long -e {reads}_genomecov_dz_qsub.err -o {reads}_genomecov_dz_qsub.out"
-    shell: "bedtools genomecov -dz -ibam {input.reads} " \
+    shell: "bedtools genomecov -strand -dz -ibam {input.reads} " \
         + "  > {output} 2> {log}"
 
 
 
-rule genome_coverage_bedgrah:
-    """Compute genome coverage from a bam-formatted file with aligned reads.
+rule genome_coverage_bedgraph:
+    """Compute genome coverage from a bam-formatted file with aligned
+    reads.  The coverage file is in bedgraph format, which can be
+    loaded in the genome viewer IGV.
 
     """
-    input: reads="{reads}.bam"
-    output: bedg="{reads}_genomecov.bedgraph"
+    input: reads = "{reads}.bam"
+    output: bedg = "{reads}_genomecov.bedgraph"
     log:  "{reads}_genomecov_bg.log"
     benchmark:  "{reads}_genomecov_bg_benchmark.json"
     params: qsub = config["qsub"] + " -q long -e {reads}_genomecov_bg_qsub.err -o {reads}_genomecov_bg_qsub.out"
-    shell: "bedtools genomecov -bg -ibam {input.reads} " \
-        + "  > {output.bedg} 2> {log}"
+    shell: "bedtools genomecov -bg -ibam {input.reads} > {output.bedg} 2> {log}" 
+
+rule genome_coverage_bedgraph_strands:
+    """Compute two strand-specific genome coverage files (with suffixes
+    _strand- and _strand+) from a bam-formatted file with aligned
+    reads.  The coverage files are in bedgraph format, which can be
+    loaded in the genome viewer IGV.
+
+    """
+    input: reads = "{reads}.bam"
+    output: bedg_plus = "{reads}_genomecov_strand+.bedgraph", \
+            bedg_minus = "{reads}_genomecov_strand-.bedgraph"
+    log:  "{reads}_genomecov_bg_str.log"
+    benchmark:  "{reads}_genomecov_bg_str_benchmark.json"
+    params: qsub = config["qsub"] + " -q long -e {reads}_genomecov_bg_str_qsub.err -o {reads}_genomecov_bg_str_qsub.out"
+    shell: "bedtools genomecov -bg -strand + -ibam {input.reads} > {output.bedg_plus} 2> {log}" \
+        + "; bedtools genomecov -bg -strand - -ibam {input.reads} > {output.bedg_minus} 2>> {log}"
+
+# rule bedgraph_to_bigwig:
+# TO BE WRITTEN    
 
 # rule genome_coverage_bgwig:
 #     """Compute genome coverage from a bam-formatted file with aligned reads.

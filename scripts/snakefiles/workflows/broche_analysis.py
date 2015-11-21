@@ -188,6 +188,8 @@ MAPPED_PE_SORTED_BY_NAME=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_
 if (verbosity >= 3):
     print ("MAPPED_PE_SORTED_BY_NAME:\n\t" + "\n\t".join(MAPPED_PE_SORTED_BY_NAME))
 GENOMECOV=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["sorted_pos"] + "_genomecov.bedgraph", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+GENOMECOV_PLUS=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["sorted_pos"] + "_genomecov_strand+.bedgraph", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+GENOMECOV_MINUS=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["sorted_pos"] + "_genomecov_strand-.bedgraph", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 
 #----------------------------------------------------------------#
 # Read counts per gene (done with htseq-count)
@@ -258,8 +260,14 @@ rule all:
     """
 #    input: TRIMMED_SUMMARIES ## Still working ?
 #    input: MERGED_RAWR_QC, RAWR_MERGED, TRIMMED_MERGED, TRIMMED_QC, MAPPED_PE_SAM, MAPPED_PE_BAM, 
-    input: MAPPED_PE_SORTED, GENOMECOV, HTSEQ_COUNTS, FEATURECOUNTS, ALL_COUNTS
-    #input: HTSEQ_COUNTS, RESULTS_EDGER
+    input: GENOMECOV, GENOMECOV_PLUS, GENOMECOV_MINUS
+#        MAPPED_PE_SORTED,  \
+#        GENOMECOV, \
+#        HTSEQ_COUNTS, \
+#        FEATURECOUNTS, \
+#        HTSEQ_COUNTS, \
+#        ALL_COUNTS, \
+#        RESULTS_EDGER 
     params: qsub=config["qsub"]
     shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
