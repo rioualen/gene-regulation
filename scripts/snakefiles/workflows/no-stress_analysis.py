@@ -66,6 +66,7 @@ include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/bowtie2_paire
 #include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/convert_sam_to_bam.rules"
 include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/util.rules"
 #include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/sorted_bam.rules"
+include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/genome_coverage.rules"
 include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/htseq.rules"
 include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/featurecounts.rules"
 include: config["dir"]["fg-chip-seq"] + "/scripts/snakefiles/rules/index_bam.rules"
@@ -148,7 +149,7 @@ BOWTIE2 = expand(config["dir"]["results"] + "{sample_ids}/{sample_ids}_{trimmed}
 
 SAM_BAM = expand(config["dir"]["results"] + "{sample_ids}/{sample_ids}_{trimmed}_{alignment}.bam", sample_ids=SAMPLE_IDS, trimmed=TRIMMED, alignment=ALIGNMENT)
 BAM_SORTED = expand(config["dir"]["results"] + "{sample_ids}/{sample_ids}_{trimmed}_{alignment}_{sorting}.bam", sample_ids=SAMPLE_IDS, trimmed=TRIMMED, alignment=ALIGNMENT, sorting=SORTING)
-GENOMECOV = expand(config["dir"]["results"] + "{sample_ids}/{sample_ids}_{trimmed}_{alignment}_{sorting}_genomecov.tfd", sample_ids=SAMPLE_IDS, trimmed=TRIMMED, alignment=ALIGNMENT, sorting=SORTING)
+GENOMECOV = expand(config["dir"]["results"] + "{sample_ids}/{sample_ids}_{trimmed}_{alignment}_{sorting}_genomecov.tdf", sample_ids=SAMPLE_IDS, trimmed=TRIMMED, alignment=ALIGNMENT, sorting=SORTING)
 #BAM_SORTED_BY_NAME = expand(config["dir"]["results"] + "{sample_ids}/{sample_ids}_{trimmed}_{alignment}_sorted_name.bam", sample_ids=SAMPLE_IDS, trimmed=TRIMMED, alignment=ALIGNMENT, sorting=SORTING)
 BAM_INDEX = expand(config["dir"]["results"] + "{sample_ids}/{sample_ids}_{trimmed}_{alignment}_{sorting}.bam.bai", sample_ids=SAMPLE_IDS, trimmed=TRIMMED, alignment=ALIGNMENT, sorting=SORTING)
 
@@ -172,20 +173,20 @@ rule all:
     input:
         # GUNZIP_FASTQ, \
         #;RSYNC_FASTQ, \
-        RAW_FASTQC, \
+        #RAW_FASTQC, \
         # TRIMMED_ALL
         # TRIMMED_FASTQ, \
         #TRIMMED_fatal
-        TRIMMED_FASTQC, \
+        #TRIMMED_FASTQC, \
         # BOWTIE2_INDEX, \
         # BOWTIE2
         # SAM_BAM
-        # BAM_SORTED, \
+        BAM_SORTED, \
         #BAM_SORTED_BY_NAME, \
         BAM_INDEX, \
         GENOMECOV, \
         # HTSEQ_COUNT, \
-        FEATURECOUNTS, \
+#        FEATURECOUNTS, \
         # OUT_HTSEQ
 #        RESULTS_EDGER, \
 #        RESULTS_DESEQ2
