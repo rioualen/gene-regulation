@@ -187,9 +187,9 @@ MAPPED_PE_SORTED=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename
 MAPPED_PE_SORTED_BY_NAME=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["sorted_name"] + ".bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 if (verbosity >= 3):
     print ("MAPPED_PE_SORTED_BY_NAME:\n\t" + "\n\t".join(MAPPED_PE_SORTED_BY_NAME))
-GENOMECOV=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["sorted_pos"] + "_genomecov.bedgraph", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
-GENOMECOV_PLUS=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["sorted_pos"] + "_genomecov_strand+.bedgraph", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
-GENOMECOV_MINUS=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["sorted_pos"] + "_genomecov_strand-.bedgraph", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+GENOMECOV=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["sorted_pos"] + "_genomecov.tdf", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+GENOMECOV_PLUS=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["sorted_pos"] + "_genomecov_strand+.tdf", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+GENOMECOV_MINUS=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["sorted_pos"] + "_genomecov_strand-.tdf", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 
 #----------------------------------------------------------------#
 # Read counts per gene (done with htseq-count)
