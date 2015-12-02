@@ -33,7 +33,7 @@ import datetime
 import pandas as pd
 
 ## Config
-configfile: "scripts/snakefiles/workflows/Celegans-H3K27me3.json"
+configfile: "scripts/snakefiles/workflows/Celegans-H3K27me3.yml"
 workdir: config["dir"]["base"]
 verbosity = int(config["verbosity"])
 
@@ -135,8 +135,7 @@ TRIM_QC = expand(RESULTS_DIR + "{samples}/{samples}_{trimmer}_fastqc/", samples=
 # Alignment
 #----------------------------------------------------------------#
 
-## to avoid duplicates, fasta sequence should be moved to {genome} directly...
-BWA_INDEX = expand(config["dir"]["genome"] + "{genome}/BWAIndex/{genome}.fa.bwt", genome=GENOME)
+BWA_INDEX = expand(config["genome"]["dir"] + "BWAIndex/{genome}.fa.bwt", genome=GENOME)
 #BOWTIE2_INDEX = expand(config["dir"]["genome"] + "{genome}/Bowtie2Index/{genome}.fa.1.bt2", genome=GENOME)
 
 MAPPING = expand(RESULTS_DIR + "{alignment}.sam", alignment=ALIGNMENT)
@@ -175,12 +174,22 @@ rule all:
 	"""
 	Run all the required analyses
 	"""
-	input: GRAPHICS, IMPORT, PEAK_MOTIFS#, RAW_QC, TRIM_QC
+	input: GRAPHICS, IMPORT, RAW_QC, PEAK_MOTIFS#, TRIM_QC
 	#BED_FEAT_COUNT, PURGE_PEAKS, PEAKS_LENGTH
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
-## /!\ C.elegans chromosomes not properly named, this should be acted upon at the beginning of the workflow
+
+ruleorder: chr_names > sam_to_bam
+
+rule chr_names:
+    input: "{file}.sam"
+    output: "{file}.bam"
+    shell:"awk '{{gsub(\"NC_003279.8\",\"chrI\"); gsub(\"NC_003280.10\",\"chrII\"); gsub(\"NC_003281.10\",\"chrIII\"); gsub(\"NC_003282.8\",\"chrIV\"); gsub(\"NC_003283.11\",\"chrV\"); gsub(\"NC_003284.9\",\"chrX\"); print}}' {input} > {input}.converted; \
+            samtools view -b -S {input}.converted > {output}"
+
+
+## /!\ C.elegans chromosomes not properly named, this should be acted upon at the beginning of the workflow /!\
 # tmp
 #rule bed_chr_id_conversion:
 #	input: "{file}.aligned.bed"
