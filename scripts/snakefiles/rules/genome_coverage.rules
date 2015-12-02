@@ -1,8 +1,9 @@
 """Compute genome coverage from aligned reads.
 
-Requirements: Kent userApps canbe downloaded from.
+Requirements: 
 
-http://hgdownload.cse.ucsc.edu/admin/exe/userApps.src.tgz
+- Kent userApps (http://hgdownload.cse.ucsc.edu/admin/exe/userApps.src.tgz)
+- bedtools
 
 """
 
@@ -11,7 +12,7 @@ rule install_bedgraphtobigwig:
     shell: "wget {params.url}"
 
 
-# # Set defaults params in case they're not defined in config file. 
+# ## Set defaults params in case they are not defined in config file. 
 # if not "genome_coverage" in config.keys():
 #     config["genome_coverage"] =  {'intervals': 200}
 
@@ -32,18 +33,26 @@ rule genome_coverate_dz:
         + "  > {output} 2> {log}"
 
 
-
-rule genome_coverage_bedgrah:
+rule genome_coverage_bedgraph:
     """Compute genome coverage from a bam-formatted file with aligned reads.
 
     """
     input: reads="{reads}.bam"
-    output: bedg="{reads}_genomecov.bedgraph"
+    output: bedg="{reads}_genomecov.bedGraph"
     log:  "{reads}_genomecov_bg.log"
     benchmark:  "{reads}_genomecov_bg_benchmark.json"
     params: qsub = config["qsub"] + " -q long -e {reads}_genomecov_bg_qsub.err -o {reads}_genomecov_bg_qsub.out"
     shell: "bedtools genomecov -bg -ibam {input.reads} " \
         + "  > {output.bedg} 2> {log}"
+
+rule bedgraphtobigwig:
+    """Convert bedGraph to bigWig format."""
+    input: chromizes="", bedgraph="{coverage}.bedGraph"
+    output: "{coverage}.bw"
+    log:  "{coverage}_bedGraphToBigWig.log"
+    benchmark:  "{coverage}_bedGraphToBigWig.json"
+    params: qsub = config["qsub"] + " -q long -e {coverage}_bedGraphToBigWig_qsub.err -o {coverage}_bedGraphToBigWig_qsub.out"
+    shell: "bedGraphToBigWig {input.bedgrap} {input.chromsizes} {output} 2> {log}"
 
 # rule genome_coverage_bgwig:
 #     """Compute genome coverage from a bam-formatted file with aligned reads.
