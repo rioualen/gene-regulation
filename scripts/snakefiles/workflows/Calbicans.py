@@ -107,7 +107,7 @@ REPORT = expand(RESULTS_DIR + "report.html")
 
 ## Suffixes (beta) (! implement several values for each param)
 
-ALIGNER="bwa".split()# bowtie2
+ALIGNER="bowtie2".split()# bowtie2
 ALIGNMENT=expand("{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)
 
 PEAKCALLER="homer_peaks macs2-qval" + config["macs2"]["qval"] + "_peaks swembl-R" + config["swembl"]["R"] + " bPeaks_allGenome"#"macs14-pval" + config["macs14"]["pval"] + "_peaks"spp-fdr" + config["spp"]["fdr"] + "
@@ -166,10 +166,39 @@ rule all:
 	"""
 	Run all the required analyses
 	"""
-	input: GRAPHICS,  IMPORT, BWA_INDEX, MAPPING, PEAKS#, PEAK_MOTIFSRAW_QC,
+	input: GRAPHICS, RAW_QC, IMPORT, MAPPING, PEAKS#, PEAK_MOTIFS,
 	#BED_FEAT_COUNT, PURGE_PEAKS, PEAKS_LENGTH
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
+
+## In order to properly name chromosomes, step "sam to bam" is replaced by chr_names
+
+ruleorder: chr_names > sam_to_bam
+
+rule chr_names:
+    input: "{file}.sam"
+    output: "{file}.bam"
+    shell:"awk '{{gsub(\"Ca19-mtDNA\",\"mtDNA\"); \
+            gsub(\"Ca21chr1_C_albicans_SC5314\",\"chr1\"); \
+            gsub(\"Ca21chr2_C_albicans_SC5314\",\"chr2\"); \
+            gsub(\"Ca21chr3_C_albicans_SC5314\",\"chr3\"); \
+            gsub(\"Ca21chr4_C_albicans_SC5314\",\"chr4\"); \
+            gsub(\"Ca21chr5_C_albicans_SC5314\",\"chr5\"); \
+            gsub(\"Ca21chr6_C_albicans_SC5314\",\"chr6\"); \
+            gsub(\"Ca21chr7_C_albicans_SC5314\",\"chr7\"); \
+            gsub(\"Ca21chrR_C_albicans_SC5314\",\"chrR\"); print}}' {input} > {input}.converted; \
+            samtools view -b -S {input}.converted > {output}"
+
+#Ca19-mtDNA
+#Ca21chr1_C_albicans_SC5314
+#Ca21chr2_C_albicans_SC5314
+#Ca21chr3_C_albicans_SC5314
+#Ca21chr4_C_albicans_SC5314
+#Ca21chr5_C_albicans_SC5314
+#Ca21chr6_C_albicans_SC5314
+#Ca21chr7_C_albicans_SC5314
+#Ca21chrR_C_albicans_SC5314
+
 
 ##================================================================#
 ##                          Report                                #
