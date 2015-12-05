@@ -4,7 +4,6 @@ Requirements:
 
 - Kent userApps (http://hgdownload.cse.ucsc.edu/admin/exe/userApps.src.tgz)
 - bedtools
-
 """
 
 rule install_bedgraphtobigwig:
@@ -29,21 +28,74 @@ rule genome_coverate_dz:
     log:  "{reads}_genomecov_dz.log"
     benchmark:  "{reads}_genomecov_dz_benchmark.json"
     params: qsub = config["qsub"] + " -q long -e {reads}_genomecov_dz_qsub.err -o {reads}_genomecov_dz_qsub.out"
-    shell: "bedtools genomecov -dz -ibam {input.reads} " \
+    shell: "bedtools genomecov -strand -dz -ibam {input.reads} " \
         + "  > {output} 2> {log}"
 
 
 rule genome_coverage_bedgraph:
-    """Compute genome coverage from a bam-formatted file with aligned reads.
+    """Compute genome coverage from a bam-formatted file with aligned
+    reads.  The coverage file is in bedgraph format, which can be
+    loaded in the genome viewer IGV.
 
     """
-    input: reads="{reads}.bam"
-    output: bedg="{reads}_genomecov.bedGraph"
+    input: reads = "{reads}.bam"
+    output: bedg = "{reads}_genomecov.bedgraph"
     log:  "{reads}_genomecov_bg.log"
     benchmark:  "{reads}_genomecov_bg_benchmark.json"
     params: qsub = config["qsub"] + " -q long -e {reads}_genomecov_bg_qsub.err -o {reads}_genomecov_bg_qsub.out"
-    shell: "bedtools genomecov -bg -ibam {input.reads} " \
-        + "  > {output.bedg} 2> {log}"
+    shell: "bedtools genomecov -bg -ibam {input.reads} > {output.bedg} 2> {log}" 
+
+rule genome_coverage_bedgraph_strands:
+    """Compute two strand-specific genome coverage files (with suffixes
+    _strand- and _strand+) from a bam-formatted file with aligned
+    reads.  The coverage files are in bedgraph format, which can be
+    loaded in the genome viewer IGV.
+
+    """
+    input: reads = "{reads}.bam"
+    output: bedg_plus = "{reads}_genomecov_strand+.bedgraph", \
+            bedg_minus = "{reads}_genomecov_strand-.bedgraph"
+    log:  "{reads}_genomecov_bg_str.log"
+    benchmark:  "{reads}_genomecov_bg_str_benchmark.json"
+    params: qsub = config["qsub"] + " -q long -e {reads}_genomecov_bg_str_qsub.err -o {reads}_genomecov_bg_str_qsub.out"
+    shell: "bedtools genomecov -bg -strand + -ibam {input.reads} > {output.bedg_plus} 2> {log}" \
+        + "; bedtools genomecov -bg -strand - -ibam {input.reads} > {output.bedg_minus} 2>> {log}"
+
+rule bedgraph_to_tdf:
+    """Convert bedgraph to TDF format, which is recommended to load
+    coverage data in IGV.
+    
+    The conversion relies on igvtools:
+    https://www.broadinstitute.org/software/igv/igvtools
+
+    """
+    input: "{coverage}.bedgraph"
+    output: "{coverage}.tdf"
+    log: "{coverage}_bedgraph_to_tdf.log"
+    benchmark: "{coverage}_bedgraph_to_tdf_benchmark.json"
+    params: genome=config["genome"]["fasta"], \
+            qsub = config["qsub"] + " -q long -e {coverage}_bedgraph_to_tdf_qsub.err -o {coverage}_bedgraph_to_tdf_qsub.out"
+    shell: "igvtools totdf {input} {output} {params.genome} 2> {log}"
+
+
+rule bam2wig:    
+    """Compute genome coverage from a bam-formatted file with aligned
+    reads and produce a wig or bigWig file, the recommended format to
+    upload coverage-type data as UCSC tracks.
+
+    """
+    input: "{reads}.bam"
+    output: "{reads}.wig"
+    log:  "{reads}_bam2wig.log"
+    benchmark:  "{reads}_bam2wig_benchmark.json"
+    params: output_prefix = "{reads}", \
+            chromsize = config["genome"]["chromsize"], \
+            qsub = config["qsub"] + " -q long -e {reads}_bam2wig_qsub.err -o {reads}_bam2wig_qsub.out"
+    shell: "bam2wig.py -i {input} -s {params.chromsize} -o {params.output_prefix} 2> {log}" 
+    
+
+# rule bedgraph_to_bigwig:
+# TO BE WRITTEN    
 
 rule bedgraphtobigwig:
     """Convert bedGraph to bigWig format."""

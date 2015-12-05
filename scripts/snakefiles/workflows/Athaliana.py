@@ -43,7 +43,6 @@ PYTHON = os.path.join(FG_LIB, "scripts/snakefiles/python_lib")
 
 include: os.path.join(PYTHON, "util.py")
 include: os.path.join(RULES, "util.rules")
-
 include: os.path.join(RULES, "bwa_index.rules")
 include: os.path.join(RULES, "bwa_se.rules")
 include: os.path.join(RULES, "bowtie2_index.rules")
@@ -68,7 +67,7 @@ include: os.path.join(RULES, "sra_to_fastq.rules")
 include: os.path.join(RULES, "swembl.rules")
 
 #================================================================#
-#                      Data & config                             #
+#                      Data & wildcards                             #
 #================================================================#
 
 # Raw data
@@ -91,23 +90,9 @@ RESULTS_DIR = config["dir"]["results"]
 if not os.path.exists(RESULTS_DIR):
     os.makedirs(RESULTS_DIR)
 
-#================================================================#
-#                         Workflow                               #
-#================================================================#
+## Programs
 
-## Data import & merging.
-
-## À revoir, rsync output du texte -> plante flowcharts...
-#os.system("rsync -rupltv --exclude '*.tab' " + READS + " " + RESULTS_DIR)
-IMPORT = expand(RESULTS_DIR + "{samples}/{samples}.fastq", samples=SAMPLE_IDS) 
-
-## Graphics & reports
-GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
-REPORT = expand(RESULTS_DIR + "report.html")
-
-## Suffixes (beta) (! implement several values for each param)
-
-ALIGNER="bwa".split()# bowtie2
+ALIGNER="bowtie2".split()# bwa
 ALIGNMENT=expand("{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)
 
 PEAKCALLER="homer_peaks macs2-qval" + config["macs2"]["qval"] + "_peaks swembl-R" + config["swembl"]["R"]# + " bPeaks_allGenome"#"macs14-pval" + config["macs14"]["pval"] + "_peaks"spp-fdr" + config["spp"]["fdr"] + "
@@ -115,6 +100,18 @@ PEAKCALLER=PEAKCALLER.split()
 PEAKCALLING=expand(expand("{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER)
 
 MOTIFS=expand(expand("{treat}_vs_{control}/{{peakcaller}}/peak-motifs/{treat}_vs_{control}_{{aligner}}_{{peakcaller}}_purged", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER)
+
+#================================================================#
+#                         Workflow                               #
+#================================================================#
+
+## Data import & merging.
+
+IMPORT = expand(RESULTS_DIR + "{samples}/{samples}.fastq", samples=SAMPLE_IDS) 
+
+## Graphics & reports
+GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
+REPORT = expand(RESULTS_DIR + "report.html")
 
 #----------------------------------------------------------------#
 # Quality control
@@ -166,8 +163,7 @@ rule all:
 	"""
 	Run all the required analyses
 	"""
-	input: PEAK_MOTIFS, GRAPHICS, RAW_QC#, IMPORT, BWA_INDEX, MAPPING, PEAKS, PEAK_MOTIFS
-	#BED_FEAT_COUNT, PURGE_PEAKS, PEAKS_LENGTH
+	input: IMPORT, GRAPHICS, PEAK_MOTIFS#RAW_QC, BWA_INDEX, MAPPING, PEAKS, 
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 

@@ -8,6 +8,7 @@
     "genome": {
         "organism": "Desulfovibrio_desulfuricans_ATCC_27774_uid59213",
         "genome_version": "Desulfovibrio_desulfuricans_atcc_27774.GCA_000022125.1.27",
+	"fasta": "genome/Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27.dna.genome.fa",
         "base_url_fasta": "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-27/fasta/bacteria_1_collection/desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774/dna/",
         "sequence": "Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27.dna.genome",
         "sequence_top": "Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27.dna.toplevel",
@@ -78,6 +79,9 @@
 
     "subread": {
         "basename": "reference_index",
+	"feature_type": "transcript",
+	"paired_ends": "FALSE",
+	"multi_overlaps": "TRUE", 
         "reference_genome": "genome/Desulfovibrio_desulfuricans_ATCC_27774_uid59213_genome.fasta",
         "gtf_attrtype": "gene_id",
         "annotations": "genome/Desulfovibrio_desulfuricans_subsp_desulfuricans_str_atcc_27774.GCA_000022125.1.27.gtf"

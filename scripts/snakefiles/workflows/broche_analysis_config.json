@@ -8,6 +8,8 @@
     "genome": {
 	"organism": "Escherichia_coli_str_k_12_substr_mg1655",
         "genome_version": "Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28",
+        "fasta": "genome/Escherichia_coli_K_12_substr__MG1655_uid57779/NC_000913.fna",
+        "chromsize": "genome/Escherichia_coli_K_12_substr__MG1655_uid57779/NC_000913_chromsize.tab",
         "base_url_fasta": "ftp://ftp.ensemblgenomes.org/pub/bacteria/release-28/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655/dna/",
         "sequence": "Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.dna.genome",
 	"fasta": "genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.2.28.dna.genome.fa",
