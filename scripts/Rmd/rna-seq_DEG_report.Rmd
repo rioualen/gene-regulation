@@ -22,7 +22,10 @@ knitr::opts_chunk$set(echo=FALSE, eval=TRUE, cache=FALSE, message=FALSE, warning
 
 
 ```{r Loading R libraries, warning=FALSE}
-library(knitr)
+library(knitr) ## Required to run this Rmd file and produce a markdown file (.md)
+library(markdown) ## Required to convert the markdown (.md) file into HTML or pdf documents
+library(xlsx) ## To export Excel tables
+
 library("stats4bioinfo") ## Generic library from Jacques van Helden
 library("edgeR", warn.conflicts = FALSE, quietly=TRUE) ## Differential expression with RNA-seq
 library("DESeq2", warn.conflicts = FALSE, quietly=TRUE, verbose=FALSE) ## Differential expression with RNA-seq
@@ -38,13 +41,8 @@ PROJECT-SPECIFIC PARAMETERS: THIS PART SHOULD BE ADAPTER FOR EACH PROJECT -->
 ## Project information
 
 ```{r Required parameters}
-#parameter.file <- "~/BeatriceRoche/reports/report_DEG_broche_parameters.R"
-parameter.file <- "/home/lkhamvongsa/mountrsatlocal/Mathilde/reports/rna-seq_DEG_parameters.R"
 if (!exists("parameter.file")) {
-  ## The prompt does not seem to work with the Rmd documents
-  #   message("Choose the parameter file")
-  #   parameter.file <- file.choose()
-  stop("This report requires to specify a variable named parameter.file, containing the path to an R file describing the parameters for this analysis.")
+  stop("This report requires to specify a variable named 'parameter.file', containing the path to an R file describing the parameters for this analysis.")
 }
 source(file=parameter.file)
 ```
@@ -149,13 +147,13 @@ if (exists("gene.info.file")) {
 # View(gene.info)
 
 ## Export the gene information table to keep a trace of what has been used. 
-gene.info.out <- paste(sep="", prefix["general.file"], "_gene_descriptions.tab")
+gene.info.out <- paste(sep="", prefix["general.file"], "_gene_descriptions")
 verbose(paste("Exporting gene information table", gene.info.out), 1)
 write.table(x = gene.info, row.names = FALSE,
-            file = file.path(dir.base, gene.info.out), sep = "\t", quote=FALSE)
+            file = file.path(dir.base, paste(sep=".", gene.info.out, "tab")), sep = "\t", quote=FALSE)
+write.xlsx(x = gene.info, row.names = FALSE,
+           file = file.path(dir.base, paste(sep=".", gene.info.out, "xlsx")))
 verbose(paste(sep="", "\tGene info table\t", gene.info.out), 1)
-
-
 
 ```
 
@@ -286,9 +284,11 @@ stats.per.sample$log10.cpm.mean <- apply(cpms.log10, 2, mean)
 # names(stats.per.sample)
 # head(stats.per.sample)
 verbose("Exporting stats per sample", 1)
-sample.summary.file <- paste(sep="", prefix["general.file"], "_summary_per_sample.tab")
+sample.summary.file <- paste(sep="", prefix["general.file"], "_summary_per_sample")
 write.table(x = stats.per.sample, row.names = TRUE, col.names=NA, 
-            file = file.path(dir.base, sample.summary.file), sep = "\t", quote=FALSE)
+            file = file.path(dir.base, paste(sep=".", sample.summary.file, "tab")), sep = "\t", quote=FALSE)
+write.xlsx(x = stats.per.sample, row.names = TRUE, col.names=NA, 
+           file = file.path(dir.base, paste(sep=".", sample.summary.file, "xlsx")))
 verbose(paste(sep="", "\tSummary per sample\t", sample.summary.file), 1)
 ```
 
@@ -514,10 +514,12 @@ for (i in 1:nrow(design)) {
   # View(result.table)
   
   ## Save the completed DESeq2 result table
-  deseq2.result.file <- paste(sep = "", prefix["comparison_file"], "DESeq2.tab")
-  comparison.summary[i,"deseq2"] <- deseq2.result.file
+  deseq2.result.file <- paste(sep = "", prefix["comparison_file"], "DESeq2")
+  comparison.summary[i,"deseq2"] <- paste(sep=".", deseq2.result.file, c("tab", "xlsx"))
   write.table(x = deseq2.result.table, row.names = FALSE, 
-              file = file.path(dir.base, deseq2.result.file), sep = "\t", quote=FALSE)
+              file = file.path(dir.base, paste(sep=".", deseq2.result.file, "tab")), sep = "\t", quote=FALSE)
+  write.xlsx(x = deseq2.result.table, row.names = FALSE, 
+             file = file.path(dir.base, paste(sep=".", deseq2.result.file, "xlsx")))
   verbose(paste(sep="", "\t\tDESeq2 result file\t", deseq2.result.file), 1)
   
 
@@ -529,11 +531,12 @@ for (i in 1:nrow(design)) {
                         "edgeR" = edger.result.table[row.names(result.table),])
  
   ## Export edgeR result table
-  edger.result.file <- paste(sep="", prefix["comparison_file"], "edgeR.tab")
-  comparison.summary[i,"edger"] <- edger.result.file
-  
+  edger.result.file <- paste(sep="", prefix["comparison_file"], "edgeR")
+  comparison.summary[i,"edger"] <- paste(sep=".", edger.result.file, c("tab", "xlsx"))
   write.table(x = edger.result.table, row.names = FALSE, 
-              file = file.path(dir.base, edger.result.file), sep = "\t", quote=FALSE)
+              file = file.path(dir.base, paste(sep=".", edger.result.file, "tab")), sep = "\t", quote=FALSE)
+  write.xlsx(x = edger.result.table, row.names = FALSE, 
+             file = file.path(dir.base, paste(sep=".", edger.result.file, "xlsx")))
   verbose(paste(sep="", "\t\tedgeR result file\t", edger.result.file), 1)
 
   ################################################################
@@ -555,10 +558,12 @@ for (i in 1:nrow(design)) {
   ################################################################
   result.file <- paste(sep = "", 
                        prefix["comparison_file"], 
-                       "_", suffix.deg, "_DESeq2_and_edgeR.tab")
-  comparison.summary[i,"result.table"] <- result.file
+                       "_", suffix.deg, "_DESeq2_and_edgeR")
+  comparison.summary[i,"result.table"] <- paste(sep=".", result.file, c("tab", "xlsx"))
   write.table(x = result.table, row.names = FALSE,
-              file = file.path(dir.base, result.file), sep = "\t", quote=FALSE)
+              file = file.path(dir.base, paste(sep=".", result.file, "tab")), sep = "\t", quote=FALSE)
+  write.xlsx(x = result.table, row.names = FALSE,
+              file = file.path(dir.base, paste(sep=".", result.file, "xlsx")))
   verbose(paste(sep="", "\t\tMerged result file\t", result.file), 1)
   
   
@@ -579,19 +584,23 @@ for (i in 1:nrow(design)) {
   verbose("Exporting tables with up-regulated genes only")
   deg.file.up <- paste(sep = "", 
                     prefix["comparison_file"], 
-                    "_", suffix.deg, "_selected_DEG_up.tab")
-  comparison.summary[i,"deg.table.up"] <- deg.file.up
+                    "_", suffix.deg, "_selected_DEG_up")
+  comparison.summary[i,"deg.table.up"] <- paste(sep=".", deg.file.up, c("tab", "xlsx"))
   write.table(x = result.table[up.genes, selected.columns], row.names = FALSE,
-              file = file.path(dir.base, deg.file.up), sep = "\t", quote=FALSE)
+              file = file.path(dir.base, paste(sep=".", deg.file.up, "tab")), sep = "\t", quote=FALSE)
+  write.xlsx(x = result.table[up.genes, selected.columns], row.names = FALSE,
+              file = file.path(dir.base, paste(sep=".", deg.file.up, "xlsx")))
   verbose(paste(sep="", "\t\tSelected DEG file with up-regulated genes\t", deg.file.up), 1)
 
   verbose("Exporting tables with down-regulated genes only")
   deg.file.down <- paste(sep = "", 
                     prefix["comparison_file"], 
-                    "_", suffix.deg, "_selected_DEG_down.tab")
-  comparison.summary[i,"deg.table.down"] <- deg.file.down
+                    "_", suffix.deg, "_selected_DEG_down")
+  comparison.summary[i,"deg.table.down"] <- paste(sep=".", deg.file.down, c("tab", "xlsx"))
   write.table(x = result.table[down.genes, selected.columns], row.names = FALSE,
-              file = file.path(dir.base, deg.file.down), sep = "\t", quote=FALSE)
+              file = file.path(dir.base, paste(sep=".", deg.file.down, "tab")), sep = "\t", quote=FALSE)
+  write.xlsx(x = result.table[down.genes, selected.columns], row.names = FALSE,
+             file = file.path(dir.base, paste(sep=".", deg.file.down, "xlsx")))
   verbose(paste(sep="", "\t\tSelected DEG file with down-regulated genes\t", deg.file.down), 1)
 
 }
