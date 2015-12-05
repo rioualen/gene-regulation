@@ -14,7 +14,7 @@ library("DESeq2", warn.conflicts = FALSE, quietly=TRUE, verbose=FALSE)
 library("limma", warn.conflicts = FALSE, quietly=TRUE) ## Required for vennCounts and vennDiagram
 library(gplots, warn.conflicts = FALSE, quietly=TRUE) ## Required for heatmaps.2
 library(RColorBrewer, warn.conflicts = FALSE, quietly=TRUE)
-library("GenomicFeatures")
+library("GenomicFeatures") ## Parse GTF file
 library("clusterProfiler")
 library("stats4bioinfo")
 
@@ -27,11 +27,11 @@ source(file.path(dir.fg, "scripts/R-scripts/deg_lib.R"))
 
 ## Define parameters
 run.param <- list()
-run.param$exploratory.plots <- FALSE
+run.param$save.image <- TRUE ## Save memory image in an RData file
+run.param$exploratory.plots <- FALSE ## Export exploratory plots (sometimes heavy, and not very useful)
 deg.tools <- c("edgeR", "DESeq2")
 
 verbosity <- 1
-save.image <- TRUE ## Save memory image in an RData file
 
 ## The only argument is the file containing all the parameters for the analysis
 if (is.na(commandArgs(trailingOnly = FALSE)[6])) {
@@ -41,8 +41,9 @@ if (is.na(commandArgs(trailingOnly = FALSE)[6])) {
   #org <- "dm_sepsis"
   #org <- "eco"
   if (org == "eco") {
-    ## TEMPORARY FOR DEBUGGING: 
-    source ("~/BeatriceRoche/config_files/roche-loiseau_config.R")
+    ## TEMPORARY
+    source(file.path(dir.fg, "scripts","snakefiles","workflows","broche_analysis_Rparams.R"))
+    # source ("~/BeatriceRoche/config_files/roche-loiseau_config.R")
 #     dir.main <- "~/BeatriceRoche/"
 #     setwd(dir.main)
 #     r.params.path <- "results/DEG/sickle_pe_q20_bowtie2_pe_sorted_name_params.R"  
@@ -73,7 +74,7 @@ if (is.na(commandArgs(trailingOnly = FALSE)[6])) {
     organism.names <- c("name" = "Drosophila melanogaster",
                         "clusterProfiler" = "fly",
                         "kegg"="dme")
-  }else if (org=="dm_sepsis") {
+  } else if (org=="dm_sepsis") {
     dir.main <- "/home/lkhamvongsa/mountrsatlocal/droso_sepsis"
     setwd(dir.main)
     r.params.path <- "results/DEG/sickle-se-q20_subread_featurecounts_params.R"  
@@ -89,7 +90,7 @@ if (is.na(commandArgs(trailingOnly = FALSE)[6])) {
     organism.names <- c("name" = "Drosophila melanogaster",
                         "clusterProfiler" = "fly",
                         "kegg"="dme")
-  }else {
+  } else {
     message(paste("No info for org", org))
   }
 } else {
@@ -111,18 +112,12 @@ if (!exists("thresholds")) {
 }
 
 
-## Define a color palette for heatmaps. I like this Red-Blue palette because 
-## - it suggests a subjective feeling of warm (high correlation)/cold (low correlation)
-## - it can be seen by people suffering from red–green color blindness.
-cols.heatmap <- rev(colorRampPalette(brewer.pal(9,"RdBu"))(100))
-
 ## A trick: to enable log-scaled plots for 0 values, I add an epsilon increment
 epsilon <- 0.01
 
 ## Read the sample description file, which indicates the 
 ## condition associated to each sample ID.
 verbose("Reading sample descriptions", 1)
-
 sample.desc <- read.delim(sample.description.file, sep="\t", 
                           comment=";", header = TRUE, row.names=1)
 sample.ids <- row.names(sample.desc)
@@ -175,20 +170,25 @@ if (length(ids.not.found) > 0) {
 
 verbose("Computing count-derived metrics (log-transformed)", 1)
 
-## The next step is useful only with htseq-count results, 
+## The next step is useful only with htseq-count results 
+## (since we are moving to featureCounts, it should be suppressed soon).
 ## in order to suppress the statistics that are inserted within the count files themselves.
 ## Statistics on reads that could not be mapped to genes for different reasons (intergenic, ambiguous, not unique, ...)
 all.counts.htseq.stats <- all.counts[grep(pattern = "^__", x = row.names(all.counts)), ]
 # dim(all.counts.htseq.stats)
-all.counts.mapped <- all.counts[grep(invert=TRUE, pattern = "^__", x = row.names(all.counts)), ]
-# dim(all.counts.mapped)
+all.counts <- all.counts[grep(invert=TRUE, pattern = "^__", x = row.names(all.counts)), ]
+# dim(all.counts)
 
-## Add an epsilon to 0 values only, in order to enable log-transform and display on logarithmic axes
-all.counts.mapped.epsilon <- all.counts.mapped
-all.counts.mapped.epsilon[all.counts.mapped==0] <- epsilon
+
+########################################################################
+## Treatment of 0 values.
+## Add an epsilon to 0 values only, in order to enable log-transform and display on logarithmic axes.
+verbose(paste("Treating zero-values by adding epsilon =", epsilon), 2)
+all.counts.epsilon <- all.counts
+all.counts.epsilon[all.counts==0] <- epsilon
 
 ## Log-transformed data for some plots. 
-all.counts.mapped.log10 <- log10(all.counts.mapped.epsilon)
+all.counts.log10 <- log10(all.counts.epsilon)
 
 
 ################################################################
@@ -220,17 +220,17 @@ if (exists("gtf.file")) {
   gene.info$description <- "no description"
 } else {
   verbose(paste("No GTF file has been specified"))
-  g <- nrow(all.counts.mapped)
+  g <- nrow(all.counts)
   gene.info <- data.frame("seqnames"=rep(NA, times=g),
                           "start"=rep(NA, times=g),
                           "end"=rep(NA, times=g),
                           "width"=rep(NA, times=g),
                           "strand"=rep(NA, times=g),
-                          "gene_id"=row.names(all.counts.mapped),
-                          "name"=row.names(all.counts.mapped),
+                          "gene_id"=row.names(all.counts),
+                          "name"=row.names(all.counts),
                           "entrez.id" = rep(NA, times=g),
                           "description"=rep("no description", times=g))
-  row.names(gene.info) <- row.names(all.counts.mapped)
+  row.names(gene.info) <- row.names(all.counts)
 }
 # View(gene.info)
 
@@ -275,17 +275,17 @@ verbose(paste(sep="", "\tGene info table\t", gene.info.out), 1)
 verbose("Computing statistics per sample", 1)
 
 stats.per.sample <- cbind(  
-  sample.desc[names(all.counts.mapped), ],
+  sample.desc[names(all.counts), ],
   data.frame(
-    "sum" = apply(all.counts.mapped, 2, sum, na.rm=TRUE),
-    "mean" = apply(all.counts.mapped, 2, mean, na.rm=TRUE),
-    "min" = apply(all.counts.mapped, 2, min, na.rm=TRUE),
-    "perc05" = apply(all.counts.mapped, 2, quantile, probs=0.05, na.rm=TRUE),
-    "perc25" = apply(all.counts.mapped, 2, quantile, probs=0.25, na.rm=TRUE),
-    "median" = apply(all.counts.mapped, 2, median, na.rm=TRUE),
-    "perc75" = apply(all.counts.mapped, 2, quantile, probs=0.75, na.rm=TRUE),
-    "perc95" = apply(all.counts.mapped, 2, quantile, probs=0.95, na.rm=TRUE),
-    "max" = apply(all.counts.mapped, 2, max, na.rm=TRUE)
+    "sum" = apply(all.counts, 2, sum, na.rm=TRUE),
+    "mean" = apply(all.counts, 2, mean, na.rm=TRUE),
+    "min" = apply(all.counts, 2, min, na.rm=TRUE),
+    "perc05" = apply(all.counts, 2, quantile, probs=0.05, na.rm=TRUE),
+    "perc25" = apply(all.counts, 2, quantile, probs=0.25, na.rm=TRUE),
+    "median" = apply(all.counts, 2, median, na.rm=TRUE),
+    "perc75" = apply(all.counts, 2, quantile, probs=0.75, na.rm=TRUE),
+    "perc95" = apply(all.counts, 2, quantile, probs=0.95, na.rm=TRUE),
+    "max" = apply(all.counts, 2, max, na.rm=TRUE)
   )
 )
 stats.per.sample$Mreads <- round(stats.per.sample$sum/1e6, digits = 1)
@@ -293,8 +293,8 @@ stats.per.sample$Mreads <- round(stats.per.sample$sum/1e6, digits = 1)
 ## Count number and the fraction of samples with counts below the mean. 
 ## This shows the impact of very large counts: in my test samples, 
 ## 85% of the samples have a value below the mean (i.e. the mean is at the percentile 85 !)
-stats.per.sample$below.mean <- apply(t(all.counts.mapped) < stats.per.sample$mean, 1, sum, na.rm=TRUE)
-stats.per.sample$fract.below.mean <- stats.per.sample$below.mean/nrow(all.counts.mapped)
+stats.per.sample$below.mean <- apply(t(all.counts) < stats.per.sample$mean, 1, sum, na.rm=TRUE)
+stats.per.sample$fract.below.mean <- stats.per.sample$below.mean/nrow(all.counts)
 # View(stats.per.sample)
 
 
@@ -310,14 +310,16 @@ verbose("Computing CPMs", 1)
 ## (very highly expressed genes).  A more robust normalisation criterion 
 ## is to use the 75th percentile, or the median. We use the median, somewhat arbitrarily, 
 ## beause it gives a nice alignment on the boxplots.
-cpms.libsum <- cpm(all.counts.mapped.epsilon)    ## Counts per million reads, normalised by library sum
-cpms.perc75 <- cpm(all.counts.mapped.epsilon, lib.size = stats.per.sample$perc75)    ## Counts per million reads, normalised by 75th percentile
-cpms.perc95 <- cpm(all.counts.mapped.epsilon, lib.size = stats.per.sample$perc95)    ## Counts per million reads, normalised by 95th percentile
-cpms.median <- cpm(all.counts.mapped.epsilon, lib.size = stats.per.sample$median)    ## Counts per million reads, normalised by sample-wise median count
+cpms.libsum <- cpm(all.counts.epsilon)    ## Counts per million reads, normalised by library sum
+cpms.perc75 <- cpm(all.counts.epsilon, lib.size = stats.per.sample$perc75)    ## Counts per million reads, normalised by 75th percentile
+cpms.perc95 <- cpm(all.counts.epsilon, lib.size = stats.per.sample$perc95)    ## Counts per million reads, normalised by 95th percentile
+cpms.median <- cpm(all.counts.epsilon, lib.size = stats.per.sample$median)    ## Counts per million reads, normalised by sample-wise median count
 #cpms <- cpms.median ## Choose one normalization factor for the CPMs used below
 cpms <- cpms.perc75 ## Choose one normalization factor for the CPMs used below
 cpms.log10 <- log10(cpms) ## Log-10 transformed CPMs, with the epsilon for 0 counts
 cpms.log2 <- log2(cpms) ## Log-10 transformed CPMs, with the epsilon for 0 counts
+
+## Compute Trimmed Means of M Values (TMM)
 
 stats.per.sample$cpm.mean <- apply(cpms, 2, mean)
 stats.per.sample$log2.cpm.mean <- apply(cpms.log2, 2, mean)
@@ -359,11 +361,11 @@ for (cond in conditions) {
   dir.create(path = dir.condition, showWarnings = FALSE, recursive = TRUE)
   
   ## Select the specific data for the current condition (samples, counts, CPMs)
-  #all.counts.mapped.with.replicate <- setdiff(names(all.counts.mapped), "CI_CI_0H_1")
-  current.samples <- names(all.counts.mapped)[sample.conditions == cond]
+  #all.counts.with.replicate <- setdiff(names(all.counts), "CI_CI_0H_1")
+  current.samples <- names(all.counts)[sample.conditions == cond]
   nrep <- length(current.samples)
   
-  current.counts <- all.counts.mapped[,current.samples]
+  current.counts <- all.counts[,current.samples]
   current.counts[current.counts==0] <- epsilon
   current.counts.mean <- apply(current.counts, 1, mean)
   current.counts.var <- apply(current.counts, 1, var)
@@ -419,8 +421,8 @@ verbose("Starting differential analysis", 1)
 
 ## Iterate over analyses
 i <- 1
-comparison.results <- design
-comparison.results$prefixes <- paste(sep="_", design$cond1, "vs", design$cond2)
+comparison.summary <- design
+comparison.summary$prefixes <- paste(sep="_", design$cond1, "vs", design$cond2)
 for (i in 1:nrow(design)) {
   
   ## Identify samples for the first condition
@@ -440,12 +442,12 @@ for (i in 1:nrow(design)) {
   verbose(paste(sep="", "\tDifferential analysis\t", i , "/", nrow(design), "\t", cond1, " vs ", cond2), 1)
   
   ## Create a specific result directory for this differential analysis
-  prefix["comparison"] <- comparison.results$prefixes[i]
+  prefix["comparison"] <- comparison.summary$prefixes[i]
   dir.analysis <- file.path(dir.DEG, paste(sep="", prefix["comparison"]))
-  comparison.results$dir.analysis <- dir.analysis
+  comparison.summary$dir.analysis <- dir.analysis
   dir.create(path = dir.analysis, showWarnings = FALSE, recursive = TRUE)
   dir.figures <- file.path(dir.analysis, "figures")
-  comparison.results$dir.figures <- dir.figures
+  comparison.summary$dir.figures <- dir.figures
   dir.create(path = dir.figures, showWarnings = FALSE, recursive = TRUE)
   prefix["comparison_file"] <- file.path(dir.analysis, prefix["comparison"])
   prefix["comparison_figure"] <- file.path(
@@ -454,7 +456,7 @@ for (i in 1:nrow(design)) {
   
   ## Select counts for the samples belonging to the two conditions
   current.samples <- c(samples1, samples2)
-  current.counts <- all.counts.mapped[,current.samples]
+  current.counts <- all.counts[,current.samples]
   # dim(current.counts)  ## For test
   # names(current.counts)
   
@@ -555,7 +557,7 @@ for (i in 1:nrow(design)) {
   
   ## Save the completed DESeq2 result table
   deseq2.result.file <- paste(sep = "", prefix["DESeq2_file"], ".tab")
-  comparison.results[i,"deseq2"] <- deseq2.result.file
+  comparison.summary[i,"deseq2"] <- deseq2.result.file
   write.table(x = deseq2.result.table, 
               row.names = FALSE, file = deseq2.result.file, sep = "\t", quote=FALSE)
   verbose(paste(sep="", "\t\tDESeq2 result file\t", deseq2.result.file), 1)
@@ -629,7 +631,7 @@ for (i in 1:nrow(design)) {
   
   ## Export edgeR result table
   edger.result.file <- paste(sep="", prefix["edgeR_file"], ".tab")
-  comparison.results[i,"edger"] <- edger.result.file
+  comparison.summary[i,"edger"] <- edger.result.file
   
   write.table(x = edger.result.table, 
               row.names = FALSE, file = edger.result.file, sep = "\t", quote=FALSE)
@@ -708,7 +710,7 @@ for (i in 1:nrow(design)) {
   result.file <- paste(sep = "", 
                        prefix["comparison_file"], 
                        "_", suffix.deg, "_DESeq2_and_edgeR.tab")
-  comparison.results[i,"result.table"] <- result.file
+  comparison.summary[i,"result.table"] <- result.file
   
   write.table(x = result.table, row.names = FALSE,
               file = result.file, sep = "\t", quote=FALSE)
@@ -844,6 +846,7 @@ for (i in 1:nrow(design)) {
        ylab=paste(sep="", "M = log2(", cond1, "/", cond2, ")"),
        col=gene.colors,
        panel.first=grid(lty="solid", col="#DDDDDD"))
+  
   ## Plot genes on the top layer to highlight them
   points(result.table[both,c("A", "M")], col=gene.palette["both"])
   points(result.table[DESeq2.only,c("A", "M")], col=gene.palette["DESeq2.only"])
@@ -1140,11 +1143,11 @@ verbose(paste(sep="", "\tSummary per analysis\t", summary.file), 1)
 ## Save an image of memory in order to reload the whole analysis without 
 ## re-computing everything. 
 ## This memory image can also be directly loaded into memory on another computer.
-if (save.image) {
+if (run.param$save.image) {
   image.file <- paste(sep="", prefix["general.file"], "_memory_image.RData")
   verbose(paste("Working directory", getwd()), 1)
   verbose(paste("Saving memory image", image.file), 1)
-  save.image(file=image.file, compress=TRUE)
+  run.param$save.image(file=image.file, compress=TRUE)
 } else {
   verbose("Skipping memory image saving")
 }
