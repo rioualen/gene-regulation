@@ -530,7 +530,8 @@ calc.stats.per.sample <- function(sample.descriptions,
       "median" = apply(all.counts, 2, median, na.rm=TRUE),
       "perc75" = apply(all.counts, 2, quantile, probs=0.75, na.rm=TRUE),
       "perc95" = apply(all.counts, 2, quantile, probs=0.95, na.rm=TRUE),
-      "max" = apply(all.counts, 2, max, na.rm=TRUE)
+      "max" = apply(all.counts, 2, max, na.rm=TRUE),
+      "zeros" = apply(all.counts == 0, 2, sum, na.rm=TRUE)
     )
   )
   stats.per.sample$Mreads <- round(stats.per.sample$sum/1e6, digits = 1)
