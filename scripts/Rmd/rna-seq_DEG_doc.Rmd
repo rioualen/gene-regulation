@@ -1,0 +1,60 @@
+---
+title: "Help for the interpretation of RNA-seq differential analysis reports"
+author: "Jacques van Helden"
+output:
+  html_document:
+    fig_caption: yes
+    highlight: zenburn
+    theme: cerulean
+    toc: yes
+    toc_depth: 3
+  pdf_document:
+    fig_caption: yes
+    highlight: zenburn
+    toc: yes
+    toc_depth: 3
+  word_document: default
+date: '`r Sys.Date()`'
+---
+
+
+* * * * * 
+### Counts Per Million reads (CPM)
+
+The conversion of counts to **counts per million reads** (**CPM**) aims at normalizing the between-library (betwen-sample) differences in sequencing depth. Indeed, a typical analysis amounts to compare samples sequenced with varying number of reads. In some cases, the total number of reads per library
+
+**CPM** stands for **Counts per million reads**. For some graphical representations, it is useful to rescale the counts between samples. 
+
+The most intuitive way to do this would be to divide each count by the total number of reads. However, not all rads can be mapped onto genes, and they would thus not all appear in the count tables used for differential analysis. The next possibility is thus to use as scaling factor the sum of reads per genes (**libsum** for "library sum") for the considered sample. However, *the libsum is strongly affected by the outlier genes* (i.e. those associated with a huge number of reads). The **mean count** per sample is *affected by outliers* exactly in the same way, since it equals the libsum divided by the number of genes. 
+
+A more robust scaling factor is to use the **median count** (median of all the counts per gene for the considered sample). 
+
+The CPM is computed by dividing each gene count by the scaling factor, and multiplying by 1.000.000. 
+
+By definition, the median CPM values must equal 1 million for each sample. Consistently, the median bars appear at the level 6 on the X axis of the $log_{10}(CPM)$ plots. 
+
+* * * * * 
+
+## Treatment of zero values
+
+Zero counts are problematic for logarithmic representations, since $log_{10}(0) = -\infty$, and can thus not be represented graphically. To circumvent this, we replaced zero counts by an epsilon (default $\epsilon = 0.01$). Since this epsilon is smaller than 1, genes with zero counts appear as negative values on the log10(counts) plots. 
+
+
+
+
+* * * * *
+
+## How to interpret count distribution box plots?
+
+We suggest to first look the log2 plots on the right side, because the original counts are generally collapsedon the left side due to the huge count numbers in an handful of outlier genes. 
+
+Let us discuss for example the figure entitled **log10(counts) per sample**.
+
+- The thick vertical line in the middle of a box indicates the **median value** (beware, these correspond to counts in the left panels, and log10(counts) in the right panels).
+- The filled box indicates the **inter-quartile range**. The IQR indicates the range from the first to the third quartile. It thus covers the 50% most centered values (25% on each side of the median). 
+- The dashed horizontal line surrounded by two vertical ticks indicates a confidence interval around the median.
+- The circles represent **outliers**, i.e. genes whose expression level falls outside of the confidence interval. 
+Note that the concept of confidence interval is not relevant for such data types. Confidence intervals are typically used to indicate the reliability and precision of a parameter estimated from a sample drawn from some population. However, in expression data, each dot represents one particular gene, which has its own expression, so that the ranges of expression will reflect their individual particularity rather than sampling fluctuations around some population parameter. 
+
+For RNA-seq data, the interest of this representation is to highlight some genes associated with very high numbers of reads (circles on the right side of the confidence intervals).
+
