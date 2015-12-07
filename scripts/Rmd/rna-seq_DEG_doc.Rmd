@@ -1,0 +1,126 @@
+---
+title: "Help for the interpretation of RNA-seq differential analysis reports"
+author: "Jacques van Helden"
+date: '`r Sys.Date()`'
+output:
+  word_document: default
+  pdf_document:
+    fig_caption: yes
+    highlight: zenburn
+    toc: yes
+    toc_depth: 3
+  html_document:
+    fig_caption: yes
+    highlight: zenburn
+    theme: cerulean
+    toc: yes
+    toc_depth: 3
+---
+
+
+* * * * * 
+## Sample-wise rescaling of counts per gene
+
+It is important to take into account the between-library (betwen-sample) differences in sequencing depth. Indeed, a typical differential analysis requires to compare counts per genes obtained from sequencing libraries sequenced with varying number of reads. In some cases, the total number of reads per library can show wide fluctuations between samples (factor 2 to 10) for different reasons (e.g. quality of the DNA library).
+
+The methods to detect differentially expressed genes have their own way to ensure between-sample normalization for the sequencing depth. However for visualisation purposes (e.g. read density maps, between-replicate scatter plots, ...) it is sometimes useful to ensure **sample-wise rescaling**, independently of differential analysis. 
+
+Various methods have been proposed to ensure sample-wise rescaling:
+
+- **counts per million reads** (**CPM**)
+- **reads per kilobase per million** (**RPKM**)
+- **fragments per kilobase per million** (**FPKM**)
+
+We currently compute CPMs. 
+
+### Counts per million reads (CPMs)
+
+**CPM** stands for **Counts per million reads**. For some graphical representations, it is useful to rescale the counts between samples. 
+
+The most intuitive way to do this would be to divide each count by the total number of reads. However, not all rads can be mapped onto genes, and they would thus not all appear in the count tables used for differential analysis. The next possibility is thus to use as scaling factor the sum of reads per genes (**libsum** for "library sum") for the considered sample. However, *the libsum is strongly affected by the outlier genes* (i.e. those associated with a huge number of reads). The **mean count** per sample is *affected by outliers* exactly in the same way, since it equals the libsum divided by the number of genes. 
+
+A more robust scaling factor is to use the **median count** (median of all the counts per gene for the considered sample). 
+
+The CPM is computed by dividing each gene count by the scaling factor, and multiplying by 1.000.000.
+
+$$CPM_{i,j} = n_{i,j} \cdot f_{j}$$
+
+Where $n_{i,j}$ is the number of reads counted for the $i^{th}$ gene (row of the count matrix) in the $j^{th}$ sample (column), $f_{j}$ is the scaling factor for sample $j$, and $CPM_{i,j}$ is the CPM statistics for gene $i$ in sample $j$. 
+
+By construction, when the median per sample is used as scaling factor, the median CPM values must equal 1 million for each sample. Consistently, the median bars appear at the level 6 on the X axis of the $log_{10}(CPM)$ plots. 
+
+Note that "CPMs" computed with any other scaling factor than the libsum are not properly called "counts per million reads". We should probably rename them **rescaled counts**.  
+
+
+
+
+* * * * * 
+
+## Treatment of zero values
+
+Zero counts are problematic for logarithmic representations, since $log_{10}(0) = -\infty$, and can thus not be represented graphically. To circumvent this, we replaced zero counts by an epsilon (default $\epsilon = 0.01$). Since this epsilon is smaller than 1, genes with zero counts appear as negative values on the log10(counts) plots. 
+
+Note that after rescaling the zero counts may become larger than 1, and thus appear as positive values on log10(CPM) plots. 
+
+* * * * * 
+
+## Sample-wise statistics
+
+### Mreads
+
+Sum of counts per sample, expressed in million reads.
+
+$$M_{j} = \frac{\sum_{i=1}^{g}n_{i,j}}{1,000,000}$$
+
+where $g$ is the number of genes (rows of the count table), $n_{i,j}$ is the number of counts mapped to gene $i$ in sample $j$, and $M_j$ is the total number of million reads for sample $j$.
+
+### Zeros
+
+Number of genes with zero counts. 
+
+### Detected
+
+Number of "detected" genes, i.e. genes counted at least once.
+
+### Percentiles
+
+The percentile indicates the value below which a certain percent of the observations lie. 
+
+- 5\% of the values are smaller than or equal to the percentile 5.
+- 25\% of the values are smaller than or equal to the percentile 25.
+- 50\% of the values are smaller than or equal to the percentile 50 (this is the **median**).
+- 75\% of the values are smaller than or equal to the percentile 75.
+- 95\% of the values are smaller than or equal to the percentile 95.
+
+
+
+### max/sum ratio
+
+Ratio between max and the sum of counts per gene for a given sample. A high value may reveal strong problems with some over-abundant transcripts (e.g. ribosomial RNA) which mobilized the majority of the counts. 
+
+### median/mean ratio
+
+In RNA-seq counts, the mean counts per gene is generally strongly affected by a handful of genes associated with very large count values ("outliers"). 
+The **median/mean ratio** is the ratio between sample-wise median and mean counts per genes. In a normal distribution, the median equals the mean, and the ratio would thus give one. Values smaller than one indicate right-skewed distributions (the mean is larger than the median). Since bin RNA-seq data the mean is strongly affected by the outliers, the median/mean ratio is generally indicative of the importance of these outliers in the total counts. 
+
+### Fraction of genes below the mean
+
+In a normal distribution, the mean equals the median, thus 50\% of the values are lower than the mean. In RNA-seq counts, the median is generally much lower than the mean, and the fraction of genes below the mean can be much higher than 50\%. 
+
+
+* * * * *
+
+## Read count distributions
+
+We suggest to first look the log2 plots on the right side, because the original counts are generally collapsedon the left side due to the huge count numbers in an handful of outlier genes. 
+
+Let us discuss for example the figure entitled **log10(counts) per sample**.
+
+- The thick vertical line in the middle of a box indicates the **median value** (beware, these correspond to counts in the left panels, and log10(counts) in the right panels).
+- The filled box indicates the **inter-quartile range**. The IQR indicates the range from the first to the third quartile. It thus covers the 50% most centered values (25% on each side of the median). 
+- The dashed horizontal line surrounded by two vertical ticks indicates a confidence interval around the median.
+- The circles represent **outliers**, i.e. genes whose expression level falls outside of the confidence interval. 
+Note that the concept of confidence interval is not relevant for such data types. Confidence intervals are typically used to indicate the reliability and precision of a parameter estimated from a sample drawn from some population. However, in expression data, each dot represents one particular gene, which has its own expression, so that the ranges of expression will reflect their individual particularity rather than sampling fluctuations around some population parameter. 
+
+For RNA-seq data, the interest of this representation is to highlight some genes associated with very high numbers of reads (circles on the right side of the confidence intervals).
+
