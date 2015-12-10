@@ -1,0 +1,90 @@
+"""Peak-calling with SICER.
+Input: sam, bam, bed... automatically detected by macs' callpeak algorithm. Bed format was used here. 
+Output: bed
+
+Usage example: 
+ 
+Required parameters:
+    ...
+Optional parameters:
+    ...
+"""
+# Contributors: 
+#        Claire Rioualen
+
+# Set defaults params in case they're not defined in config file. 
+if not "version" in config["genome"].keys():
+    sys.exit("The parameter genome version must be defined in the config file")
+
+if not "sicer" in config.keys():
+    config["sicer"] = {}
+
+if not "redundancy" in config["sicer"].keys():
+    config["sicer"]["redundancy"] = "1"
+
+if not "win_size" in config["sicer"].keys():
+    config["sicer"]["win_size"] = "200"
+
+if not "frag_size" in config["sicer"].keys():
+    config["sicer"]["frag_size"] = "50"
+
+if not "genome_fraction" in config["sicer"].keys():
+    config["sicer"]["genome_fraction"] = "20"
+
+if not "gap_size" in config["sicer"].keys():
+    config["sicer"]["gap_size"] = "600"
+
+if not "fdr" in config["sicer"].keys():
+    config["sicer"]["fdr"] = "0.05"
+
+rule sicer:
+    input:
+        treatment="{result_dir}/{treatment}/{treatment}_{aligner}.bed", \
+        control="{result_dir}/{control}/{control}_{aligner}.bed"
+    params:
+        indir="{result_dir}/{treatment}/", \
+        bedfile="{treatment}_{aligner}.bed", \
+        ctrlfile="{control}_{aligner}.bed", \
+        outdir="{result_dir}/{treatment}_vs_{control}/sicer-fdr{fdr}/", \
+        species=config["genome"]["version"], \
+        redun=config["sicer"]["redundancy"], \
+        winsize=config["sicer"]["win_size"], \
+        fragsize=config["sicer"]["frag_size"], \
+        genfraction=config["sicer"]["genome_fraction"], \
+        gapsize=config["sicer"]["gap_size"], \
+        fdr = config["sicer"]["fdr"]
+#        qsub=config["qsub"] \
+#          + " -q long -e {result_dir}/{treatment}_vs_{control}/sicer-fdr{fdr}/{treatment}_vs_{control}_{aligner}_sicer-fdr{fdr}_qsub.err" \
+#          + " -o {result_dir}/{treatment}_vs_{control}/sicer-fdr{fdr}/{treatment}_vs_{control}_{aligner}_sicer-fdr{fdr}_qsub.out" 
+    output:
+        peaks_bed = "{result_dir}/{treatment}_vs_{control}/sicer-fdr{fdr}/{treatment}_vs_{control}_{aligner}_sicer-fdr{fdr}.bed"
+#    message: "SICER is looking for histone marks in {treatment} versus {control} samples..."
+    log: "{result_dir}/{treatment}_vs_{control}/sicer-fdr{fdr}/{treatment}_vs_{control}_{aligner}_sicer-fdr{fdr}.log"
+#    benchmark: "{result_dir}/{treatment}_vs_{control}/sicer-fdr{fdr}/{treatment}_vs_{control}_{aligner}_sicer-fdr{fdr}_benchmark.json"
+    shell: """
+(SICER.sh {params.indir} {params.bedfile} {params.ctrlfile} {params.outdir} {params.species} {params.redun} {params.winsize} {params.fragsize} {params.genfraction} {params.gapsize} {params.fdr})&> {log}
+ls {params.outdir}*island.bed | xargs -I '{{}}' mv '{{}}' {output.peaks_bed}
+"""
+
+
+
+#sh SICER.sh ["InputDir"] ["bed file"] ["control file"] ["OutputDir"] ["Species"] ["redundancythreshold"] ["window size (bp)"] ["fragment size"] ["effective genome fraction"] ["gap size (bp)"]
+#["FDR"]
+
+#sh ~/bin/SICER_V1.1/SICER/SICER.sh /home/rioualen/Desktop/test_sicer-fdr{fdr}/ chip.bed input.bed /home/rioualen/Desktop/test_sicer-fdr{fdr} ce10 1 200 50 20 600 0.01
+
+# 
+
+##!/bin/bash
+
+## !!!!Replace it with your own directory!!!
+#SICER=/home/data/SICER1.1/SICER
+
+##["InputDir"] ["bed file"] ["control file"] ["OutputDir"] ["Species"] ["redundancy threshold"] ["window size (bp)"] ["fragment size"] ["effective genome fraction"]   ["gap size (bp)"] ["FDR"]
+#sh $SICER/SICER.sh /home/data/SICER1.1/SICER/ex test.bed control.bed . hg18 1 200 150 0.74 600 .01
+
+
+#Pa PAO1 6.3 x 106
+
+
+
