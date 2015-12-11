@@ -1,4 +1,4 @@
-# Shared code for France Genomique WP2.6 - Regulation
+# Shared code for France Genomique WP2.6 - Gene Regulation
 
 ## Purpose of this repository
 
@@ -15,23 +15,98 @@ different bioinformaticians involved in ChIP-seq and RNA-seq projects.
 
 3. Enable validation of the code by independent users.
 
+## Workflow examples
 
-**Beware!** This folder should only contain re-usable code: 
+This repository contains basic workflow examples. 
 
-- R libraries,
-- snakemake rules, 
-- generic snakemake workflows than can be included as sub-workflows in
-  project-specific snakefiles.
+### Transcription factors
 
-Project-specific code should be handled in user-specific directories,
-and should be no means be submitted to the distributed git repository.
+The file `factor_workflow.py` is designed to perform ChIP-seq analysis on transcription factor studies. 
+
+Two associated config files are designed to work with this workflow: `Athaliana-Myb.yml` and `Scerevisiae-GCN4.yml`.
+
+In order to launch the workflows, you can enter the following commands from the root of the repository:
+
+```
+snakemake -s scripts/snakefiles/workflows/factor_workflow.py --configfile scripts/snakefiles/workflows/Scerevisiae-GCN4.yml -p -n
+snakemake -s scripts/snakefiles/workflows/factor_workflow.py --configfile scripts/snakefiles/workflows/Athaliana-Myb.yml -p -n
+```
+This ensures the workflows are executable. Remove the -n option to actually run them. 
+
+### Histone marks
+
+The file `histone_workflow.py` is designed to perform ChIP-seq analysis on histone marks data. 
+
+Two associated config files are designed to work with this workflow: `Celegans-H3K4me3.yml` and `Celegans-H3K27me3.yml`.
+
+In order to launch the workflows, you can enter the following commands from the root of the repository:
+
+```
+snakemake -s scripts/snakefiles/workflows/histone_workflow.py --configfile scripts/snakefiles/workflows/Celegans-H3K4me3.yml -p -n
+snakemake -s scripts/snakefiles/workflows/histone_workflow.py --configfile scripts/snakefiles/workflows/Celegans-H3K27me3.yml -p -n
+```
+This ensures the workflows are executable. Remove the -n option to actually run them. 
+
+### Data organisation
+
+From the example config files, it is assumed that, in order to run the workflows, you have the following file organisation:
+
+```
+/data/
+    Athaliana-Myb/
+        GSM1482283/
+            SRR1554463.sra
+        GSM1482284/
+            SRR1554464.sra
+        design.tab
+        samples.tab
+    Celegans-H3K27me3/
+        GSM1217457/
+            SRR1198569.sra
+        GSM121745/
+            SRR1198570.sra
+        GSM121745/
+            SRR1198571.sra
+        GSM1217460/
+            SRR1198572.sra
+        design.tab
+        samples.tab
+    Celegans-H3K4me3/
+        GSM120836/
+            SRR952381.sra
+        GSM1217457/
+            SRR1198569.sra
+        design.tab
+        samples.tab
+    Scerevisiae-GCN4/
+        GSM147015/
+            SRR1542426.sra
+        GSM1470160/
+            SRR1542427.sra
+        GSM147016/
+            SRR1542428.sra
+        GSM147016/
+            SRR1542429.sra
+        GSM1470163/
+            SRR1542430.sra
+        GSM1470164/
+            SRR1542431.sra
+        design.tab
+        samples.tab
+    genomes/
+        ce10/
+            ce10.fa
+        sacCer3/
+            sacCer3.fa
+        TAIR10/
+            TAIR10.fa
+```
+
+All the data is available from the GEO platform. 
 
 ## Contact
 
 - Claire Rioualen <claire.rioualen@inserm.fr>
 - Jacques van Helden <Jacques.van-helden@univ-amu.fr>
 
-# genome-regulation-analysis
 
-
-this is a test
