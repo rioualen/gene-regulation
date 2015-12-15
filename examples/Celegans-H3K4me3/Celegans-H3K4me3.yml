@@ -1,0 +1,114 @@
+---
+  description: |
+    This config file is designed to work with the workflow Athaliana.py.
+
+    Note\: yaml format prohibits using tabulations.
+
+    Optional parameters, if not provided, are automatically set to the default value provided with the given program.
+
+  author: "Claire Rioualen"
+  qsub: "-V -m a -d /data" 
+  verbosity: "0"                                         # beware:    verbosity can interfere with flowcharts creation
+
+  genome:
+    organism: "Caenorhabditis elegans"
+    size: " 100286401"                                      # required: if using macs2, macs14, homer...
+    version: "ce10"                                        # required: has to match genome filenames and directories
+    file: "/data/genomes/ce10/ce10.fa"                       # required: fasta file is required for a number of operations
+    dir: "/data/genomes/ce10/"                             # required
+    data: "http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE49870"
+
+  files: 
+    samples: "/data/Celegans-H3K4me3/samples.tab"        # required: has to contain at least sample ids in 1st column of tab-delimited file
+    design: "/data/Celegans-H3K4me3/design.tab"          # required: has to contain at least ids of samples to be compared in 1st 2 columns of tab-delimited file
+
+  dir: 
+    base: "."
+    fg_lib: "."
+    reads_source: "/data/Celegans-H3K4me3/"              # directory: contains raw data organized in sub directories named after the samples
+    results: "/data/results/Celegans-H3K4me3/"       # directory: path where all result files should be stored
+    reports: "/data/results/Celegans-H3K4me3/"
+    genomes: "/data/genomes/"
+    r_libs: "lib/R-packages/"                            # required: where to look for installed R libraries (spp, bPeaks...)
+    pgrm: "~/bin/"                                      # required // todo
+
+  reports: 
+    dag: "/data/results/Celegans-H3K4me3/dag"
+    rulegraph: "/data/results/Celegans-H3K4me3/rule"
+
+  sickle: 
+    threshold: "20"
+    qual: "sanger"
+
+  fastqc: 
+    other_options: ""
+
+  bwa: 
+    dir: "/data/genomes/ce10/BWAIndex/"                    # optional: where to index the genome if needed, where to look for index if already existing (def: <genome dir>/BWAIndex)
+    threads: "10"                                        # optional: number of threads to speed up calculations (def: 1)
+
+  bowtie2:
+    dir: "/data/genomes/ce10/Bowtie2Index/"                # optional: where to index the genome if needed, where to look for index if already existing (def: <genome dir>/Bowtie2Index)
+    threads: "10"                                        # optional: number of threads to speed up calculations (def: 1)
+
+  samtools: 
+    sort_by_name: ""                                     # optional
+
+
+## Peak-calling
+
+  bPeaks: 
+    IPcoeff: "2"                                         # optional: default is 2
+    controlCoeff: "4"                                    # optional: default is 2
+    log2FC: "1"                                          # optional: default is 2
+    averageQuantiles: "0.8"                              # optional: default is 0.9
+    windowSize: "50"                                     # optional: default is 150
+    windowOverlap: "40"                                  # optional: default is 50
+
+  homer: 
+    style: "histone"                                     # optional: default is factor, else can be: histone, groseq, tss, dnase, super, mC (beware of output filenames)
+    genome: "/data/genomes/ce10/ce10.fa"                 # required: either path to the fasta file or the official genome version (has to be installed manually w/ HOMER) ## TODO to be removed
+    F: "2"                                               # optional: default is 4
+    L: "2"                                               # optional: default is 4
+    P: "0.01"                                            # optional: default is 0.0001
+    fdr: "0.01"                                          # optional: default is 0.001
+
+  macs14:
+    pval: "0.00001"                                      # opt, to be tested (def: 0.00001)
+    mfold: "10,30"                                       # opt, to be tested (def: 10,30)
+    keep_dup: "auto"                                     # opt, to be tested (def: auto, else int)
+    bandwidth: "300"                                     # opt, to be tested (def: 300)
+    other_options: "--nomodel"                                    # opt, to be tested can include: -bdg (time-consuming), -wig (time-consuming), --call-summits (requires PeakSplitter)
+
+  macs2: 
+    qval: "0.05"                                         # optional: default is 0.05
+    keep_dup: "all"                                      # optional: default is 1
+    mfold_min: "2"                                       # optional: default is 5
+    mfold_max: "50"                                      # optional: default is 50
+    other_options: "--broad --nomodel"                             # optional: default is empty, can include --call-summits, --broad (those 2 being mutually exclusive)...
+    type: "broad"                                        # optional, either broad or narrow. default = narrow
+
+  sicer: 
+    fdr: "0.01"                                          # optional: default is 0.01
+
+  spp: 
+    fdr: "0.01"                                          # optional: default is 0.01
+
+  swembl:
+    R: "0.1"                                             # optional: default is 0 -- no idea how it works though...
+    x: "1.2"                                             # optional: default is 1 -- no idea how it works though...
+
+
+
+  peak-motifs: 
+    tasks: "all"                                                                                    # optional: default is "all (incl. purge,seqlen,composition,ref_motifs,disco,meme,chipmunk,merge_words,motifs_vs_ref,motifs_vs_db,timelog,synthesis) (what about collect_motifs,motifs_vs_motifs,archive,small_summary,scan ?...)
+    max_seq_len: "0"                                                                                # default ? curr not used
+    motif_db: "jaspar_core_nematodes tf $RSAT/public_html/motif_databases/JASPAR/jaspar_core_nematodes_2015_03.tf"          # required: name format db_file
+    disco: "oligos,positions,dyads"                                                                  # default ? oligos|dyads|positions|local_words|merged_words|meme|chipmunk
+
+  oligo_analysis: 
+    count_oligo: "1 2 6"                                 # optional: 
+
+
+
+
