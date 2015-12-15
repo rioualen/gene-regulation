@@ -1,4 +1,6 @@
-# Shared code for France Genomique WP2.6 - Gene Regulation
+# France Genomique  Workpackage 2.6 - Gene Regulation
+
+Last update: 15/12/15
 
 ## Purpose of this repository
 
@@ -28,8 +30,8 @@ Two associated config files are designed to work with this workflow: `Athaliana-
 In order to launch the workflows, you can enter the following commands from the root of the repository:
 
 ```
-snakemake -s scripts/snakefiles/workflows/factor_workflow.py --configfile scripts/snakefiles/workflows/Scerevisiae-GCN4.yml -p -n
-snakemake -s scripts/snakefiles/workflows/factor_workflow.py --configfile scripts/snakefiles/workflows/Athaliana-Myb.yml -p -n
+snakemake -s scripts/snakefiles/workflows/factor_workflow.py --configfile examples/Scerevisiae-GCN4/Scerevisiae-GCN4.yml -p -n
+snakemake -s scripts/snakefiles/workflows/factor_workflow.py --configfile examples/Athaliana-Myb/Athaliana-Myb.yml -p -n
 ```
 This ensures the workflows are executable. Remove the -n option to actually run them. 
 
@@ -42,8 +44,8 @@ Two associated config files are designed to work with this workflow: `Celegans-H
 In order to launch the workflows, you can enter the following commands from the root of the repository:
 
 ```
-snakemake -s scripts/snakefiles/workflows/histone_workflow.py --configfile scripts/snakefiles/workflows/Celegans-H3K4me3.yml -p -n
-snakemake -s scripts/snakefiles/workflows/histone_workflow.py --configfile scripts/snakefiles/workflows/Celegans-H3K27me3.yml -p -n
+snakemake -s scripts/snakefiles/workflows/histone_workflow.py --configfile examples/Celegans-H3K4me3/Celegans-H3K4me3.yml -p -n
+snakemake -s scripts/snakefiles/workflows/histone_workflow.py --configfile examples/Celegans-H3K27me3/Celegans-H3K27me3.yml -p -n
 ```
 This ensures the workflows are executable. Remove the -n option to actually run them. 
 
@@ -102,7 +104,7 @@ From the example config files, it is assumed that, in order to run the workflows
             TAIR10.fa
 ```
 
-All the data is available from the GEO platform. 
+All the data is available from the GEO platform. `samples.tab` and `design.tab` can be found in the repository examples section. 
 
 ## Contact
 

@@ -28,7 +28,7 @@ import datetime
 import pandas as pd
 
 ## Config
-configfile: "scripts/snakefiles/workflows/Athaliana.yml"                                                        ####
+#configfile: "scripts/snakefiles/workflows/Athaliana.yml"                                                        ####
 workdir: config["dir"]["base"]
 verbosity = int(config["verbosity"])
 
@@ -97,9 +97,9 @@ ALIGNMENT=expand("{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=AL
 PEAKCALLER=[
     "homer_peaks", 
     "macs2-qval" + config["macs2"]["qval"] + "_peaks", 
-    "swembl-R" + config["swembl"]["R"]
-    "macs14-pval" + config["macs14"]["pval"],
-    "bPeaks_allGenome",
+    "swembl-R" + config["swembl"]["R"],
+    "macs14-pval" + config["macs14"]["pval"] + "_peaks",
+#    "bPeaks_allGenome"
 #    "spp-fdr" + config["spp"]["fdr"],
 ]
 PEAKCALLING=expand(expand("{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER)

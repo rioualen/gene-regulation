@@ -140,6 +140,8 @@ RAW_READNB = expand(RESULTS_DIR + "{samples}/{samples}_fastq_readnb.txt", sample
 TRIM = expand(RESULTS_DIR + "{trimming}.fastq", trimming=TRIMMING)
 TRIM_QC = expand(RESULTS_DIR + "{samples}/{samples}_{trimmer}_fastqc/", samples=SAMPLE_IDS, trimmer=TRIMMER)
 
+QC = RAW_QC + TRIM_QC
+
 #----------------------------------------------------------------#
 # Alignment
 #----------------------------------------------------------------#
@@ -183,7 +185,7 @@ rule all:
 	"""
 	Run all the required analyses
 	"""
-	input: RAW_QC, PEAKS#, PEAK_MOTIFS#, TRIM_QC IMPORT RAW_QC, TRIM_QC,   GRAPHICS
+	input: GRAPHICS, QC, PEAKS#, PEAK_MOTIFS#, TRIM_QC IMPORT RAW_QC, TRIM_QC,   
 	#BED_FEAT_COUNT, PURGE_PEAKS, PEAKS_LENGTH
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
