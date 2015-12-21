@@ -4,7 +4,6 @@ author: "Claire Rioualen"
 date: "July 30, 2015"
 output:
   html_document:
-    css: ../styles.css
     fig_caption: yes
     toc: yes
     number_sections: true
