@@ -1,8 +1,18 @@
-# France Genomique  Workpackage 2.6 - Gene Regulation
+---
+title: "France Genomique  Workpackage 2.6 - Gene Regulation
+"
+author: "Claire Rioualen"
+date: "December 21, 2015"
+output:
+  html_document:
+    fig_caption: yes
+    toc: yes
+    number_sections: true
+  pdf_document:
+    toc: yes
+---
 
-Last update: 15/12/15
-
-## Purpose of this repository
+# Purpose of this repository
 
 This git repository holds shared code for the analysis of Next
 Generation Sequencing data related to gene regulation: ChIP-seq,
@@ -17,11 +27,23 @@ different bioinformaticians involved in ChIP-seq and RNA-seq projects.
 
 3. Enable validation of the code by independent users.
 
-## Workflow examples
+# Workflow examples
 
 This repository contains basic workflow examples. 
 
-### Transcription factors
+Pre-requisites:
+
+* R 3+
+* Python 3.3+
+* Snakemake 3.3+
+
+See `doc/install_protocols/install_snakemake_workflows.Rmd` for details.
+
+## Transcription factors
+
+![alt text][factor]
+
+### Execution 
 
 The file `factor_workflow.py` is designed to perform ChIP-seq analysis on transcription factor studies. 
 
@@ -35,7 +57,27 @@ snakemake -s scripts/snakefiles/workflows/factor_workflow.py --configfile exampl
 ```
 This ensures the workflows are executable. Remove the -n option to actually run them. 
 
-### Histone marks
+### Dependencies
+
+* [SRA Toolkit](http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software)
+* [Bowtie 2](http://bowtie-bio.sourceforge.net/)
+* [SAMtools](http://samtools.sourceforge.net/)
+* [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
+* [bedtools](http://bedtools.readthedocs.org/)
+* [HOMER](http://homer.salk.edu/homer/index.html)
+* [MACS1.4](http://liulab.dfci.harvard.edu/MACS/index.html)
+* [MACS2](https://github.com/taoliu/MACS/)
+* [SWEMBL](http://www.ebi.ac.uk/~swilder/SWEMBL/)
+* [RSAT](http://rsat.eu/)
+
+
+## Histone marks
+
+![alt text][histone]
+
+This workflow is adapted for histone marks that show larger profiles than usual TF marks. 
+
+### Execution 
 
 The file `histone_workflow.py` is designed to perform ChIP-seq analysis on histone marks data. 
 
@@ -49,7 +91,21 @@ snakemake -s scripts/snakefiles/workflows/histone_workflow.py --configfile examp
 ```
 This ensures the workflows are executable. Remove the -n option to actually run them. 
 
-### Data organisation
+### Dependencies
+
+* [SRA Toolkit](http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software)
+* [BWA](http://bio-bwa.sourceforge.net/)
+* [SAMtools](http://samtools.sourceforge.net/)
+* [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
+* [bedtools](http://bedtools.readthedocs.org/)
+* [HOMER](http://homer.salk.edu/homer/index.html)
+* [MACS1.4](http://liulab.dfci.harvard.edu/MACS/index.html)
+* [MACS2](https://github.com/taoliu/MACS/)
+* [SWEMBL](http://www.ebi.ac.uk/~swilder/SWEMBL/)
+
+## RNA-seq (TODO)
+
+# Data organisation
 
 From the example config files, it is assumed that, in order to run the workflows, you have the following file organisation:
 
@@ -106,9 +162,24 @@ From the example config files, it is assumed that, in order to run the workflows
 
 All the data is available from the GEO platform. `samples.tab` and `design.tab` can be found in the repository examples section. 
 
-## Contact
+# Documentation
+
+More documentation can be found in the `doc` directory. (under construction)
+
+It includes: 
+
+* Instructions for the installation of dependencies (to be refhreshed)
+* RSAT install guide (to be refreshed)
+* Instructions for building a virtual machine on the IFB cloud or under VirtualBox
+* Some wiki material
+
+
+
+# Contact
 
 - Claire Rioualen <claire.rioualen@inserm.fr>
 - Jacques van Helden <Jacques.van-helden@univ-amu.fr>
 
 
+[factor]: https://github.com/rioualen/gene-regulation/blob/master/examples/factor.png
+[histone]: https://github.com/rioualen/gene-regulation/blob/master/examples/histone.png
