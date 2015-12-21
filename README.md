@@ -1,15 +1,7 @@
 ---
-title: "France Genomique  Workpackage 2.6 - Gene Regulation
-"
+title: "France Genomique  Workpackage 2.6 - Gene Regulation"
 author: "Claire Rioualen"
 date: "December 21, 2015"
-output:
-  html_document:
-    fig_caption: yes
-    toc: yes
-    number_sections: true
-  pdf_document:
-    toc: yes
 ---
 
 # Purpose of this repository
