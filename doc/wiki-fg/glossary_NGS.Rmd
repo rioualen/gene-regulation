@@ -17,7 +17,6 @@ output:
   word_document: default
 ---
 
-We define hereafter a series of abbreviations, terms and concepts which appear recurrently in the litterature about NGS analysis. This document aims at providing a support for the interpretation of analysis reports. 
 
 ## Abbreviations
 
