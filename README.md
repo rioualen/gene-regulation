@@ -86,6 +86,7 @@ This ensures the workflows are executable. Remove the -n option to actually run 
 ### Dependencies
 
 * [SRA Toolkit](http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software)
+* [Sickle](https://github.com/najoshi/sickle)
 * [BWA](http://bio-bwa.sourceforge.net/)
 * [SAMtools](http://samtools.sourceforge.net/)
 * [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
