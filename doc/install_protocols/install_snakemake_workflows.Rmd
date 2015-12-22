@@ -1,16 +1,22 @@
 ---
-title: "Install Snakemake workflows"
+title: "Install & execute Snakemake workflows"
 author: "Claire Rioualen"
-date: "July 30, 2015"
+date: "December 22, 2015"
 output:
   html_document:
     fig_caption: yes
     toc: yes
     number_sections: true
-  pdf_document:
-    toc: yes
 ---
 
+This manual aims at helping you install the necessary programs and dependencies in order to have the snakemake workflows work.
+It was designed for Unix-running computers (Ubuntu, Debian).
+
+Keep in mind that, while most of these tools can be installed by simply issuing an `apt-get` command, this likely won't get you the latest versions to date. You might thus run into dependency issues. 
+
+To know more about the tools themselves, better check the [wiki/informatics section](https://github.com/rioualen/gene-regulation/blob/master/doc/wiki-fg/informatics.md). 
+
+<!--
 ### **TODO**
 
 * Include map of possible "bricks" of worflows (like general rulegraph) with each step's requirement/dependencies
@@ -25,8 +31,6 @@ output:
     - '/etc/init.d/vboxdrv setup' error when restarting
     - disparition vboxnet0
     
-* Since snakemake 3.4: add pyYAML ?
-
 **/!\\** attention pour les rsync, notamment si user + root... ssh, ssh agent ?
 
 * revoir les install via apt-get car pb de version ! 
@@ -36,8 +40,12 @@ output:
 * dependance mkvtree / rsat
 
 * see differences between ubuntu and lmde (python libs notamment)
+* check mac ? 
+
+* check version dependencies and add --version to doc
+-->
     
-## Requirements
+## Pre-requisites in case of virtual machine (VM) development
 
 ### VM creation
 
@@ -63,7 +71,7 @@ Here we used these settings:
 
 # General requirements 
 
-## Tools to install (in the event they're not)
+## Generic tools
 
 ### ssh
 ```
@@ -73,9 +81,7 @@ If you have followed one of the previous tutorials, you should have copied your 
 
 ### rsync
 
-rsync is an open source utility that provides fast incremental file transfer. 
-
-* [rsync page](https://rsync.samba.org/)
+[rsync](https://rsync.samba.org/) is an open source utility that provides fast incremental file transfer. 
 
 ```
 sudo apt-get install rsync
@@ -105,13 +111,11 @@ sudo apt-get install libz-dev
 
 ### qsub
 
-**/?\\** TODO 
-sudo apt-get install slurm-wlm-torque
-! munge
+**TODO**
 
-## Create own bin
+## Create bin/ (opt)
 
-While some programs will be installed completely automatically... some will not. Here we create a directory that will be kept for manual installations. 
+While some programs will be installed completely automatically... some will not. Here we create a directory that will be used for manual installations. 
 ```
 mkdir $HOME/bin
 ```
@@ -141,25 +145,32 @@ Execute the file to validate the change.
 source ~/.profile
 ```
 
-# Snakemake
+# Snakemake workflows basic requirements
 
+<!--
 /!\\ check R versions, python versions, etc...
 
 /!\\ It seems there could an issue with the installation of python module while using sudo or doing is as root...
 Googling "sudo pip" suggests it is a bad idea for safety reasons, and should not be needed...
+-->
 
-## Python 3
+**TODO:** 
 
-Snakemake requires to have Python 3 installed. If you have installed Ubuntu14.04 on your machine by following on of the previous tutorials, you should have both Python 2.7 and Python 3.4 installed for starters. You can check this by issuing the following commands in a terminal: 
+* R section (including lib path issue)
+* Is running pip/pip3 as sudoer necessary or desirable?
+
+## Python
+
+Snakemake requires to have Python 3.3+ installed. If you have installed Ubuntu14.04 on your machine by following one of the previous tutorials, you should have both Python 2.7 and Python 3.4 installed for starters. You can check this by issuing the following commands in a terminal: 
 ```
 python --version # usually the default python version is 2.7+
 python3 --version
 ```
-If you don't have python 3 you should install it, as well as pip3.
+If you don't have python 3 you should install it.
 ```
 sudo apt-get install python3
 ```
-Install pip
+Install pip and pip3.
 ```
 sudo apt-get install python-pip
 sudo apt-get install python3-pip
@@ -170,8 +181,34 @@ apt-get install python-dev
 apt-get install python3.4-dev
 ```
 
-## R (to be revised!)
+### Pandas library
 
+This library is used in order to read our data, specifically files `samples.tab` and `design.tab`.
+```
+pip3 install pandas
+```
+
+### Package rpy2
+
+```
+pip3 install "rpy2<2.3.10"
+```
+
+**NB** There might be other dependencies; this should be checked by running workflows without the RSAT install, which itself contains many libraries. 
+<!--
+Issue with egg_info stuff, found info [here](http://stackoverflow.com/questions/17886647/cant-install-via-pip-because-of-egg-info-error)
+
+```
+doesnt work
+```
+Problems solved after rsat install (including loads of python packages)?
+-->
+
+
+## R (to be revised)
+
+**TODO**
+<!--
 **/!\\* Issues with R lib 
 
 * Beware: libPath can be automatically set in rsat distribution, which can cause permission problems etc.
@@ -194,50 +231,28 @@ Select CRAN, CRAN extras, bioc...
 * Beware of using "http" mirrors rather than "https" mirrors (why exactly?)
 
 * R-libs dir in fg-chip seq repo, invoke libraries with lib.loc **/!\\**
+-->
 
-### Python 3 package rpy2
-
-```
-pip3 install "rpy2<2.3.10"
-```
-
-Issue with egg_info stuff, found info [here](http://stackoverflow.com/questions/17886647/cant-install-via-pip-because-of-egg-info-error)
-
-```
-doesnt work
-```
-Problems solved after rsat install (including loads of python packages)?
-
-### spp (spp peak-calling)
-
-depends on caTools
-```
-source("http://bioconductor.org/biocLite.R")
-biocLite("spp")
-> install.packages("spp")
-```
-```
-R CMD INSTALL spp_1.10.tar.gz
-```
-...
-
+<!-- unnecessary -> use rsat ?
 ### Biostrings (peak length)
 
 ```
 install.packages("Biostrings", lib="/path/to/my/lib")
 ```
+-->
 
 ## Snakemake
 
-* General documentation about snakemake: [click](https://bitbucket.org/johanneskoester/snakemake/wiki/Documentation)
-* Snakemake FAQ/forum: [click](https://groups.google.com/forum/#!forum/snakemake)
+* [Documentation](https://bitbucket.org/snakemake/snakemake/wiki/Documentation)
+* [FAQ](https://bitbucket.org/snakemake/snakemake/wiki/FAQ)
+* [Forum](https://groups.google.com/forum/#!forum/snakemake)
+* More: see [wiki/informatics](https://github.com/rioualen/gene-regulation/blob/master/doc/wiki-fg/informatics.md) section. 
 
-Now you have installed Python 3 and pip3 (see previous section), you can install snakemake safely:
-**/!\\** NB done as root#...
+Now you have installed Python 3 and pip3 (see previous section), you can install snakemake safely. 
 ```
 pip3 install snakemake
 ```
-You can check snakemake works properly with this basic script:
+You can check that snakemake works properly with this basic script:
 ```
 """Snakefile to test basic functions of snakemake.
 """
@@ -261,14 +276,13 @@ rule bye:
 ```
 * Save it to `~/workspace/hello.py`.
 * Issue the command `cd ~/workspace ; snakemake -s hello.py`.
-* 2 files shoudl be created: `hello.txt` and `bye.txt`.
+* 2 files should be created: `hello.txt` and `bye.txt`.
 
-**/!\\** Need version 3.4.1
+As of December 2015, you need snakemake version 3.4+.
 ```
 pip3 install snakemake --upgrade
 ```
-
-En option, pour générer les rapports:
+If you want to use Snakemake reports function (optional):
 ```
 pip3 install docutils
 ```
@@ -281,37 +295,24 @@ Snakemake can generate useful graphviz outputs.
 sudo apt-get install graphviz
 ```
 
+# NGS analysis software & tools
 
-Now if we want to use snakemake to develop NGS workflows, we have to install a number of programs depending on what we want to achieve.
+## File management
 
-## Pandas
+### SRA toolkit
 
-**/!\\ TODO** To be checked!
-
-```
-$ pip3 install pandas ## not ok
-$ pip install pandas ## not ok
-# pip install pandas ## not ok
-# pip3 install pandas ## ok ?
-```
-
-
-# NGS analysis (optional) software to install
-
-## SRA toolkit
-
-This toolkit includes a number of programs, allowing the conversion of \*.sra files. `fastq-dump` translates \*.sra files to \*.fastq files.
+This toolkit includes a number of programs, allowing the conversion of `*.sra` files. `fastq-dump` translates `*.sra` files to `*.fastq` files.
 
 * [SRA format](http://www.ncbi.nlm.nih.gov/Traces/sra/)
 * [fastq-dump manual](http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=toolkit_doc&f=fastq-dump)
 * [Installation manual](http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=toolkit_doc&f=std)
 
-Download last version [here](http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software):
+You can download last version [here](http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software), or issue the following commands:
 ```
 cd ~/bin
 wget "http://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.5.2/sratoolkit.2.5.2-ubuntu64.tar.gz"
 tar -xvzf sratoolkit.2.5.2-ubuntu64.tar.gz
-rm sratoolkit.2.5.2-ubuntu64.tar.g
+rm sratoolkit.2.5.2-ubuntu64.tar.gz
 ```
  
 Add to path (cf section 1.3): 
@@ -336,26 +337,45 @@ fastq-dump --version
   fastq-dump : 2.1.7
 ```
  
+ 
+### Samtools
 
-## FastQC
+SAM (Sequence Alignment/Map) format is a generic format for storing large nucleotide sequence alignments. 
 
-FastQC aims to provide a simple way to do some quality control checks on raw sequence data coming from high throughput sequencing pipelines. It provides a modular set of analyses which you can use to give a quick impression of whether your data has any problems of which you should be aware before doing any further analysis. 
+[SAMtools](http://samtools.sourceforge.net/) provides several tools to process such files.
 
-* [FastQC main page](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
+```
+sudo apt-get install samtools
+```
+V: 0.1.19
+Latest: 1.2
+
+### Bedtools
+
+The [bedtools](http://bedtools.readthedocs.org/en/latest/) utilities are a swiss-army knife of tools for a wide-range of genomics analysis tasks. For example, bedtools allows one to intersect, merge, count, complement, and shuffle genomic intervals from multiple files in widely-used genomic file formats such as BAM, BED, GFF/GTF, VCF. 
+
+```
+sudo apt-get install bedtools
+````
+V: v2.17.0
+Latest: 2.24.0
+
+
+## Quality assessment
+
+### FastQC
+
+[FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) aims to provide a simple way to do some quality control checks on raw sequence data coming from high throughput sequencing pipelines. It provides a modular set of analyses which you can use to give a quick impression of whether your data has any problems of which you should be aware before doing any further analysis. 
 
 ```
 sudo apt-get install fastqc
 ```
-V 0.10.1
 
-Latest: 11.3
+## Trimming
 
+### Sickle
 
-## Sickle
-
-Sickle is a trimming tool which better the quality of NGS reads.
-
-* [Sickle main page](https://github.com/najoshi/sickle)
+[Sickle](https://github.com/najoshi/sickle) is a trimming tool which better the quality of NGS reads.
 
 * Pre-requisite: install `zlib` (see section 1.1.4).
 * Clone the git repository into your bin (see section 1.2) and run `make`.
@@ -373,29 +393,36 @@ make
 PATH="$HOME/bin/sickle:$PATH"
 ```
 
-## BWA
+## Alignment/mapping
 
-BWA is a software package for mapping low-divergent sequences against a large reference genome, such as the human genome.
+### BWA
 
-* [Main page](http://bio-bwa.sourceforge.net/)
+[BWA](http://bio-bwa.sourceforge.net/) is a software package for mapping low-divergent sequences against a large reference genome, such as the human genome.
+
 * [Manual](http://bio-bwa.sourceforge.net/bwa.shtml)
 
 ```
 sudo apt-get install bwa
 ````
+
+<!--
 V: 0.7.5a-r405
 
 Latest : 0.7.12
+-->
 
-## Bowtie2
+### Bowtie2
 
-* [General documentation](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml)
-* Instructions [here](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#obtaining-bowtie-2)
-    * Download package [here](https://sourceforge.net/projects/bowtie-bio/files/bowtie2/)
-    * Move package to your personnal bin/
-    * Unzip
-    * Add to $PATH (see section 1.3)
-    * There you go!
+[General documentation](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml)
+
+[Instructions](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#obtaining-bowtie-2)
+
+
+* Download package [here](https://sourceforge.net/projects/bowtie-bio/files/bowtie2/)
+* Move package to your personnal bin/
+* Unzip
+* Add to $PATH (see section 1.3)
+* There you go!
     
 ```
 cd ~/bin
@@ -403,31 +430,64 @@ wget http://sourceforge.net/projects/bowtie-bio/files/bowtie2/2.2.6/bowtie2-2.2.
 unzip bowtie2-2.2.6-linux-x86_64.zip
 ```
 
-## Samtools
+## Peak-calling
 
-SAM (Sequence Alignment/Map) format is a generic format for storing large nucleotide sequence alignments. 
+### bPeaks
 
-* [SAMtools main page](http://samtools.sourceforge.net/)
+Peak-caller developped specifically for yeast, can be useful in order to process small genomes only. 
 
+**TODO**
+
+### HOMER
+
+[Web page](http://homer.salk.edu/)
+
+[Install instructions](http://homer.salk.edu/homer/introduction/install.html)
 ```
-sudo apt-get install samtools
+wget "http://homer.salk.edu/homer/configureHomer.pl"
+mkdir $HOME/bin/HOMER
+mv configureHomer.pl $HOME/bin/HOMER
+cd $HOME/bin/HOMERcd $HOME/bin/HOMER
+perl configureHomer.pl -install homer
 ```
-V: 0.1.19
-Latest: 1.2
 
-## Bedtools
-
-The bedtools utilities are a swiss-army knife of tools for a wide-range of genomics analysis tasks. For example, bedtools allows one to intersect, merge, count, complement, and shuffle genomic intervals from multiple files in widely-used genomic file formats such as BAM, BED, GFF/GTF, VCF. 
-
-* [bedtools main page](http://bedtools.readthedocs.org/en/latest/)
-
+Add to path (see section 1.3)
 ```
-sudo apt-get install bedtools
-````
-V: v2.17.0
-Latest: 2.24.0
+PATH="$HOME/bin/HOMER/bin:$PATH"
+```
 
-## MACS 1.4
+The basic Homer installation does not contain any sequence data.  To download sequences for use with HOMER, use the configureHomer.pl script. To get a list of available packages:
+```
+perl $HOME/bin/HOMER/configureHomer.pl -list
+```
+To install packages, simply use the -install option and the name(s) of the package(s).
+```
+perl  $HOME/bin/HOMER/configureHomer.pl -install mouse # (to download the mouse promoter set)
+perl  $HOME/bin/HOMER/configureHomer.pl -install mm8   # (to download the mm8 version of the mouse genome)
+perl  $HOME/bin/HOMER/configureHomer.pl -install hg19  # (to download the hg19 version of the human genome)
+```
+
+Supported organisms:
+
+| Organism | Assembly      |
+|------|-------------------|
+| Human | hg17, hg18, hg19 |
+| Mouse | mm8, mm9, mm10   |
+| Rat   | rn4, rn5         |
+| Frog  | xenTro2, xenTro3 |
+| Zebrafish     | danRer7  |
+| Drosophila   | dm3       |
+| C. elegans   | ce6, ce10 |
+| S. cerevisiae | sacCer2, sacCer3 |
+| pombe | ASM294v1         |
+|Arabidopsis    | tair10   |
+| Rice  | msu6             |
+
+HOMER can also with custom genomes in FASTA format and gene annotations in GTF format.
+
+
+
+### MACS 1.4
 
 * [doc](http://liulab.dfci.harvard.edu/MACS/00README.html)
 * [install](http://liulab.dfci.harvard.edu/MACS/INSTALL.html)
@@ -441,9 +501,9 @@ sudo python setup.py install
 macs14 --version
 ```
 
-Note: deb package wouldn't work with python 2.7, asks for python 2.6.
+**NB** deb package wouldn't work with python 2.7, asks for python 2.6.
 
-## MACS2
+### MACS2
 
 * [MACS2 web page](https://github.com/taoliu/MACS/)
 
@@ -452,56 +512,41 @@ sudo apt-get install python-numpy
 sudo pip install MACS2
 ```
 
-
-Marche pas:< 
+<!--
+Marche pas?
 ```
 $ git clone https://github.com/taoliu/MACS.git
 # pip install MACS2
 ...
 ```
-
-## HOMER
-
-[Web page](http://homer.salk.edu/)
-
-[Install instructions:](http://homer.salk.edu/homer/introduction/install.html)
-
-wget "http://homer.salk.edu/homer/configureHomer.pl"
-rsync -> VM
-copy configureHomer.pl to /home/rg/bin/HOMER
-cd /home/rg/bin/HOMER
-perl configureHomer.pl -install homer
-
-add to path : PATH="$HOME/bin/HOMER/bin:$PATH"
+-->
 
 
-The basic Homer installation does not contain any sequence data.  To download sequences for use with homer, use the configureHomer.pl script.  To get a list of available packages:
-perl /path-to-homer/configureHomer.pl -list
-To install packages, simply use the -install option and the name(s) of the package(s).
-perl /path-to-homer/configureHomer.pl -install mouse (to download the mouse promoter set)
-perl /path-to-homer/configureHomer.pl -install mm8    (to download the mm8 version of the mouse genome)
-perl /path-to-homer/configureHomer.pl -install hg19    (to download the hg19 version of the human genome)
+### SPP R package (broken)
 
 
-Available genomes
-Supported Organisms: Human (hg17, hg18, hg19), Mouse (mm8, mm9, mm10), Rat (rn4, rn5), Frog (xenTro2, xenTro3), Zebrafish (danRer7), Drosophila (dm3), C elegans (ce6, ce10), S. cerevisiae (sacCer2, sacCer3), pombe (ASM294v1), Arabidopsis (tair10), Rice (msu6), and also works with custom genomes in FASTA format and gene annotations in GTF format.
+```
+install.packages("caTools")
+install.packages("spp")
+```
 
-
-## SWEMBL
-
-* [SWEMBL beginner's manual](http://www.ebi.ac.uk/~swilder/SWEMBL/beginners.html)
-
-**TODO**
-
-
-### R package spp
-
+<!--
+```
+source("http://bioconductor.org/biocLite.R")
+biocLite("spp")
+> install.packages("spp")
+```
+```
+R CMD INSTALL spp_1.10.tar.gz
+```
+...
+```
 sudo su
 echo "deb http://www.stats.bris.ac.uk/R/bin/linux/ubuntu precise/" >> /etc/apt/sources.list
 apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 apt-get update
 apt-get upgrade
-
+```
 ```
 wget "https://cran.r-project.org/src/base/R-3/R-3.2.2.tar.gz"
 tar -xf rm R-3.2.2.tar.gz
@@ -515,57 +560,58 @@ not a problem of R version anyway
 
 libboost libraries ?
 apt-get install libboost-all-dev
-
-```
-> install.packages("caTools")
-```
+-->
 
 
-## RSAT suite
 
-See *$RSAT/doc/howto/install_rsat_ubuntu14.04.bash*
 
-# France Génomique ChIP-seq project - Scerevisiae-Pho4
+### SWEMBL
+
+* [SWEMBL beginner's manual](http://www.ebi.ac.uk/~swilder/SWEMBL/beginners.html)
+
+**TODO**
+
+
+## Motif discovery, motif analysis
+
+### RSAT suite
+
+See [doc/install_protocols section](https://github.com/rioualen/gene-regulation/blob/master/doc/install_protocols/install_rsat_ubuntu14.04.Rmd). Beware, this manuel might be deprecated.
+
+
+
+# Workpackage 2.6 - Gene regulation
 
 ## Cloning the repository
 
-Cloning the repository from GitHub requires access rights. 
-Contact: claire.rioualen@inserm.fr
 ```
 cd ~/workspace
-git clone git+ssh://git@git.renater.fr:2222/fg-chip-seq.git
-```
-Note: commit 3e1434c9942a2c7899b135f1a4be99d8f4aa68cf
-
-## Data transfer
-
-**/!\\ 15/08/31** Rsync ne fonctionne que dans un sens ? 
-```
-cd
-mkdir data
-mkdir genomes
+git clone git@github.com:rioualen/gene-regulation.git
 ```
 
-Et depuis l'hôte:
-```
-rsync -ruptvl /data/Scerevisiae-Pho4 rg@192.54.201.107:~/data/
-rsync -ruptvl /data/genomes/sc rg@192.54.201.107:~/genomes/
-```
+## Data transfer/download
+
+**TODO** 
+
+Depends whether installing a VM or testing FG workflows locally.
 
 
 ## Running the pipeline
 
 ```
-cd ~/workspace/fg-chip-seq
-snakemake -s scripts/snakefiles/workflows/Scerevisiae-Pho4.py -j 4
+cd ~/workspace/gene-regulation
 ```
 
-/!\\ path of files should be changed from /home/rioualen to /home/rg in both .py and .json files.
+**TODO** Update 
 
+See README instead.
+
+<!--
 ## Increase virtual disk space
 
 You may need to expand your virtual disk space. For VBox users, see `virtualbox_vm_creation.Rmd`, section XX (VirtualBox hacks and tricks).
+-->
 
 # VM export / submission 
 
-See *$project_home/doc/install_protocols/export_appliance.Rmd*
+See *doc/install_protocols/export_appliance.Rmd*...
