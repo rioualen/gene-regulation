@@ -4,6 +4,23 @@ author: "Claire Rioualen"
 date: "December 21, 2015"
 ---
 
+Table of Contents
+=================
+
+    * [date: "December 21, 2015"](#date-december-21-2015)
+  * [Purpose of this repository](#purpose-of-this-repository)
+  * [Workflow examples](#workflow-examples)
+    * [Transcription factors](#transcription-factors)
+      * [Execution](#execution)
+      * [Dependencies](#dependencies)
+    * [Histone marks](#histone-marks)
+      * [Execution](#execution-1)
+      * [Dependencies](#dependencies-1)
+    * [RNA-seq (TODO)](#rna-seq-todo)
+  * [Data organisation](#data-organisation)
+  * [Documentation](#documentation)
+  * [Contact](#contact)
+  
 # Purpose of this repository
 
 This git repository holds shared code for the analysis of Next
