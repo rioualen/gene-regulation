@@ -14,8 +14,7 @@ To know more about the tools themselves, better check the [wiki/informatics sect
 Table of Contents
 =================
 
-    * [    number_sections: true](#----number_sections-true)
-    * [Pre-requisites in case of virtual machine (VM) development](#pre-requisites-in-case-of-virtual-machine-vm-development)
+  * [Pre-requisites in case of virtual machine (VM) development](#pre-requisites-in-case-of-virtual-machine-vm-development)
       * [VM creation](#vm-creation)
       * [VM customization](#vm-customization)
   * [General requirements](#general-requirements)
