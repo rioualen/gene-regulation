@@ -2,11 +2,6 @@
 title: "Install & execute Snakemake workflows"
 author: "Claire Rioualen"
 date: "December 22, 2015"
-output:
-  html_document:
-    fig_caption: yes
-    toc: yes
-    number_sections: true
 ---
 
 This manual aims at helping you install the necessary programs and dependencies in order to have the snakemake workflows work.
@@ -15,6 +10,56 @@ It was designed for Unix-running computers (Ubuntu, Debian).
 Keep in mind that, while most of these tools can be installed by simply issuing an `apt-get` command, this likely won't get you the latest versions to date. You might thus run into dependency issues. 
 
 To know more about the tools themselves, better check the [wiki/informatics section](https://github.com/rioualen/gene-regulation/blob/master/doc/wiki-fg/informatics.md). 
+
+Table of Contents
+=================
+
+    * [    number_sections: true](#----number_sections-true)
+    * [Pre-requisites in case of virtual machine (VM) development](#pre-requisites-in-case-of-virtual-machine-vm-development)
+      * [VM creation](#vm-creation)
+      * [VM customization](#vm-customization)
+  * [General requirements](#general-requirements)
+    * [Generic tools](#generic-tools)
+      * [ssh](#ssh)
+      * [rsync](#rsync)
+      * [git](#git)
+      * [zlib](#zlib)
+      * [qsub](#qsub)
+    * [Create bin/ (opt)](#create-bin-opt)
+    * [Edit $PATH ](#edit-path)
+  * [Snakemake workflows basic requirements](#snakemake-workflows-basic-requirements)
+    * [Python](#python)
+      * [Pandas library](#pandas-library)
+      * [Package rpy2](#package-rpy2)
+    * [R (to be revised)](#r-to-be-revised)
+    * [Snakemake](#snakemake)
+    * [Graphviz](#graphviz)
+  * [NGS analysis software &amp; tools](#ngs-analysis-software--tools)
+    * [File management](#file-management)
+      * [SRA toolkit](#sra-toolkit)
+      * [Samtools](#samtools)
+      * [Bedtools](#bedtools)
+    * [Quality assessment](#quality-assessment)
+      * [FastQC](#fastqc)
+    * [Trimming](#trimming)
+      * [Sickle](#sickle)
+    * [Alignment/mapping](#alignmentmapping)
+      * [BWA](#bwa)
+      * [Bowtie2](#bowtie2)
+    * [Peak-calling](#peak-calling)
+      * [bPeaks](#bpeaks)
+      * [HOMER](#homer)
+      * [MACS 1.4](#macs-14)
+      * [MACS2](#macs2)
+      * [SPP R package (broken)](#spp-r-package-broken)
+      * [SWEMBL](#swembl)
+    * [Motif discovery, motif analysis](#motif-discovery-motif-analysis)
+      * [RSAT suite](#rsat-suite)
+  * [Workpackage 2.6 - Gene regulation](#workpackage-26---gene-regulation)
+    * [Cloning the repository](#cloning-the-repository)
+    * [Data transfer/download](#data-transferdownload)
+    * [Running the pipeline](#running-the-pipeline)
+  * [VM export / submission](#vm-export--submission)
 
 <!--
 ### **TODO**

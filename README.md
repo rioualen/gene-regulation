@@ -7,7 +7,6 @@ date: "December 21, 2015"
 Table of Contents
 =================
 
-    * [date: "December 21, 2015"](#date-december-21-2015)
   * [Purpose of this repository](#purpose-of-this-repository)
   * [Workflow examples](#workflow-examples)
     * [Transcription factors](#transcription-factors)
