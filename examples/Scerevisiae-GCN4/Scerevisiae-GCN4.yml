@@ -14,13 +14,14 @@
     organism: "Saccharomyces cerevisiae"
     size: "12156677"                                      # required: if using macs2, macs14, homer...
     version: "sacCer3"                                        # required: has to match genome filenames and directories            use genome version S288C_R64-1-1 ? 
-    file: "/data/genomes/sacCer3/sacCer3.fa"                       # required: fasta file is required for a number of operations
+    fasta: "/data/genomes/sacCer3/sacCer3.fa"                       # required: fasta file is required for a number of operations
     dir: "/data/genomes/sacCer3/"                             # required
     data: "http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60281"
 
   files: 
     samples: "/data/Scerevisiae-GCN4/samples.tab"        # required: has to contain at least sample ids in 1st column of tab-delimited file
     design: "/data/Scerevisiae-GCN4/design.tab"          # required: has to contain at least ids of samples to be compared in 1st 2 columns of tab-delimited file
+    snakefile: "scripts/snakefiles/workflows/factor_workflow.py"
 
   dir: 
     base: "."
