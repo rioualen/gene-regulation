@@ -14,13 +14,14 @@
     organism: "Caenorhabditis elegans"
     size: " 100286401"                                      # required: if using macs2, macs14, homer...
     version: "ce10"                                        # required: has to match genome filenames and directories
-    file: "/data/genomes/ce10/ce10.fa"                       # required: fasta file is required for a number of operations
+    fasta: "/data/genomes/ce10/ce10.fa"                       # required: fasta file is required for a number of operations
     dir: "/data/genomes/ce10/"                             # required
     data: "http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE49870"
 
   files: 
     samples: "/data/Celegans-H3K4me3/samples.tab"        # required: has to contain at least sample ids in 1st column of tab-delimited file
     design: "/data/Celegans-H3K4me3/design.tab"          # required: has to contain at least ids of samples to be compared in 1st 2 columns of tab-delimited file
+    snakefile: "scripts/snakefiles/workflows/histone_workflow.py"
 
   dir: 
     base: "."
