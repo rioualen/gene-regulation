@@ -28,7 +28,7 @@ import datetime
 import pandas as pd
 
 ## Config
-#configfile: "scripts/snakefiles/workflows/Athaliana.yml"                                                        ####
+#configfile: "examples/Athaliana-Myb/Athaliana-Myb.yml"                                                        ####
 workdir: config["dir"]["base"]
 verbosity = int(config["verbosity"])
 
@@ -53,6 +53,7 @@ include: os.path.join(RULES, "count_reads.rules")
 include: os.path.join(RULES, "fastqc.rules")
 include: os.path.join(RULES, "flowcharts.rules")
 include: os.path.join(RULES, "getfasta.rules")
+include: os.path.join(RULES, "genome_coverage.rules")
 include: os.path.join(RULES, "homer.rules")
 include: os.path.join(RULES, "macs2.rules")
 include: os.path.join(RULES, "macs14.rules")
@@ -135,11 +136,14 @@ BOWTIE2_INDEX = expand(config["dir"]["genomes"] + "{genome}/Bowtie2Index/{genome
 
 MAPPING = expand(RESULTS_DIR + "{alignment}.sam", alignment=ALIGNMENT)
 
+
 # Sorted and converted reads (bam, bed)
 SORTED_MAPPED_READS_BWA = expand(RESULTS_DIR + "{alignment}_sorted_pos.bam", alignment=ALIGNMENT)
 BAM_READNB = expand(RESULTS_DIR + "{alignment}_sorted_pos_bam_readnb.txt", alignment=ALIGNMENT)
 SORTED_READS_BED = expand(RESULTS_DIR + "{alignment}_sorted_pos.bed", alignment=ALIGNMENT)
 BED_FEAT_COUNT = expand(RESULTS_DIR + "{alignment}_sorted_pos_bed_nb.txt", alignment=ALIGNMENT)
+
+TDF = expand(RESULTS_DIR + "{alignment}_sorted_pos_genomecov.tdf", alignment=ALIGNMENT)
 
 # ----------------------------------------------------------------
 # Peak-calling
@@ -166,7 +170,7 @@ rule all:
 	"""
 	Run all the required analyses
 	"""
-	input: GRAPHICS, RAW_QC, PEAK_MOTIFS  #RAW_QC, BWA_INDEX, MAPPING, PEAKS, IMPORT
+	input: GRAPHICS, RAW_QC, PEAK_MOTIFS, TDF  #RAW_QC, BWA_INDEX, MAPPING, PEAKS, IMPORT
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
