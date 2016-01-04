@@ -27,6 +27,8 @@ rule flowcharts:
     Usage example:
     	expand(config["dir"]["reports"] + "dag.pdf") 
 
+    # TODO allow user to chose between vertical or horizontal graphs, depending on the nulber of samples...
+
     """
     output: dag_dot = config["reports"]["dag"] + ".dot", \
             dag_png = config["reports"]["dag"] + ".png", \
