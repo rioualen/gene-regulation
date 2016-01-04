@@ -14,13 +14,14 @@
     organism: "Arabidopsis thaliana"
     size: "135000000"                                           # required: if using macs2, macs14, homer...
     version: "TAIR10"                                           # required: has to match genome filenames and directories
-    file: "/data/genomes/TAIR10/TAIR10.fa"                      # required: fasta file is required for a number of operations
+    fasta: "/data/genomes/TAIR10/TAIR10.fa"                      # required: fasta file is required for a number of operations
     dir: "/data/genomes/TAIR10/"                                # required
     data: "http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60554"
 
   files: 
     samples: "/data/Athaliana-Myb/samples.tab"                      # required: has to contain at least sample ids in 1st column of tab-delimited file
     design: "/data/Athaliana-Myb/design.tab"                        # required: has to contain at least ids of samples to be compared in 1st 2 columns of tab-delimited file
+    snakefile: "scripts/snakefiles/workflows/factor_workflow.py"
 
   dir: 
     base: "."
@@ -69,8 +70,8 @@
     other_options: "--call-summits"                            # optional: can include --call-summits, --broad...
 
   swembl:
-    R: "0.1"                                                    # optional: default is 0 -- no idea how it works though...
-    x: "1.2"                                                  # optional: default is 1 -- no idea how it works though...
+    R: "0.05"                                                    # optional: default is 0 -- no idea how it works though...
+    x: "1"                                                  # optional: default is 1 -- no idea how it works though...
 
   homer: 
     style: "factor"                                             # optional: default is factor, else can be: histone, groseq, tss, dnase, super, mC (beware of output filenames)
