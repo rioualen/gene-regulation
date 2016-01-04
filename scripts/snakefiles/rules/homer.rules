@@ -1,3 +1,12 @@
+	"""Peak-calling with HOMER software, findPeaks algorithm (!).
+	Input formats: .sam, .bam, .bed (bam input requires samtools to be installed)
+
+	The genome parameter can be either:
+		- the code of a genome installed in Homer (eg HG18, dm3...)
+		- a fasta file (see http://homer.salk.edu/homer_peaks/introduction/update.html)          TO be changed
+
+	"""
+
 # Check if each required parameter has been defined in the JSON
 # configuration file, otherwise use default values
 #
@@ -29,25 +38,6 @@ if not "fdr" in config["homer"].keys():
 
 
 rule homer:
-	"""Peak-calling with HOMER software, findPeaks algorithm (!).
-	Input formats: .sam, .bam, .bed (bam input requires samtools to be installed)
-
-	The genome parameter can be either:
-		- the code of a genome installed in Homer (eg HG18, dm3...)
-		- a fasta file (see http://homer.salk.edu/homer_peaks/introduction/update.html)
-
-	Required parameters:
-		config["homer"]["genome"]
-		config["homer"]["style"] # Can be "factor" (narrow peaks) or "histone" (broad peaks). See http://homer.salk.edu/homer/ngs/peaks.html for more options.
-		config["qsub"]
-
-
-	Usage:
-		PEAKS_HOMER = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/homer_peaks/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_homer_peaks.bed",
-               		zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
-
-	/!\ Lots of updates to be done before use
-	"""
 	input: 	treatment="{result_dir}/{treatment}/{treatment}_{aligner}.bed", \
 		control="{result_dir}/{control}/{control}_{aligner}.bed"
 	output: "{result_dir}/{treatment}_vs_{control}/homer_peaks/{treatment}_vs_{control}_{aligner}_homer_peaks.bed"
