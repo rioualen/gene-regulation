@@ -32,8 +32,8 @@ rule bPeaks:
         PEAKS_BPEAKS = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/bPeaks_allGenome/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_bPeaks.bed",
                    zip, treat=TREATMENT, ctrl=CONTROL), trimming=TRIM, aligner=ALIGN)
     """
-    input:    treatment="{result_dir}/{treatment}/{treatment}_{aligner}.bam", \
-        control="{result_dir}/{control}/{control}_{aligner}.bam"
+    input:    treatment="{result_dir}/{treatment}/{treatment}_{aligner}_sorted_pos.bam", \
+        control="{result_dir}/{control}/{control}_{aligner}_sorted_pos.bam"
     params:
         outdir="{result_dir}/{treatment}_vs_{control}/bPeaks_allGenome/", \
         name="{treatment}_vs_{control}_{aligner}", \
