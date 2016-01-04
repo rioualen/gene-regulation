@@ -45,7 +45,7 @@ Pre-requisites:
 * Python 3.3+
 * Snakemake 3.3+
 
-See `doc/install_protocols/install_snakemake_workflows.Rmd` for details.
+See `doc/install_protocols/install_snakemake_workflows.Rmd` for a detailed manual on how to install programs and dependencies.
 
 ## Transcription factors
 
