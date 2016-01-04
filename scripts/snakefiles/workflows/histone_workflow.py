@@ -33,7 +33,7 @@ import datetime
 import pandas as pd
 
 ## Config
-#configfile: "scripts/snakefiles/workflows/Celegans-H3K27me3.yml"
+#configfile: "examples/Celegans-H3K27me3/Celegans-H3K27me3.yml"
 workdir: config["dir"]["base"]
 verbosity = int(config["verbosity"])
 
