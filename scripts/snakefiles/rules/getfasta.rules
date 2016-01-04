@@ -14,7 +14,7 @@ rule getfasta:
 	output: "{regions}.fasta"
 	log: "{regions}_getfasta.log"
 	benchmark: "{regions}_getfasta_benchmark.json"
-	params: genome = config["genome"]["file"], \
+	params: genome = config["genome"]["fasta"], \
                 qsub = config["qsub"] + " -q short -e {regions}_getfasta_qsub.err -o {regions}_getfasta_qsub.out"
 	shell:"""bedtools getfasta -fi {params.genome} -bed {input} -fo {output} 2> {log}"""
 
