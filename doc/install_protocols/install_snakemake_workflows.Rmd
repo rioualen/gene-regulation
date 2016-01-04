@@ -9,7 +9,7 @@ It was designed for Unix-running computers (Ubuntu, Debian).
 
 Keep in mind that, while most of these tools can be installed by simply issuing an `apt-get` command, this likely won't get you the latest versions to date. You might thus run into dependency issues. 
 
-To know more about the tools themselves, better check the [wiki/informatics section](https://github.com/rioualen/gene-regulation/blob/master/doc/wiki-fg/informatics.md). 
+To know more about the tools themselves, better check the [wiki](https://github.com/rioualen/gene-regulation/blob/master/doc/wiki-fg/). 
 
 Table of Contents
 =================
@@ -514,7 +514,7 @@ perl  $HOME/bin/HOMER/configureHomer.pl -install hg19  # (to download the hg19 v
 Supported organisms:
 
 | Organism | Assembly      |
-|------|-------------------|
+|-------|------------------|
 | Human | hg17, hg18, hg19 |
 | Mouse | mm8, mm9, mm10   |
 | Rat   | rn4, rn5         |
@@ -523,7 +523,7 @@ Supported organisms:
 | Drosophila   | dm3       |
 | C. elegans   | ce6, ce10 |
 | S. cerevisiae | sacCer2, sacCer3 |
-| pombe | ASM294v1         |
+| S. pombe      | ASM294v1         |
 |Arabidopsis    | tair10   |
 | Rice  | msu6             |
 
