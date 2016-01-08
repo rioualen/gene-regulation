@@ -1,0 +1,67 @@
+"""Download sra files using srr ids mentioned in samples.tab
+
+"""
+
+rule download_sra:
+	"""Fetch .sra data from GEO website using GSM IDs.
+	"""
+	input: srr="{srr_ids}", gsm="{sample_ids}"
+	output: "{some_path}/{sample_ids}/{srr_ids}.sra"
+	log: ""
+	benchmark: ""
+	params: qsub=""
+    shell: "prefetch -v {input.srr} {output}"
+
+
+
+
+
+
+#ftp://ftp.ddbj.nig.ac.jp/ddbj_database/dra/sralite/ByExp/litesra/SRX/SRX683/SRX683746
+
+#ftp://ftp.ddbj.nig.ac.jp/ddbj_database/dra/sralite/ByExp/litesra/SRX/SRX335/SRX335103/SRR952381
+
+
+
+#	run:
+#		R("""
+
+##sink("{log}")
+
+#library(SRAdb)
+
+#dest="{some_path}/{sample_ids}/"
+#getSRAfile( in_acc = "{srr_ids}", sra_con = sra_con, destDir = dest, fileType = 'sra' )
+
+#"""
+#geometadbfile <- getSRAdbFile(destdir = "~", destfile = "SRAmetadb.sqlite.gz")
+
+
+#library(SRAdb)
+#sra_dbname <- 'SRAmetadb.sqlite'
+#sra_con <- dbConnect( dbDriver("SQLite"), sra_dbname )
+
+#dest="~"
+
+#getSRAfile( in_acc = "SRR1554464", sra_con = sra_con, destDir = dest)
+
+
+#from Bio import Geo
+#handle = open("/home/rioualen/Desktop/GSE60554_series_matrix.txt")
+#records = Geo.parse(handle)
+#for record in records:
+#    print(record)
+
+#from Bio import Entrez
+#Entrez.email = "claire.rioualen@inserm.fr"
+#handle = Entrez.esearch(db="gds", term="GSE60554")
+#record = Entrez.read(handle)
+#record["Count"]
+#record["IdList"]
+
+
+
+
+
+
+
