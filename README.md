@@ -4,9 +4,6 @@ author: "Claire Rioualen"
 date: "December 21, 2015"
 ---
 
-This is a test. 
-
-
 Table of Contents
 =================
 
