@@ -186,8 +186,10 @@ rule merge_lanes_paired_end:
             # Merge the source files
             to_merge = merging_dict[m]
             cmd = "gunzip -c " + " ".join(to_merge) + "> " + m
-            print("Merging " + str(len(to_merge)) + " files into " + m)
-            print(cmd)
+            now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+            if (verbosity >= 1):
+                print(now + "\tMerging " + str(len(to_merge)) + " files into " + m)
+                print("\t" + cmd)
             os.system(cmd)
 
 
