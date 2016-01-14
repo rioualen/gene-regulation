@@ -102,9 +102,9 @@ include: os.path.join(RULES, "bowtie2_build.rules")           ## Build genome in
 # # Raw data
 # READS = config["dir"]["reads_source"]
 
-#================================================================#
+#----------------------------------------------------------------#
 # Read sample descriptions
-#================================================================#
+#----------------------------------------------------------------#
 
 # Read the sample description file
 SAMPLE_DESCR = read_table(config["files"]["samples"], verbosity=verbosity)
@@ -116,17 +116,90 @@ SAMPLE_DIRS = SAMPLE_DESCR['folder']
 # Verbosity
 if (verbosity >= 1):
     print("Sample descriptions:\t" + config["files"]["samples"])
-    if (verbosity >= 2):
+    if (verbosity >= 3):
         print("\tSample IDs:\t" + ";".join(SAMPLE_IDS))
         print("\tConditions:\t" + ";".join(SAMPLE_CONDITIONS))
         print("\tSample names:\t" + ";".join(SAMPLE_NAMES))
         print("\tSample folders:\t" + ";".join(SAMPLE_DIRS))
 
 
+#----------------------------------------------------------------#
+# Merge lanes per sample
+#----------------------------------------------------------------#
+rule merge_lanes_paired_end:
+    """
+    Merge lanes (fastq) of the same sample and end in a single fastq file.
+
+    ince the file naming conventions are highly dependent on the sequencing
+    platform, the file grouping is read from a user-provided text file with
+    tab-separated values (extension .tsv). This file must have been specified
+    in the config file, as config["files"]["lane_merging"].
+
+    This file must contain at least two columns with this precise header:
+        source_file
+        merged_file
+
+    There should be a N to 1 correspondence from source file to merge file
+    (each source file should in principle be assigned to a single merged file).
+
+    Source files are supposed to be compressed fastq sequence files (.fastq.gz).
+
+    The output file is an uncompressed fastq file, because bowtie version 1
+    does not support gzipped files as input.
+
+    """
+    input: config["files"]["lane_merging"]
+    # output: config["dir"]["results"] + "_lane_merging_benchmark.json"
+    log: config["dir"]["results"] + "_lane_merging_log.txt"
+    benchmark: config["dir"]["results"] + "_lane_merging_benchmark.json"
+    run:
+        if (verbosity >= 1):
+            print("Lane merging table:\t" + config["files"]["lane_merging"])
+
+        # Read the lane merging table
+        lane_merging_table = read_table(config["files"]["lane_merging"], verbosity=verbosity)
+        source_file = lane_merging_table['source_file']
+        merged_file = lane_merging_table['merged_file']
+
+        # Build a dictionary indexed by merged file, where values are lists of files to be merged
+        merging_dict = {}
+        for s,m in zip(source_file, merged_file):
+            # print("\t".join([s,m]))
+            if (m in merging_dict):
+                merging_dict[m].append(s)
+            else:
+                merging_dict[m] = [s]
+
+        # Verbosity
+        if (verbosity >= 5):
+            print("\tsource_file:\t" + ";".join(source_file))
+            print("\tmerged_file:\t" + ";".join(merged_file))
+            print("\tmerging_dict:\t" + str(merging_dict))
+
+        # Merge the files
+        for m in merging_dict.keys():
+            # Check the output directory
+            m_dir = os.path.dirname(m)
+            if not os.path.exists(m_dir):
+                os.makedirs(m_dir)
+
+            # Merge the source files
+            to_merge = merging_dict[m]
+            cmd = "gunzip -c " + " ".join(to_merge) + "> " + m
+            print("Merging " + str(len(to_merge)) + " files into " + m)
+            print(cmd)
+            os.system(cmd)
+
+
 ## Design
 DESIGN = read_table(config["files"]["design"], verbosity=verbosity)
 TREATMENT = DESIGN.iloc[:,0]
 CONTROL = DESIGN.iloc[:,1]
+if (verbosity >= 1):
+    print("Design file:\t" + config["files"]["design"])
+    if (verbosity >= 3):
+        print("\tTREATMENT:\t" + ";".join(TREATMENT))
+        print("\tCONTROL:\t" + ";".join(CONTROL))
 
 # ## Ref genome
 # GENOME = config["genome"]["version"]
@@ -319,10 +392,12 @@ rule all:
 # ruleorder: bowtie2_paired_end > merge_lanes
 #
 # # ruleorder: bowtie_paired_end > merge_lanes
+
 #
 #
 # #----------------------------------------------------------------#
 # # Merge lanes per sample
+# #----------------------------------------------------------------#
 # rule merge_lanes:
 #     """
 #     Merge lanes of the same sample and end in a single file.  The input
@@ -340,7 +415,7 @@ rule all:
 #     benchmark: "{reads_prefix}_merged_{reads_suffix}_benchmark.json"
 #     params: qsub = config["qsub"] + " -e {reads_prefix}__merged_{reads_suffix}_qsub.err  -o {reads_prefix}__merged_{reads_suffix}_qsub.out"
 #     shell: "gunzip -c {input.L1} {input.L2} {input.L3} {input.L4} | gzip > {output}"
-#
+
 # #----------------------------------------------------------------#
 # # Build the report (including DAG and rulegraph flowcharts).
 # from snakemake.utils import report
