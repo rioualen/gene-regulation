@@ -41,8 +41,7 @@ import pandas as pd
 #                        Configuration
 #================================================================#
 
-## Config
-#configfile: "metadata/glossine_ageiger.yml"
+## Config file must be specified on the command line, with the option --configfile
 
 workdir: config["dir"]["base"]
 
@@ -95,24 +94,48 @@ include: os.path.join(RULES, "bowtie2_build.rules")           ## Build genome in
 # include: os.path.join(RULES, "featurecounts.rules")           ## Count reads per gene with R subread::featurecounts
 #
 #
-# #================================================================#
-# # Read sample descriptions
-# #================================================================#
+
+#================================================================#
+#                      Data & wildcards                          #
+#================================================================#
+
+# # Raw data
+# READS = config["dir"]["reads_source"]
+
+#================================================================#
+# Read sample descriptions
+#================================================================#
+
+# Read the sample description file
+SAMPLE_DESCR = read_table(config["files"]["samples"], verbosity=verbosity)
+SAMPLE_IDS = SAMPLE_DESCR.iloc[:,0] ## First column MUST contain the sample ID
+SAMPLE_CONDITIONS = SAMPLE_DESCR['condition'] ## Second column MUST contain condition for each sample
+SAMPLE_NAMES = SAMPLE_DESCR['title'] ## Sample-wise label
+SAMPLE_DIRS = SAMPLE_DESCR['folder']
+
+# Verbosity
+if (verbosity >= 1):
+    print("Sample descriptions:\t" + config["files"]["samples"])
+    if (verbosity >= 2):
+        print("\tSample IDs:\t" + ";".join(SAMPLE_IDS))
+        print("\tConditions:\t" + ";".join(SAMPLE_CONDITIONS))
+        print("\tSample names:\t" + ";".join(SAMPLE_NAMES))
+        print("\tSample folders:\t" + ";".join(SAMPLE_DIRS))
+
+
+## Design
+DESIGN = read_table(config["files"]["design"], verbosity=verbosity)
+TREATMENT = DESIGN.iloc[:,0]
+CONTROL = DESIGN.iloc[:,1]
+
+# ## Ref genome
+# GENOME = config["genome"]["version"]
 #
-# # Read the sample description file
-# SAMPLE_DESCR = read_table(config["files"]["samples"], verbosity=verbosity)
-# SAMPLE_DIRS = SAMPLE_DESCR['folder']
-# SAMPLE_IDS = SAMPLE_DESCR.iloc[:,0] ## First column MUST contain the sample ID
-# SAMPLE_CONDITIONS = SAMPLE_DESCR.iloc[:,1] ## Second column MUST contain condition for each sample
-#
-# # Verbosity
-# if (verbosity >= 1):
-#     print("Sample descriptions:\t" + config["files"]["samples"])
-#     if (verbosity >= 2):
-#         print("\tSample IDs:\t" + ";".join(SAMPLE_IDS))
-#         print("\tSample folders:\t" + ";".join(SAMPLE_DIRS))
-#         print("\tConditions:\t" + ";".join(SAMPLE_CONDITIONS))
-#
+# ## Results dir
+# RESULTS_DIR = config["dir"]["results"]
+# if not os.path.exists(RESULTS_DIR):
+#     os.makedirs(RESULTS_DIR)
+
 #================================================================#
 # Define target file names
 #================================================================#
@@ -122,7 +145,7 @@ include: os.path.join(RULES, "bowtie2_build.rules")           ## Build genome in
 # Genome index
 #----------------------------------------------------------------#
 
-GENOME_INDEX=config["bowtie2"]["index"]
+GENOME_INDEX=config["bowtie2"]["index"] + "_benchmark.json"
 
 # #----------------------------------------------------------------#
 # # Raw reads
