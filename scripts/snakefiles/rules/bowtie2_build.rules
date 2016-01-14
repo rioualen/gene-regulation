@@ -1,5 +1,9 @@
-"""Snakemake rules to download a reference genome and build the index
-   for bowtie version 2.
+"""Snakemake rules to build the index for bowtie version 2.
+
+   Required parameters (should be specified in the config file):
+
+   config["bowtie2"]["genome"]
+   config["bowtie2"]["index"]
 """
 
 print(config["bowtie2"])
@@ -25,7 +29,7 @@ rule bowtie2_build:
             + " -o " + config["bowtie2"]["index"] + "_qsub.out"
     log:  config["bowtie2"]["index"] + "_log.txt"
     message: "Building bowtie2 index in directory:\t{params.bowtie_index}"
-    benchmark:  config["bowtie2"]["index"] + "_bowtie-build_benchmark.json"
+    benchmark:  config["bowtie2"]["index"] + "_benchmark.json"
     shell: "bowtie2-build {input.sequence} {params.bowtie_index} &> {log}"
 
 # """Snakemake rules to download a refrence genome and build the index
