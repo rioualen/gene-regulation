@@ -1,24 +1,12 @@
-"""Generic work flow for the analysis of ChIP-seq data for the binding
-of transcription factors.
-
-
-This workflow performs the following treatments: 
-
- - read mapping
- - peak-calling with alternate peak-calling programs
- - motif discovery
-
-The details are specified in a yaml-formatted configuration file.
+"""Athaliana.
 
 Usage: 
     snakemake -p  -c "qsub {params.qsub}" -j 12 \
-        -s scripts/snakefiles/workflows/factor_workflow.py \
-        --configfile path/to/specific/config_file.yml \
+        -s scripts/snakefiles/workflows/Athaliana.py \
         [targets]
 
 Flowcharts:
-    snakemake -p -s scripts/snakefiles/workflows/factor_workflow.py \
-        --configfile path/to/specific/config_file.yml \
+    snakemake -p -s scripts/snakefiles/workflows/Athaliana.py \
         --force flowcharts
 
 Reference genome:	-
@@ -26,7 +14,6 @@ Sequencing type: 	single end
 
 Author: 		Claire Rioualen, Jacques van Helden
 Contact: 		claire.rioualen@inserm.fr
-
 """
 
 #================================================================#
