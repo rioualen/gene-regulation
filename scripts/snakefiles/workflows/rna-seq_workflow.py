@@ -79,11 +79,12 @@ FG_LIB = os.path.abspath(config["dir"]["fg_lib"])
 RULES = os.path.join(FG_LIB, "scripts/snakefiles/rules")
 PYTHON = os.path.join(FG_LIB, "scripts/snakefiles/python_lib")
 
-include: os.path.join(PYTHON, "util.py")                           ## Python utilities for our snakemake workflows
+include: os.path.join(PYTHON, "util.py")                        ## Python utilities for our snakemake workflows
 # include: os.path.join(RULES, "util.rules")                    ## Snakemake utilities
-include: os.path.join(RULES, "bowtie2_build.rules")           ## Build genome index for bowtie2 (read mapping with gaps)
+include: os.path.join(RULES, "merge_lanes.rules")               ## Build genome index for bowtie2 (read mapping with gaps)
+include: os.path.join(RULES, "fastqc.rules")                    ## Quality control with fastqc
+include: os.path.join(RULES, "bowtie2_build.rules")             ## Build genome index for bowtie2 (read mapping with gaps)
 # include: os.path.join(RULES, "count_reads.rules")             ## Count reads in different file formats
-# include: os.path.join(RULES, "fastqc.rules")                  ## Quality control with fastqc
 # include: os.path.join(RULES, "flowcharts.rules")              ## Draw flowcharts (dag and rule graph)
 # include: os.path.join(RULES, "sickle_paired_ends.rules")      ## Trimming with sickle
 # #include: os.path.join(RULES, "bowtie_build.rules")           ## Read mapping with bowtie version 1 (no gap)
@@ -112,6 +113,9 @@ SAMPLE_IDS = SAMPLE_DESCR.iloc[:,0] ## First column MUST contain the sample ID
 SAMPLE_CONDITIONS = SAMPLE_DESCR['condition'] ## Second column MUST contain condition for each sample
 SAMPLE_NAMES = SAMPLE_DESCR['title'] ## Sample-wise label
 SAMPLE_DIRS = SAMPLE_DESCR['folder']
+FASTQ_R1 = SAMPLE_DESCR['fastq_R1']
+FASTQ_R2 = SAMPLE_DESCR['fastq_R2']
+FASTQ = list(FASTQ_R1) + list(FASTQ_R2)
 
 # Verbosity
 if (verbosity >= 1):
@@ -123,74 +127,74 @@ if (verbosity >= 1):
         print("\tSample folders:\t" + ";".join(SAMPLE_DIRS))
 
 
-#----------------------------------------------------------------#
-# Merge lanes per sample
-#----------------------------------------------------------------#
-rule merge_lanes_paired_end:
-    """
-    Merge lanes (fastq) of the same sample and end in a single fastq file.
-
-    ince the file naming conventions are highly dependent on the sequencing
-    platform, the file grouping is read from a user-provided text file with
-    tab-separated values (extension .tsv). This file must have been specified
-    in the config file, as config["files"]["lane_merging"].
-
-    This file must contain at least two columns with this precise header:
-        source_file
-        merged_file
-
-    There should be a N to 1 correspondence from source file to merge file
-    (each source file should in principle be assigned to a single merged file).
-
-    Source files are supposed to be compressed fastq sequence files (.fastq.gz).
-
-    The output file is an uncompressed fastq file, because bowtie version 1
-    does not support gzipped files as input.
-
-    """
-    input: config["files"]["lane_merging"]
-    # output: config["dir"]["results"] + "_lane_merging_benchmark.json"
-    log: config["dir"]["results"] + "_lane_merging_log.txt"
-    benchmark: config["dir"]["results"] + "_lane_merging_benchmark.json"
-    run:
-        if (verbosity >= 1):
-            print("Lane merging table:\t" + config["files"]["lane_merging"])
-
-        # Read the lane merging table
-        lane_merging_table = read_table(config["files"]["lane_merging"], verbosity=verbosity)
-        source_file = lane_merging_table['source_file']
-        merged_file = lane_merging_table['merged_file']
-
-        # Build a dictionary indexed by merged file, where values are lists of files to be merged
-        merging_dict = {}
-        for s,m in zip(source_file, merged_file):
-            # print("\t".join([s,m]))
-            if (m in merging_dict):
-                merging_dict[m].append(s)
-            else:
-                merging_dict[m] = [s]
-
-        # Verbosity
-        if (verbosity >= 5):
-            print("\tsource_file:\t" + ";".join(source_file))
-            print("\tmerged_file:\t" + ";".join(merged_file))
-            print("\tmerging_dict:\t" + str(merging_dict))
-
-        # Merge the files
-        for m in merging_dict.keys():
-            # Check the output directory
-            m_dir = os.path.dirname(m)
-            if not os.path.exists(m_dir):
-                os.makedirs(m_dir)
-
-            # Merge the source files
-            to_merge = merging_dict[m]
-            cmd = "gunzip -c " + " ".join(to_merge) + "> " + m
-            now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-            if (verbosity >= 1):
-                print(now + "\tMerging " + str(len(to_merge)) + " files into " + m)
-                print("\t" + cmd)
-            os.system(cmd)
+# #----------------------------------------------------------------#
+# # Merge lanes per sample
+# #----------------------------------------------------------------#
+# rule merge_lanes:
+#     """
+#     Merge lanes (fastq) of the same sample and end in a single fastq file.
+#
+#     ince the file naming conventions are highly dependent on the sequencing
+#     platform, the file grouping is read from a user-provided text file with
+#     tab-separated values (extension .tsv). This file must have been specified
+#     in the config file, as config["files"]["lane_merging"].
+#
+#     This file must contain at least two columns with this precise header:
+#         source_file
+#         merged_file
+#
+#     There should be a N to 1 correspondence from source file to merge file
+#     (each source file should in principle be assigned to a single merged file).
+#
+#     Source files are supposed to be compressed fastq sequence files (.fastq.gz).
+#
+#     The output file is an uncompressed fastq file, because bowtie version 1
+#     does not support gzipped files as input.
+#
+#     """
+#     input: config["files"]["lane_merging"]
+#     # output: config["dir"]["results"] + "_lane_merging_benchmark.json"
+#     log: config["dir"]["results"] + "_lane_merging_log.txt"
+#     benchmark: config["dir"]["results"] + "_lane_merging_benchmark.json"
+#     run:
+#         if (verbosity >= 1):
+#             print("Lane merging table:\t" + config["files"]["lane_merging"])
+#
+#         # Read the lane merging table
+#         lane_merging_table = read_table(config["files"]["lane_merging"], verbosity=verbosity)
+#         source_file = lane_merging_table['source_file']
+#         merged_file = lane_merging_table['merged_file']
+#
+#         # Build a dictionary indexed by merged file, where values are lists of files to be merged
+#         merging_dict = {}
+#         for s,m in zip(source_file, merged_file):
+#             # print("\t".join([s,m]))
+#             if (m in merging_dict):
+#                 merging_dict[m].append(s)
+#             else:
+#                 merging_dict[m] = [s]
+#
+#         # Verbosity
+#         if (verbosity >= 5):
+#             print("\tsource_file:\t" + ";".join(source_file))
+#             print("\tmerged_file:\t" + ";".join(merged_file))
+#             print("\tmerging_dict:\t" + str(merging_dict))
+#
+#         # Merge the files
+#         for m in merging_dict.keys():
+#             # Check the output directory
+#             m_dir = os.path.dirname(m)
+#             if not os.path.exists(m_dir):
+#                 os.makedirs(m_dir)
+#
+#             # Merge the source files
+#             to_merge = merging_dict[m]
+#             cmd = "gunzip -c " + " ".join(to_merge) + "> " + m
+#             now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+#             if (verbosity >= 1):
+#                 print(now + "\tMerging " + str(len(to_merge)) + " files into " + m)
+#                 print("\t" + cmd)
+#             os.system(cmd)
 
 
 ## Design
@@ -221,6 +225,35 @@ if (verbosity >= 1):
 #----------------------------------------------------------------#
 
 GENOME_INDEX=config["bowtie2"]["index"] + "_benchmark.json"
+
+
+#----------------------------------------------------------------#
+# Quality control
+#----------------------------------------------------------------#
+
+RAW_QC = [filename.replace('.fastq','_fastqc/') for filename in FASTQ]
+RAW_READNB = [filename.replace('.fastq','_fastq_readnb.txt') for filename in FASTQ]
+
+# rule fastqc_simple:
+#     """Check the quality of a file named {dataset}.fastq, containing
+#     fastq-formatted raw reads using the program fastQC (quality
+#     control).  You can add any wanted parameters in the "other
+#     options" of the config file.  The results are put into a folder
+#     named '{dataset}_fastqc'.
+#
+# 	Required parameters:
+# 		config['fastqc']['other_options']
+# 		config['qsub']
+#
+#     """
+#     input: "{file}.fastq"
+#     output: outdir="{file}_fastqc/", benchmark="{file}_fastqc/fastqc_benchmark.json"
+#     log: "{file}_fastqc/fastqc_log.txt"
+#     benchmark: "{file}_fastqc/fastqc_benchmark.json"
+#     params: qsub = config["qsub"] + " -q short -e {file}_fastqc/fastqc_qsub.err -o {file}_fastqc/fastqc_qsub.out", \
+#             options = config["fastqc"]["other_options"]
+#     shell:"fastqc --outdir {output.outdir} --format fastq {input} {params.options} 2> {log} "
+
 
 # #----------------------------------------------------------------#
 # # Raw reads
@@ -367,7 +400,7 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: GENOME_INDEX
+	input: GENOME_INDEX, RAW_QC
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
