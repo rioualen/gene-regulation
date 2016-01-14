@@ -18,6 +18,7 @@ rule merge_lanes:
     This file must contain at least two columns with this precise header:
         source_file
         merged_file
+    Additional columns can be included but will be ignored.
 
     There should be a N to 1 correspondence from source file to merge file
     (each source file should in principle be assigned to a single merged file).
@@ -27,11 +28,17 @@ rule merge_lanes:
     The output file is an uncompressed fastq file, because bowtie version 1
     does not support gzipped files as input.
 
+
+    Required configuration parameters:
+
+    config["files"]["lane_merging"] file indicating the source/merged file names
+    config["dir"]["fastq"]          base of the directory containing the fastq files
+
     """
     input: config["files"]["lane_merging"]
-    # output: config["dir"]["results"] + "_lane_merging_benchmark.json"
-    log: config["dir"]["results"] + "_lane_merging_log.txt"
-    benchmark: config["dir"]["results"] + "_lane_merging_benchmark.json"
+    output: config["dir"]["fastq"] + "/lane_merging_benchmark.json"
+    log: config["dir"]["fastq"] + "/lane_merging_log.txt"
+    benchmark: config["dir"]["fastq"] + "/lane_merging_benchmark.json"
     run:
         if (verbosity >= 1):
             print("Lane merging table:\t" + config["files"]["lane_merging"])
