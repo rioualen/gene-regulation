@@ -6,8 +6,6 @@
    config["bowtie2"]["index"]
 """
 
-print(config["bowtie2"])
-
 if not "bowtie2" in config.keys():
     sys.exit("Bowtie2 parameters must be defined in the config file")
 
@@ -22,7 +20,7 @@ rule bowtie2_build:
     Build index for bowtie version 2 (gapped read mapping).
     """
     input: sequence = config["bowtie2"]["genome"]
-    output: index1 = config["bowtie2"]["index"]
+    output: index1 = config["bowtie2"]["index"] + "_benchmark.json"
     params: bowtie_index = config["bowtie2"]["index"],\
             qsub = config["qsub"] \
             + " -q short -e " + config["bowtie2"]["index"] + "_qsub.err" \
