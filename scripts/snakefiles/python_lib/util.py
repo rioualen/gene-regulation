@@ -76,13 +76,13 @@ def read_table(file:str, verbosity:int=0, header:int=0, skip_blank_lines=True, c
     header. These options can be overwritten in the function call.
 
     """
-    if verbosity >= 4:
+    if verbosity >= 3:
         print ("read_table()\t" + file)
     df = pd.read_csv(file, sep="\t", 
                      header=header, 
                      skip_blank_lines=skip_blank_lines,
                      comment=comment)
-    if verbosity >= 5:
+    if verbosity >= 4:
         print("\tColumns:\t" + ";".join(list(df.columns)))
     return(df)
     
