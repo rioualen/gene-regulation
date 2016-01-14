@@ -7,6 +7,7 @@ if not "fastqc" in config.keys():
 if not "other_options" in config["fastqc"].keys():
     config["fastqc"]["other_options"] = ""
 
+
 rule fastqc:
     """Check the quality of a file named {dataset}.fastq, containing
     fastq-formatted raw reads using the program fastQC (quality
@@ -23,10 +24,10 @@ rule fastqc:
 
     """
     input: "{data_dir}/{dataset}.fastq"
-    output: outdir="{data_dir}/{dataset}_fastqc/"
+    output: outdir="{data_dir}/{dataset}_fastqc/", benchmark="{data_dir}/{dataset}_fastqc/{dataset}_fastqc_benchmark.json"
     log: "{data_dir}/{dataset}_fastqc/{dataset}_fastqc.log"
     benchmark: "{data_dir}/{dataset}_fastqc/{dataset}_fastqc_benchmark.json"
-    params: qsub = config["qsub"] + " -q short -e {data_dir}/{data_dir}_fastqc_qsub.err -o {data_dir}/{data_dir}_fastqc_qsub.out", \
+    params: qsub = config["qsub"] + " -q short -e {data_dir}/{dataset}_fastqc/{dataset}_fastqc_qsub.err -o {data_dir}/{dataset}_fastqc/{dataset}_fastqc_qsub.out", \
             options = config["fastqc"]["other_options"]
     shell:"fastqc --outdir {output.outdir} --format fastq {input} {params.options} 2> {log} "
 
