@@ -70,8 +70,8 @@ def read_table(file:str, verbosity:int=0, header:int=0, skip_blank_lines=True, c
     """Read a tab-delimited text file and return the content as a data
     frame (object of the class panda.DataFrame).
 
-    This is a simple wrapper around panda.read_csv, with the
-    appropriat options for our tab-delimited files: comment lines
+    This is a simple wrapper around panda.read_csv, with the appropriate
+    options for our customized tab-separated files (tsv): comment lines
     start with ';', the first non-comment line contains the
     header. These options can be overwritten in the function call.
 
