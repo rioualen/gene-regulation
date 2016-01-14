@@ -2,15 +2,16 @@
    for bowtie version 2.
 """
 
+print(config["bowtie2"])
 
 if not "bowtie2" in config.keys():
     sys.exit("Bowtie2 parameters must be defined in the config file")
 
 if not "genome" in config["bowtie2"].keys():
-    sys.exit("The bowtie2 genome (fasta sequence) must be defined in the config file")
+    sys.exit("The parameter config['bowtie2']['genome'] should be specified in the config file.")
 
 if not "index" in config["bowtie2"].keys():
-    sys.exit("The path of the bowtie2 index must be defined in the config file")
+    sys.exit("The parameter config['bowtie2']['index'] should be specified in the config file.")
 
 rule bowtie2_build:
     """
