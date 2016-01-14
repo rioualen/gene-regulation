@@ -84,9 +84,9 @@ include: os.path.join(PYTHON, "util.py")                        ## Python utilit
 include: os.path.join(RULES, "merge_lanes.rules")               ## Build genome index for bowtie2 (read mapping with gaps)
 include: os.path.join(RULES, "fastqc.rules")                    ## Quality control with fastqc
 include: os.path.join(RULES, "bowtie2_build.rules")             ## Build genome index for bowtie2 (read mapping with gaps)
-# include: os.path.join(RULES, "count_reads.rules")             ## Count reads in different file formats
+include: os.path.join(RULES, "count_reads.rules")             ## Count reads in different file formats
+# include: os.path.join(RULES, "sickle_paired_ends.rules")        ## Trimming with sickle
 # include: os.path.join(RULES, "flowcharts.rules")              ## Draw flowcharts (dag and rule graph)
-# include: os.path.join(RULES, "sickle_paired_ends.rules")      ## Trimming with sickle
 # #include: os.path.join(RULES, "bowtie_build.rules")           ## Read mapping with bowtie version 1 (no gap)
 # #include: os.path.join(RULES, "bowtie_paired_ends.rules")     ## Paired-ends read mapping with bowtie version 1 (no gap)
 # include: os.path.join(RULES, "bowtie2_paired_ends.rules")     ## Paired-ends read mapping with bowtie version 2 (support gaps)
@@ -400,7 +400,7 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: GENOME_INDEX, RAW_QC
+	input: GENOME_INDEX, RAW_QC, RAW_READNB
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
