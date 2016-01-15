@@ -83,13 +83,11 @@ include: os.path.join(PYTHON, "util.py")                        ## Python utilit
 # include: os.path.join(RULES, "util.rules")                    ## Snakemake utilities
 include: os.path.join(RULES, "merge_lanes.rules")               ## Build genome index for bowtie2 (read mapping with gaps)
 include: os.path.join(RULES, "fastqc.rules")                    ## Quality control with fastqc
+include: os.path.join(RULES, "count_reads.rules")               ## Count reads in different file formats
 include: os.path.join(RULES, "bowtie2_build.rules")             ## Build genome index for bowtie2 (read mapping with gaps)
-include: os.path.join(RULES, "count_reads.rules")             ## Count reads in different file formats
+include: os.path.join(RULES, "bowtie2_paired_ends.rules")     ## Paired-ends read mapping with bowtie version 2 (support gaps)
 # include: os.path.join(RULES, "sickle_paired_ends.rules")        ## Trimming with sickle
 # include: os.path.join(RULES, "flowcharts.rules")              ## Draw flowcharts (dag and rule graph)
-# #include: os.path.join(RULES, "bowtie_build.rules")           ## Read mapping with bowtie version 1 (no gap)
-# #include: os.path.join(RULES, "bowtie_paired_ends.rules")     ## Paired-ends read mapping with bowtie version 1 (no gap)
-# include: os.path.join(RULES, "bowtie2_paired_ends.rules")     ## Paired-ends read mapping with bowtie version 2 (support gaps)
 # include: os.path.join(RULES, "genome_coverage.rules")         ## Compute density profiles in bedgraph format
 # include: os.path.join(RULES, "htseq.rules")                   ## Count reads per gene with htseq-count
 # include: os.path.join(RULES, "featurecounts.rules")           ## Count reads per gene with R subread::featurecounts
@@ -226,7 +224,6 @@ if (verbosity >= 1):
 
 GENOME_INDEX=config["bowtie2"]["index"] + "_benchmark.json"
 
-
 #----------------------------------------------------------------#
 # Quality control
 #----------------------------------------------------------------#
@@ -234,25 +231,19 @@ GENOME_INDEX=config["bowtie2"]["index"] + "_benchmark.json"
 RAW_QC = [filename.replace('.fastq','_fastqc/') for filename in FASTQ]
 RAW_READNB = [filename.replace('.fastq','_fastq_readnb.txt') for filename in FASTQ]
 
-# rule fastqc_simple:
-#     """Check the quality of a file named {dataset}.fastq, containing
-#     fastq-formatted raw reads using the program fastQC (quality
-#     control).  You can add any wanted parameters in the "other
-#     options" of the config file.  The results are put into a folder
-#     named '{dataset}_fastqc'.
+#----------------------------------------------------------------#
+# Read mapping (alignment against reference genome)
+#----------------------------------------------------------------#
+
+## to avoid duplicates, fasta sequence should be moved to {genome} directly...
+# BWA_INDEX = expand(config["dir"]["genomes"] + "{genome}/BWAIndex/{genome}.fa.bwt", genome=GENOME)
+# BOWTIE2_INDEX = expand(config["dir"]["genomes"] + "{genome}/Bowtie2Index/{genome}.fa.1.bt2", genome=GENOME)
 #
-# 	Required parameters:
-# 		config['fastqc']['other_options']
-# 		config['qsub']
-#
-#     """
-#     input: "{file}.fastq"
-#     output: outdir="{file}_fastqc/", benchmark="{file}_fastqc/fastqc_benchmark.json"
-#     log: "{file}_fastqc/fastqc_log.txt"
-#     benchmark: "{file}_fastqc/fastqc_benchmark.json"
-#     params: qsub = config["qsub"] + " -q short -e {file}_fastqc/fastqc_qsub.err -o {file}_fastqc/fastqc_qsub.out", \
-#             options = config["fastqc"]["other_options"]
-#     shell:"fastqc --outdir {output.outdir} --format fastq {input} {params.options} 2> {log} "
+# MAPPING = expand(RESULTS_DIR + "{alignment}.sam", alignment=ALIGNMENT)
+MAPPED_PE_SAM=expand(config["dir"]["sam"] + "/{sample_dir}/{sample_id}_bowtie2_pe.sam", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+# MAPPED_PE_BAM=expand(config["dir"]["bam"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["mapped"] + ".bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+if (verbosity >= 0):
+    print("\tMAPPED_PE_SAM:\t" + ";".join(MAPPED_PE_SAM))
 
 
 # #----------------------------------------------------------------#
@@ -400,7 +391,7 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: GENOME_INDEX, RAW_QC, RAW_READNB
+	input: GENOME_INDEX, RAW_QC, RAW_READNB, MAPPED_PE_SAM
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
