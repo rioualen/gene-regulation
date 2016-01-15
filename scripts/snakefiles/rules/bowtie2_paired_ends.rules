@@ -62,7 +62,7 @@ rule bowtie2_paired_end:
     benchmark: config["dir"]["sam"] + "{reads}_bowtie2_pe_benchmark.json"
     params: max_mismatches = config["bowtie2"]["max_mismatches"], \
             index = config["bowtie2"]["index"], \
-            qsub=config["qsub"] + " -q long -e " + config["dir"]["sam"] + "{reads}_bowtie_qsub.err " \
+            qsub=config["qsub"] + " -e " + config["dir"]["sam"] + "{reads}_bowtie_qsub.err " \
                  + " -o " + config["dir"]["sam"] + "{reads}_bowtie_qsub.out", \
             options = config["bowtie2"]["other_options"]
     shell: "bowtie2 -x {params.index} -1 {input.forward} -2 {input.reverse} -S {output.sam} --phred33 -N {params.max_mismatches} -t {params.options} > {output.summary} 2> {log}"
@@ -104,7 +104,7 @@ rule bowtie2_paired_end_trimmed:
     benchmark: "{reads}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_benchmark.json"
     params: max_mismatches = config["bowtie2"]["max_mismatches"], \
             index = config["bowtie2"]["index"], \
-            qsub=config["qsub"] + " -q long -e {reads}_bowtie_qsub.err -o {reads}_bowtie_qsub.out", \
+            qsub=config["qsub"] + " -e {reads}_bowtie_qsub.err -o {reads}_bowtie_qsub.out", \
             options = config["bowtie2"]["other_options"]
     shell: "bowtie2 -x {params.index} -1 {input.forward} -2 {input.reverse} -S {output.sam} --phred33 -N {params.max_mismatches} -t {params.options} > {output.summary} 2> {log}"
  
