@@ -53,7 +53,7 @@ rule bowtie2_paired_end:
 """
     
     input:  \
-            index = config["bowtie2"]["index"] + ".1.bt2", \
+            first_index = config["bowtie2"]["index"] + ".1.bt2", \
             forward = config["dir"]["fastq"] + "{reads}" + config["suffix"]["reads_fwd"] + ".fastq", \
             reverse = config["dir"]["fastq"] + "{reads}" + config["suffix"]["reads_rev"] + ".fastq"
     output: sam = config["dir"]["sam"] + "{reads}_bowtie2_pe.sam", \
@@ -61,11 +61,11 @@ rule bowtie2_paired_end:
     log: config["dir"]["sam"] + "{reads}_bowtie2_pe.log"
     benchmark: config["dir"]["sam"] + "{reads}_bowtie2_pe_benchmark.json"
     params: max_mismatches = config["bowtie2"]["max_mismatches"], \
-            # index = config["dir"]["genome"] + config["genome"]["organism"], \
+            index = config["bowtie2"]["index"], \
             qsub=config["qsub"] + " -q long -e " + config["dir"]["sam"] + " {reads}_bowtie_qsub.err " \
                  + " -o " + config["dir"]["sam"] + " {reads}_bowtie_qsub.out", \
             options = config["bowtie2"]["other_options"]
-    shell: "bowtie2 -x {input.index} -1 {input.forward} -2 {input.reverse} -S {output.sam} --phred33 -N {params.max_mismatches} -t {params.options} > {output.summary} 2> {log}"
+    shell: "bowtie2 -x {params.index} -1 {input.forward} -2 {input.reverse} -S {output.sam} --phred33 -N {params.max_mismatches} -t {params.options} > {output.summary} 2> {log}"
 
 
 ################################################################
