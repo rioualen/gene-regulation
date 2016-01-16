@@ -1,13 +1,19 @@
-"""
-	Align each sample with the R-package subread
+"""Align each sample with the R-package subread.
 
-	For aligned each sample on the genome reference the R-package subread need to build a index by the function
-	builindex(), and then we execute the alignement with the function align() who call the tool Subread.
-	Liao Y, Smyth GK and Shi W (2013). The Subread aligner: fast, accurate and scalable read mapping by seed-and-vote.
-	Nucleic Acids Research, 41(10):e108
+   To align each sample on the reference genome the R-package subread
+   first needs to build a index with the function builindex(). The
+   alignment is then executed with the function align(), which calls
+   the tool read mapping tool Subread.  
+
+   Reference: Liao Y, Smyth GK and Shi W (2013). The Subread aligner:
+   fast, accurate and scalable read mapping by seed-and-vote.  Nucleic
+   Acids Research, 41(10):e108
+
 """
 # rule buildindex_mapping:
-# 	"""This rule build the index necessary to process the alignement"""
+# 	"""Build an index of the genome, which is required before alignig the
+# reads.
+# """
 # 	input: reference_genome = config["subread"]["reference_genome"]
 # 	output: config["dir"]["results"] + "control_buildindex.txt"
 # 	params: reference_index = config["dir"]["results"] + config["subread"]["basename"], qsub = config["qsub"] + " -q short -e " + config["dir"]["results"] + "buildindex_qsub.err -o " + config["dir"]["results"] + "buildindex_qsub.out"
@@ -21,7 +27,11 @@
 # 		""")
 #
 # rule subread_mapping:
-# 	"""This rule execute the alignement with the subread tool"""
+# 	"""Align reads onto a reference genome  with the tool subread. 
+#
+#         Before running the alignment, an index of the genome sequence
+#         has to be built with the tool Rsubread::buildindex.
+# """
 # 	input: file_input = "{data_dir}/{dataset}_{trimmed}.fastq", control_txt = config["dir"]["results"] + "control_buildindex.txt"
 # 	output: "{data_dir}/{dataset}_{trimmed}_{aligneur}.bam"
 # 	params: reference_index = config["dir"]["results"] + config["subread"]["basename"], qsub = config["qsub"] + " -q medium -e {data_dir}/{dataset}_{trimmed}_{aligneur}_subread_mapping_qsub.err -o {data_dir}/{dataset}_{trimmed}_{aligneur}_subread_mapping_qsub.out"
@@ -33,11 +43,32 @@
 # 			align(index="{params.reference_index}",readfile1="{input.file_input}",output_file="{output}")
 # 		""")
 
+# Raise an error and exit if a required parameter is missing.
+# Set optional params to defaults values in case they're not defined in config file.
+
+if not "subread" in config.keys():
+    sys.exit("The subread parameters should be specified in the config file.")
+
+if not "index" in config["subread"].keys():
+    sys.exit("The parameter config['subread']['index'] should be specified in the config file.")
+
+if not "threads" in config["subread"].keys():
+    config["subread"]["threads"] = "1"
+
+if not "seq_type" in config["subread"].keys():
+    sys.exit("The parameter config['subread']['seq_type'] should be specified in the config file.")
+
+if not "other_options" in config["subread"].keys():
+    config["subread"]["other_options"] = ""
+
 
 rule subread_buildindex:
-	"""Build the index  of genome sequences for subread read mapping. """
+	"""Build an index of the genome, which is required before alignig the
+reads with subread-align.
+"""
 	input: reference_genome = config["subread"]["reference_genome"]
-	output: config["subread"]["basename"] + "control_buildindex.txt"
+	output: files=config["subread"]["index"] + ".files", \
+            benchmark=config["subread"]["index"] + "_buildindex_benchmark.json"
 	params: reference_index = config["subread"]["index"], \
 			qsub = config["qsub"] \
 		+ " -e " + config["subread"]["index"] + "_buildindex_qsub.err " \
@@ -45,4 +76,27 @@ rule subread_buildindex:
 	log: config["subread"]["index"] + "_buildindex_log.txt"
 	benchmark: config["subread"]["index"] + "_buildindex_benchmark.json"
 	shell: "subread-buildindex -o {params.reference_index}  {input.reference_genome} &> {log}"
+
+
+
+rule subread_align_pe:
+     """Align reads onto a reference genome with the
+	tool subread-align.
+
+        Before running the alignment, an index of the genome sequence
+        has to be built with the tool Rsubread::buildindex.
+"""
+     input: index_files = config["subread"]["index"] + ".files", \
+        reads_1 = config["dir"]["fastq"] + "{reads}" + config["suffix"]["reads_fwd"] + ".fastq", \
+        reads_2 = config["dir"]["fastq"] + "{reads}" + config["suffix"]["reads_rev"] + ".fastq"
+     output: bam = config["dir"]["mapped_reads"] + "{reads}_subread-align_pe.bam", \
+        benchmark = config["dir"]["mapped_reads"] + "{reads}_subread-align_pe_benchmark.json"
+     log: config["dir"]["mapped_reads"] + "{reads}_subread-align_pe.log"
+     benchmark: config["dir"]["mapped_reads"] + "{reads}_subread-align_pe_benchmark.json"
+     params: subread_index = config["subread"]["index"], \
+        threads = config["subread"]["threads"], \
+        qsub=config["qsub"] + " -e " + config["dir"]["mapped_reads"] + "{reads}_bowtie_qsub.err " \
+            + " -o " + config["dir"]["mapped_reads"] + "{reads}_bowtie_qsub.out", \
+        options = config["subread"]["other_options"]
+     shell: "subread-align -i {params.subread_index} -r {input.reads_1} -R {input.reads_2} -T {params.threads} {params.options} -o {output.bam} 2> {log}"
 
