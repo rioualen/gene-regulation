@@ -5,21 +5,21 @@ rule count_reads_fastq:
     """Count number of reads in a fastq-formatted file (unaligned reads)."""
     input: "{file}.fastq"
     output: "{file}_fastq_readnb.txt"
-    params: qsub = config["qsub"] + " -q long -e {file}_readnb_qsub.err -o {file}_readnb_qsub.out"
+    params: qsub = config["qsub"] + " -e {file}_readnb_qsub.err -o {file}_readnb_qsub.out"
     shell: "grep '^@' {input} | wc -l > {output}"
 
 rule count_reads_fastq_gz:
     """Count number of reads in a gzipped fastq-formatted file (unaligned reads)."""
     input: "{file}.fastq.gz"
     output: "{file}_fastq_readnb.txt"
-    params: qsub = config["qsub"] + " -q long -e {file}_fastq_readnb_qsub.err -o {file}_fastq_readnb_qsub.out"
+    params: qsub = config["qsub"] + " -e {file}_fastq_readnb_qsub.err -o {file}_fastq_readnb_qsub.out"
     shell: "gunzip -c {input} | grep '^@' | wc -l > {output}"
 
 rule count_reads_bam:
     """Count number of reads in a bam-formatted file (binary alignment map, compressed sam)."""
     input: "{file}.bam"
     output: "{file}_bam_readnb.txt"
-    params: qsub = config["qsub"] + " -q long -e {file}_bam_readnb_qsub.err -o {file}_bam_readnb_qsub.out"
+    params: qsub = config["qsub"] + " -e {file}_bam_readnb_qsub.err -o {file}_bam_readnb_qsub.out"
     shell: "samtools view -c {input} > {output}"
 
 rule count_reads_sam:
@@ -27,7 +27,7 @@ rule count_reads_sam:
     input: "{file}.sam"
     output: "{file}_sam_readnb.txt"
     log: "{file}_sam_readnb.log"
-    params: qsub = config["qsub"] + " -q long -e {file}_sam_readnb_qsub.err -o {file}_sam_readnb_qsub.out"
+    params: qsub = config["qsub"] + " -e {file}_sam_readnb_qsub.err -o {file}_sam_readnb_qsub.out"
     shell: "samtools view -S -c {input} > {output} 2> {log}"
 
 rule count_features_bed:
@@ -35,5 +35,5 @@ rule count_features_bed:
     input: "{file}.bed"
     output: "{file}_bed_nb.txt"
     log: "{file}_bed_nb.log"
-    params: qsub = config["qsub"] + " -q long -e {file}_bed_nb_qsub.err -o {file}_bed_nb_qsub.out"
+    params: qsub = config["qsub"] + " -e {file}_bed_nb_qsub.err -o {file}_bed_nb_qsub.out"
     shell: "grep -v '^#' {input} | wc -l | perl -pe 's| +||g' > {output} 2> {log}"
