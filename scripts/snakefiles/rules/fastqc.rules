@@ -27,7 +27,7 @@ rule fastqc:
     output: outdir="{data_dir}/{dataset}_fastqc/", benchmark="{data_dir}/{dataset}_fastqc/{dataset}_fastqc_benchmark.json"
     log: "{data_dir}/{dataset}_fastqc/{dataset}_fastqc.log"
     benchmark: "{data_dir}/{dataset}_fastqc/{dataset}_fastqc_benchmark.json"
-    params: qsub = config["qsub"] + " -q short -e {data_dir}/{dataset}_fastqc/{dataset}_fastqc_qsub.err -o {data_dir}/{dataset}_fastqc/{dataset}_fastqc_qsub.out", \
+    params: qsub = config["qsub"] + " -e {data_dir}/{dataset}_fastqc/{dataset}_fastqc_qsub.err -o {data_dir}/{dataset}_fastqc/{dataset}_fastqc_qsub.out", \
             options = config["fastqc"]["other_options"]
     shell:"fastqc --outdir {output.outdir} --format fastq {input} {params.options} 2> {log} "
 
