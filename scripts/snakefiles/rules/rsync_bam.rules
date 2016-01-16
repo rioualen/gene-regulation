@@ -10,5 +10,5 @@ rule rsync_bam:
 	output: config["dir"]["results"] + "{data_dir}/{dataset}.bam"
 	log: config["dir"]["results"] + "{data_dir}/{dataset}_rsync.log"
 	benchmark: config["dir"]["results"] + "{data_dir}/{dataset}_rsync_benchmark.json"
-	params: qsub = config["qsub"] + " -q short -e " + config["dir"]["results"] + "{data_dir}/{dataset}_rsync_qsub.err -o " + config["dir"]["results"] + "{data_dir}/{dataset}_rsync_qsub.out"
+	params: qsub = config["qsub"] + " -e " + config["dir"]["results"] + "{data_dir}/{dataset}_rsync_qsub.err -o " + config["dir"]["results"] + "{data_dir}/{dataset}_rsync_qsub.out"
 	shell:"rsync -ruptvl {input} {output} 2> {log} "
