@@ -21,7 +21,7 @@ rule htseq_count:
             idattr = config["htseq"]["id_attr"], \
             mode = config["htseq"]["mode"], \
             gff_file = config["htseq"]["gff_file"], \
-            qsub = config["qsub"] + " -q long" \
+            qsub = config["qsub"] + "" \
             + " -e {reads}_sorted_{order}_HTSeqcount_qsub.err" \
             + " -o {reads}_sorted_{order}_HTSeqcount_qsub.out", 
             options = config["htseq"]["other_options"]
@@ -52,7 +52,7 @@ rule htseq_count:
 #             idattr = config["htseq"]["id_attr"], \
 #             mode = config["htseq"]["mode"], \
 #             gff_file = config["htseq"]["gff_file"], \
-#             qsub = config["qsub"] + " -q long" \
+#             qsub = config["qsub"] + "" \
 #             + " -e {reads}_sorted_" + config["htseq"]["order"] + "_HTSeqcount_qsub.err" \
 #             + " -o {reads}_sorted_" + config["htseq"]["order"] + "_HTSeqcount_qsub.out", \
 #             options = config["htseq"]["other_options"]
