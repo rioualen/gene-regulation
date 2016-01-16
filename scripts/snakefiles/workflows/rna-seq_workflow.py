@@ -85,7 +85,8 @@ include: os.path.join(RULES, "merge_lanes.rules")               ## Build genome 
 include: os.path.join(RULES, "fastqc.rules")                    ## Quality control with fastqc
 include: os.path.join(RULES, "count_reads.rules")               ## Count reads in different file formats
 include: os.path.join(RULES, "bowtie2_build.rules")             ## Build genome index for bowtie2 (read mapping with gaps)
-include: os.path.join(RULES, "bowtie2_paired_ends.rules")     ## Paired-ends read mapping with bowtie version 2 (support gaps)
+include: os.path.join(RULES, "bowtie2_paired_ends.rules")       ## Paired-ends read mapping with bowtie version 2 (support gaps)
+include: os.path.join(RULES, "subread_mapping_JvH.rules")       ## Read mapping with subreads
 # include: os.path.join(RULES, "sickle_paired_ends.rules")        ## Trimming with sickle
 # include: os.path.join(RULES, "flowcharts.rules")              ## Draw flowcharts (dag and rule graph)
 # include: os.path.join(RULES, "genome_coverage.rules")         ## Compute density profiles in bedgraph format
@@ -240,10 +241,14 @@ RAW_READNB = [filename.replace('.fastq','_fastq_readnb.txt') for filename in FAS
 # BOWTIE2_INDEX = expand(config["dir"]["genomes"] + "{genome}/Bowtie2Index/{genome}.fa.1.bt2", genome=GENOME)
 #
 # MAPPING = expand(RESULTS_DIR + "{alignment}.sam", alignment=ALIGNMENT)
-MAPPED_PE_SAM=expand(config["dir"]["sam"] + "/{sample_dir}/{sample_id}_bowtie2_pe.sam", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
-# MAPPED_PE_BAM=expand(config["dir"]["bam"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["mapped"] + ".bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+MAPPED_BOWTIE2_PE_SAM=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_bowtie2_pe.sam", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+MAPPED_BOWTIE2_PE_BAM=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_bowtie2_pe.bam", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
 if (verbosity >= 0):
-    print("\tMAPPED_PE_SAM:\t" + ";".join(MAPPED_PE_SAM))
+    print("\tMAPPED_BOWTIE2_PE_SAM:\t" + ";".join(MAPPED_BOWTIE2_PE_SAM))
+
+SUBREADALIGN_PE_BAM=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe.bam", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+if (verbosity >= 0):
+    print("\tSUBREADALIGN_PE_BAM:\t" + ";".join(SUBREADALIGN_PE_BAM))
 
 
 # #----------------------------------------------------------------#
@@ -312,8 +317,8 @@ if (verbosity >= 0):
 # # was causing problems with bowtie1. I should revise this at some
 # # point.
 #
-# MAPPED_PE_SAM=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["mapped"] + ".sam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
-# MAPPED_PE_BAM=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["mapped"] + ".bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+# MAPPED_BOWTIE2_PE_SAM=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["mapped"] + ".sam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+# MAPPED_BOWTIE2_PE_BAM=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["mapped"] + ".bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 # MAPPED_PE_SORTED=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["sorted_pos"] + ".bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 # MAPPED_PE_SORTED_BY_NAME=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["sorted_name"] + ".bam", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 # if (verbosity >= 3):
@@ -391,7 +396,7 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: GENOME_INDEX, RAW_QC, RAW_READNB, MAPPED_PE_SAM
+	input: GENOME_INDEX, RAW_QC, RAW_READNB, SUBREADALIGN_PE_BAM #, MAPPED_BOWTIE2_PE_SAM
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
@@ -402,7 +407,7 @@ rule all:
 #     Run all the required analyses
 #     """
 # #    input: TRIMMED_SUMMARIES ## Still working ?
-# #    input: MERGED_RAWR_QC, RAWR_MERGED, TRIMMED_MERGED, TRIMMED_QC, MAPPED_PE_SAM, MAPPED_PE_BAM,
+# #    input: MERGED_RAWR_QC, RAWR_MERGED, TRIMMED_MERGED, TRIMMED_QC, MAPPED_BOWTIE2_PE_SAM, MAPPED_BOWTIE2_PE_BAM,
 #     input: GENOMECOV, GENOMECOV_PLUS, GENOMECOV_MINUS
 # #        MAPPED_PE_SORTED,  \
 # #        GENOMECOV, \
@@ -450,8 +455,8 @@ rule all:
 # SAMPLE_DIRS_OL=report_numbered_list(SAMPLE_DIRS)
 # RAWR_MERGED_OL=report_numbered_list(RAWR_MERGED)
 # TRIMMED_MERGED_OL=report_numbered_list(TRIMMED_MERGED)
-# MAPPED_PE_SAM_OL=report_numbered_list(MAPPED_PE_SAM)
-# MAPPED_PE_BAM_OL=report_numbered_list(MAPPED_PE_BAM)
+# MAPPED_BOWTIE2_PE_SAM_OL=report_numbered_list(MAPPED_BOWTIE2_PE_SAM)
+# MAPPED_BOWTIE2_PE_BAM_OL=report_numbered_list(MAPPED_BOWTIE2_PE_BAM)
 # MAPPED_PE_SORTED_OL = report_numbered_list(MAPPED_PE_SORTED)
 # MAPPED_PE_SORTED_BY_NAME_OL = report_numbered_list(MAPPED_PE_SORTED_BY_NAME)
 # HTSEQ_COUNTS_OL = report_numbered_list(HTSEQ_COUNTS)
@@ -527,11 +532,11 @@ rule all:
 #
 #         Sam format (uncompressed)
 #
-#         {MAPPED_PE_SAM_OL}
+#         {MAPPED_BOWTIE2_PE_SAM_OL}
 #
 #         Bam format (compressed)
 #
-#         {MAPPED_PE_BAM_OL}
+#         {MAPPED_BOWTIE2_PE_BAM_OL}
 #
 #         Bam format (sorted by positions)
 #
