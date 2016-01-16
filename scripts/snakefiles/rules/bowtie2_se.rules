@@ -48,7 +48,7 @@ rule bowtie2_se:
     message: "Mapping reads on reference genome {input.index} using Bowtie2..."
     params:
         max_mismatches = config["bowtie2"]["max_mismatches"], \
-        qsub=config["qsub"] + " -q long -e {reads}_bowtie2_qsub.err -o {reads}_bowtie2_qsub.out", \
+        qsub=config["qsub"] + " -e {reads}_bowtie2_qsub.err -o {reads}_bowtie2_qsub.out", \
         threads = config["bowtie2"]["threads"], \
         index=config["bowtie2"]["dir"] + config["genome"]["version"] + ".fa", \
         stats = "{reads}_bowtie2_sam_stat.txt"
