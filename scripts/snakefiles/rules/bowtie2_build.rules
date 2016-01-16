@@ -23,7 +23,7 @@ rule bowtie2_build:
     output: index1 = config["bowtie2"]["index"] + "_benchmark.json"
     params: bowtie_index = config["bowtie2"]["index"],\
             qsub = config["qsub"] \
-            + " -q short -e " + config["bowtie2"]["index"] + "_qsub.err" \
+            + " -e " + config["bowtie2"]["index"] + "_qsub.err" \
             + " -o " + config["bowtie2"]["index"] + "_qsub.out"
     log:  config["bowtie2"]["index"] + "_log.txt"
     message: "Building bowtie2 index in directory:\t{params.bowtie_index}"
@@ -46,7 +46,7 @@ rule bowtie2_build:
 #     params: sequence_url = config["genome"]["base_url_fasta"] + config["genome"]["sequence"] + ".fa.gz", \
 #             features_gtf_url = config["genome"]["base_url_gtf"] + config["genome"]["features_gtf"] + ".gtf.gz", \
 #             features_gff3_url = config["genome"]["base_url_gff3"] + config["genome"]["features_gff3"] + ".gff3.gz", \
-#             qsub = config["qsub"] + " -q short"
+#             qsub = config["qsub"] + " "
 #     shell: "wget --timestamping --no-directories " \
 #         + " --directory-prefix " + config["dir"]["genome"] \
 #         + " {params.sequence_url}" \
@@ -65,7 +65,7 @@ rule bowtie2_build:
 #     input: sequence = config["dir"]["genome"] + "/" + config["genome"]["sequence"] + ".fa"
 #     output: index1 = config["dir"]["genome"] + "/" + config["genome"]["organism"] + ".1.bt2"
 #     params: bowtie_index = config["dir"]["genome"] + "/" + config["genome"]["organism"],\
-#             qsub = config["qsub"] + " -q short -e " + config["dir"]["genome"] + "/" + config["genome"]["sequence"] + "_qsub.err -o " + config["dir"]["genome"] + "/" + config["genome"]["sequence"] + "_qsub.out"
+#             qsub = config["qsub"] + " -e " + config["dir"]["genome"] + "/" + config["genome"]["sequence"] + "_qsub.err -o " + config["dir"]["genome"] + "/" + config["genome"]["sequence"] + "_qsub.out"
 #     log:  config["genome"]["organism"] + "/bowtie-build_log.txt"
 #     message: "Building bowtie index in directory:\t{params.bowtie_index}"
 #     benchmark:  config["genome"]["organism"] + "/bowtie-build_benchmark.json"
