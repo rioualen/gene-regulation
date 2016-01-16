@@ -21,7 +21,7 @@ rule bowtie2_download_genome:
     log: config["dir"]["genome"] + "/" + "wget_log.txt"
     params: sequence_url = config["genome"]["base_url_fasta"] + "/" + config["genome"]["sequence"] + ".fa.gz", \
             features_gtf_url = config["genome"]["base_url_gtf"] + "/" + config["genome"]["features_gtf"] + ".gtf.gz", \
-            qsub = config["qsub"] + " -q short"
+            qsub = config["qsub"]
     shell: "wget --timestamping --no-directories " \
         + " --directory-prefix " + config["dir"]["genome"] + "/" \
         + " {params.sequence_url}" \
