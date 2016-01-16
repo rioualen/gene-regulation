@@ -14,6 +14,9 @@ if not "index" in config["bowtie2"].keys():
 if not "threads" in config["bowtie2"].keys():
     config["bowtie2"]["threads"] = "1"
 
+if not "threads" in config["bowtie2"].keys():
+    config["bowtie2"]["threads"] = "1"
+
 if not "max_mismatches" in config["bowtie2"].keys():
     config["bowtie2"]["max_mismatches"] = "0"
 
@@ -23,13 +26,8 @@ if not "dir" in config.keys():
 if not "fastq" in config["dir"].keys():
     sys.exit("The parameter config['dir']['fastq'] should be specified in the config file.")
 
-if not "sam" in config["dir"].keys():
-    sys.exit("The parameter config['dir']['sam'] should be specified in the config file.")
-
-print("\n\t".join(["DEBUG",
-                   config["dir"]["fastq"],
-                   config["dir"]["sam"]
-                   ]))
+if not "mapped_reads" in config["dir"].keys():
+    sys.exit("The parameter config['dir']['mapped_reads'] should be specified in the config file.")
 
 rule bowtie2_paired_end:
     """Read mapping for paired end data using bowtie2.
@@ -56,14 +54,14 @@ rule bowtie2_paired_end:
             first_index = config["bowtie2"]["index"] + ".1.bt2", \
             forward = config["dir"]["fastq"] + "{reads}" + config["suffix"]["reads_fwd"] + ".fastq", \
             reverse = config["dir"]["fastq"] + "{reads}" + config["suffix"]["reads_rev"] + ".fastq"
-    output: sam = config["dir"]["sam"] + "{reads}_bowtie2_pe.sam", \
-            summary = config["dir"]["sam"] + "{reads}_bowtie2_pe_summary.txt"
-    log: config["dir"]["sam"] + "{reads}_bowtie2_pe.log"
-    benchmark: config["dir"]["sam"] + "{reads}_bowtie2_pe_benchmark.json"
+    output: sam = config["dir"]["mapped_reads"] + "{reads}_bowtie2_pe.sam", \
+            summary = config["dir"]["mapped_reads"] + "{reads}_bowtie2_pe_summary.txt"
+    log: config["dir"]["mapped_reads"] + "{reads}_bowtie2_pe.log"
+    benchmark: config["dir"]["mapped_reads"] + "{reads}_bowtie2_pe_benchmark.json"
     params: max_mismatches = config["bowtie2"]["max_mismatches"], \
             index = config["bowtie2"]["index"], \
-            qsub=config["qsub"] + " -e " + config["dir"]["sam"] + "{reads}_bowtie_qsub.err " \
-                 + " -o " + config["dir"]["sam"] + "{reads}_bowtie_qsub.out", \
+            qsub=config["qsub"] + " -e " + config["dir"]["mapped_reads"] + "{reads}_bowtie_qsub.err " \
+                 + " -o " + config["dir"]["mapped_reads"] + "{reads}_bowtie_qsub.out", \
             options = config["bowtie2"]["other_options"]
     shell: "bowtie2 -x {params.index} -1 {input.forward} -2 {input.reverse} -S {output.sam} --phred33 -N {params.max_mismatches} -t {params.options} > {output.summary} 2> {log}"
 
@@ -103,9 +101,10 @@ rule bowtie2_paired_end_trimmed:
     log: "{reads}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe.log"
     benchmark: "{reads}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_benchmark.json"
     params: max_mismatches = config["bowtie2"]["max_mismatches"], \
+            threads = config["bowtie2"]["threads"], \
             index = config["bowtie2"]["index"], \
             qsub=config["qsub"] + " -e {reads}_bowtie_qsub.err -o {reads}_bowtie_qsub.out", \
             options = config["bowtie2"]["other_options"]
-    shell: "bowtie2 -x {params.index} -1 {input.forward} -2 {input.reverse} -S {output.sam} --phred33 -N {params.max_mismatches} -t {params.options} > {output.summary} 2> {log}"
+    shell: "bowtie2 -x {params.index} -1 {input.forward} -2 {input.reverse} -S {output.sam} --phred33 -N {params.max_mismatches} --threads {params.threads} -t {params.options} > {output.summary} 2> {log}"
  
     
