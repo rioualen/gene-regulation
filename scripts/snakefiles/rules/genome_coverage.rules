@@ -27,7 +27,7 @@ rule genome_coverate_dz:
     output: "{reads}_genomecov_dz.txt"
     log:  "{reads}_genomecov_dz.log"
     benchmark:  "{reads}_genomecov_dz_benchmark.json"
-    params: qsub = config["qsub"] + " -q long -e {reads}_genomecov_dz_qsub.err -o {reads}_genomecov_dz_qsub.out"
+    params: qsub = config["qsub"] + " -e {reads}_genomecov_dz_qsub.err -o {reads}_genomecov_dz_qsub.out"
     shell: "bedtools genomecov -strand -dz -ibam {input.reads} " \
         + "  > {output} 2> {log}"
 
@@ -42,7 +42,7 @@ rule genome_coverage_bedgraph:
     output: bedg = "{reads}_genomecov.bedgraph"
     log:  "{reads}_genomecov_bg.log"
     benchmark:  "{reads}_genomecov_bg_benchmark.json"
-    params: qsub = config["qsub"] + " -q long -e {reads}_genomecov_bg_qsub.err -o {reads}_genomecov_bg_qsub.out"
+    params: qsub = config["qsub"] + " -e {reads}_genomecov_bg_qsub.err -o {reads}_genomecov_bg_qsub.out"
     shell: "bedtools genomecov -bg -ibam {input.reads} > {output.bedg} 2> {log}" 
 
 rule genome_coverage_bedgraph_strands:
@@ -57,7 +57,7 @@ rule genome_coverage_bedgraph_strands:
             bedg_minus = "{reads}_genomecov_strand-.bedgraph"
     log:  "{reads}_genomecov_bg_str.log"
     benchmark:  "{reads}_genomecov_bg_str_benchmark.json"
-    params: qsub = config["qsub"] + " -q long -e {reads}_genomecov_bg_str_qsub.err -o {reads}_genomecov_bg_str_qsub.out"
+    params: qsub = config["qsub"] + " -e {reads}_genomecov_bg_str_qsub.err -o {reads}_genomecov_bg_str_qsub.out"
     shell: "bedtools genomecov -bg -strand + -ibam {input.reads} > {output.bedg_plus} 2> {log}" \
         + "; bedtools genomecov -bg -strand - -ibam {input.reads} > {output.bedg_minus} 2>> {log}"
 
@@ -74,7 +74,7 @@ rule bedgraph_to_tdf:
     log: "{coverage}_bedgraph_to_tdf.log"
     benchmark: "{coverage}_bedgraph_to_tdf_benchmark.json"
     params: genome=config["genome"]["fasta"], \
-            qsub = config["qsub"] + " -q long -e {coverage}_bedgraph_to_tdf_qsub.err -o {coverage}_bedgraph_to_tdf_qsub.out"
+            qsub = config["qsub"] + " -e {coverage}_bedgraph_to_tdf_qsub.err -o {coverage}_bedgraph_to_tdf_qsub.out"
     shell: "igvtools totdf {input} {output} {params.genome} 2> {log}"
 
 
@@ -90,7 +90,7 @@ rule bam2wig:
     benchmark:  "{reads}_bam2wig_benchmark.json"
     params: output_prefix = "{reads}", \
             chromsize = config["genome"]["chromsize"], \
-            qsub = config["qsub"] + " -q long -e {reads}_bam2wig_qsub.err -o {reads}_bam2wig_qsub.out"
+            qsub = config["qsub"] + " -e {reads}_bam2wig_qsub.err -o {reads}_bam2wig_qsub.out"
     shell: "bam2wig.py -i {input} -s {params.chromsize} -o {params.output_prefix} 2> {log}" 
     
 
@@ -103,7 +103,7 @@ rule bedgraphtobigwig:
     output: "{coverage}.bw"
     log:  "{coverage}_bedGraphToBigWig.log"
     benchmark:  "{coverage}_bedGraphToBigWig.json"
-    params: qsub = config["qsub"] + " -q long -e {coverage}_bedGraphToBigWig_qsub.err -o {coverage}_bedGraphToBigWig_qsub.out"
+    params: qsub = config["qsub"] + " -e {coverage}_bedGraphToBigWig_qsub.err -o {coverage}_bedGraphToBigWig_qsub.out"
     shell: "bedGraphToBigWig {input.bedgrap} {input.chromsizes} {output} 2> {log}"
 
 # rule genome_coverage_bgwig:
@@ -119,7 +119,7 @@ rule bedgraphtobigwig:
 #     benchmark:  "{reads}_genomecov_benchmark.json"
 #     params: chrom_sizes = config["genome"]["chromsizes"], \
 #             intervals = config["genome_coverage"]["intervals"], \
-#             qsub = config["qsub"] + " -q long -e {reads}_genomecov_qsub.err -o {reads}_genomecov_qsub.out"
+#             qsub = config["qsub"] + " -e {reads}_genomecov_qsub.err -o {reads}_genomecov_qsub.out"
 #     shell: "bedtools genomecov -bg -scale {params.intervals} -ibam {input.reads} " \
 #         + " | bedGraphToBigWig  > {output.bw} 2> {log}"
 
