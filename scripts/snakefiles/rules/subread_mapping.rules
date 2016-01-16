@@ -17,7 +17,7 @@ reads.
 	input: reference_genome = config["subread"]["reference_genome"]
 	output: config["dir"]["results"] + "control_buildindex.txt"
 	params: reference_index = config["dir"]["results"] + config["subread"]["basename"], \
-            qsub = config["qsub"] + " -q short -e " + config["dir"]["results"] + "buildindex_qsub.err " \
+            qsub = config["qsub"] + " -e " + config["dir"]["results"] + "buildindex_qsub.err " \
                    + " -o " + config["dir"]["results"] + "buildindex_qsub.out"
 	log: config["dir"]["results"] + "buildindex.log"
 	benchmark: config["dir"]["results"] + "buildindex_benchmark.json"
@@ -28,8 +28,9 @@ buildindex(basename="{params.reference_index}",reference="{input.reference_genom
 write("buildindex ok", file="{output}")
 """)
 
-rule subread_mapping:
-	"""Align reads onto a reference genome  with the tool subread. 
+rule subread_mapping: 
+     """Align reads onto a reference genome with the
+	tool subread-align.
 
         Before running the alignment, an index of the genome sequence
         has to be built with the tool Rsubread::buildindex.
@@ -37,7 +38,7 @@ rule subread_mapping:
 	input: file_input = "{data_dir}/{dataset}_{trimmed}.fastq", control_txt = config["dir"]["results"] + "control_buildindex.txt"
 	output: "{data_dir}/{dataset}_{trimmed}_{aligner}.bam"
 	params: reference_index = config["dir"]["results"] + config["subread"]["basename"], \
-            qsub = config["qsub"] + " -q medium -e {data_dir}/{dataset}_{trimmed}_{aligner}_subread_mapping_qsub.err " \
+            qsub = config["qsub"] + "  -e {data_dir}/{dataset}_{trimmed}_{aligner}_subread_mapping_qsub.err " \
                 + " -o {data_dir}/{dataset}_{trimmed}_{aligner}_subread_mapping_qsub.out"
 	log: "{data_dir}/{dataset}_{trimmed}_{aligner}_subread_mapping.log"
 	benchmark: "{data_dir}/{dataset}_{trimmed}_{aligner}_subread_mapping_benchmark.json"
