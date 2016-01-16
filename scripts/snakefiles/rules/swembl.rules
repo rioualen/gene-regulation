@@ -33,7 +33,7 @@ rule swembl:
         R =  config["swembl"]["R"], \
         x = config["swembl"]["x"], \
         qsub = config["qsub"]  \
-        + " -q long -e {result_dir}/{treatment}_vs_{control}/swembl-R{R}/{treatment}_vs_{control}_{aligner}_swembl-R{R}_qsub.err" \
+        + " -e {result_dir}/{treatment}_vs_{control}/swembl-R{R}/{treatment}_vs_{control}_{aligner}_swembl-R{R}_qsub.err" \
         + " -o {result_dir}/{treatment}_vs_{control}/swembl-R{R}/{treatment}_vs_{control}_{aligner}_swembl-R{R}_qsub.out"
     log: "{result_dir}/{treatment}_vs_{control}/swembl-R{R}/{treatment}_vs_{control}_{aligner}_swembl-R{R}.log"
     benchmark: "{result_dir}/{treatment}_vs_{control}/swembl-R{R}/{treatment}_vs_{control}_{aligner}_swembl-R{R}_benchmark.json"
