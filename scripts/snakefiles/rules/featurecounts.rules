@@ -39,7 +39,7 @@ rule featurecounts:
                 paired_ends = config["subread"]["paired_ends"], \
                 ignore_duplicate = config["subread"]["ignore_dup"], \
                 qsub = config["qsub"] \
-                + " -q short -e {data_dir}/{reads}_featurecounts_qsub.err" \
+                + " -e {data_dir}/{reads}_featurecounts_qsub.err" \
                 + " -o {data_dir}/{reads}_featurecounts_qsub.out"
 	log: "{data_dir}/{reads}_featurecounts.log"
 	benchmark: "{data_dir}/{reads}_featurecounts_benchmark.json"
