@@ -52,11 +52,17 @@ if not "subread" in config.keys():
 if not "index" in config["subread"].keys():
     sys.exit("The parameter config['subread']['index'] should be specified in the config file.")
 
+if not "seq_type" in config["subread"].keys():
+    sys.exit("The parameter config['subread']['seq_type'] should be specified in the config file.")
+
+if not "max_mismatches" in config["subread"].keys():
+    config["subread"]["max_mismatches"] = "3"
+
 if not "threads" in config["subread"].keys():
     config["subread"]["threads"] = "1"
 
-if not "seq_type" in config["subread"].keys():
-    sys.exit("The parameter config['subread']['seq_type'] should be specified in the config file.")
+if not "align_options" in config["subread"].keys():
+    config["subread"]["align_options"] = ""
 
 if not "other_options" in config["subread"].keys():
     config["subread"]["other_options"] = ""
@@ -98,9 +104,10 @@ rule subread_align_pe:
      benchmark: config["dir"]["mapped_reads"] + "{reads}_subread-align_pe_benchmark.json"
      params: subread_index = config["subread"]["index"], \
         seq_type = config["subread"]["seq_type"], \
+        max_mismatches = config["subread"]["max_mismatches"], \
         threads = config["subread"]["threads"], \
         qsub=config["qsub"] + " -e " + config["dir"]["mapped_reads"] + "{reads}_bowtie_qsub.err " \
             + " -o " + config["dir"]["mapped_reads"] + "{reads}_bowtie_qsub.out", \
-        options = config["subread"]["other_options"]
-     shell: "subread-align -i {params.subread_index} -r {input.reads_1} -R {input.reads_2} -t {params.seq_type} -T {params.threads} {params.options} -o {output.bam} 2> {log}"
+        align_options = config["subread"]["align_options"]
+     shell: "subread-align -i {params.subread_index} -r {input.reads_1} -R {input.reads_2} -t {params.seq_type} -T {params.threads} -M {params.max_mismatches} {params.align_options} -o {output.bam} 2> {log}"
 
