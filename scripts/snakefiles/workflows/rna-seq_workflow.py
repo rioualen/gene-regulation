@@ -80,16 +80,16 @@ RULES = os.path.join(FG_LIB, "scripts/snakefiles/rules")
 PYTHON = os.path.join(FG_LIB, "scripts/snakefiles/python_lib")
 
 include: os.path.join(PYTHON, "util.py")                        ## Python utilities for our snakemake workflows
-# include: os.path.join(RULES, "util.rules")                    ## Snakemake utilities
+include: os.path.join(RULES, "util.rules")                    ## Snakemake utilities
+include: os.path.join(RULES, "flowcharts.rules")              ## Draw flowcharts (dag and rule graph)
 include: os.path.join(RULES, "merge_lanes.rules")               ## Build genome index for bowtie2 (read mapping with gaps)
 include: os.path.join(RULES, "fastqc.rules")                    ## Quality control with fastqc
 include: os.path.join(RULES, "count_reads.rules")               ## Count reads in different file formats
 include: os.path.join(RULES, "bowtie2_build.rules")             ## Build genome index for bowtie2 (read mapping with gaps)
 include: os.path.join(RULES, "bowtie2_paired_ends.rules")       ## Paired-ends read mapping with bowtie version 2 (support gaps)
 include: os.path.join(RULES, "subread_mapping_JvH.rules")       ## Read mapping with subreads
+include: os.path.join(RULES, "genome_coverage.rules")         ## Compute density profiles in bedgraph format
 # include: os.path.join(RULES, "sickle_paired_ends.rules")        ## Trimming with sickle
-# include: os.path.join(RULES, "flowcharts.rules")              ## Draw flowcharts (dag and rule graph)
-# include: os.path.join(RULES, "genome_coverage.rules")         ## Compute density profiles in bedgraph format
 # include: os.path.join(RULES, "htseq.rules")                   ## Count reads per gene with htseq-count
 # include: os.path.join(RULES, "featurecounts.rules")           ## Count reads per gene with R subread::featurecounts
 #
@@ -243,12 +243,26 @@ RAW_READNB = [filename.replace('.fastq','_fastq_readnb.txt') for filename in FAS
 # MAPPING = expand(RESULTS_DIR + "{alignment}.sam", alignment=ALIGNMENT)
 MAPPED_BOWTIE2_PE_SAM=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_bowtie2_pe.sam", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
 MAPPED_BOWTIE2_PE_BAM=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_bowtie2_pe.bam", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
-if (verbosity >= 0):
+if (verbosity >= 3):
     print("\tMAPPED_BOWTIE2_PE_SAM:\t" + ";".join(MAPPED_BOWTIE2_PE_SAM))
 
+## Aligned reads produced by subread-align (10 times faster than bowtie2).
 SUBREADALIGN_PE_BAM=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe.bam", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
-if (verbosity >= 0):
+if (verbosity >= 3):
     print("\tSUBREADALIGN_PE_BAM:\t" + ";".join(SUBREADALIGN_PE_BAM))
+
+## Genome coverage file (number of reads per genomic window), useful
+## for visualisation. The bedgraph format is essentially used as
+## intermediate to obtain TDF files, preferred by IGV.
+SUBREADALIGN_PE_BG=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_sorted_pos.bg", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+if (verbosity >= 3):
+    print("\tSUBREADALIGN_PE_BG:\t" + ";".join(SUBREADALIGN_PE_BG))
+
+## Genome coverage file (number of reads per genomic window), useful
+## for visualisation. The TDF format is the standard for IGV.
+SUBREADALIGN_PE_TDF=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_sorted_pos.tdf", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+if (verbosity >= 3):
+    print("\tSUBREADALIGN_PE_TDF:\t" + ";".join(SUBREADALIGN_PE_TDF))
 
 
 # #----------------------------------------------------------------#
@@ -396,7 +410,7 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: GENOME_INDEX, RAW_QC, RAW_READNB, SUBREADALIGN_PE_BAM #, MAPPED_BOWTIE2_PE_SAM
+	input: GENOME_INDEX, RAW_QC, RAW_READNB, SUBREADALIGN_PE_BAM, SUBREADALIGN_PE_TDF #, MAPPED_BOWTIE2_PE_SAM
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
