@@ -46,7 +46,7 @@ rule genome_coverage_bedgraph:
     log:  "{reads}_genomecov_bedgraph.log"
     benchmark:  "{reads}_genomecov_bedgraph_benchmark.json"
     params: qsub = config["qsub"] + " -e {reads}_genomecov_bedgraph_qsub.err -o {reads}_genomecov_bedgraph_qsub.out"
-    shell: "bedtools genomecov -bedgraph -ibam {input.reads} > {output.bedg} 2> {log}" 
+    shell: "bedtools genomecov -bg -ibam {input.reads} > {output.bedg} 2> {log}" 
 
 # rule genome_coverage_bedgraph2:
 #     """Compute genome coverage from a bam-formatted file with aligned
@@ -74,8 +74,8 @@ rule genome_coverage_bedgraph_strands:
     log:  "{reads}_genomecov_bedgraph_str.log"
     benchmark:  "{reads}_genomecov_bedgraph_str_benchmark.json"
     params: qsub = config["qsub"] + " -e {reads}_genomecov_bedgraph_str_qsub.err -o {reads}_genomecov_bedgraph_str_qsub.out"
-    shell: "bedtools genomecov -bedgraph -strand + -ibam {input.reads} > {output.bedg_plus} 2> {log}" \
-        + "; bedtools genomecov -bedgraph -strand - -ibam {input.reads} > {output.bedg_minus} 2>> {log}"
+    shell: "bedtools genomecov -bg -strand + -ibam {input.reads} > {output.bedg_plus} 2> {log}" \
+        + "; bedtools genomecov -bg -strand - -ibam {input.reads} > {output.bedg_minus} 2>> {log}"
 
 rule bedgraph_to_tdf:
     """Convert bedgraph to TDF format, which is recommended to load
