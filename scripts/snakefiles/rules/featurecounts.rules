@@ -1,13 +1,24 @@
-"""Assign sequence reads to genomic features with the R-package
-   subread
+"""Assign sequence reads to genomic features with featureCounts
+   (subread suite).
 
    This rule excecutes the counting step of RNA-Seq analysis.
 
    The program featureCounts requires two files :
    -the Sam or Bam file containing mapping reads
-   -the annotation file
+   -the annotation file (GTF or other related formats).
 
-   The featureCounts function calls the tool featureCounts.
+   Counting options can be specified in the yaml configuration file.
+   
+
+  subread:
+    reference_genome: "genome/Glossina_morsitans/Glossina-morsitans-Yale_CONTIGS_GmorY1.fa"
+    annotations: "genome/Glossina_morsitans/Glossina-morsitans-Yale_BASEFEATURES_GmorY1.5.gtf"
+    index: "genome/Glossina_morsitans/subread/Glossina-morsitans-Yale_CONTIGS_GmorY1"
+    gtf_attrtype: "gene_id"     ## Attribute to extract from the GTF file
+    feature_type: "transcript"  ## Feature type for subread featureCounts
+    paired_ends: "TRUE"
+    multi_overlaps: "TRUE"
+
 
    Reference: Liao Y, Smyth GK and Shi W (2014). featureCounts: an
    efficient general purpose program for assigning sequence reads to
@@ -15,46 +26,103 @@
 
 """
 
-# Set defaults params in case they're not defined in config file. 
+# Check mandatory parameters (must have been defined in the config file)
 if not "subread" in config.keys():
     sys.exit("Subread parameters must be defined in the config file")
 
 if not "annotations" in config["subread"].keys():
     sys.exit('The variable config["subreads"]["annotations"] must be defined in the config file ')
 
+# Set defaults params in case they were not defined in config file. 
+if not "feature_type" in config["subread"].keys():
+    config["subread"]["feature_type"] = "transcript"
+
+if not "gtf_attrtype" in config["subread"].keys():
+    config["subread"]["gtf_attrtype"] = "gene_id"
+
 if not "ignore_dup" in config["subread"].keys():
     config["subread"]["ignore_dup"] = "False"
 
+if not "threads" in config["subread"].keys():
+    config["subread"]["threads"] = "1"
 
-rule featurecounts:
-	"""Assign sequence reads to genomic features
-"""
-	input: "{data_dir}/{reads}.bam"
-	output: count_table = "{data_dir}/{reads}_featurecounts.tab", \
-                stat_table = "{data_dir}/{reads}_featurecounts_stat.tab"
-	params: annotation = config["subread"]["annotations"], \
-                attr_type = config["subread"]["gtf_attrtype"], \
-                feature_type = config["subread"]["feature_type"], \
-                multi_overlaps = config["subread"]["multi_overlaps"], \
-                paired_ends = config["subread"]["paired_ends"], \
-                ignore_duplicate = config["subread"]["ignore_dup"], \
-                qsub = config["qsub"] \
-                + " -e {data_dir}/{reads}_featurecounts_qsub.err" \
-                + " -o {data_dir}/{reads}_featurecounts_qsub.out"
-	log: "{data_dir}/{reads}_featurecounts.log"
-	benchmark: "{data_dir}/{reads}_featurecounts_benchmark.json"
-	run: 
-		R("""
-library("Rsubread")
-count.features <- featureCounts(
-                files="{input}",
-                annot.ext="{params.annotation}",
-                isGTFAnnotationFile=TRUE,
-                GTF.featureType="{params.feature_type}",
-                GTF.attrType="{params.attr_type}",
-                isPairedEnd = {params.paired_ends},
-                ignoreDup ={params.ignore_duplicate},
-                allowMultiOverlap = {params.multi_overlaps})
-write.table(count.features$counts, file="{output.count_table}", sep="\t", col.names = FALSE, quote=FALSE)
-write.table(count.features$stat, file="{output.stat_table}", sep="\t", quote=FALSE)
-		""")
+if not "count_options" in config["subread"].keys():
+    config["subread"]["count_options"] = ""
+
+# concatenate flag-type options to build featureCounts command
+FEATURECOUNTS_FLAGS = "" 
+
+# Count fragments (read pairs) instead of individual reads.
+if "paired_ends" in config["subread"].keys():
+    if config["subread"]["paired_ends"].lower() == "true":
+        FEATURECOUNTS_FLAGS = FEATURECOUNTS_FLAGS + " -p"
+
+# Multi-mapping reads will also be counted (option -M).
+if "multi_overlaps" in config["subread"].keys():
+    if config["subread"]["multi_overlaps"].lower() == "true":
+        FEATURECOUNTS_FLAGS = FEATURECOUNTS_FLAGS + " -M"
+
+rule featurecounts_R:
+    """Count number of reads per genomic feature with featureCounts
+    (subread suite).
+
+    Note that for paired-end sequencing the reads should not be sorted
+    after read-mapping, because this would separate paired
+    reads. FeatureCounts detects this situation and re-sorts the
+    reads, so the results would be fine, but the re-sorting takes an
+    unnecessary time.
+
+    """
+	input: annotation = config["subread"]["annotations"], \
+            reads="{aligned_reads}.bam"
+	output: count_table = "{aligned_reads}_featurecounts.tab", \
+            stat_table = "{aligned_reads}_featurecounts_stat.tab"
+	params: gtf_attrtype = config["subread"]["gtf_attrtype"], \
+            feature_type = config["subread"]["feature_type"], \
+            multi_overlaps = config["subread"]["multi_overlaps"], \
+            paired_ends = config["subread"]["paired_ends"], \
+            ignore_dup = config["subread"]["ignore_dup"], \
+            threads = config["subread"]["threads"], \
+            flags = FEATURECOUNTS_FLAGS, \
+            count_options = config["subread"]["count_options"], \
+            qsub = config["qsub"] \
+                + " -e {aligned_reads}_featurecounts_qsub.err" \
+                + " -o {aligned_reads}_featurecounts_qsub.out"
+	log: "{aligned_reads}_featurecounts.log"
+	benchmark: "{aligned_reads}_featurecounts_benchmark.json"
+        shell: "featureCounts -a {input.annotation} -o {output.count_table} -t {params.feature_type} -g {params.gtf_attrtype} -T {params.threads} {params.flags} {params.count_options} {input.reads} "
+
+# rule featurecounts_R:
+# 	"""Count number of reads per genomic feature, using subread
+# featureCounts via its R interface (Rsubread::featureCounts).
+
+#         """
+# 	input: "{data_dir}/{reads}.bam"
+# 	output: count_table = "{data_dir}/{reads}_featurecounts.tab", \
+#                 stat_table = "{data_dir}/{reads}_featurecounts_stat.tab"
+# 	params: annotation = config["subread"]["annotations"], \
+#                 gtf_attrtype = config["subread"]["gtf_attrtype"], \
+#                 feature_type = config["subread"]["feature_type"], \
+#                 multi_overlaps = config["subread"]["multi_overlaps"], \
+#                 paired_ends = config["subread"]["paired_ends"], \
+#                 ignore_dup = config["subread"]["ignore_dup"], \
+#                 qsub = config["qsub"] \
+#                 + " -e {data_dir}/{reads}_featurecounts_qsub.err" \
+#                 + " -o {data_dir}/{reads}_featurecounts_qsub.out"
+# 	log: "{data_dir}/{reads}_featurecounts.log"
+# 	benchmark: "{data_dir}/{reads}_featurecounts_benchmark.json"
+# 	run: 
+# 		R("""
+# library("Rsubread")
+# count.features <- featureCounts(
+#                 files="{input}",
+#                 annot.ext="{params.annotation}",
+#                 isGTFAnnotationFile=TRUE,
+#                 GTF.featureType="{params.feature_type}",
+#                 GTF.attrType="{params.gtf_attrtype}",
+#                 isPairedEnd = {params.paired_ends},
+#                 ignoreDup ={params.ignore_dup},
+#                 allowMultiOverlap = {params.multi_overlaps})
+# write.table(count.features$counts, file="{output.count_table}", sep="\t", col.names = FALSE, quote=FALSE)
+# write.table(count.features$stat, file="{output.stat_table}", sep="\t", quote=FALSE)
+# 		""")
