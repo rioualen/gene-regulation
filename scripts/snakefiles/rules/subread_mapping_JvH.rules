@@ -86,7 +86,7 @@ reads with subread-align.
 
 ## If SAM file exists (resulting from version < 1.4) convert SAM to
 ## BAM rather than redo the mapping.
-ruleorder:  sam_to_bam > subread_align_pe
+ruleorder:  subread_align_pe > sam_to_bam
 
 rule subread_align_pe:
      """Align reads onto a reference genome with the
