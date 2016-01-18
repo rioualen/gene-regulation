@@ -62,7 +62,7 @@ if "multi_overlaps" in config["subread"].keys():
     if config["subread"]["multi_overlaps"].lower() == "true":
         FEATURECOUNTS_FLAGS = FEATURECOUNTS_FLAGS + " -M"
 
-rule featurecounts_R:
+rule featurecounts:
     """Count number of reads per genomic feature with featureCounts
     (subread suite).
 
@@ -90,7 +90,7 @@ rule featurecounts_R:
                 + " -o {aligned_reads}_featurecounts_qsub.out"
 	log: "{aligned_reads}_featurecounts.log"
 	benchmark: "{aligned_reads}_featurecounts_benchmark.json"
-        shell: "featureCounts -a {input.annotation} -o {output.count_table} -t {params.feature_type} -g {params.gtf_attrtype} -T {params.threads} {params.flags} {params.count_options} {input.reads} "
+        shell: "featureCounts -a {input.annotation} -o {output.count_table} -t {params.feature_type} -g {params.gtf_attrtype} -T {params.threads} {params.flags} {params.count_options} {input.reads} > {output.stat_table} 2> {log} "
 
 # rule featurecounts_R:
 # 	"""Count number of reads per genomic feature, using subread
