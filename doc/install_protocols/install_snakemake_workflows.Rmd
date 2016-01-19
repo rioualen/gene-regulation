@@ -527,7 +527,7 @@ Supported organisms:
 |Arabidopsis    | tair10   |
 | Rice  | msu6             |
 
-HOMER can also with custom genomes in FASTA format and gene annotations in GTF format.
+HOMER can also work with custom genomes in FASTA format and gene annotations in GTF format.
 
 
 
