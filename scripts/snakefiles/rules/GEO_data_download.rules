@@ -1,0 +1,28 @@
+"""Download sra files using srr ids mentioned in samples.tab
+
+"""
+
+rule download_sra:
+    """Fetch .sra data from GEO website using SRR IDs.
+    """
+    input: datadir = config['dir']['reads_source']
+    output: outdir=config["dir"]["reads_source"] + "{sample}/{srr}.sra"
+    log: ""
+    benchmark: ""
+    params: qsub="", outdir=config["dir"]["reads_source"] + "{sample}", srr="{srr}"
+    shell: """
+prefetch -v {params.srr}
+mv ~/ncbi/public/sra/{params.srr}.sra {params.outdir}
+touch {input.datadir}/download.done
+#fastq-dump --outdir <output directory> /home/<USER>/ncbi/public/sra/<SRR ID>.sra
+"""
+
+
+
+
+
+
+
+
+
+

@@ -41,7 +41,7 @@ import datetime
 import pandas as pd
 
 ## Config
-#configfile: "examples/Athaliana-Myb/Athaliana-Myb.yml"                                                        ####
+#configfile: "examples/Athaliana-Myb/Athaliana-Myb.yml"
 workdir: config["dir"]["base"]
 verbosity = int(config["verbosity"])
 
@@ -65,6 +65,7 @@ include: os.path.join(RULES, "count_oligo.rules")
 include: os.path.join(RULES, "count_reads.rules")
 include: os.path.join(RULES, "fastqc.rules")
 include: os.path.join(RULES, "flowcharts.rules")
+include: os.path.join(RULES, "GEO_data_download.rules")
 include: os.path.join(RULES, "getfasta.rules")
 include: os.path.join(RULES, "genome_coverage.rules")
 include: os.path.join(RULES, "homer.rules")
@@ -76,7 +77,7 @@ include: os.path.join(RULES, "purge_sequence.rules")
 #include: os.path.join(RULES, "rsync.rules")
 include: os.path.join(RULES, "sickle_se.rules")
 include: os.path.join(RULES, "spp.rules")
-include: os.path.join(RULES, "sra_to_fastq.rules")
+#include: os.path.join(RULES, "sra_to_fastq.rules")
 include: os.path.join(RULES, "swembl.rules")
 
 #================================================================#
@@ -89,6 +90,8 @@ READS = config["dir"]["reads_source"]
 # Samples
 SAMPLES = read_table(config["files"]["samples"], verbosity=verbosity)
 SAMPLE_IDS = SAMPLES.iloc[:,0] ## First column MUST contain the sample ID
+SRR_IDS = SAMPLES.iloc[:,1] ## Second column MUST contain srr IDs
+
 
 ## Design
 DESIGN = read_table(config["files"]["design"], verbosity=verbosity)
@@ -98,10 +101,14 @@ CONTROL = DESIGN.iloc[:,1]
 ## Ref genome
 GENOME = config["genome"]["version"]
 
-## Results dir
+## Data & results dir
 RESULTS_DIR = config["dir"]["results"]
 if not os.path.exists(RESULTS_DIR):
     os.makedirs(RESULTS_DIR)
+
+READS = config["dir"]["reads_source"]
+if not os.path.exists(READS):
+    os.makedirs(READS)
 
 ## Programs
 
@@ -114,7 +121,7 @@ PEAKCALLER=[
     "swembl-R" + config["swembl"]["R"],
     "macs14-pval" + config["macs14"]["pval"] + "_peaks",
 #    "bPeaks_allGenome"
-#    "spp-fdr" + config["spp"]["fdr"],
+    "spp-fdr" + config["spp"]["fdr"],
 ]
 PEAKCALLING=expand(expand("{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER)
 
@@ -126,7 +133,9 @@ MOTIFS=expand(expand("{treat}_vs_{control}/{{peakcaller}}/peak-motifs/{treat}_vs
 
 ## Data import & merging.
 
+#DOWNLOAD = expand(READS + "{samples}/{srr}.sra", zip, samples=SAMPLE_IDS, srr=SRR_IDS) 
 IMPORT = expand(RESULTS_DIR + "{samples}/{samples}.fastq", samples=SAMPLE_IDS) 
+
 
 ## Graphics & reports
 GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
@@ -136,14 +145,13 @@ REPORT = expand(RESULTS_DIR + "report.html")
 # Quality control
 #----------------------------------------------------------------#
 
-RAW_QC = expand(RESULTS_DIR + "{samples}/{samples}_fastqc/", samples=SAMPLE_IDS)
+RAW_QC = expand(RESULTS_DIR + "{samples}/{samples}_fastqc/{samples}_fastqc.html", samples=SAMPLE_IDS)
 RAW_READNB = expand(RESULTS_DIR + "{samples}/{samples}_fastq_readnb.txt", samples=SAMPLE_IDS)
 
 #----------------------------------------------------------------#
 # Alignment
 #----------------------------------------------------------------#
 
-## to avoid duplicates, fasta sequence should be moved to {genome} directly...
 BWA_INDEX = expand(config["dir"]["genomes"] + "{genome}/BWAIndex/{genome}.fa.bwt", genome=GENOME)
 BOWTIE2_INDEX = expand(config["dir"]["genomes"] + "{genome}/Bowtie2Index/{genome}.fa.1.bt2", genome=GENOME)
 
@@ -183,7 +191,7 @@ rule all:
 	"""
 	Run all the required analyses
 	"""
-	input: GRAPHICS, RAW_QC, PEAK_MOTIFS, TDF  #RAW_QC, BWA_INDEX, MAPPING, PEAKS, IMPORT
+	input: RAW_QC, PEAK_MOTIFS#, TDF  #RAW_QC, BWA_INDEX, MAPPING, PEAKS, IMPORT
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
