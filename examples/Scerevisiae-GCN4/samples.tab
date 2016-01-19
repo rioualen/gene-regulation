@@ -1,11 +1,8 @@
 ; Sample description file
-; Organism: Pseudomonas aeruginosa
+; Organism: Saccharomyces cerevisiae
 ; Experiment type: ChIP-seq
 ; Input type: genomic
-; 
-; Columns
-; TODO col description
-ID	SRR	type	chipped	treat	descr
+ID	SRR	type	chipped
 GSM1470159	SRR1542426	input	gcn4	-
 GSM1470160	SRR1542427	chip	gcn4	-
 GSM1470161	SRR1542428	input	gcn4	-

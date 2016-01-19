@@ -1,11 +1,6 @@
 ; Sample description file
 ; Organism: Pseudomonas aeruginosa
 ; Experiment type: ChIP-seq
-; Input type: genomic
-; 
-; Columns
-;	1	ID	Sample ID
-;	2	SRR	SRR id for GEO download
 ID	SRR
 GSM1482283	SRR1554463
 GSM1482284	SRR1554464
