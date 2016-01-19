@@ -145,7 +145,7 @@ REPORT = expand(RESULTS_DIR + "report.html")
 # Quality control
 #----------------------------------------------------------------#
 
-RAW_QC = expand(RESULTS_DIR + "{samples}/{samples}_fastqc/{samples}_fastqc.html", samples=SAMPLE_IDS)
+RAW_QC = expand(RESULTS_DIR + "{samples}/{samples}_fastqc/", samples=SAMPLE_IDS)
 RAW_READNB = expand(RESULTS_DIR + "{samples}/{samples}_fastq_readnb.txt", samples=SAMPLE_IDS)
 
 #----------------------------------------------------------------#
