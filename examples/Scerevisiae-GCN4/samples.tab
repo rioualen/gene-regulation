@@ -4,16 +4,12 @@
 ; Input type: genomic
 ; 
 ; Columns
-;	1	ID		Sample ID
-;	2	condition	Experimental condition (genotype + culture medium)
-;	3	type		Sample type (ChIP, input)
-;	4	chipped		ChIPped protein (factor or mark name)
-;	5	descr		Description
-ID	condition	type	chipped	treat	descr
-GSM1470159	-	input	gcn4	-
-GSM1470160	-	chip	gcn4	-
-GSM1470161	-	input	gcn4	-
-GSM1470162	-	chip	gcn4	-
-GSM1470163	-	input	gcn4	-
-GSM1470164	-	chip	gcn4	-
+; TODO col description
+ID	SRR	type	chipped	treat	descr
+GSM1470159	SRR1542426	input	gcn4	-
+GSM1470160	SRR1542427	chip	gcn4	-
+GSM1470161	SRR1542428	input	gcn4	-
+GSM1470162	SRR1542429	chip	gcn4	-
+GSM1470163	SRR1542430	input	gcn4	-
+GSM1470164	SRR1542431	chip	gcn4	-
 
