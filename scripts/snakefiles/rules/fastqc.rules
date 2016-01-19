@@ -28,6 +28,11 @@ rule fastqc:
     benchmark: "{data_dir}/{dataset}_fastqc/{dataset}_fastqc_benchmark.json"
     params: qsub = config["qsub"] + " -q short -e {data_dir}/{data_dir}_fastqc_qsub.err -o {data_dir}/{data_dir}_fastqc_qsub.out", \
             options = config["fastqc"]["other_options"], \
+<<<<<<< Updated upstream
             outdir="{data_dir}/{dataset}_fastqc/"
     shell:"fastqc --outdir {PARAMS.outdir} --format fastq {input} {params.options} 2> {log} "
+=======
+            outdir = "{data_dir}/{dataset}_fastqc/"
+    shell:"fastqc --outdir {params.outdir} --format fastq {input} {params.options} 2> {log} "
+>>>>>>> Stashed changes
 
