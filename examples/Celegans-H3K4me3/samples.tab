@@ -1,0 +1,14 @@
+; Sample description file
+; Organism: C elegans
+; Experiment type: ChIP-seq
+; Input type: genomic
+; 
+; Columns
+;	1	ID		Sample ID
+;	2	condition	Experimental condition (genotype + culture medium)
+;	3	type		Sample type (ChIP, input)
+;	4	chipped		ChIPped protein (factor or mark name)
+;	5	descr		Description
+ID	SRR	type	chipped	treat	descr
+GSM1217457	SRR1198569	input	H3K27me3
+GSM1208361	SRR952381	chip	h3k4me3
