@@ -51,7 +51,7 @@ verbosity = int(config["verbosity"])
 
 FG_LIB = os.path.abspath(config["dir"]["fg_lib"])
 RULES = os.path.join(FG_LIB, "scripts/snakefiles/rules")
-PYTHON = os.path.join(FG_LIB, "scripts/snakefiles/python_lib")
+PYTHON = os.path.join(FG_LIB, "scripts/python_lib")
 
 include: os.path.join(PYTHON, "util.py")
 include: os.path.join(RULES, "util.rules")
