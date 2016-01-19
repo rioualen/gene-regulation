@@ -73,7 +73,6 @@
 
   homer: 
     style: "factor"                                                             # optional (def: factor), can be: factor, histone, groseq, tss, dnase, super, mC (beware of output filenames)
-    genome: "/data/genomes/TAIR10/TAIR10.fa"                                    # required: either path to the fasta file or the official genome version (has to be installed manually w/ HOMER)
     F: "2"                                                                      # optional (def: 4)
     L: "2"                                                                      # optional (def: 4)
     P: "0.01"                                                                   # optional (def: 0.0001)
