@@ -292,6 +292,33 @@ COUNT_FILES=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_su
 if (verbosity >= 3):
     print ("COUNT_FILES:\n\t" + "\n\t".join(COUNT_FILES))
 
+
+## Print a tab-delimited file with the paths of count files per sample
+if not ("files" in config.keys()) & ("count_file_paths" in config["files"].keys()) :
+    sys.exit("The parameter config['files']['count_file_paths'] should be specified in the config file.")
+## Check the directory for count file paths and create it if required
+count_paths_dir = os.path.dirname(config['files']['count_file_paths'])
+if not os.path.exists(count_paths_dir):
+        os.makedirs(count_paths_dir)
+
+COUNT_FILE_PATHS=pd.DataFrame({"SampleID": SAMPLE_IDS, "FilePath":COUNT_FILES})
+COUNT_FILE_PATHS[["SampleID", "FilePath"]].to_csv(config["files"]["count_file_paths"], sep='\t', 
+                        encoding='utf-8', header=True, index=False)
+if (verbosity >= 1):
+    print("Count file paths\t" + config["files"]["count_file_paths"])
+    if (verbosity >= 3):
+        print(COUNT_FILE_PATHS)
+
+## Summary count table, with one row per gene and one column per sample
+if not ("files" in config.keys()) & ("count_table" in config["files"].keys()) :
+    sys.exit("The parameter config['files']['count_table'] should be specified in the config file.")
+## Check the directory for count file paths and create it if required
+count_table_dir = os.path.dirname(config['files']['count_table'])
+if not os.path.exists(count_table_dir):
+        os.makedirs(count_table_dir)
+COUNT_TABLE=config['files']['count_table']
+
+
 # #----------------------------------------------------------------#
 # # Differential expression analysis
 # #----------------------------------------------------------------#
@@ -338,7 +365,7 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: GENOME_INDEX, RAW_QC, RAW_READNB, SUBREADALIGN_PE_BAM, SUBREADALIGN_PE_TDF, COUNT_FILES
+	input: GENOME_INDEX, RAW_QC, RAW_READNB, SUBREADALIGN_PE_BAM, SUBREADALIGN_PE_TDF, COUNT_FILES #, COUNT_TABLE
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
