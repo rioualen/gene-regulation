@@ -1,20 +1,67 @@
 ruleorder:  bowtie2_paired_end_trimmed > bowtie2_paired_end
 
-rule bowtie2_paired_end:
-    """Read mapping for a paired-end sample, using bowtie version 2.
+#TODO: add # mismatches param
 
-    """
+# Raise an error and exit if a required parameter is missing.
+# Set optional params to defaults values in case they're not defined in config file.
+
+if not "bowtie2" in config.keys():
+    sys.exit("The bowtie2 parameters should be specified in the config file.")
+
+if not "index" in config["bowtie2"].keys():
+    sys.exit("The parameter config['bowtie2']['index'] should be specified in the config file.")
+
+if not "threads" in config["bowtie2"].keys():
+    config["bowtie2"]["threads"] = "1"
+
+if not "threads" in config["bowtie2"].keys():
+    config["bowtie2"]["threads"] = "1"
+
+if not "max_mismatches" in config["bowtie2"].keys():
+    config["bowtie2"]["max_mismatches"] = "0"
+
+if not "dir" in config.keys():
+    sys.exit("The 'dir' parameters (directoryies) should be specified in the config file.")
+
+if not "fastq" in config["dir"].keys():
+    sys.exit("The parameter config['dir']['fastq'] should be specified in the config file.")
+
+if not "mapped_reads" in config["dir"].keys():
+    sys.exit("The parameter config['dir']['mapped_reads'] should be specified in the config file.")
+
+rule bowtie2_paired_end:
+    """Read mapping for paired end data using bowtie2.
+
+    Requires the indexing to have previously been done (can be done with
+    bowtie_build.rules).
+
+    Required parameters:
+        config["bowtie"]["index"]
+        config["qsub"]
+
+    Optional parameters:
+        config["bowtie2"]["threads"]
+        config["bowtie2"]["max_mismatches"]
+
+    Usage example:
+        MAPPING = expand(RESULTS_DIR + "{alignment}.sam", alignment=ALIGNMENT)
+
+    Contributors:
+        Claire Rioualen and Jacques van Helden
+"""
     
-    input:  index = config["dir"]["genome"] + config["genome"]["organism"] + ".1.bt2", \
-            forward = "{reads}" + config["suffix"]["reads_fwd"] + "{reads_suffix}" + ".fastq", \
-            reverse = "{reads}" + config["suffix"]["reads_rev"] + "{reads_suffix}" + ".fastq" 
-    output: sam = "{reads}{reads_suffix}_bowtie2_pe.sam", \
-            summary = "{reads}{reads_suffix}_bowtie2_pe_summary.txt"
-    log: "{reads}{reads_suffix}_bowtie2_pe.log"
-    benchmark: "{reads}{reads_suffix}_bowtie2_pe_benchmark.json"
+    input:  \
+            first_index = config["bowtie2"]["index"] + ".1.bt2", \
+            forward = config["dir"]["fastq"] + "{reads}" + config["suffix"]["reads_fwd"] + ".fastq", \
+            reverse = config["dir"]["fastq"] + "{reads}" + config["suffix"]["reads_rev"] + ".fastq"
+    output: sam = config["dir"]["mapped_reads"] + "{reads}_bowtie2_pe.sam", \
+            summary = config["dir"]["mapped_reads"] + "{reads}_bowtie2_pe_summary.txt"
+    log: config["dir"]["mapped_reads"] + "{reads}_bowtie2_pe.log"
+    benchmark: config["dir"]["mapped_reads"] + "{reads}_bowtie2_pe_benchmark.json"
     params: max_mismatches = config["bowtie2"]["max_mismatches"], \
-            index = config["dir"]["genome"] + config["genome"]["organism"], \
-            qsub=config["qsub"] + " -q long -e {reads}_bowtie_qsub.err -o {reads}_bowtie_qsub.out", \
+            index = config["bowtie2"]["index"], \
+            qsub=config["qsub"] + " -e " + config["dir"]["mapped_reads"] + "{reads}_bowtie_qsub.err " \
+                 + " -o " + config["dir"]["mapped_reads"] + "{reads}_bowtie_qsub.out", \
             options = config["bowtie2"]["other_options"]
     shell: "bowtie2 -x {params.index} -1 {input.forward} -2 {input.reverse} -S {output.sam} --phred33 -N {params.max_mismatches} -t {params.options} > {output.summary} 2> {log}"
 
@@ -46,7 +93,7 @@ rule bowtie2_paired_end_trimmed:
 
     """
     
-    input:  index = config["dir"]["genome"] + config["genome"]["organism"] + ".1.bt2", \
+    input:  index = config["bowtie2"]["index"], \
             forward = "{reads}" + config["suffix"]["reads_fwd"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq", \
             reverse = "{reads}" + config["suffix"]["reads_rev"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq" 
     output: sam = "{reads}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe.sam", \
@@ -54,9 +101,10 @@ rule bowtie2_paired_end_trimmed:
     log: "{reads}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe.log"
     benchmark: "{reads}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_benchmark.json"
     params: max_mismatches = config["bowtie2"]["max_mismatches"], \
-            index = config["dir"]["genome"] + config["genome"]["organism"], \
-            qsub=config["qsub"] + " -q long -e {reads}_bowtie_qsub.err -o {reads}_bowtie_qsub.out", \
+            threads = config["bowtie2"]["threads"], \
+            index = config["bowtie2"]["index"], \
+            qsub=config["qsub"] + " -e {reads}_bowtie_qsub.err -o {reads}_bowtie_qsub.out", \
             options = config["bowtie2"]["other_options"]
-    shell: "bowtie2 -x {params.index} -1 {input.forward} -2 {input.reverse} -S {output.sam} --phred33 -N {params.max_mismatches} -t {params.options} > {output.summary} 2> {log}"
+    shell: "bowtie2 -x {params.index} -1 {input.forward} -2 {input.reverse} -S {output.sam} --phred33 -N {params.max_mismatches} --threads {params.threads} -t {params.options} > {output.summary} 2> {log}"
  
     

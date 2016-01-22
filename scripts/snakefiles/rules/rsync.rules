@@ -9,7 +9,7 @@ rule rsync:
 	output: config["dir"]["results"] + "{data_dir}/{dataset}.fastq"
 	log: config["dir"]["results"] + "{data_dir}/{dataset}_rsync.log"
 	benchmark: config["dir"]["results"] + "{data_dir}/{dataset}_rsync_benchmark.json"
-	params: qsub = config["qsub"] + " -q short -e " + config["dir"]["results"] + "{data_dir}/{dataset}_rsync_qsub.err -o " + config["dir"]["results"] + "{data_dir}/{dataset}_rsync_qsub.out"
+	params: qsub = config["qsub"] + "  -e " + config["dir"]["results"] + "{data_dir}/{dataset}_rsync_qsub.err -o " + config["dir"]["results"] + "{data_dir}/{dataset}_rsync_qsub.out"
 	shell:"rsync -ruptvl {input} {output} 2> {log} "
 
 
@@ -18,7 +18,7 @@ rule rsync:
 # 	output: config["dir"]["results"] + "{reads}.fastq"
 # 	log: config["dir"]["results"] + "{reads}_rsync.log"
 # 	benchmark: config["dir"]["results"] + "{reads}_rsync_benchmark.json"
-# 	params: qsub = config["qsub"] + " -q short -e " + config["dir"]["results"] + "{reads}_rsync_qsub.err -o " + config["dir"]["results"] + "{reads}_rsync_qsub.out"
+# 	params: qsub = config["qsub"] + "  -e " + config["dir"]["results"] + "{reads}_rsync_qsub.err -o " + config["dir"]["results"] + "{reads}_rsync_qsub.out"
 # 	shell:"rsync -ruptvl {input} {output} 2> {log} "
 
 

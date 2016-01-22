@@ -50,7 +50,7 @@ rule allcounts_and_params:
             all_counts_file = ALL_COUNTS
     log: config["dir"]["results"] + "DEG/all_count.log"
     benchmark: config["dir"]["results"] + "DEG/all_count_benchmark.json"
-    params: qsub = config["qsub"] + " -q short -e " + config["dir"]["results"] + "DEG/all_count_qsub.err -o " + config["dir"]["results"] + "DEG/all_count_qsub.out", \
+    params: qsub = config["qsub"] + " -e " + config["dir"]["results"] + "DEG/all_count_qsub.err -o " + config["dir"]["results"] + "DEG/all_count_qsub.out", \
 #            dir_results = config["dir"]["results"], \
             sample_desc_file = config["files"]["samples"], \
             design_file = config["files"]["analyses"], \

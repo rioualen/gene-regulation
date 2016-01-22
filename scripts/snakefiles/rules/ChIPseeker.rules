@@ -19,7 +19,7 @@ rule peaks_annotation:
 			vennpie = "{regions}_vennpie.pdf"
 	log: "{regions}_ChIPseeker.log"
 	benchmark: "{regions}_ChIPseeker_benchmark.json"
-	params: qsub = config["qsub"] + " -q long -e {regions}_ChIPseeker_qsub.err -o {regions}_ChIPseeker_qsub.out", \
+	params: qsub = config["qsub"] + " -e {regions}_ChIPseeker_qsub.err -o {regions}_ChIPseeker_qsub.out", \
 			dir_main = config["dir"]["base"]
 	run: 
 		R("""

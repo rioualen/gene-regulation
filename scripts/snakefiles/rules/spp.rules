@@ -24,7 +24,7 @@ rule spp:
 	params:	fdr = config["spp"]["fdr"], \
             Rlibs=config["dir"]["r_libs"], \
 			qsub=config["qsub"] \
-                  + " -q long -e {result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + "_qsub.err" \
+                  + " -e {result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + "_qsub.err" \
                   + " -o {result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + "_qsub.out" 
 	log: "{result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".log"
 	benchmark: "{result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + "_benchmark.json"

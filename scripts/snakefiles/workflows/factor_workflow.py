@@ -204,7 +204,7 @@ PEAK_MOTIFS = expand(RESULTS_DIR + "{motifs}.html", motifs=MOTIFS)
 
 rule all: 
 	"""
-	Run all the required analyses
+	Run all the required analyses.
 	"""
 	input: GRAPHICS, RAW_QC, MAPPING, PEAKS#_MOTIFS#, TDF  #RAW_QC, BWA_INDEX, MAPPING, PEAKS, IMPORT
 	params: qsub=config["qsub"]

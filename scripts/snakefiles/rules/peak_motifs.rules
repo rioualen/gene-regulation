@@ -46,8 +46,8 @@ rule peak_motifs:
         motif_db = config['peak-motifs']['motif_db'], \
         outdir = "{caller_dir}/peak-motifs/", \
         prefix="{peaks}_peak-motifs", \
-        qsub = config['qsub'] + " -q long -e {peaks}_qsub.err" \
-                  + " -q long -o {peaks}_qsub.out" 
+        qsub = config['qsub'] + " -e {peaks}_qsub.err" \
+                  + " -o {peaks}_qsub.out" 
     log: "{caller_dir}/{peaks}_peak-motifs.log"
     benchmark: "{caller_dir}/{peaks}_peak-motifs_bench.json"
     shell: """

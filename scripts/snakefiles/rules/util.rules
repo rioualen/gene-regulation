@@ -36,7 +36,7 @@ rule sort_bam_by_pos:
     log: "{aligned_reads}_sorted_pos.log"
     benchmark: "{aligned_reads}_sorted_pos_benchmark.json"
     params: prefix = "{aligned_reads}_sorted_pos", \
-            qsub = config["qsub"] + " -q long -e {aligned_reads}_sorted_pos_qsub.err -o {aligned_reads}_sorted_pos_qsub.out"
+            qsub = config["qsub"] + " -e {aligned_reads}_sorted_pos_qsub.err -o {aligned_reads}_sorted_pos_qsub.out"
     shell:"samtools sort  {input} {params.prefix} 2> {log}; samtools index {output} 2>> {log}"
     
 rule sort_bam_by_name:
@@ -48,5 +48,5 @@ rule sort_bam_by_name:
     log: "{aligned_reads}_sorted_name.log"
     benchmark: "{aligned_reads}_sorted_name_benchmark.json"
     params: prefix = "{aligned_reads}_sorted_name", \
-            qsub = config["qsub"] + " -q long -e {aligned_reads}_sorted_name_qsub.err -o {aligned_reads}_sorted_name_qsub.out"
+            qsub = config["qsub"] + " -e {aligned_reads}_sorted_name_qsub.err -o {aligned_reads}_sorted_name_qsub.out"
     shell:"samtools sort -n {input} {params.prefix} 2> {log}; samtools index {output} 2>> {log}"

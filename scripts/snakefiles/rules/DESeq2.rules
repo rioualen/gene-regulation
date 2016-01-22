@@ -18,7 +18,7 @@ rule DESeq2:
     output: tab = RESULTS_DESEQ2
     log: config["dir"]["results"] + "DEG/DESeq2.log"
     benchmark: config["dir"]["results"] + "DEG/DESeq2_benchmark.json"
-    params: qsub = config["qsub"] + " -q short -e " + config["dir"]["results"] + "DEG/DESeq2_qsub.err -o " + config["dir"]["results"] + "DEG/DESeq2_qsub.out", \
+    params: qsub = config["qsub"] + " -e " + config["dir"]["results"] + "DEG/DESeq2_qsub.err -o " + config["dir"]["results"] + "DEG/DESeq2_qsub.out", \
             cond1 = config["Diff_Exp"]["cond1"], \
             cond2=config["Diff_Exp"]["cond2"], \
             dir_results = config["dir"]["results"]

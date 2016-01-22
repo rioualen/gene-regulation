@@ -54,7 +54,7 @@ rule sicer:
         gapsize=config["sicer"]["gap_size"], \
         fdr = config["sicer"]["fdr"]
 #        qsub=config["qsub"] \
-#          + " -q long -e {result_dir}/{treatment}_vs_{control}/sicer-fdr{fdr}/{treatment}_vs_{control}_{aligner}_sicer-fdr{fdr}_qsub.err" \
+#          + " -e {result_dir}/{treatment}_vs_{control}/sicer-fdr{fdr}/{treatment}_vs_{control}_{aligner}_sicer-fdr{fdr}_qsub.err" \
 #          + " -o {result_dir}/{treatment}_vs_{control}/sicer-fdr{fdr}/{treatment}_vs_{control}_{aligner}_sicer-fdr{fdr}_qsub.out" 
     output:
         peaks_bed = "{result_dir}/{treatment}_vs_{control}/sicer-fdr{fdr}/{treatment}_vs_{control}_{aligner}_sicer-fdr{fdr}.bed"

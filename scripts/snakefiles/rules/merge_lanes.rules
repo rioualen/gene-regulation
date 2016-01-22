@@ -1,0 +1,104 @@
+
+#----------------------------------------------------------------#
+# Merge lanes per sample
+#----------------------------------------------------------------#
+rule merge_lanes:
+    """
+    Concatenate multiple fastqiles to produce a merged fastq file.
+
+    This rule typically serves to merge raw reads (fastq) corresponding to
+    multiple sequencing lanes for the same sample into a single fastq file
+    per sample.
+
+    Since the file naming conventions are highly dependent on the sequencing
+    platform, the file grouping is read from a user-provided text file with
+    tab-separated values (extension .tsv). This file must have been specified
+    in the config file, as config["files"]["lane_merging"].
+
+    This file must contain at least two columns with this precise header:
+        source_file
+        merged_file
+    Additional columns can be included but will be ignored.
+
+    There should be a N to 1 correspondence from source file to merge file
+    (each source file should in principle be assigned to a single merged file).
+
+    Source files are supposed to be compressed fastq sequence files (.fastq.gz).
+
+    The output file is an uncompressed fastq file, because bowtie version 1
+    does not support gzipped files as input.
+
+
+    Required configuration parameters:
+
+    config["files"]["lane_merging"] file indicating the source/merged file names
+    config["dir"]["fastq"]          base of the directory containing the fastq files
+
+    """
+    input: config["files"]["lane_merging"]
+    output: config["dir"]["fastq"] + "/lane_merging_benchmark.json"
+    log: config["dir"]["fastq"] + "/lane_merging_log.txt"
+    benchmark: config["dir"]["fastq"] + "/lane_merging_benchmark.json"
+    run:
+        if (verbosity >= 1):
+            print("Lane merging table:\t" + config["files"]["lane_merging"])
+
+        # Read the lane merging table
+        lane_merging_table = read_table(config["files"]["lane_merging"], verbosity=verbosity)
+        source_file = lane_merging_table['source_file']
+        merged_file = lane_merging_table['merged_file']
+
+        # Build a dictionary indexed by merged file, where values are lists of files to be merged
+        merging_dict = {}
+        for s,m in zip(source_file, merged_file):
+            # print("\t".join([s,m]))
+            if (m in merging_dict):
+                merging_dict[m].append(s)
+            else:
+                merging_dict[m] = [s]
+
+        # Verbosity
+        if (verbosity >= 5):
+            print("\tsource_file:\t" + ";".join(source_file))
+            print("\tmerged_file:\t" + ";".join(merged_file))
+            print("\tmerging_dict:\t" + str(merging_dict))
+
+        # Merge the files
+        for m in merging_dict.keys():
+            # Check the output directory
+            m_dir = os.path.dirname(m)
+            if not os.path.exists(m_dir):
+                os.makedirs(m_dir)
+
+            # Merge the source files
+            to_merge = merging_dict[m]
+            cmd = "gunzip -c " + " ".join(to_merge) + "> " + m
+            now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+            if (verbosity >= 1):
+                print(now + "\tMerging " + str(len(to_merge)) + " files into " + m)
+                print("\t" + cmd)
+            os.system(cmd)
+
+# #----------------------------------------------------------------#
+# # Merge lanes per sample
+# #----------------------------------------------------------------#
+#
+# # Note by JvH: THIS RULE IS TOO CUMBERSOME, I MUST FIND A MORE FLEXIBLE SOLUTION
+#
+# rule merge_lanes_previous:
+#     """
+#     Merge lanes of the same sample and end in a single file.  The input
+#     files are compressed (.fastq.gz) but the output file is in
+#     uncompressed fastq format, because bowtie version 1 does not
+#     support gzipped files as input.
+#
+#     """
+#     input: L1 = "{reads_prefix}_L001_{reads_suffix}.fastq.gz", \
+#         L2 = "{reads_prefix}_L002_{reads_suffix}.fastq.gz", \
+#         L3 = "{reads_prefix}_L003_{reads_suffix}.fastq.gz", \
+#         L4 = "{reads_prefix}_L004_{reads_suffix}.fastq.gz"
+#     output: "{reads_prefix}_merged_{reads_suffix}.fastq"
+#     log: "{reads_prefix}_merged_{reads_suffix}.log"
+#     benchmark: "{reads_prefix}_merged_{reads_suffix}_benchmark.json"
+#     params: qsub = config["qsub"] + " -e {reads_prefix}__merged_{reads_suffix}_qsub.err  -o {reads_prefix}__merged_{reads_suffix}_qsub.out"
+#     shell: "gunzip -c {input.L1} {input.L2} {input.L3} {input.L4} | gzip > {output}"

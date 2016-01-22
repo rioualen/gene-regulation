@@ -25,7 +25,7 @@ rule bed_to_fasta:
 	benchmark: "{regions}_fetchseq_benchmark.json"
 	params: verbosity = config["rsat"]["verbosity"], \
                 genome = config["genome"]["genome_version"], \
-                qsub = config["qsub"] + " -q short -e {regions}_fetchseq_qsub.err -o {regions}_fetchseq_qsub.out"
+                qsub = config["qsub"] + " -e {regions}_fetchseq_qsub.err -o {regions}_fetchseq_qsub.out"
 	shell:"""fetch-sequences -v {params.verbosity} -i {input} -header_format galaxy -genome {params.genome} -o {output} 2> {log}"""
 
 #working example
