@@ -10,38 +10,6 @@
    Acids Research, 41(10):e108
 
 """
-# rule buildindex_mapping:
-# 	"""Build an index of the genome, which is required before alignig the
-# reads.
-# """
-# 	input: reference_genome = config["subread"]["reference_genome"]
-# 	output: config["dir"]["results"] + "control_buildindex.txt"
-# 	params: reference_index = config["dir"]["results"] + config["subread"]["basename"], qsub = config["qsub"] + " -q short -e " + config["dir"]["results"] + "buildindex_qsub.err -o " + config["dir"]["results"] + "buildindex_qsub.out"
-# 	log: config["dir"]["results"] + "buildindex.log"
-# 	benchmark: config["dir"]["results"] + "buildindex_benchmark.json"
-# 	run:
-# 		R("""
-# 			library("Rsubread")
-# 			buildindex(basename="{params.reference_index}",reference="{input.reference_genome}")
-# 			write("buildindex ok", file="{output}")
-# 		""")
-#
-# rule subread_mapping:
-# 	"""Align reads onto a reference genome  with the tool subread. 
-#
-#         Before running the alignment, an index of the genome sequence
-#         has to be built with the tool Rsubread::buildindex.
-# """
-# 	input: file_input = "{data_dir}/{dataset}_{trimmed}.fastq", control_txt = config["dir"]["results"] + "control_buildindex.txt"
-# 	output: "{data_dir}/{dataset}_{trimmed}_{aligneur}.bam"
-# 	params: reference_index = config["dir"]["results"] + config["subread"]["basename"], qsub = config["qsub"] + " -q medium -e {data_dir}/{dataset}_{trimmed}_{aligneur}_subread_mapping_qsub.err -o {data_dir}/{dataset}_{trimmed}_{aligneur}_subread_mapping_qsub.out"
-# 	log: "{data_dir}/{dataset}_{trimmed}_{aligneur}_subread_mapping.log"
-# 	benchmark: "{data_dir}/{dataset}_{trimmed}_{aligneur}_subread_mapping_benchmark.json"
-# 	run:
-# 		R("""
-# 			library("Rsubread")
-# 			align(index="{params.reference_index}",readfile1="{input.file_input}",output_file="{output}")
-# 		""")
 
 # Raise an error and exit if a required parameter is missing.
 # Set optional params to defaults values in case they're not defined in config file.
@@ -49,12 +17,17 @@
 if not "subread" in config.keys():
     sys.exit("The subread parameters should be specified in the config file.")
 
+if not (("genome" in config.keys()) and ("fasta" in config["genome"].keys())):
+    sys.exit("The parameter config['genome']['fasta'] should be specified in the config file.")
+
 if not "index" in config["subread"].keys():
     sys.exit("The parameter config['subread']['index'] should be specified in the config file.")
 
 if not "seq_type" in config["subread"].keys():
     sys.exit("The parameter config['subread']['seq_type'] should be specified in the config file.")
 
+
+# Defne default parameters if not specified in the config file
 if not "max_mismatches" in config["subread"].keys():
     config["subread"]["max_mismatches"] = "3"
 
@@ -69,19 +42,19 @@ if not "other_options" in config["subread"].keys():
 
 
 rule subread_buildindex:
-	"""Build an index of the genome, which is required before alignig the
+    """Build an index of the genome, which is required before alignig the
 reads with subread-align.
 """
-	input: reference_genome = config["subread"]["reference_genome"]
-	output: files=config["subread"]["index"] + ".files", \
-            benchmark=config["subread"]["index"] + "_buildindex_benchmark.json"
-	params: reference_index = config["subread"]["index"], \
-			qsub = config["qsub"] \
-		+ " -e " + config["subread"]["index"] + "_buildindex_qsub.err " \
-			+ " -o " + config["subread"]["index"] + "_buildindex_qsub.out"
-	log: config["subread"]["index"] + "_buildindex_log.txt"
-	benchmark: config["subread"]["index"] + "_buildindex_benchmark.json"
-	shell: "subread-buildindex -o {params.reference_index}  {input.reference_genome} &> {log}"
+    input: reference_genome = config["genome"]["fasta"]
+    output: files=config["subread"]["index"] + ".files", \
+        benchmark=config["subread"]["index"] + "_buildindex_benchmark.json"
+    params: reference_index = config["subread"]["index"], \
+        qsub = config["qsub"] \
+            + " -e " + config["subread"]["index"] + "_buildindex_qsub.err " \
+            + " -o " + config["subread"]["index"] + "_buildindex_qsub.out"
+    log: config["subread"]["index"] + "_buildindex_log.txt"
+    benchmark: config["subread"]["index"] + "_buildindex_benchmark.json"
+    shell: "subread-buildindex -o {params.reference_index}  {input.reference_genome} &> {log}"
 
 
 ## If SAM file exists (resulting from version < 1.4) convert SAM to
