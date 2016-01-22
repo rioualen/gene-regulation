@@ -89,7 +89,6 @@ include: os.path.join(RULES, "swembl.rules")
 READS = config["dir"]["reads_source"]
 
 
-
 # Samples
 SAMPLES = read_table(config["files"]["samples"])
 SAMPLE_IDS = SAMPLES.iloc[:,0] ## First column MUST contain the sample ID
@@ -100,6 +99,27 @@ SRR_IDS = SAMPLES.iloc[:,1] ## Second column MUST contain srr IDs
 DESIGN = read_table(config["files"]["design"])
 TREATMENT = DESIGN.iloc[:,0]
 CONTROL = DESIGN.iloc[:,1]
+
+## Samples
+#SAMPLES = read_table(config["files"]["samples"])
+#SAMPLE_IDS = SAMPLES.iloc[:,0] ## First column MUST contain the sample ID
+
+### Design
+#DESIGN = read_table(config["files"]["design"])
+#TREATMENT = DESIGN.iloc[:,0]
+#CONTROL = DESIGN.iloc[:,1]
+
+### Check after Jacques' merge
+## Samples
+#SAMPLES = read_table(config["files"]["samples"])
+#SAMPLE_IDS = SAMPLES.iloc[:,0] ## First column MUST contain the sample ID
+#SRR_IDS = SAMPLES['SRR']
+
+### Design
+#DESIGN = read_table(config["files"]["design"])
+#TREATMENT = DESIGN['treatment']
+#CONTROL = DESIGN['control']
+#>>>>>>> Stashed changes
 
 
 ## Check after Jacques' merge
