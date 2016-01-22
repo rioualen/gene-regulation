@@ -1,5 +1,13 @@
-"""
-    Snakemake rule to produce a count matrix from a sorted alignment file.
+""" Snakemake rules to produce a count matrix from a sorted alignment
+    file using htseq.
+
+    IMPORTANT NOTE: there seems to be a problem with htseq and
+    position-sorted bam files. This has been discussed on SesqAnswers:
+    http://seqanswers.com/forums/showthread.php?t=41531
+
+    After some testing, we recommend to use subread featurecounts
+    (rules defined in file featurecounts.rules) rather than htseq.
+
 """
 rule htseq_count:
     """Count reads per gene in a bam file using htseq-count. 
@@ -21,7 +29,7 @@ rule htseq_count:
             idattr = config["htseq"]["id_attr"], \
             mode = config["htseq"]["mode"], \
             gff_file = config["htseq"]["gff_file"], \
-            qsub = config["qsub"] + " -q long" \
+            qsub = config["qsub"] + "" \
             + " -e {reads}_sorted_{order}_HTSeqcount_qsub.err" \
             + " -o {reads}_sorted_{order}_HTSeqcount_qsub.out", 
             options = config["htseq"]["other_options"]
@@ -52,7 +60,7 @@ rule htseq_count:
 #             idattr = config["htseq"]["id_attr"], \
 #             mode = config["htseq"]["mode"], \
 #             gff_file = config["htseq"]["gff_file"], \
-#             qsub = config["qsub"] + " -q long" \
+#             qsub = config["qsub"] + "" \
 #             + " -e {reads}_sorted_" + config["htseq"]["order"] + "_HTSeqcount_qsub.err" \
 #             + " -o {reads}_sorted_" + config["htseq"]["order"] + "_HTSeqcount_qsub.out", \
 #             options = config["htseq"]["other_options"]

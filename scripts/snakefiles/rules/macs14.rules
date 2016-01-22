@@ -56,7 +56,7 @@ rule macs14:
         other_options = config["macs14"]["other_options"], \
         genome_size = config["genome"]["size"], \
         qsub=config["qsub"] \
-          + " -q long -e {result_dir}/{treatment}_vs_{control}/macs14-pval{pval}_peaks/{treatment}_vs_{control}_{aligner}_macs14_qsub.err" \
+          + " -e {result_dir}/{treatment}_vs_{control}/macs14-pval{pval}_peaks/{treatment}_vs_{control}_{aligner}_macs14_qsub.err" \
           + " -o {result_dir}/{treatment}_vs_{control}/macs14-pval{pval}_peaks/{treatment}_vs_{control}_{aligner}_macs14_qsub.out"
     output:
         peaks_bed = "{result_dir}/{treatment}_vs_{control}/macs14-pval{pval}_peaks/{treatment}_vs_{control}_{aligner}_macs14-pval{pval}_peaks.bed", \

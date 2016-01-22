@@ -12,7 +12,7 @@ rule peak_length:
 	output: "{peaks}_length.png"
 	benchmark: "{peaks}_length_benchmark.json"
 	log: "{peaks}_length.log"
-	params: qsub = config['qsub'] + " -q short -e {peaks}_qsub.err -o {peaks}_qsub.out"
+	params: qsub = config['qsub'] + "  -e {peaks}_qsub.err -o {peaks}_qsub.out"
 
 	run:
 		R("""sink("{log}")

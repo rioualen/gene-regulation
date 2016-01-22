@@ -15,5 +15,5 @@ rule purge_sequence:
 	output: "{seq}_purged.fasta"
 	benchmark: "{seq}_purge-seq_benchmark.json"
 	log: "{seq}_purge-seq.log"
-	params:	qsub = config["qsub"] + " -q short -e {seq}_purge_qsub.err -o {seq}_purge_qsub.out"
+	params:	qsub = config["qsub"] + " -e {seq}_purge_qsub.err -o {seq}_purge_qsub.out"
 	shell: "purge-sequence -i {input} -o {output} 2> {log}"

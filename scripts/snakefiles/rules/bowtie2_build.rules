@@ -1,49 +1,33 @@
-"""Snakemake rules to download a reference genome and build the index
-   for bowtie version 2.
+"""Snakemake rules to build the index for bowtie version 2.
+
+   Required parameters (should be specified in the config file):
+
+   config["bowtie2"]["genome"]
+   config["bowtie2"]["index"]
 """
 
-## Attention, Jacques suppressed the gff3 download, because it was not
-## working with E.coli, and apparently we don't use these files, we
-## use the gtf instead.
+if not "bowtie2" in config.keys():
+    sys.exit("Bowtie2 parameters must be defined in the config file")
 
-rule bowtie2_download_genome:
-    """Download and index the reference genome for the Bowtie2
-    read-mapping software from ensembl.
+if not "genome" in config["bowtie2"].keys():
+    sys.exit("The parameter config['bowtie2']['genome'] should be specified in the config file.")
 
-    """
-    # output: sequence = config["dir"]["genome"] + "/" + config["genome"]["sequence"] + ".fa", \
-    #         features_gtf = config["dir"]["genome"] + "/" + config["genome"]["features_gtf"] + ".gtf"
-    # log: config["dir"]["genome"] + "/" + "wget_log.txt"
-    # params: sequence_url = config["genome"]["base_url_fasta"] + config["genome"]["sequence"] + ".fa.gz", \
-    #         features_gtf_url = config["genome"]["base_url_gtf"] + config["genome"]["features_gtf"] + ".gtf.gz"
-    output: sequence = config["dir"]["genome"] + "/" + config["genome"]["sequence"] + ".fa", \
-            features_gtf = config["dir"]["genome"] + "/" + config["genome"]["features_gtf"] + ".gtf"
-    log: config["dir"]["genome"] + "/" + "wget_log.txt"
-    params: sequence_url = config["genome"]["base_url_fasta"] + "/" + config["genome"]["sequence"] + ".fa.gz", \
-            features_gtf_url = config["genome"]["base_url_gtf"] + "/" + config["genome"]["features_gtf"] + ".gtf.gz", \
-            qsub = config["qsub"] + " -q short"
-    shell: "wget --timestamping --no-directories " \
-        + " --directory-prefix " + config["dir"]["genome"] + "/" \
-        + " {params.sequence_url}" \
-        + " {params.features_gtf_url}" \
-        + " && gunzip -f " \
-        +  config["dir"]["genome"] + "/" + config["genome"]["sequence"] + ".fa.gz " \
-        +  config["dir"]["genome"] + "/" + config["genome"]["features_gtf"] + ".gtf.gz " \
-        + " &> {log}"
+if not "index" in config["bowtie2"].keys():
+    sys.exit("The parameter config['bowtie2']['index'] should be specified in the config file.")
 
 rule bowtie2_build:
     """
     Build index for bowtie version 2 (gapped read mapping).
     """
-    input: sequence = config["dir"]["genome"] + "/" + config["genome"]["sequence"] + ".fa"
-    output: index1 = config["dir"]["genome"] + "/" + config["genome"]["organism"] + ".1.bt2"
-    params: bowtie_index = config["dir"]["genome"] + "/" + config["genome"]["organism"],\
+    input: sequence = config["bowtie2"]["genome"]
+    output: index1 = config["bowtie2"]["index"] + "_benchmark.json"
+    params: bowtie_index = config["bowtie2"]["index"],\
             qsub = config["qsub"] \
-            + " -q short -e " + config["dir"]["genome"] + "/" + config["genome"]["sequence"] + "_qsub.err" \
-            + " -o " + config["dir"]["genome"] + "/" + config["genome"]["sequence"] + "_qsub.out"
-    log:  config["genome"]["organism"] + "/bowtie-build_log.txt"
-    message: "Building bowtie index in directory:\t{params.bowtie_index}"
-    benchmark:  config["genome"]["organism"] + "/bowtie-build_benchmark.json"
+            + " -e " + config["bowtie2"]["index"] + "_qsub.err" \
+            + " -o " + config["bowtie2"]["index"] + "_qsub.out"
+    log:  config["bowtie2"]["index"] + "_log.txt"
+    message: "Building bowtie2 index in directory:\t{params.bowtie_index}"
+    benchmark:  config["bowtie2"]["index"] + "_benchmark.json"
     shell: "bowtie2-build {input.sequence} {params.bowtie_index} &> {log}"
 
 # """Snakemake rules to download a refrence genome and build the index
@@ -62,7 +46,7 @@ rule bowtie2_build:
 #     params: sequence_url = config["genome"]["base_url_fasta"] + config["genome"]["sequence"] + ".fa.gz", \
 #             features_gtf_url = config["genome"]["base_url_gtf"] + config["genome"]["features_gtf"] + ".gtf.gz", \
 #             features_gff3_url = config["genome"]["base_url_gff3"] + config["genome"]["features_gff3"] + ".gff3.gz", \
-#             qsub = config["qsub"] + " -q short"
+#             qsub = config["qsub"] + " "
 #     shell: "wget --timestamping --no-directories " \
 #         + " --directory-prefix " + config["dir"]["genome"] \
 #         + " {params.sequence_url}" \
@@ -81,7 +65,7 @@ rule bowtie2_build:
 #     input: sequence = config["dir"]["genome"] + "/" + config["genome"]["sequence"] + ".fa"
 #     output: index1 = config["dir"]["genome"] + "/" + config["genome"]["organism"] + ".1.bt2"
 #     params: bowtie_index = config["dir"]["genome"] + "/" + config["genome"]["organism"],\
-#             qsub = config["qsub"] + " -q short -e " + config["dir"]["genome"] + "/" + config["genome"]["sequence"] + "_qsub.err -o " + config["dir"]["genome"] + "/" + config["genome"]["sequence"] + "_qsub.out"
+#             qsub = config["qsub"] + " -e " + config["dir"]["genome"] + "/" + config["genome"]["sequence"] + "_qsub.err -o " + config["dir"]["genome"] + "/" + config["genome"]["sequence"] + "_qsub.out"
 #     log:  config["genome"]["organism"] + "/bowtie-build_log.txt"
 #     message: "Building bowtie index in directory:\t{params.bowtie_index}"
 #     benchmark:  config["genome"]["organism"] + "/bowtie-build_benchmark.json"

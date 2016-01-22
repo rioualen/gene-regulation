@@ -15,6 +15,6 @@ rule diff_expr:
     output: tab = RESULTS_EDGER
     log: config["dir"]["results"] + "DEG/diff_expr.log"
     benchmark: config["dir"]["results"] + "DEG/diff_expr_benchmark.json"
-    params: qsub = config["qsub"] + " -q short -e " + config["dir"]["results"] + "DEG/diff_expr_qsub.err -o " + config["dir"]["results"] + "DEG/diff_expr_qsub.out", \
+    params: qsub = config["qsub"] + " -e " + config["dir"]["results"] + "DEG/diff_expr_qsub.err -o " + config["dir"]["results"] + "DEG/diff_expr_qsub.out", \
             r_script = config["dir"]["fg-chip-seq"] + "/scripts/R-scripts/rna-seq_DEG_detection.R"
     shell: "Rscript {params.r_script} {input.R_params}"

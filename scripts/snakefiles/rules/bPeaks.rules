@@ -45,7 +45,7 @@ rule bPeaks:
         windowSize = config["bPeaks"]["windowSize"], \
         windowOverlap = config["bPeaks"]["windowOverlap"], \
         qsub=config["qsub"] \
-        + " -q long -e {result_dir}/{treatment}_vs_{control}/bPeaks_allGenome/{treatment}_vs_{control}_{aligner}_bPeaks_qsub.err" \
+        + " -e {result_dir}/{treatment}_vs_{control}/bPeaks_allGenome/{treatment}_vs_{control}_{aligner}_bPeaks_qsub.err" \
         + " -o {result_dir}/{treatment}_vs_{control}/bPeaks_allGenome/{treatment}_vs_{control}_{aligner}_bPeaks_qsub.out" 
     output: 
         allgen_bed = "{result_dir}/{treatment}_vs_{control}/bPeaks_allGenome/{treatment}_vs_{control}_{aligner}_bPeaks_allGenome.bed", \

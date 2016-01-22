@@ -62,7 +62,7 @@ rule macs2:
         other_options = config["macs2"]["other_options"], \
         genome_size = config["genome"]["size"], \
         qsub=config["qsub"] \
-          + " -q long -e {result_dir}/{treatment}_vs_{control}/macs2-qval{qval}_peaks/{treatment}_vs_{control}_{aligner}_macs2-qval{qval}_qsub.err" \
+          + " -e {result_dir}/{treatment}_vs_{control}/macs2-qval{qval}_peaks/{treatment}_vs_{control}_{aligner}_macs2-qval{qval}_qsub.err" \
           + " -o {result_dir}/{treatment}_vs_{control}/macs2-qval{qval}_peaks/{treatment}_vs_{control}_{aligner}_macs2-qval{qval}_qsub.out" 
     output:
         peaks = "{result_dir}/{treatment}_vs_{control}/macs2-qval{qval}_peaks/{treatment}_vs_{control}_{aligner}_macs2-qval{qval}_peaks." + config["macs2"]["type"] + "Peak", \

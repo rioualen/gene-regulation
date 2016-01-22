@@ -1,19 +1,28 @@
-"""Athaliana.
+"""Snakemake workflow for the analysis of RNA-seq data.
+
+This script runs the following steps:
+
+- merging the reads from multiple lanes to obtain a single read file per sample (fastq)
+- read quality
+- read mapping onto a reference genome
+- counting the reads per gene
+
+The parameters should be specified in a configuration file (yaml or json).
 
 Usage: 
     snakemake -p  -c "qsub {params.qsub}" -j 12 \
-        -s scripts/snakefiles/workflows/Athaliana.py \
+        -s gene-regulation/scripts/snakefiles/workflows/rna-seq_workflow.py \
+        --configfile [path_to_your_config_file.yaml] \
         [targets]
 
 Flowcharts:
-    snakemake -p -s scripts/snakefiles/workflows/Athaliana.py \
+    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/Athaliana.py \
+        --configfile [path_to_your_config_file.yaml] \
         --force flowcharts
 
-Reference genome:	-
-Sequencing type: 	single end
 
-Author: 		Claire Rioualen, Jacques van Helden
-Contact: 		claire.rioualen@inserm.fr
+Authors: Justine Long, Jeanne Cheneby, Lucie Khamvongsa, Claire Rioualen & Jacques van Helden
+Contact: Jacques.van-Helden@univ-amu.fr
 """
 
 #================================================================#
@@ -27,253 +36,517 @@ import time#rm?
 import datetime
 import pandas as pd
 
-## Config
-#configfile: "examples/Athaliana-Myb/Athaliana-Myb.yml"                                                        ####
-workdir: config["dir"]["base"]
-verbosity = int(config["verbosity"])
 
 #================================================================#
-#                         Includes                               #
+#                        Configuration
 #================================================================#
+
+## Config file must be specified on the command line, with the option --configfile
+
+workdir: config["dir"]["base"]
+
+# Beware: verbosity messages are incompatible with the flowcharts
+verbosity = int(config["verbosity"])
+
+# #================================================================#
+# # Define suffixes for each step of the workflow. Note: this could
+# # alternatively be done in the config file but we would then not be
+# # able to build suffixes from other config values due to JSON
+# # limitations.
+# # ================================================================#
+# config["suffix"]["trimmed"] = "sickle_pe_q" + config["sickle"]["threshold"]
+# config["suffix"]["mapped"] = config["suffix"]["trimmed"] + "_bowtie2_pe"
+# config["suffix"]["featurecounts"] = config["suffix"]["mapped"] + "_featurecounts"
+# config["suffix"]["sorted_pos"] = config["suffix"]["mapped"] + "_sorted_pos"
+# config["suffix"]["sorted_name"] = config["suffix"]["mapped"] + "_sorted_name"
+# config["suffix"]["htseq_counts"] = config["suffix"]["sorted_name"] + "_HTSeqcount"
+# config["suffix"]["deg"] = "sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"]
+# config["suffix"]["edgeR"] = config["suffix"]["deg"] + config["edgeR"]["suffix"]
+# config["suffix"]["DESeq2"] = config["suffix"]["deg"] + config["DESeq2"]["suffix"]
+#
+# #================================================================#
+# # Define global variables
+# #================================================================#
+# NOW = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+#
+#================================================================#
+# Import snakemake rules and python utilities
+#================================================================#
+if not ("dir" in config.keys()) & ("fg_lib" in config["dir"].keys()) :
+    sys.exit("The parameter config['dir']['fg_lib'] should be specified in the config file.")
 
 FG_LIB = os.path.abspath(config["dir"]["fg_lib"])
 RULES = os.path.join(FG_LIB, "scripts/snakefiles/rules")
-PYTHON = os.path.join(FG_LIB, "scripts/snakefiles/python_lib")
+PYTHON = os.path.join(FG_LIB, "scripts/python_lib")
 
-include: os.path.join(PYTHON, "util.py")
-include: os.path.join(RULES, "util.rules")
-include: os.path.join(RULES, "bwa_index.rules")
-include: os.path.join(RULES, "bwa_se.rules")
-include: os.path.join(RULES, "bowtie2_index.rules")
-include: os.path.join(RULES, "bowtie2_se.rules")
-include: os.path.join(RULES, "bPeaks.rules")
-include: os.path.join(RULES, "convert_bam_to_bed.rules")
-include: os.path.join(RULES, "count_oligo.rules")
-include: os.path.join(RULES, "count_reads.rules")
-include: os.path.join(RULES, "fastqc.rules")
-include: os.path.join(RULES, "flowcharts.rules")
-include: os.path.join(RULES, "getfasta.rules")
-include: os.path.join(RULES, "genome_coverage.rules")
-include: os.path.join(RULES, "homer.rules")
-include: os.path.join(RULES, "macs2.rules")
-include: os.path.join(RULES, "macs14.rules")
-include: os.path.join(RULES, "peak_length.rules")
-include: os.path.join(RULES, "peak_motifs.rules")
-include: os.path.join(RULES, "purge_sequence.rules")
-#include: os.path.join(RULES, "rsync.rules")
-include: os.path.join(RULES, "sickle_se.rules")
-include: os.path.join(RULES, "spp.rules")
-include: os.path.join(RULES, "sra_to_fastq.rules")
-include: os.path.join(RULES, "swembl.rules")
+include: os.path.join(PYTHON, "util.py")                        ## Python utilities for our snakemake workflows
+include: os.path.join(RULES, "util.rules")                    ## Snakemake utilities
+include: os.path.join(RULES, "flowcharts.rules")              ## Draw flowcharts (dag and rule graph)
+include: os.path.join(RULES, "merge_lanes.rules")               ## Merge lanes by sample, based on a tab-delimited file indicating how to merge
+include: os.path.join(RULES, "fastqc.rules")                    ## Quality control with fastqc
+# include: os.path.join(RULES, "sickle_paired_ends.rules")        ## Trimming with sickle
+include: os.path.join(RULES, "count_reads.rules")               ## Count reads in different file formats
+#include: os.path.join(RULES, "bowtie2_build.rules")             ## Build genome index for bowtie2 (read mapping with gaps)
+#include: os.path.join(RULES, "bowtie2_paired_ends.rules")       ## Paired-ends read mapping with bowtie version 2 (support gaps)
+include: os.path.join(RULES, "subread_mapping_JvH.rules")       ## Read mapping with subreads
+include: os.path.join(RULES, "genome_coverage.rules")         ## Compute density profiles in bedgraph format
+# include: os.path.join(RULES, "htseq.rules")                   ## Count reads per gene with htseq-count
+include: os.path.join(RULES, "featurecounts.rules")           ## Count reads per gene with R subread::featurecounts
 
 #================================================================#
 #                      Data & wildcards                          #
 #================================================================#
 
-# Raw data
-READS = config["dir"]["reads_source"]
+# # Raw data
+# READS = config["dir"]["reads_source"]
 
-# Samples
-SAMPLES = read_table(config["files"]["samples"], verbosity=verbosity)
-SAMPLE_IDS = SAMPLES.iloc[:,0] ## First column MUST contain the sample ID
+#----------------------------------------------------------------#
+# Read sample descriptions
+#----------------------------------------------------------------#
+
+# Read the sample description file
+SAMPLE_DESCR = read_table(config["files"]["samples"], verbosity=verbosity)
+SAMPLE_IDS = SAMPLE_DESCR.iloc[:,0] ## First column MUST contain the sample ID
+SAMPLE_CONDITIONS = SAMPLE_DESCR['condition'] ## Second column MUST contain condition for each sample
+SAMPLE_NAMES = SAMPLE_DESCR['title'] ## Sample-wise label
+SAMPLE_DIRS = SAMPLE_DESCR['folder']
+FASTQ_R1 = SAMPLE_DESCR['fastq_R1']
+FASTQ_R2 = SAMPLE_DESCR['fastq_R2']
+FASTQ = list(FASTQ_R1) + list(FASTQ_R2)
+
+# Verbosity
+if (verbosity >= 1):
+    print("Sample descriptions:\t" + config["files"]["samples"])
+    if (verbosity >= 3):
+        print("\tSample IDs:\t" + ";".join(SAMPLE_IDS))
+        print("\tConditions:\t" + ";".join(SAMPLE_CONDITIONS))
+        print("\tSample names:\t" + ";".join(SAMPLE_NAMES))
+        print("\tSample folders:\t" + ";".join(SAMPLE_DIRS))
+
+
+# #----------------------------------------------------------------#
+# # Merge lanes per sample
+# #----------------------------------------------------------------#
+# rule merge_lanes:
+#     """
+#     Merge lanes (fastq) of the same sample and end in a single fastq file.
+#
+#     ince the file naming conventions are highly dependent on the sequencing
+#     platform, the file grouping is read from a user-provided text file with
+#     tab-separated values (extension .tsv). This file must have been specified
+#     in the config file, as config["files"]["lane_merging"].
+#
+#     This file must contain at least two columns with this precise header:
+#         source_file
+#         merged_file
+#
+#     There should be a N to 1 correspondence from source file to merge file
+#     (each source file should in principle be assigned to a single merged file).
+#
+#     Source files are supposed to be compressed fastq sequence files (.fastq.gz).
+#
+#     The output file is an uncompressed fastq file, because bowtie version 1
+#     does not support gzipped files as input.
+#
+#     """
+#     input: config["files"]["lane_merging"]
+#     # output: config["dir"]["results"] + "_lane_merging_benchmark.json"
+#     log: config["dir"]["results"] + "_lane_merging_log.txt"
+#     benchmark: config["dir"]["results"] + "_lane_merging_benchmark.json"
+#     run:
+#         if (verbosity >= 1):
+#             print("Lane merging table:\t" + config["files"]["lane_merging"])
+#
+#         # Read the lane merging table
+#         lane_merging_table = read_table(config["files"]["lane_merging"], verbosity=verbosity)
+#         source_file = lane_merging_table['source_file']
+#         merged_file = lane_merging_table['merged_file']
+#
+#         # Build a dictionary indexed by merged file, where values are lists of files to be merged
+#         merging_dict = {}
+#         for s,m in zip(source_file, merged_file):
+#             # print("\t".join([s,m]))
+#             if (m in merging_dict):
+#                 merging_dict[m].append(s)
+#             else:
+#                 merging_dict[m] = [s]
+#
+#         # Verbosity
+#         if (verbosity >= 5):
+#             print("\tsource_file:\t" + ";".join(source_file))
+#             print("\tmerged_file:\t" + ";".join(merged_file))
+#             print("\tmerging_dict:\t" + str(merging_dict))
+#
+#         # Merge the files
+#         for m in merging_dict.keys():
+#             # Check the output directory
+#             m_dir = os.path.dirname(m)
+#             if not os.path.exists(m_dir):
+#                 os.makedirs(m_dir)
+#
+#             # Merge the source files
+#             to_merge = merging_dict[m]
+#             cmd = "gunzip -c " + " ".join(to_merge) + "> " + m
+#             now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+#             if (verbosity >= 1):
+#                 print(now + "\tMerging " + str(len(to_merge)) + " files into " + m)
+#                 print("\t" + cmd)
+#             os.system(cmd)
 
 ## Design
 DESIGN = read_table(config["files"]["design"], verbosity=verbosity)
 TREATMENT = DESIGN.iloc[:,0]
 CONTROL = DESIGN.iloc[:,1]
+if (verbosity >= 1):
+    print("Design file:\t" + config["files"]["design"])
+    if (verbosity >= 3):
+        print("\tTREATMENT:\t" + ";".join(TREATMENT))
+        print("\tCONTROL:\t" + ";".join(CONTROL))
 
-## Ref genome
-GENOME = config["genome"]["version"]
-
-## Results dir
-RESULTS_DIR = config["dir"]["results"]
-if not os.path.exists(RESULTS_DIR):
-    os.makedirs(RESULTS_DIR)
-
-## Programs
-
-ALIGNER=["bowtie2"] # bwa
-ALIGNMENT=expand("{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)
-
-PEAKCALLER=[
-    "homer_peaks", 
-    "macs2-qval" + config["macs2"]["qval"] + "_peaks", 
-    "swembl-R" + config["swembl"]["R"],
-    "macs14-pval" + config["macs14"]["pval"] + "_peaks",
-#    "bPeaks_allGenome"
-#    "spp-fdr" + config["spp"]["fdr"],
-]
-PEAKCALLING=expand(expand("{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER)
-
-MOTIFS=expand(expand("{treat}_vs_{control}/{{peakcaller}}/peak-motifs/{treat}_vs_{control}_{{aligner}}_{{peakcaller}}_peak-motifs_synthesis", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER)
+# ## Ref genome
+# GENOME = config["genome"]["version"]
+#
+# ## Results dir
+# RESULTS_DIR = config["dir"]["results"]
+# if not os.path.exists(RESULTS_DIR):
+#     os.makedirs(RESULTS_DIR)
 
 #================================================================#
-#                         Workflow                               #
+# Define target file names
 #================================================================#
 
-## Data import & merging.
 
-IMPORT = expand(RESULTS_DIR + "{samples}/{samples}.fastq", samples=SAMPLE_IDS) 
+#----------------------------------------------------------------#
+# Genome index
+#----------------------------------------------------------------#
 
-## Graphics & reports
-GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
-REPORT = expand(RESULTS_DIR + "report.html")
+# GENOME_INDEX=config["bowtie2"]["index"] + "_benchmark.json"
+GENOME_INDEX=config["subread"]["index"] + ".files"
 
 #----------------------------------------------------------------#
 # Quality control
 #----------------------------------------------------------------#
 
-RAW_QC = expand(RESULTS_DIR + "{samples}/{samples}_fastqc/", samples=SAMPLE_IDS)
-RAW_READNB = expand(RESULTS_DIR + "{samples}/{samples}_fastq_readnb.txt", samples=SAMPLE_IDS)
+RAW_QC = [filename.replace('.fastq','_fastqc/') for filename in FASTQ]
+RAW_READNB = [filename.replace('.fastq','_fastq_readnb.txt') for filename in FASTQ]
 
 #----------------------------------------------------------------#
-# Alignment
+# Read mapping (alignment against reference genome)
 #----------------------------------------------------------------#
 
-## to avoid duplicates, fasta sequence should be moved to {genome} directly...
-BWA_INDEX = expand(config["dir"]["genomes"] + "{genome}/BWAIndex/{genome}.fa.bwt", genome=GENOME)
-BOWTIE2_INDEX = expand(config["dir"]["genomes"] + "{genome}/Bowtie2Index/{genome}.fa.1.bt2", genome=GENOME)
+# Note: after having implemented rules for read-mapping with BWA,
+# bowtie and bowtie2, we opted for subread-align, which is *much*
+# faster than any of these.
 
-MAPPING = expand(RESULTS_DIR + "{alignment}.sam", alignment=ALIGNMENT)
+## Aligned reads produced by subread-align (10 times faster than bowtie2).
+SUBREADALIGN_PE_BAM=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe.bam", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+if (verbosity >= 3):
+    print("\tSUBREADALIGN_PE_BAM:\t" + ";".join(SUBREADALIGN_PE_BAM))
+
+## Genome coverage file (number of reads per genomic window), useful
+## for visualisation. The bedgraph format is essentially used as
+## intermediate to obtain TDF files, preferred by IGV.
+SUBREADALIGN_PE_BG=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_sorted_pos.bg", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+if (verbosity >= 3):
+    print("\tSUBREADALIGN_PE_BG:\t" + ";".join(SUBREADALIGN_PE_BG))
+
+## Genome coverage file (number of reads per genomic window), useful
+## for visualisation. The TDF format is the standard for IGV.
+SUBREADALIGN_PE_TDF=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_sorted_pos.tdf", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+if (verbosity >= 3):
+    print("\tSUBREADALIGN_PE_TDF:\t" + ";".join(SUBREADALIGN_PE_TDF))
+
+# #----------------------------------------------------------------#
+# # Trimmed reads
+# #----------------------------------------------------------------#
+#
+# # Merge trimmed reads. Note: I use a trick to obtain one directory
+# # name per group of lanes: I only glob the first lane, and I use the
+# # list of directories and basenames.
+# SAMPLE_L1R1, PAIRED_DIRS, PAIRED_BASENAMES=glob_multi_dir(SAMPLE_DIRS, "*_L001" + config["suffix"]["reads_fwd"] + ".fastq.gz", config["dir"]["reads"], "_L001" + config["suffix"]["reads_fwd"] + ".fastq.gz")
+# TRIMMED_MERGED_FWD=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_fwd"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+# TRIMMED_MERGED_REV=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_rev"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+# TRIMMED_MERGED=TRIMMED_MERGED_FWD + TRIMMED_MERGED_REV
+# if verbosity >= 3:
+#     print ("PAIRED_DIRS:\n\t" + "\n\t".join(PAIRED_DIRS))
+#     print ("PAIRED_BASENAMES:\n\t" + "\n\t".join(PAIRED_BASENAMES))
+#
+# # Trimmed reads
+# #TRIMMED_SUMMARIES = expand(config["dir"]["reads"] + "/{sample_dir}/{reads}_trimmed_thr" + config["sickle"]["threshold"] + "_summary.txt", zip, reads=RAWR_BASENAMES_FWD, sample_dir=RAWR_DIRS_FWD)
+# TRIMMED_FILES, TRIMMED_DIRS, TRIMMED_BASENAMES=glob_multi_dir(SAMPLE_DIRS, "*_R*_001_trimmed_thr" + config["sickle"]["threshold"] + ".fastq.gz", config["dir"]["reads"], ".fastq.gz")
+
+#----------------------------------------------------------------#
+# Read counts per gene (done with htseq-count)
+#----------------------------------------------------------------#
+
+# Since the program featureCounts (subread suite) is MUCH faster (30
+# times) than htseq-count, and does not required bam sorting, I switch
+# to featureCounts.
 
 
-# Sorted and converted reads (bam, bed)
-SORTED_MAPPED_READS_BWA = expand(RESULTS_DIR + "{alignment}_sorted_pos.bam", alignment=ALIGNMENT)
-BAM_READNB = expand(RESULTS_DIR + "{alignment}_sorted_pos_bam_readnb.txt", alignment=ALIGNMENT)
-SORTED_READS_BED = expand(RESULTS_DIR + "{alignment}_sorted_pos.bed", alignment=ALIGNMENT)
-BED_FEAT_COUNT = expand(RESULTS_DIR + "{alignment}_sorted_pos_bed_nb.txt", alignment=ALIGNMENT)
+#FEATURECOUNTS=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["featurecounts"] + ".tab", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+COUNT_FILES=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_featurecounts.tab", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+if (verbosity >= 3):
+    print ("COUNT_FILES:\n\t" + "\n\t".join(COUNT_FILES))
 
-TDF = expand(RESULTS_DIR + "{alignment}_sorted_pos_genomecov.tdf", alignment=ALIGNMENT)
 
-# ----------------------------------------------------------------
-# Peak-calling
-# ----------------------------------------------------------------
+## Print a tab-delimited file with the paths of count files per sample
+if not ("files" in config.keys()) & ("count_file_paths" in config["files"].keys()) :
+    sys.exit("The parameter config['files']['count_file_paths'] should be specified in the config file.")
+## Check the directory for count file paths and create it if required
+count_paths_dir = os.path.dirname(config['files']['count_file_paths'])
+if not os.path.exists(count_paths_dir):
+        os.makedirs(count_paths_dir)
 
-PEAKS = expand(RESULTS_DIR + "{peakcalling}.bed", peakcalling=PEAKCALLING)
+COUNT_FILE_PATHS=pd.DataFrame({"SampleID": SAMPLE_IDS, "FilePath":COUNT_FILES})
+COUNT_FILE_PATHS[["SampleID", "FilePath"]].to_csv(config["files"]["count_file_paths"], sep='\t', 
+                        encoding='utf-8', header=True, index=False)
+if (verbosity >= 1):
+    print("Count file paths\t" + config["files"]["count_file_paths"])
+    if (verbosity >= 3):
+        print(COUNT_FILE_PATHS)
 
-# ----------------------------------------------------------------
-# Peak analysis
-# ----------------------------------------------------------------
+## Summary count table, with one row per gene and one column per sample
+if not ("files" in config.keys()) & ("count_table" in config["files"].keys()) :
+    sys.exit("The parameter config['files']['count_table'] should be specified in the config file.")
+## Check the directory for count file paths and create it if required
+count_table_dir = os.path.dirname(config['files']['count_table'])
+if not os.path.exists(count_table_dir):
+        os.makedirs(count_table_dir)
+COUNT_TABLE=config['files']['count_table']
 
-GET_FASTA = expand(RESULTS_DIR + "{peakcalling}.fasta", peakcalling=PEAKCALLING)
-PEAK_MOTIFS = expand(RESULTS_DIR + "{motifs}.html", motifs=MOTIFS)
 
-## Oligo analysis # ! missing input exception
-#OLIGO = config['oligo_analysis']['count_oligo'].split()
-#OLIGO_ANALYSIS = expand(RESULTS_DIR + "{peakcalling}_purged_oligo{oligo}.txt", peakcalling=PEAKCALLING, oligo=OLIGO)
+# #----------------------------------------------------------------#
+# # Differential expression analysis
+# #----------------------------------------------------------------#
+#
+# PARAMS_R = config["dir"]["results"] + "/DEG/" + config["suffix"]["deg"] + "_params.R"
+# ALL_COUNTS = config["dir"]["results"] + "/DEG/" + config["suffix"]["deg"] + "_all_counts.tab"
+# if (verbosity >= 2):
+#     print ("PARAMS_R:\t" + PARAMS_R)
+#     print ("ALL_COUNTS:\t" + ALL_COUNTS)
+#     print("COUNT_FILES\t" + ";".join(COUNT_FILES))
+#
+# #================================================================#
+# # Rule definitions
+# #================================================================#
+#
+# # Note: these rules must be loaded after having defined some global
+# # variables COUNT_FILES, PARAMS_R, ALL_COUNTS.
+# include: os.path.join(RULES, "allcount_params.rules")   ## Produce the count table from sample-based count files + the parameters for differential analysis
+#
+#
+# # Read the analysis design file
+# DESIGN = read_table(config["files"]["analyses"], verbosity=verbosity)
+# config["Diff_Exp"]["cond1"] = COND_1 = DESIGN['cond1']
+# config["Diff_Exp"]["cond2"] = COND_2 = DESIGN['cond2']
+# if (verbosity >= 1):
+#     print("Analysis design:\t" + config["files"]["analyses"])
+#     if (verbosity >= 2):
+#         print("\tCondition 1:\t" + ";".join(COND_1))
+#         print("\tCondition 2:\t" + ";".join(COND_2))
+#
+# # Detect differentially expressed genes wit edgeR
+# RESULTS_EDGER = expand(config["dir"]["results"] + "/DEG/{cond_1}_vs_{cond_2}/{cond_1}_vs_{cond_2}_" + config["suffix"]["edgeR"] +".tab", zip, cond_1=COND_1, cond_2=COND_2)
+#
+# include: os.path.join(RULES, "diff_expr.rules")                  ## Differential expression analysis with BioConductor edgeR and DESeq2 packates
+# #include: os.path.join(RULES, "edgeR.rules")                  ## Differential expression analysis with BioConductor edgeR package
+# #include: os.path.join(RULES, "DESeq2.rules")                 ## Differential expression analysis with BioConductor DESeq2 package
+#
+#
 
 #================================================================#
 #                        Rule all                                #
 #================================================================#
 
-rule all: 
+rule all:
 	"""
-	Run all the required analyses
+	Run all the required analyses.
 	"""
-	input: GRAPHICS, RAW_QC, PEAK_MOTIFS, TDF  #RAW_QC, BWA_INDEX, MAPPING, PEAKS, IMPORT
+	input: GENOME_INDEX, RAW_QC, RAW_READNB, SUBREADALIGN_PE_BAM, SUBREADALIGN_PE_TDF, COUNT_FILES #, COUNT_TABLE
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
+# #----------------------------------------------------------------#
+# # Get all targets
+# rule all:
+#     """
+#     Run all the required analyses
+#     """
+# #    input: TRIMMED_SUMMARIES ## Still working ?
+# #    input: MERGED_RAWR_QC, RAWR_MERGED, TRIMMED_MERGED, TRIMMED_QC, MAPPED_BOWTIE2_PE_SAM, MAPPED_BOWTIE2_PE_BAM,
+#     input: GENOMECOV, GENOMECOV_PLUS, GENOMECOV_MINUS
+# #        MAPPED_PE_SORTED,  \
+# #        GENOMECOV, \
+# #        HTSEQ_COUNTS, \
+# #        FEATUREOUNTS, \
+# #        HTSEQ_COUNTS, \
+# #        ALL_COUNTS, \
+# #        RESULTS_EDGER
+#     params: qsub=config["qsub"]
+#     shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
+#
+# ruleorder: sickle_paired_ends > merge_lanes
+# ruleorder: bowtie2_paired_end > merge_lanes
+#
+# # ruleorder: bowtie_paired_end > merge_lanes
 
-##================================================================#
-##                          Report                                #
-##================================================================#
+#
+#
+# #----------------------------------------------------------------#
+# # Merge lanes per sample
+# #----------------------------------------------------------------#
+# rule merge_lanes:
+#     """
+#     Merge lanes of the same sample and end in a single file.  The input
+#     files are compressed (.fastq.gz) but the output file is in
+#     uncompressed fastq format, because bowtie version 1 does not
+#     support gzipped files as input.
+#
+#     """
+#     input: L1 = "{reads_prefix}_L001_{reads_suffix}.fastq.gz", \
+#         L2 = "{reads_prefix}_L002_{reads_suffix}.fastq.gz", \
+#         L3 = "{reads_prefix}_L003_{reads_suffix}.fastq.gz", \
+#         L4 = "{reads_prefix}_L004_{reads_suffix}.fastq.gz"
+#     output: "{reads_prefix}_merged_{reads_suffix}.fastq"
+#     log: "{reads_prefix}_merged_{reads_suffix}.log"
+#     benchmark: "{reads_prefix}_merged_{reads_suffix}_benchmark.json"
+#     params: qsub = config["qsub"] + " -e {reads_prefix}__merged_{reads_suffix}_qsub.err  -o {reads_prefix}__merged_{reads_suffix}_qsub.out"
+#     shell: "gunzip -c {input.L1} {input.L2} {input.L3} {input.L4} | gzip > {output}"
 
-#NOW = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-
-##rule report:
-##    """
-##    Generate a report with the list of datasets + summary of the results.
-##    """
-## see Scerevisiae report
-
-##----------------------------------------------------------------#
-## Build the report (including DAG and rulegraph flowcharts).
-#from snakemake.utils import report
-
-## Bulleted list of samples for the report
-#SAMPLE_IDS_OL=report_numbered_list(SAMPLE_IDS)
-#RAW_READS_OL=report_numbered_list(IMPORT)
-#RAW_QC_OL=report_numbered_list(RAW_QC)
-
-#MAPPING_OL=report_numbered_list(MAPPING)
-
-#PEAKFILES_OL=report_numbered_list(PEAKS)
-
-##	input: GRAPHICS, IMPORT, TRIMMED_READS_SICKLE, TRIMMED_QC, RAW_QC, MAPPED_READS_BWA, RAW_READNB, BAM_READNB, BED_READNB, PEAKS_MACS2, FETCH_MACS2_PEAKS, PURGE_MACS2_PEAKS #redundant for flowcharts
-
-#NOW = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-
-#rule report:
-#    """
-#    Generate a report with the list of datasets + summary of the results.
-#    """
-#    input:  dag=config["dir"]["reports"] + "dag.pdf", \
-#            dag_png=config["dir"]["reports"] + "dag.png", \
-#            rulegraph=config["dir"]["reports"] + "rule.pdf", \
-#            rulegraph_png=config["dir"]["reports"] + "rule.png"
-#    output: html=config["dir"]["reports"] + "report.html"
-#    run:
-#        report("""
-#        ===========================================
-#        ChIP-seq analysis - - - P.aeruginosa ParABS
-#        ===========================================
-#        
-#        :Date:                 {NOW}
-#        :Project:              P aeruginosa
-#        :Analysis workflow:    Claire Rioualen
-#        
-#        Contents
-#        ========
-#        
-#        - `Flowcharts`_
-#        - `Datasets`_
-#             - `Samples`_
-#             - `Raw reads`_
-#             - `Mapping`_
-#             - `Peaks`_
-#             - `QC reports`_
-
-#        -----------------------------------------------------
-
-#        Flowcharts
-#        ==========
-
-#        - Sample treatment: dag_
-#        - Workflow: rulegraph_
-
-#        .. image:: rulegraph.png
-
-#        -----------------------------------------------------
-
-#        Datasets
-#        ========
-#        
-#        Samples
-#        -------
-
-#        {SAMPLE_IDS_OL} 
-
-#        Raw reads 
-#        ---------
-
-#        {RAW_READS_OL}
-
-#        Mapping
-#        -------
-
-#        {MAPPING_OL}
-
-#        Peaks
-#        -----
-
-#        {PEAKFILES_OL}
-
-#        QC reports
-#        ----------
-
-#        {RAW_QC_OL}
-
-#        -----------------------------------------------------
-
-#        """, output.html, metadata="Claire Rioualen (claire.rioualen@inserm.fr)", **input)
+# #----------------------------------------------------------------#
+# # Build the report (including DAG and rulegraph flowcharts).
+# from snakemake.utils import report
+#
+# # Bulleted list of samples for the report
+# SAMPLE_DIRS_OL=report_numbered_list(SAMPLE_DIRS)
+# RAWR_MERGED_OL=report_numbered_list(RAWR_MERGED)
+# TRIMMED_MERGED_OL=report_numbered_list(TRIMMED_MERGED)
+# MAPPED_BOWTIE2_PE_SAM_OL=report_numbered_list(MAPPED_BOWTIE2_PE_SAM)
+# MAPPED_BOWTIE2_PE_BAM_OL=report_numbered_list(MAPPED_BOWTIE2_PE_BAM)
+# MAPPED_PE_SORTED_OL = report_numbered_list(MAPPED_PE_SORTED)
+# MAPPED_PE_SORTED_BY_NAME_OL = report_numbered_list(MAPPED_PE_SORTED_BY_NAME)
+# HTSEQ_COUNTS_OL = report_numbered_list(HTSEQ_COUNTS)
+# FEATURECOUNTS_OL = report_numbered_list(FEATURECOUNTS)
+# COUNT_FILES_OL = report_numbered_list(COUNT_FILES)
+#
+# rule report:
+#     """
+#     Generate a report with the list of datasets + summary of the results.
+#     """
+#     input:  dag=config["dir"]["reports"] + "/" + "dag.pdf", \
+#             dag_png=config["dir"]["reports"] + "/" + "dag.png", \
+#             rulegraph=config["dir"]["reports"] + "/" + "rulegraph.pdf", \
+#             rulegraph_png=config["dir"]["reports"] + "/" + "rulegraph.png", \
+#             all_counts = ALL_COUNTS, \
+#             params_r = PARAMS_R
+#     output: html=config["dir"]["reports"] + "/report.html"
+#     run:
+#         report("""
+#         =================================
+#         RNA-seq analysis - Béatrice Roche
+#         =================================
+#
+#         :Date:                 {NOW}
+#         :Project:              Béatrice Roche
+#         :Analysis workflow:    Jacques van Helden
+#
+#         Contents
+#         ========
+#
+#         - `Flowcharts`_
+#         - `Datasets`_
+#              - `Sample directories`_
+#              - `Raw reads`_
+#              - `Trimmed`_
+#              - `Mapped`_
+#              - `Count files`_
+#
+#         -----------------------------------------------------
+#
+#         Flowcharts
+#         ==========
+#
+#         - Sample treatment: dag_
+#         - Workflow: rulegraph_
+#
+#         .. image:: rulegraph.png
+#
+#         -----------------------------------------------------
+#
+#         Datasets
+#         ========
+#
+#         Sample directories
+#         ------------------
+#
+#         {SAMPLE_DIRS_OL}
+#
+#         Raw reads
+#         ---------
+#
+#         (merged lanes per sample)
+#
+#         {RAWR_MERGED_OL}
+#
+#         Trimmed
+#         -------
+#
+#         {TRIMMED_MERGED_OL}
+#
+#         Mapped
+#         ------
+#
+#         Sam format (uncompressed)
+#
+#         {MAPPED_BOWTIE2_PE_SAM_OL}
+#
+#         Bam format (compressed)
+#
+#         {MAPPED_BOWTIE2_PE_BAM_OL}
+#
+#         Bam format (sorted by positions)
+#
+#         {MAPPED_PE_SORTED_OL}
+#
+#         Bam format (sorted by names)
+#
+#         {MAPPED_PE_SORTED_BY_NAME_OL}
+#
+#         Count files
+#         -----------
+#
+#         htseq-count results (paired-ends, no multi overlap)
+#
+#         {HTSEQ_COUNTS_OL}
+#
+#         Subread featureCounts results (multi-overlaps)
+#
+#         ! temporarily: paired-ends option *inactive* due to problem
+#
+#         {FEATURECOUNTS_OL}
+#
+#         Count files for differential expression analysis
+#
+#         {COUNT_FILES_OL}
+#
+#         Count table
+#         -----------
+#
+#         - Count table (one row per gene, one column per sample): all_counts_
+#
+#         R parameters
+#         ------------
+#
+#         Parameters passed to R for differential expression anlysis
+#
+#         params_r_
+#
+#         -----------------------------------------------------
+#
+#         """, output.html, metadata="Jacques van Helden (Jacques.van-Helden@univ-amu.fr)", **input)
+#
+#
+# # TO CHECK
+# #   https://github.com/leipzig/snakemake-example/blob/master/Snakefile
+# #   Report generated with R Sweave

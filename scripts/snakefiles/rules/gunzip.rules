@@ -9,6 +9,6 @@ rule gunzip_one_file:
     output: "{file}.fastq"
     log: "{file}_gunzip.log"
     benchmark: "{file}_gunzip_benchmark.json"
-    params: qsub = config["qsub"] + " -q short -e {file}_gunzip_qsub.err -o {file}_gunzip_qsub.out"
+    params: qsub = config["qsub"] + " -e {file}_gunzip_qsub.err -o {file}_gunzip_qsub.out"
     shell:"gunzip {input} --keep 2> {log} "
 

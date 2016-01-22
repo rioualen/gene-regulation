@@ -54,8 +54,8 @@ rule homer:
 		fdr = config["homer"]["fdr"], \
 		genome_size = config["genome"]["size"], \
 		qsub=config["qsub"] \
-		+ " -q long -e {result_dir}/{treatment}_vs_{control}/homer_peaks/{treatment}_vs_{control}_{aligner}_homer_qsub.err" \
-		+ " -q long -e {result_dir}/{treatment}_vs_{control}/homer_peaks/{treatment}_vs_{control}_{aligner}_homer_qsub.out" 
+		+ " -e {result_dir}/{treatment}_vs_{control}/homer_peaks/{treatment}_vs_{control}_{aligner}_homer_qsub.err" \
+		+ " -e {result_dir}/{treatment}_vs_{control}/homer_peaks/{treatment}_vs_{control}_{aligner}_homer_qsub.out" 
 	shell:"""(makeTagDirectory {params.treatment_tag} -genome {params.genome} -checkGC {input.treatment} -format bed
 		makeTagDirectory {params.control_tag} -genome {params.genome} -checkGC {input.control} -format bed
 		findPeaks {params.treatment_tag} -style {params.style} -L {params.L} -P {params.P} -F {params.F} -fdr {params.fdr} -gsize {params.genome_size} -o {params.treatment_tag}/peaks.txt -i {params.control_tag}
