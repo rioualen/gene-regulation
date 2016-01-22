@@ -8,8 +8,6 @@
 
   author: "Claire Rioualen"
   qsub: "" 
-  verbosity: "0"                                                                # Beware: verbosity can interfere with flowcharts creation. This should be taken care of.
-
   genome:
     organism: "Arabidopsis thaliana"
     size: "135000000"                                                           # required: if using macs2, macs14, homer...
@@ -24,6 +22,7 @@
         http://www.ebi.ac.uk/ena/data/warehouse/filereport?accession=SRP045633&result=read_run&fields=study_accession,secondary_study_accession,sample_accession,secondary_sample_accession,experiment_accession,run_accession,tax_id,scientific_name,instrument_model,library_layout,fastq_ftp,fastq_galaxy,submitted_ftp,submitted_galaxy,cram_index_ftp,cram_index_galaxy&download=txt
         "
   files: 
+
     samples: "examples/Athaliana-Myb/samples.tab"                               # required: has to contain at least sample ids
     design: "examples/Athaliana-Myb/design.tab"                                 # required: has to contain at least ids of pairs of samples to be compared
     snakefile: "scripts/snakefiles/workflows/factor_workflow.py"                # required for flowcharts generation; maybe this should be revised
