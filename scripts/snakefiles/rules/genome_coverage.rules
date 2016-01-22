@@ -91,6 +91,7 @@ rule bedgraph_to_tdf:
 #    params: output_prefix = "{reads}", \
 #            chromsize = config["genome"]["chromsize"], \
 #            qsub = config["qsub"] + " -q long -e {reads}_bam2wig_qsub.err -o {reads}_bam2wig_qsub.out"
+#            qsub = config["qsub"] + " -e {reads}_bam2wig_qsub.err -o {reads}_bam2wig_qsub.out"
 #    shell: "bam2wig.py -i {input} -s {params.chromsize} -o {params.output_prefix} 2> {log}" 
 #    
 
