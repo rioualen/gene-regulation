@@ -1,0 +1,22 @@
+"""Download genome sequence to specific location."""
+
+rule download_genome:
+	input: "."
+	output: "{genome}.fa"
+	log: "{genome}_download.log"
+	benchmark: "{genome}_download_benchmark.json"
+	params: url = config["genome"]["url"], dir = config["genome"]["dir"], version = config["genome"]["version"]
+	shell:"""
+cd {params.dir}
+wget {params.url}
+filename=$(basename {params.url})
+echo $filename
+##basename {params.url} | xargs gunzip 
+
+gunzip $filename
+fastaname=$(basename $filename .${{filename##*.}})
+
+
+mv $fastaname {params.version}.fa
+"""
+

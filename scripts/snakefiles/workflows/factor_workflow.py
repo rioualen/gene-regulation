@@ -41,15 +41,15 @@ import datetime
 import pandas as pd
 
 ## Config
-#configfile: "examples/Athaliana-Myb/Athaliana-Myb.yml"
-workdir: config["dir"]["base"]
-verbosity = int(config["verbosity"])
+configfile: "examples/Athaliana-Myb/Athaliana-Myb.yml"
+#workdir: config["dir"]["base"]
+#verbosity = int(config["verbosity"])
 
 #================================================================#
 #                         Includes                               #
 #================================================================#
 
-FG_LIB = os.path.abspath(config["dir"]["fg_lib"])
+FG_LIB = os.path.abspath(".")
 RULES = os.path.join(FG_LIB, "scripts/snakefiles/rules")
 PYTHON = os.path.join(FG_LIB, "scripts/python_lib")
 
@@ -61,11 +61,12 @@ include: os.path.join(RULES, "bowtie2_index.rules")
 include: os.path.join(RULES, "bowtie2_se.rules")
 include: os.path.join(RULES, "bPeaks.rules")
 include: os.path.join(RULES, "convert_bam_to_bed.rules")
-include: os.path.join(RULES, "count_oligo.rules")
+#include: os.path.join(RULES, "count_oligo.rules")
 include: os.path.join(RULES, "count_reads.rules")
+include: os.path.join(RULES, "download_from_GEO.rules")
+include: os.path.join(RULES, "download_genome.rules")
 include: os.path.join(RULES, "fastqc.rules")
 include: os.path.join(RULES, "flowcharts.rules")
-include: os.path.join(RULES, "GEO_data_download.rules")
 include: os.path.join(RULES, "getfasta.rules")
 include: os.path.join(RULES, "genome_coverage.rules")
 include: os.path.join(RULES, "homer.rules")
@@ -75,9 +76,9 @@ include: os.path.join(RULES, "peak_length.rules")
 include: os.path.join(RULES, "peak_motifs.rules")
 include: os.path.join(RULES, "purge_sequence.rules")
 #include: os.path.join(RULES, "rsync.rules")
-include: os.path.join(RULES, "sickle_se.rules")
+#include: os.path.join(RULES, "sickle_se.rules")
 include: os.path.join(RULES, "spp.rules")
-#include: os.path.join(RULES, "sra_to_fastq.rules")
+include: os.path.join(RULES, "sra_to_fastq.rules")
 include: os.path.join(RULES, "swembl.rules")
 
 #================================================================#
@@ -87,16 +88,30 @@ include: os.path.join(RULES, "swembl.rules")
 # Raw data
 READS = config["dir"]["reads_source"]
 
+
+
 # Samples
-SAMPLES = read_table(config["files"]["samples"], verbosity=verbosity)
+SAMPLES = read_table(config["files"]["samples"])
 SAMPLE_IDS = SAMPLES.iloc[:,0] ## First column MUST contain the sample ID
 SRR_IDS = SAMPLES.iloc[:,1] ## Second column MUST contain srr IDs
 
 
 ## Design
-DESIGN = read_table(config["files"]["design"], verbosity=verbosity)
+DESIGN = read_table(config["files"]["design"])
 TREATMENT = DESIGN.iloc[:,0]
 CONTROL = DESIGN.iloc[:,1]
+
+
+## Check after Jacques' merge
+## Samples
+#SAMPLES = read_table(config["files"]["samples"])
+#SAMPLE_IDS = SAMPLES.iloc[:,0] ## First column MUST contain the sample ID
+#SRR_IDS = SAMPLES['SRR']
+
+### Design
+#DESIGN = read_table(config["files"]["design"])
+#TREATMENT = DESIGN['treatment']
+#CONTROL = DESIGN['control']
 
 ## Ref genome
 GENOME = config["genome"]["version"]
@@ -191,7 +206,7 @@ rule all:
 	"""
 	Run all the required analyses
 	"""
-	input: RAW_QC, PEAK_MOTIFS#, TDF  #RAW_QC, BWA_INDEX, MAPPING, PEAKS, IMPORT
+	input: GRAPHICS, RAW_QC, MAPPING, PEAKS#_MOTIFS#, TDF  #RAW_QC, BWA_INDEX, MAPPING, PEAKS, IMPORT
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 

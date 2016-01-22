@@ -16,6 +16,7 @@
     version: "TAIR10"                                                           # required: has to match genome filenames and directories
     fasta: "/data/genomes/TAIR10/TAIR10.fa"                                     # required: fasta file is required for a number of operations
     dir: "/data/genomes/TAIR10/"                                                # required
+    url: "ftp://ftp.ensemblgenomes.org/pub/plants/release-30/fasta/arabidopsis_thaliana/dna/Arabidopsis_thaliana.TAIR10.30.dna.genome.fa.gz"            # required for genome download: provide url to .fa.gz
     data: |
         Optional, should be replaced by a download procedure (ongoing)
         "
