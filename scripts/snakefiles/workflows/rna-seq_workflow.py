@@ -79,28 +79,24 @@ FG_LIB = os.path.abspath(config["dir"]["fg_lib"])
 RULES = os.path.join(FG_LIB, "scripts/snakefiles/rules")
 PYTHON = os.path.join(FG_LIB, "scripts/snakefiles/python_lib")
 
-include: os.path.join(PYTHON, "util.py")                        ## Python utilities for our snakemake workflows
+include: os.path.join(PYTHON, "util.py")                      ## Python utilities for our snakemake workflows
 include: os.path.join(RULES, "util.rules")                    ## Snakemake utilities
 include: os.path.join(RULES, "flowcharts.rules")              ## Draw flowcharts (dag and rule graph)
-include: os.path.join(RULES, "merge_lanes.rules")               ## Merge lanes by sample, based on a tab-delimited file indicating how to merge
-include: os.path.join(RULES, "fastqc.rules")                    ## Quality control with fastqc
-# include: os.path.join(RULES, "sickle_paired_ends.rules")        ## Trimming with sickle
-include: os.path.join(RULES, "count_reads.rules")               ## Count reads in different file formats
-#include: os.path.join(RULES, "bowtie2_build.rules")             ## Build genome index for bowtie2 (read mapping with gaps)
-#include: os.path.join(RULES, "bowtie2_paired_ends.rules")       ## Paired-ends read mapping with bowtie version 2 (support gaps)
-include: os.path.join(RULES, "subread_mapping_JvH.rules")       ## Read mapping with subreads
+include: os.path.join(RULES, "merge_lanes.rules")             ## Merge lanes by sample, based on a tab-delimited file indicating how to merge
+include: os.path.join(RULES, "fastqc.rules")                  ## Quality control with fastqc
+# include: os.path.join(RULES, "sickle_paired_ends.rules")      ## Trimming with sickle
+include: os.path.join(RULES, "count_reads.rules")             ## Count reads in different file formats
+#include: os.path.join(RULES, "bowtie2_build.rules")            ## Build genome index for bowtie2 (read mapping with gaps)
+#include: os.path.join(RULES, "bowtie2_paired_ends.rules")      ## Paired-ends read mapping with bowtie version 2 (support gaps)
+include: os.path.join(RULES, "subread_mapping_JvH.rules")     ## Read mapping with subreads
 include: os.path.join(RULES, "genome_coverage.rules")         ## Compute density profiles in bedgraph format
 # include: os.path.join(RULES, "htseq.rules")                   ## Count reads per gene with htseq-count
+include: os.path.join(RULES, "cufflinks.rules")               ## Detect transcripts based on genome annotations (GTF) plus RNA-seq data`
 include: os.path.join(RULES, "featurecounts.rules")           ## Count reads per gene with R subread::featurecounts
-#
-#
 
 #================================================================#
 #                      Data & wildcards                          #
 #================================================================#
-
-# # Raw data
-# READS = config["dir"]["reads_source"]
 
 #----------------------------------------------------------------#
 # Read sample descriptions
@@ -137,13 +133,6 @@ if (verbosity >= 1):
         print("\tTREATMENT:\t" + ";".join(TREATMENT))
         print("\tCONTROL:\t" + ";".join(CONTROL))
 
-# ## Ref genome
-# GENOME = config["genome"]["version"]
-#
-# ## Results dir
-# RESULTS_DIR = config["dir"]["results"]
-# if not os.path.exists(RESULTS_DIR):
-#     os.makedirs(RESULTS_DIR)
 
 #================================================================#
 # Define target file names
@@ -210,13 +199,18 @@ if (verbosity >= 3):
 # TRIMMED_FILES, TRIMMED_DIRS, TRIMMED_BASENAMES=glob_multi_dir(SAMPLE_DIRS, "*_R*_001_trimmed_thr" + config["sickle"]["threshold"] + ".fastq.gz", config["dir"]["reads"], ".fastq.gz")
 
 #----------------------------------------------------------------#
-# Read counts per gene (done with htseq-count)
+# Re-annotation of transcripts by combining genomic annotations (gtf)
+# and RNA-seq aligned reads (bam)
+# ----------------------------------------------------------------#
+
+REANNOT=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_sorted_pos_cufflinks_benchmark.json", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+if (verbosity >= 3):
+    print ("REANNOT:\n\t" + "\n\t".join(REANNOT))
+
+
 #----------------------------------------------------------------#
-
-# Since the program featureCounts (subread suite) is MUCH faster (30
-# times) than htseq-count, and does not required bam sorting, I switch
-# to featureCounts.
-
+# Read counts per gene
+#----------------------------------------------------------------#
 
 #FEATURECOUNTS=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["featurecounts"] + ".tab", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 COUNT_FILES=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_featurecounts.tab", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
@@ -296,7 +290,7 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: GENOME_INDEX, RAW_QC, RAW_READNB, SUBREADALIGN_PE_BAM, SUBREADALIGN_PE_TDF, COUNT_FILES #, COUNT_TABLE
+	input: GENOME_INDEX, RAW_QC, RAW_READNB, SUBREADALIGN_PE_BAM, SUBREADALIGN_PE_TDF, REANNOT, COUNT_FILES #, COUNT_TABLE
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
