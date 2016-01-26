@@ -1,0 +1,15 @@
+"""Generates chromsize file specified in the config file."""
+rule get_chrom_sizes:
+	input: "{genome}.fa"
+	output: "{genome}.genome"
+	log: "{genome}_chromsize.log"
+	benchmark: "{genome}_chromsize_benchmark.json"
+	params: fasta = config["genome"]["fasta"]
+	shell:"""
+samtools faidx {input}
+cut -f1,2 {input}.fai > {output}
+"""
+#pip install pyfaidx
+#$ faidx input.fasta -i chromsizes > sizes.genome
+
+#cat {params.fasta} | awk '$0 ~ ">" {{print c; c=0;printf substr($0,2,100) "\t"; }} $0 !~ ">" {{c+=length($0);}} END {{ print c; }}' > {output}
