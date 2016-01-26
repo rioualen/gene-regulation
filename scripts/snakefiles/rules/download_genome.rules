@@ -1,5 +1,5 @@
-"""Download genome sequence to specific location."""
-
+"""Download genome sequence to location specified in the config file.
+"""
 rule download_genome:
 	input: "."
 	output: "{genome}.fa"
@@ -11,12 +11,8 @@ cd {params.dir}
 wget {params.url}
 filename=$(basename {params.url})
 echo $filename
-##basename {params.url} | xargs gunzip 
-
 gunzip $filename
 fastaname=$(basename $filename .${{filename##*.}})
-
-
 mv $fastaname {params.version}.fa
 """
 
