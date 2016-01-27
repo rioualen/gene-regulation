@@ -89,6 +89,8 @@ include: os.path.join(RULES, "count_reads.rules")             ## Count reads in 
 #include: os.path.join(RULES, "bowtie2_build.rules")            ## Build genome index for bowtie2 (read mapping with gaps)
 #include: os.path.join(RULES, "bowtie2_paired_ends.rules")      ## Paired-ends read mapping with bowtie version 2 (support gaps)
 include: os.path.join(RULES, "subread_mapping_JvH.rules")     ## Read mapping with subreads
+include: os.path.join(RULES, "split_bam_by_strands.rules")    ## split a BAM file in plus and minus strands
+include: os.path.join(RULES, "index_bam.rules")               ## Index bam for visualization
 include: os.path.join(RULES, "genome_coverage.rules")         ## Compute density profiles in bedgraph format
 include: os.path.join(RULES, "cufflinks.rules")               ## Detect transcripts based on genome annotations (GTF) plus RNA-seq data`
 # include: os.path.join(RULES, "htseq.rules")                   ## Count reads per gene with htseq-count
@@ -165,6 +167,13 @@ RAW_READNB = [filename.replace('.fastq','_fastq_readnb.txt') for filename in FAS
 SUBREADALIGN_PE_BAM=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe.bam", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
 if (verbosity >= 3):
     print("\tSUBREADALIGN_PE_BAM:\t" + ";".join(SUBREADALIGN_PE_BAM))
+
+
+## split reads acording to their strand (plus or minus)
+SUBREADALIGN_PE_PLUS_BAM=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_plus_sorted_pos.bam", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+SUBREADALIGN_PE_MIN_BAM=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_min_sorted_pos.bam", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+SUBREADALIGN_PE_MIN_BAI=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_min_sorted_pos.bam.bai", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+SUBREADALIGN_PE_PLUS_BAI=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_plus_sorted_pos.bam.bai", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
 
 ## Genome coverage file (number of reads per genomic window), useful
 ## for visualisation. The bedgraph format is essentially used as
@@ -296,8 +305,9 @@ COUNT_TABLE=config['files']['count_table']
 # include: os.path.join(RULES, "diff_expr.rules")                  ## Differential expression analysis with BioConductor edgeR and DESeq2 packates
 # #include: os.path.join(RULES, "edgeR.rules")                  ## Differential expression analysis with BioConductor edgeR package
 # #include: os.path.join(RULES, "DESeq2.rules")                 ## Differential expression analysis with BioConductor DESeq2 package
-#
-#
+
+
+
 #================================================================#
 #                        Rule all                                #
 #================================================================#
@@ -306,7 +316,16 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: GENOME_INDEX, RAW_QC, RAW_READNB, SUBREADALIGN_PE_BAM, SUBREADALIGN_PE_TDF, COUNT_FILES, CUFFLINKS_TRANSCRIPTS, CUFFMERGE_TRANSCRIPTS #, COUNT_TABLE
+	input: GENOME_INDEX, \
+            RAW_QC, \
+            RAW_READNB, \
+            SUBREADALIGN_PE_BAM, \
+            SUBREADALIGN_PE_PLUS_BAM, SUBREADALIGN_PE_MIN_BAM, \
+            SUBREADALIGN_PE_PLUS_BAI, SUBREADALIGN_PE_MIN_BAI, \
+            SUBREADALIGN_PE_TDF, \
+            COUNT_FILES, \
+            CUFFLINKS_TRANSCRIPTS, \
+            CUFFMERGE_TRANSCRIPTS #, COUNT_TABLE
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
