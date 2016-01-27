@@ -90,8 +90,8 @@ include: os.path.join(RULES, "count_reads.rules")             ## Count reads in 
 #include: os.path.join(RULES, "bowtie2_paired_ends.rules")      ## Paired-ends read mapping with bowtie version 2 (support gaps)
 include: os.path.join(RULES, "subread_mapping_JvH.rules")     ## Read mapping with subreads
 include: os.path.join(RULES, "genome_coverage.rules")         ## Compute density profiles in bedgraph format
-# include: os.path.join(RULES, "htseq.rules")                   ## Count reads per gene with htseq-count
 include: os.path.join(RULES, "cufflinks.rules")               ## Detect transcripts based on genome annotations (GTF) plus RNA-seq data`
+# include: os.path.join(RULES, "htseq.rules")                   ## Count reads per gene with htseq-count
 include: os.path.join(RULES, "featurecounts.rules")           ## Count reads per gene with R subread::featurecounts
 
 #================================================================#
@@ -203,10 +203,26 @@ if (verbosity >= 3):
 # and RNA-seq aligned reads (bam)
 # ----------------------------------------------------------------#
 
-REANNOT=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_sorted_pos_cufflinks_benchmark.json", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+CUFFLINKS_TRANSCRIPTS=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_sorted_pos_CUFFLINKS/transcripts.gtf", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
 if (verbosity >= 3):
-    print ("REANNOT:\n\t" + "\n\t".join(REANNOT))
+    print ("CUFFLINKS_TRANSCRIPTS:\n\t" + "\n\t".join(CUFFLINKS_TRANSCRIPTS))
 
+CUFFMERGE_TRANSCRIPTS=config["cufflinks"]["cuffmerge_transcripts"]
+rule cuffmerge:
+    """Merge transcripts obtained from RNA-seq reads with cufflinks.
+
+    """
+    input: transcript_files=CUFFLINKS_TRANSCRIPTS
+    output: cuffmerge_dir=config["cufflinks"]["cuffmerge_dir"], \
+        assembly_files=config["cufflinks"]["assembly_files"], \
+        cuffmerge_transcripts=config["cufflinks"]["cuffmerge_transcripts"]
+    log:  CUFFMERGE_TRANSCRIPTS + ".log"
+    benchmark:  CUFFMERGE_TRANSCRIPTS + "_benchmark.json"
+    params: ref_gtf = config["genome"]["features_gtf"], \
+        ref_fasta = config["genome"]["fasta"], \
+        threads = config["cufflinks"]["threads"], \
+        qsub = config["qsub"] + " -e " + CUFFMERGE_TRANSCRIPTS + "_qsub.err -o " + CUFFMERGE_TRANSCRIPTS + "_cufflinks_qsub.out"
+    shell: "echo {input.transcript_files} | perl -pe 's|\s+|\n|g' > {output.assembly_files}; cuffmerge  -o {output.cuffmerge_dir} -g {params.ref_gtf} --keep-tmp -s {params.ref_fasta} --num-threads {params.threads} {output.assembly_files} 2> {log}"
 
 #----------------------------------------------------------------#
 # Read counts per gene
@@ -290,7 +306,7 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: GENOME_INDEX, RAW_QC, RAW_READNB, SUBREADALIGN_PE_BAM, SUBREADALIGN_PE_TDF, REANNOT, COUNT_FILES #, COUNT_TABLE
+	input: GENOME_INDEX, RAW_QC, RAW_READNB, SUBREADALIGN_PE_BAM, SUBREADALIGN_PE_TDF, COUNT_FILES, CUFFLINKS_TRANSCRIPTS, CUFFMERGE_TRANSCRIPTS #, COUNT_TABLE
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
