@@ -1,0 +1,24 @@
+if not "gtf" in config["genome"].keys():
+    sys.exit("The gtf file must be defined in the config file")
+
+if not "bedtools" in config.keys():
+    config["bedtools"] = {}
+
+if not "window" in config["bedtools"].keys():
+    config["bedtools"]["window"] = "1000"
+
+    """Compute genome coverage from a bam-formatted file with aligned
+    reads.  The coverage file is in bedgraph format (with extension
+    .bedgraph), which can be loaded in the genome viewer IGV. 
+
+    Note however that IGV issues a warning when bedgraph files are
+    given in input, and recommends to use the tdf format instead. We
+    implemented hereafter rules to convert bedgraph to tdf.
+    """
+rule neighboring_features:
+    input: reads = "{reads}.bam"
+    output: bedg = "{reads}.tab"
+    log:  "{reads}_neighbor_features.log"
+    benchmark:  "{reads}_neighbor_features_benchmark.json"
+    params: window = config["bedtools"]["window"], gtf = config["genome"]["gtf"]
+    shell: "(bedtools window -w {params.window} -a {input} -b {params.gtf} > {output}) 2> {log}" 
