@@ -79,28 +79,24 @@ FG_LIB = os.path.abspath(config["dir"]["fg_lib"])
 RULES = os.path.join(FG_LIB, "scripts/snakefiles/rules")
 PYTHON = os.path.join(FG_LIB, "scripts/snakefiles/python_lib")
 
-include: os.path.join(PYTHON, "util.py")                        ## Python utilities for our snakemake workflows
+include: os.path.join(PYTHON, "util.py")                      ## Python utilities for our snakemake workflows
 include: os.path.join(RULES, "util.rules")                    ## Snakemake utilities
 include: os.path.join(RULES, "flowcharts.rules")              ## Draw flowcharts (dag and rule graph)
-include: os.path.join(RULES, "merge_lanes.rules")               ## Merge lanes by sample, based on a tab-delimited file indicating how to merge
-include: os.path.join(RULES, "fastqc.rules")                    ## Quality control with fastqc
-# include: os.path.join(RULES, "sickle_paired_ends.rules")        ## Trimming with sickle
-include: os.path.join(RULES, "count_reads.rules")               ## Count reads in different file formats
-#include: os.path.join(RULES, "bowtie2_build.rules")             ## Build genome index for bowtie2 (read mapping with gaps)
-#include: os.path.join(RULES, "bowtie2_paired_ends.rules")       ## Paired-ends read mapping with bowtie version 2 (support gaps)
-include: os.path.join(RULES, "subread_mapping_JvH.rules")       ## Read mapping with subreads
+include: os.path.join(RULES, "merge_lanes.rules")             ## Merge lanes by sample, based on a tab-delimited file indicating how to merge
+include: os.path.join(RULES, "fastqc.rules")                  ## Quality control with fastqc
+# include: os.path.join(RULES, "sickle_paired_ends.rules")      ## Trimming with sickle
+include: os.path.join(RULES, "count_reads.rules")             ## Count reads in different file formats
+#include: os.path.join(RULES, "bowtie2_build.rules")            ## Build genome index for bowtie2 (read mapping with gaps)
+#include: os.path.join(RULES, "bowtie2_paired_ends.rules")      ## Paired-ends read mapping with bowtie version 2 (support gaps)
+include: os.path.join(RULES, "subread_mapping_JvH.rules")     ## Read mapping with subreads
 include: os.path.join(RULES, "genome_coverage.rules")         ## Compute density profiles in bedgraph format
+include: os.path.join(RULES, "cufflinks.rules")               ## Detect transcripts based on genome annotations (GTF) plus RNA-seq data`
 # include: os.path.join(RULES, "htseq.rules")                   ## Count reads per gene with htseq-count
 include: os.path.join(RULES, "featurecounts.rules")           ## Count reads per gene with R subread::featurecounts
-#
-#
 
 #================================================================#
 #                      Data & wildcards                          #
 #================================================================#
-
-# # Raw data
-# READS = config["dir"]["reads_source"]
 
 #----------------------------------------------------------------#
 # Read sample descriptions
@@ -126,75 +122,6 @@ if (verbosity >= 1):
         print("\tSample folders:\t" + ";".join(SAMPLE_DIRS))
 
 
-# #----------------------------------------------------------------#
-# # Merge lanes per sample
-# #----------------------------------------------------------------#
-# rule merge_lanes:
-#     """
-#     Merge lanes (fastq) of the same sample and end in a single fastq file.
-#
-#     ince the file naming conventions are highly dependent on the sequencing
-#     platform, the file grouping is read from a user-provided text file with
-#     tab-separated values (extension .tsv). This file must have been specified
-#     in the config file, as config["files"]["lane_merging"].
-#
-#     This file must contain at least two columns with this precise header:
-#         source_file
-#         merged_file
-#
-#     There should be a N to 1 correspondence from source file to merge file
-#     (each source file should in principle be assigned to a single merged file).
-#
-#     Source files are supposed to be compressed fastq sequence files (.fastq.gz).
-#
-#     The output file is an uncompressed fastq file, because bowtie version 1
-#     does not support gzipped files as input.
-#
-#     """
-#     input: config["files"]["lane_merging"]
-#     # output: config["dir"]["results"] + "_lane_merging_benchmark.json"
-#     log: config["dir"]["results"] + "_lane_merging_log.txt"
-#     benchmark: config["dir"]["results"] + "_lane_merging_benchmark.json"
-#     run:
-#         if (verbosity >= 1):
-#             print("Lane merging table:\t" + config["files"]["lane_merging"])
-#
-#         # Read the lane merging table
-#         lane_merging_table = read_table(config["files"]["lane_merging"], verbosity=verbosity)
-#         source_file = lane_merging_table['source_file']
-#         merged_file = lane_merging_table['merged_file']
-#
-#         # Build a dictionary indexed by merged file, where values are lists of files to be merged
-#         merging_dict = {}
-#         for s,m in zip(source_file, merged_file):
-#             # print("\t".join([s,m]))
-#             if (m in merging_dict):
-#                 merging_dict[m].append(s)
-#             else:
-#                 merging_dict[m] = [s]
-#
-#         # Verbosity
-#         if (verbosity >= 5):
-#             print("\tsource_file:\t" + ";".join(source_file))
-#             print("\tmerged_file:\t" + ";".join(merged_file))
-#             print("\tmerging_dict:\t" + str(merging_dict))
-#
-#         # Merge the files
-#         for m in merging_dict.keys():
-#             # Check the output directory
-#             m_dir = os.path.dirname(m)
-#             if not os.path.exists(m_dir):
-#                 os.makedirs(m_dir)
-#
-#             # Merge the source files
-#             to_merge = merging_dict[m]
-#             cmd = "gunzip -c " + " ".join(to_merge) + "> " + m
-#             now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-#             if (verbosity >= 1):
-#                 print(now + "\tMerging " + str(len(to_merge)) + " files into " + m)
-#                 print("\t" + cmd)
-#             os.system(cmd)
-
 
 ## Design
 DESIGN = read_table(config["files"]["design"], verbosity=verbosity)
@@ -206,13 +133,6 @@ if (verbosity >= 1):
         print("\tTREATMENT:\t" + ";".join(TREATMENT))
         print("\tCONTROL:\t" + ";".join(CONTROL))
 
-# ## Ref genome
-# GENOME = config["genome"]["version"]
-#
-# ## Results dir
-# RESULTS_DIR = config["dir"]["results"]
-# if not os.path.exists(RESULTS_DIR):
-#     os.makedirs(RESULTS_DIR)
 
 #================================================================#
 # Define target file names
@@ -279,18 +199,66 @@ if (verbosity >= 3):
 # TRIMMED_FILES, TRIMMED_DIRS, TRIMMED_BASENAMES=glob_multi_dir(SAMPLE_DIRS, "*_R*_001_trimmed_thr" + config["sickle"]["threshold"] + ".fastq.gz", config["dir"]["reads"], ".fastq.gz")
 
 #----------------------------------------------------------------#
-# Read counts per gene (done with htseq-count)
+# Re-annotation of transcripts by combining genomic annotations (gtf)
+# and RNA-seq aligned reads (bam)
+# ----------------------------------------------------------------#
+
+CUFFLINKS_TRANSCRIPTS=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_sorted_pos_CUFFLINKS/transcripts.gtf", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+if (verbosity >= 3):
+    print ("CUFFLINKS_TRANSCRIPTS:\n\t" + "\n\t".join(CUFFLINKS_TRANSCRIPTS))
+
+CUFFMERGE_TRANSCRIPTS=config["cufflinks"]["cuffmerge_transcripts"]
+rule cuffmerge:
+    """Merge transcripts obtained from RNA-seq reads with cufflinks.
+
+    """
+    input: transcript_files=CUFFLINKS_TRANSCRIPTS
+    output: cuffmerge_dir=config["cufflinks"]["cuffmerge_dir"], \
+        assembly_files=config["cufflinks"]["assembly_files"], \
+        cuffmerge_transcripts=config["cufflinks"]["cuffmerge_transcripts"]
+    log:  CUFFMERGE_TRANSCRIPTS + ".log"
+    benchmark:  CUFFMERGE_TRANSCRIPTS + "_benchmark.json"
+    params: ref_gtf = config["genome"]["features_gtf"], \
+        ref_fasta = config["genome"]["fasta"], \
+        threads = config["cufflinks"]["threads"], \
+        qsub = config["qsub"] + " -e " + CUFFMERGE_TRANSCRIPTS + "_qsub.err -o " + CUFFMERGE_TRANSCRIPTS + "_cufflinks_qsub.out"
+    shell: "echo {input.transcript_files} | perl -pe 's|\s+|\n|g' > {output.assembly_files}; cuffmerge  -o {output.cuffmerge_dir} -g {params.ref_gtf} --keep-tmp -s {params.ref_fasta} --num-threads {params.threads} {output.assembly_files} 2> {log}"
+
 #----------------------------------------------------------------#
-
-# Since the program featureCounts (subread suite) is MUCH faster (30
-# times) than htseq-count, and does not required bam sorting, I switch
-# to featureCounts.
-
+# Read counts per gene
+#----------------------------------------------------------------#
 
 #FEATURECOUNTS=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["featurecounts"] + ".tab", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 COUNT_FILES=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_featurecounts.tab", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
 if (verbosity >= 3):
     print ("COUNT_FILES:\n\t" + "\n\t".join(COUNT_FILES))
+
+
+## Print a tab-delimited file with the paths of count files per sample
+if not ("files" in config.keys()) & ("count_file_paths" in config["files"].keys()) :
+    sys.exit("The parameter config['files']['count_file_paths'] should be specified in the config file.")
+## Check the directory for count file paths and create it if required
+count_paths_dir = os.path.dirname(config['files']['count_file_paths'])
+if not os.path.exists(count_paths_dir):
+        os.makedirs(count_paths_dir)
+
+COUNT_FILE_PATHS=pd.DataFrame({"SampleID": SAMPLE_IDS, "FilePath":COUNT_FILES})
+COUNT_FILE_PATHS[["SampleID", "FilePath"]].to_csv(config["files"]["count_file_paths"], sep='\t', 
+                        encoding='utf-8', header=True, index=False)
+if (verbosity >= 1):
+    print("Count file paths\t" + config["files"]["count_file_paths"])
+    if (verbosity >= 3):
+        print(COUNT_FILE_PATHS)
+
+## Summary count table, with one row per gene and one column per sample
+if not ("files" in config.keys()) & ("count_table" in config["files"].keys()) :
+    sys.exit("The parameter config['files']['count_table'] should be specified in the config file.")
+## Check the directory for count file paths and create it if required
+count_table_dir = os.path.dirname(config['files']['count_table'])
+if not os.path.exists(count_table_dir):
+        os.makedirs(count_table_dir)
+COUNT_TABLE=config['files']['count_table']
+
 
 # #----------------------------------------------------------------#
 # # Differential expression analysis
@@ -338,7 +306,7 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: GENOME_INDEX, RAW_QC, RAW_READNB, SUBREADALIGN_PE_BAM, SUBREADALIGN_PE_TDF, COUNT_FILES
+	input: GENOME_INDEX, RAW_QC, RAW_READNB, SUBREADALIGN_PE_BAM, SUBREADALIGN_PE_TDF, COUNT_FILES, CUFFLINKS_TRANSCRIPTS, CUFFMERGE_TRANSCRIPTS #, COUNT_TABLE
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
