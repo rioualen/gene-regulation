@@ -13,7 +13,7 @@ date: '2016-01-28'
 Table of Contents
 =================
 
-  * [IFB cloud utilities](#ifb-cloud-utilities" aria-hidden="true"><span aria-hidden="true)
+  * [IFB cloud utilities](#ifb-cloud-utilities)
     * [User account creation &amp; configuration](#user-account-creation--configuration" aria-hidden="true"><span aria-hidden="true)
   * [Using an existing appliance](#using-an-existing-appliance" aria-hidden="true"><span aria-hidden="true)
     * [Virtual disk creation](#virtual-disk-creation" aria-hidden="true"><span aria-hidden="true)
