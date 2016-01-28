@@ -1,7 +1,7 @@
 ---
 title: "IFB cloud howto"
 author: "Claire Rioualen"
-date: '`r Sys.Date()`'
+date: '2016-01-28'
 #output:
 #  html_document:
 #    theme: cerulean
