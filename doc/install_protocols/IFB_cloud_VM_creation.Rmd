@@ -10,6 +10,31 @@ date: '2016-01-28'
 #    number_sections: yes
 ---
 
+Table of Contents
+=================
+
+  * [IFB cloud utilities](#ifb-cloud-utilities" aria-hidden="true"><span aria-hidden="true)
+    * [User account creation &amp; configuration](#user-account-creation--configuration" aria-hidden="true"><span aria-hidden="true)
+  * [Using an existing appliance](#using-an-existing-appliance" aria-hidden="true"><span aria-hidden="true)
+    * [Virtual disk creation](#virtual-disk-creation" aria-hidden="true"><span aria-hidden="true)
+    * [Creation of an instance](#creation-of-an-instance" aria-hidden="true"><span aria-hidden="true)
+  * [Creation of an appliance](#creation-of-an-appliance" aria-hidden="true"><span aria-hidden="true)
+    * [Creation](#creation" aria-hidden="true"><span aria-hidden="true)
+    * [Configuration (optional)](#configuration-optional" aria-hidden="true"><span aria-hidden="true)
+      * [User account](#user-account" aria-hidden="true"><span aria-hidden="true)
+      * [Shell coloring](#shell-coloring" aria-hidden="true"><span aria-hidden="true)
+    * [Data management](#data-management" aria-hidden="true"><span aria-hidden="true)
+      * [Virtual disk](#virtual-disk" aria-hidden="true"><span aria-hidden="true)
+      * [Transfers](#transfers" aria-hidden="true"><span aria-hidden="true)
+  * [Then...](#then" aria-hidden="true"><span aria-hidden="true)
+    * [Software installation](#software-installation" aria-hidden="true"><span aria-hidden="true)
+    * [Documentation](#documentation" aria-hidden="true"><span aria-hidden="true)
+      * [RSAT suite](#rsat-suite" aria-hidden="true"><span aria-hidden="true)
+      * [Snakemake workflows](#snakemake-workflows" aria-hidden="true"><span aria-hidden="true)
+      * [VBox export / IFB appliance submission](#vbox-export--ifb-appliance-submission" aria-hidden="true"><span aria-hidden="true)
+
+
+
 # IFB cloud utilities
 
 ![](img/ifb-logo.png)
