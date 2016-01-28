@@ -2,12 +2,12 @@
 title: "IFB cloud howto"
 author: "Claire Rioualen"
 date: '`r Sys.Date()`'
-output:
-  html_document:
-    theme: cerulean
-    toc: yes
-    toc_depth: 4
-    number_sections: yes
+#output:
+#  html_document:
+#    theme: cerulean
+#    toc: yes
+#    toc_depth: 4
+#    number_sections: yes
 ---
 
 # IFB cloud utilities
