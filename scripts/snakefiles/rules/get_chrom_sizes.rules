@@ -4,7 +4,7 @@ rule get_chrom_sizes:
 	output: "{genome}.genome"
 	log: "{genome}_chromsize.log"
 	benchmark: "{genome}_chromsize_benchmark.json"
-	params: fasta = config["genome"]["fasta"]
+#	params: fasta = config["genome"]["fasta"]
 	shell:"""
 samtools faidx {input}
 cut -f1,2 {input}.fai > {output}
