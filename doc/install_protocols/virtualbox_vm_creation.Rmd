@@ -2,15 +2,15 @@
 title: "Creating a virtual machine with Virtualbox"
 author: "Claire Rioualen & Jacques van Helden"
 output:
+  pdf_document:
+    fig_caption: yes
+    highlight: zenburn
+    toc: yes
+    toc_depth: 5
   html_document:
     fig_caption: yes
     highlight: zenburn
     theme: cerulean
-    toc: yes
-    toc_depth: 5
-  pdf_document:
-    fig_caption: yes
-    highlight: zenburn
     toc: yes
     toc_depth: 5
   word_document: default

@@ -1,5 +1,6 @@
 ---
 title: "Export appliance"
+date: 2015-07-31
 output:
   html_document:
     css: ../styles.css
