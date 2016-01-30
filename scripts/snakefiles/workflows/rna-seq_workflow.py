@@ -172,8 +172,13 @@ if (verbosity >= 3):
 ## split reads acording to their strand (plus or minus)
 SUBREADALIGN_PE_PLUS_BAM=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_plus_sorted_pos.bam", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
 SUBREADALIGN_PE_MIN_BAM=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_min_sorted_pos.bam", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+SUBREADALIGN_PE_PLUSMIN_BAM = SUBREADALIGN_PE_PLUS_BAM + SUBREADALIGN_PE_MIN_BAM
 SUBREADALIGN_PE_MIN_BAI=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_min_sorted_pos.bam.bai", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
 SUBREADALIGN_PE_PLUS_BAI=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_plus_sorted_pos.bam.bai", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+SUBREADALIGN_PE_PLUSMIN_BAI = SUBREADALIGN_PE_PLUS_BAI + SUBREADALIGN_PE_MIN_BAI
+SUBREADALIGN_PE_PLUS_TDF=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_plus_sorted_pos.tdf", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+SUBREADALIGN_PE_MIN_TDF=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_min_sorted_pos.tdf", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+SUBREADALIGN_PE_PLUSMIN_TDF = SUBREADALIGN_PE_PLUS_TDF + SUBREADALIGN_PE_MIN_TDF
 
 ## Genome coverage file (number of reads per genomic window), useful
 ## for visualisation. The bedgraph format is essentially used as
@@ -320,12 +325,12 @@ rule all:
             RAW_QC, \
             RAW_READNB, \
             SUBREADALIGN_PE_BAM, \
-            SUBREADALIGN_PE_PLUS_BAM, SUBREADALIGN_PE_MIN_BAM, \
-            SUBREADALIGN_PE_PLUS_BAI, SUBREADALIGN_PE_MIN_BAI, \
             SUBREADALIGN_PE_TDF, \
+            SUBREADALIGN_PE_PLUSMIN_BAM, \
+            SUBREADALIGN_PE_PLUSMIN_BAI, \
+            SUBREADALIGN_PE_PLUSMIN_TDF, \
             COUNT_FILES, \
-            CUFFLINKS_TRANSCRIPTS, \
-            CUFFMERGE_TRANSCRIPTS #, COUNT_TABLE
+            CUFFLINKS_TRANSCRIPTS #,#            CUFFMERGE_TRANSCRIPTS #, COUNT_TABLE
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
