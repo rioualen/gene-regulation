@@ -28,7 +28,7 @@ import datetime
 import pandas as pd
 
 ## Config
-#configfile: "examples/Athaliana-Myb/Athaliana-Myb.yml"                                                        ####
+# configfile: "examples/Athaliana-Myb/Athaliana-Myb.yml"                                                        ####
 workdir: config["dir"]["base"]
 verbosity = int(config["verbosity"])
 
