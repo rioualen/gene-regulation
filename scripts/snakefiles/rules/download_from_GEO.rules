@@ -1,6 +1,8 @@
 """Download sra files using srr ids mentioned in samples.tab
 
 """
+if not (("dir" in config.keys()) and ("reads_source" in config["dir"].keys())):
+    sys.exit("The parameter config['genome']['reads_source'] should be specified in the config file.")
 
 rule download_sra:
     """Fetch .sra data from GEO website using SRR IDs.
@@ -11,7 +13,7 @@ rule download_sra:
     benchmark: ""
     params: qsub="", outdir=config["dir"]["reads_source"] + "{sample}", srr="{srr}"
     shell: """
-prefetch -v {params.srr}
+prefetch --verbose {params.srr}
 mv ~/ncbi/public/sra/{params.srr}.sra {params.outdir}
 touch {input.datadir}/download.done
 #fastq-dump --outdir <output directory> /home/<USER>/ncbi/public/sra/<SRR ID>.sra
