@@ -82,7 +82,7 @@ PYTHON = os.path.join(FG_LIB, "scripts/snakefiles/python_lib")
 include: os.path.join(PYTHON, "util.py")                      ## Python utilities for our snakemake workflows
 include: os.path.join(RULES, "util.rules")                    ## Snakemake utilities
 include: os.path.join(RULES, "flowcharts.rules")              ## Draw flowcharts (dag and rule graph)
-include: os.path.join(RULES, "merge_lanes.rules")             ## Merge lanes by sample, based on a tab-delimited file indicating how to merge
+#include: os.path.join(RULES, "merge_lanes.rules")             ## Merge lanes by sample, based on a tab-delimited file indicating how to merge
 include: os.path.join(RULES, "fastqc.rules")                  ## Quality control with fastqc
 # include: os.path.join(RULES, "sickle_paired_ends.rules")      ## Trimming with sickle
 include: os.path.join(RULES, "count_reads.rules")             ## Count reads in different file formats
@@ -92,7 +92,7 @@ include: os.path.join(RULES, "subread_mapping_JvH.rules")     ## Read mapping wi
 include: os.path.join(RULES, "split_bam_by_strands.rules")    ## split a BAM file in plus and minus strands
 include: os.path.join(RULES, "index_bam.rules")               ## Index bam for visualization
 include: os.path.join(RULES, "genome_coverage.rules")         ## Compute density profiles in bedgraph format
-include: os.path.join(RULES, "cufflinks.rules")               ## Detect transcripts based on genome annotations (GTF) plus RNA-seq data`
+#include: os.path.join(RULES, "cufflinks.rules")               ## Detect transcripts based on genome annotations (GTF) plus RNA-seq data`
 # include: os.path.join(RULES, "htseq.rules")                   ## Count reads per gene with htseq-count
 include: os.path.join(RULES, "featurecounts.rules")           ## Count reads per gene with R subread::featurecounts
 
@@ -110,9 +110,9 @@ SAMPLE_IDS = SAMPLE_DESCR.iloc[:,0] ## First column MUST contain the sample ID
 SAMPLE_CONDITIONS = SAMPLE_DESCR['condition'] ## Second column MUST contain condition for each sample
 SAMPLE_NAMES = SAMPLE_DESCR['title'] ## Sample-wise label
 SAMPLE_DIRS = SAMPLE_DESCR['folder']
-FASTQ_R1 = SAMPLE_DESCR['fastq_R1']
-FASTQ_R2 = SAMPLE_DESCR['fastq_R2']
-FASTQ = list(FASTQ_R1) + list(FASTQ_R2)
+FASTQ = SAMPLE_DESCR['fastq_R1']
+#FASTQ_R2 = SAMPLE_DESCR['fastq_R2']
+#FASTQ = list(FASTQ_R1) + list(FASTQ_R2)
 
 # Verbosity
 if (verbosity >= 1):
@@ -217,27 +217,6 @@ if (verbosity >= 3):
 # and RNA-seq aligned reads (bam)
 # ----------------------------------------------------------------#
 
-CUFFLINKS_TRANSCRIPTS=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_sorted_pos_CUFFLINKS/transcripts.gtf", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
-if (verbosity >= 3):
-    print ("CUFFLINKS_TRANSCRIPTS:\n\t" + "\n\t".join(CUFFLINKS_TRANSCRIPTS))
-
-CUFFMERGE_TRANSCRIPTS=config["cufflinks"]["cuffmerge_transcripts"]
-rule cuffmerge:
-    """Merge transcripts obtained from RNA-seq reads with cufflinks.
-
-    """
-    input: transcript_files=CUFFLINKS_TRANSCRIPTS
-    output: cuffmerge_dir=config["cufflinks"]["cuffmerge_dir"], \
-        assembly_files=config["cufflinks"]["assembly_files"], \
-        cuffmerge_transcripts=config["cufflinks"]["cuffmerge_transcripts"]
-    log:  CUFFMERGE_TRANSCRIPTS + ".log"
-    benchmark:  CUFFMERGE_TRANSCRIPTS + "_benchmark.json"
-    params: ref_gtf = config["genome"]["features_gtf"], \
-        ref_fasta = config["genome"]["fasta"], \
-        threads = config["cufflinks"]["threads"], \
-        qsub = config["qsub"] + " -e " + CUFFMERGE_TRANSCRIPTS + "_qsub.err -o " + CUFFMERGE_TRANSCRIPTS + "_cufflinks_qsub.out"
-    shell: "echo {input.transcript_files} | perl -pe 's|\s+|\n|g' > {output.assembly_files}; cuffmerge  -o {output.cuffmerge_dir} -g {params.ref_gtf} --keep-tmp -s {params.ref_fasta} --num-threads {params.threads} {output.assembly_files} 2> {log}"
-
 #----------------------------------------------------------------#
 # Read counts per gene
 #----------------------------------------------------------------#
@@ -323,14 +302,13 @@ rule all:
 	"""
 	input: GENOME_INDEX, \
             RAW_QC, \
-            RAW_READNB, \
-            SUBREADALIGN_PE_BAM, \
-            SUBREADALIGN_PE_TDF, \
-            SUBREADALIGN_PE_PLUSMIN_BAM, \
-            SUBREADALIGN_PE_PLUSMIN_BAI, \
-            SUBREADALIGN_PE_PLUSMIN_TDF, \
-            COUNT_FILES, \
-            CUFFLINKS_TRANSCRIPTS #,#            CUFFMERGE_TRANSCRIPTS #, COUNT_TABLE
+            RAW_READNB #, \
+            # SUBREADALIGN_PE_BAM, \
+            # SUBREADALIGN_PE_TDF, \
+            # SUBREADALIGN_PE_PLUSMIN_BAM, \
+            # SUBREADALIGN_PE_PLUSMIN_BAI, \
+            # SUBREADALIGN_PE_PLUSMIN_TDF, \
+            # COUNT_FILES #, COUNT_TABLE
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
