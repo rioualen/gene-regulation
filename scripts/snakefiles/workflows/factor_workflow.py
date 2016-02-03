@@ -59,8 +59,8 @@ include: os.path.join(RULES, "bowtie2_index.rules")
 include: os.path.join(RULES, "bowtie2_se.rules")
 include: os.path.join(RULES, "convert_bam_to_bed.rules")
 include: os.path.join(RULES, "count_reads.rules")
-include: os.path.join(RULES, "download_from_GEO.rules")
-include: os.path.join(RULES, "download_genome.rules")
+#include: os.path.join(RULES, "download_from_GEO.rules")
+#include: os.path.join(RULES, "download_genome.rules")
 include: os.path.join(RULES, "fastqc.rules")
 include: os.path.join(RULES, "flowcharts.rules")
 include: os.path.join(RULES, "getfasta.rules")
@@ -71,7 +71,7 @@ include: os.path.join(RULES, "macs2.rules")
 include: os.path.join(RULES, "macs14.rules")
 include: os.path.join(RULES, "peak_motifs.rules")
 include: os.path.join(RULES, "spp.rules")
-include: os.path.join(RULES, "sra_to_fastq.rules")
+#include: os.path.join(RULES, "sra_to_fastq.rules")
 include: os.path.join(RULES, "swembl.rules")
 
 #================================================================#
@@ -114,9 +114,9 @@ ALIGNMENT=expand("{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=AL
 PEAKCALLER=[
     "homer_peaks", 
     "macs2-qval" + config["macs2"]["qval"] + "_peaks", 
-#    "swembl-R" + config["swembl"]["R"],
+    "swembl-R" + config["swembl"]["R"],
 #    "macs14-pval" + config["macs14"]["pval"] + "_peaks",
-#    "spp-fdr" + config["spp"]["fdr"],
+    "spp-fdr" + config["spp"]["fdr"],
 #    "bPeaks_allGenome"
 ]
 PEAKCALLING=expand(expand("{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER)
@@ -183,6 +183,6 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: GRAPHICS, CHROM_SIZES, PEAKS, TDF
+	input: DOWNLOAD#, IMPORT#PEAK_MOTIFS#GRAPHICS, CHROM_SIZES, PEAKS, TDF
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"

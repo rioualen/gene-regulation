@@ -75,7 +75,7 @@
     fdr: "0.01"                                                                 # optional (def: 0.001)
 
   spp: 
-    fdr: "0.001195"                                                             # optional (def: 0.01)
+    fdr: "0.001"                                                             # optional (def: 0.01)
 
   bPeaks: 
     IPcoeff: "2"                                                                # optional (def: 2)
