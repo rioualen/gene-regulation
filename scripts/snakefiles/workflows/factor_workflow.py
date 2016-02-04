@@ -41,15 +41,25 @@ import datetime
 import pandas as pd
 
 ## Config
-configfile: "examples/Athaliana-Myb/Athaliana-Myb.yml"
+#configfile: "examples/Athaliana-Myb/Athaliana-Myb.yml"
 #workdir: config["dir"]["base"]
 #verbosity = int(config["verbosity"])
 
 #================================================================#
-#                         Includes                               #
+#                    Check mandatory parameters
 #================================================================#
 
-FG_LIB = os.path.abspath(".")
+# Define verbosity
+if not ("verbosity" in config.keys()):
+    config["verbosity"] = 0
+verbosity = int(config["verbosity"])
+
+#================================================================#
+#                         Includes                               #
+#================================================================#
+if not ("dir" in config.keys()) & ("fg_lib" in config["dir"].keys()) :
+    sys.exit("The parameter config['dir']['fg_lib'] should be specified in the config file.")
+FG_LIB = os.path.abspath(config["dir"]["fg_lib"])
 RULES = os.path.join(FG_LIB, "scripts/snakefiles/rules")
 PYTHON = os.path.join(FG_LIB, "scripts/python_lib")
 
@@ -59,19 +69,19 @@ include: os.path.join(RULES, "bowtie2_index.rules")
 include: os.path.join(RULES, "bowtie2_se.rules")
 include: os.path.join(RULES, "convert_bam_to_bed.rules")
 include: os.path.join(RULES, "count_reads.rules")
-#include: os.path.join(RULES, "download_from_GEO.rules")
+include: os.path.join(RULES, "download_from_GEO.rules")
 #include: os.path.join(RULES, "download_genome.rules")
 include: os.path.join(RULES, "fastqc.rules")
 include: os.path.join(RULES, "flowcharts.rules")
 include: os.path.join(RULES, "getfasta.rules")
 include: os.path.join(RULES, "get_chrom_sizes.rules")
-include: os.path.join(RULES, "genome_coverage.rules")
+#include: os.path.join(RULES, "genome_coverage.rules")
 include: os.path.join(RULES, "homer.rules")
 include: os.path.join(RULES, "macs2.rules")
 include: os.path.join(RULES, "macs14.rules")
-include: os.path.join(RULES, "peak_motifs.rules")
+include: os.path.join(RULES, "merge_lanes.rules")               ## Merge lanes by sample, based on a tab-delimited file indicainclude: os.path.join(RULES, "peak_motifs.rules")
 include: os.path.join(RULES, "spp.rules")
-#include: os.path.join(RULES, "sra_to_fastq.rules")
+include: os.path.join(RULES, "sra_to_fastq.rules")
 include: os.path.join(RULES, "swembl.rules")
 
 #================================================================#
@@ -98,13 +108,18 @@ CHROM_SIZES = expand(GENOME_DIR + "{genome}.genome", genome=GENOME)
 config["genome"]["chromsize"] = CHROM_SIZES
 
 ## Data & results dir
+if not (("dir" in config.keys()) and ("results" in config["dir"].keys())):
+    sys.exit("The parameter config['dir']['results'] should be specified in the config file.")
 RESULTS_DIR = config["dir"]["results"]
-if not os.path.exists(RESULTS_DIR):
-    os.makedirs(RESULTS_DIR)
+#if not os.path.exists(RESULTS_DIR):
+#    os.makedirs(RESULTS_DIR)
 
+if not (("dir" in config.keys()) and ("reads_source" in config["dir"].keys())):
+    sys.exit("The parameter config['dir']['reads_source'] should be specified in the config file.")
 READS = config["dir"]["reads_source"]
-if not os.path.exists(READS):
-    os.makedirs(READS)
+#if not os.path.exists(READS):
+#    os.makedirs(READS)
+
 
 ## Programs
 
@@ -129,9 +144,13 @@ MOTIFS=expand(expand("{treat}_vs_{control}/{{peakcaller}}/peak-motifs/{treat}_vs
 
 ## Data import & merging.
 
-DOWNLOAD = expand(READS + "{samples}/{srr}.sra", zip, samples=SAMPLE_IDS, srr=SRR_IDS) 
-IMPORT = expand(RESULTS_DIR + "{samples}/{samples}.fastq", samples=SAMPLE_IDS) 
+DOWNLOAD = expand(READS + "{samples}/{srr}.sra", zip, samples=SAMPLE_IDS, srr=SRR_IDS)
+IMPORT = expand(RESULTS_DIR + "{samples}/{srr}.fastq", zip, samples=SAMPLE_IDS, srr=SRR_IDS)
 
+# Verbosity
+if (verbosity >= 3):
+    print("\tDOWNLOAD:\t" + ";".join(DOWNLOAD))
+    print("\tIMPORT:\t" + ";".join(IMPORT))
 
 ## Graphics & reports
 GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
@@ -183,6 +202,6 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: DOWNLOAD#, IMPORT#PEAK_MOTIFS#GRAPHICS, CHROM_SIZES, PEAKS, TDF
+	input: DOWNLOAD, IMPORT#, PEAK_MOTIFS#GRAPHICS, CHROM_SIZES, PEAKS, TDF
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"

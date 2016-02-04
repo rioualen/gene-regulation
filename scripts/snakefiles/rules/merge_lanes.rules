@@ -1,10 +1,15 @@
-
 #----------------------------------------------------------------#
 # Merge lanes per sample
 #----------------------------------------------------------------#
+
+if not (("dir" in config.keys()) and ("results" in config["dir"].keys())):
+    sys.exit("The parameter config['dir']['results'] should be specified in the config file.")
+
+if not (("files" in config.keys()) and ("lane_merging" in config["files"].keys())):
+    sys.exit("The parameter config['files']['lane_merging'] should be specified in the config file.")
+
 rule merge_lanes:
-    """
-    Concatenate multiple fastqiles to produce a merged fastq file.
+    """Concatenate multiple fastq files to produce a merged fastq file.
 
     This rule typically serves to merge raw reads (fastq) corresponding to
     multiple sequencing lanes for the same sample into a single fastq file
@@ -28,7 +33,6 @@ rule merge_lanes:
     The output file is an uncompressed fastq file, because bowtie version 1
     does not support gzipped files as input.
 
-
     Required configuration parameters:
 
     config["files"]["lane_merging"] file indicating the source/merged file names
@@ -36,11 +40,11 @@ rule merge_lanes:
 
     """
     input: config["files"]["lane_merging"]
-    output: config["dir"]["fastq"] + "/lane_merging_benchmark.json"
-    log: config["dir"]["fastq"] + "/lane_merging_log.txt"
-    benchmark: config["dir"]["fastq"] + "/lane_merging_benchmark.json"
+    output: config["dir"]["results"] + "/lane_merging_benchmark.json"
+    log: config["dir"]["results"] + "/lane_merging_log.txt"
+    benchmark: config["dir"]["results"] + "/lane_merging_benchmark.json"
     run:
-        if (verbosity >= 1):
+        if (verbosity >= 0):
             print("Lane merging table:\t" + config["files"]["lane_merging"])
 
         # Read the lane merging table
@@ -72,33 +76,18 @@ rule merge_lanes:
 
             # Merge the source files
             to_merge = merging_dict[m]
-            cmd = "gunzip -c " + " ".join(to_merge) + "> " + m
+
+            # Check if the merged file results from a single or multiple fastq files. 
+            # For n-to-1 merging, concatenate input files to produce the output file
+            merge_nb = len(to_merge)
+            if merge_nb > 1:
+                cmd = "gunzip -c " + " ".join(to_merge) + "> " + m
+            # For 1-to-1 merging, create a Unix hard link to avoid doubling the disk space occupancy
+            else:
+                cmd = "ln --relative --force -s " + " ".join(to_merge) + " " + m
             now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-            if (verbosity >= 1):
-                print(now + "\tMerging " + str(len(to_merge)) + " files into " + m)
+            if (verbosity >= 2):
+                print(now + "\tMerging " + str(merge_nb) + " files into " + m)
                 print("\t" + cmd)
             os.system(cmd)
 
-# #----------------------------------------------------------------#
-# # Merge lanes per sample
-# #----------------------------------------------------------------#
-#
-# # Note by JvH: THIS RULE IS TOO CUMBERSOME, I MUST FIND A MORE FLEXIBLE SOLUTION
-#
-# rule merge_lanes_previous:
-#     """
-#     Merge lanes of the same sample and end in a single file.  The input
-#     files are compressed (.fastq.gz) but the output file is in
-#     uncompressed fastq format, because bowtie version 1 does not
-#     support gzipped files as input.
-#
-#     """
-#     input: L1 = "{reads_prefix}_L001_{reads_suffix}.fastq.gz", \
-#         L2 = "{reads_prefix}_L002_{reads_suffix}.fastq.gz", \
-#         L3 = "{reads_prefix}_L003_{reads_suffix}.fastq.gz", \
-#         L4 = "{reads_prefix}_L004_{reads_suffix}.fastq.gz"
-#     output: "{reads_prefix}_merged_{reads_suffix}.fastq"
-#     log: "{reads_prefix}_merged_{reads_suffix}.log"
-#     benchmark: "{reads_prefix}_merged_{reads_suffix}_benchmark.json"
-#     params: qsub = config["qsub"] + " -e {reads_prefix}__merged_{reads_suffix}_qsub.err  -o {reads_prefix}__merged_{reads_suffix}_qsub.out"
-#     shell: "gunzip -c {input.L1} {input.L2} {input.L3} {input.L4} | gzip > {output}"
