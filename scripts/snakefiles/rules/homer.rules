@@ -3,7 +3,7 @@
 
 	The genome parameter can be either:
 		- the code of a genome installed in Homer (eg HG18, dm3...)
-		- a fasta file (see http://homer.salk.edu/homer_peaks/introduction/update.html)          TO be changed
+		- a fasta file (see http://homer.salk.edu/homer-fdr{fdr}_peaks/introduction/update.html)          TO be changed
 
 	"""
 
@@ -38,14 +38,14 @@ if not "fdr" in config["homer"].keys():
 
 
 rule homer:
-	input: 	treatment="{result_dir}/{treatment}/{treatment}_{aligner}.bed", \
-		control="{result_dir}/{control}/{control}_{aligner}.bed"
-	output: "{result_dir}/{treatment}_vs_{control}/homer_peaks/{treatment}_vs_{control}_{aligner}_homer_peaks.bed"
-	log: "{result_dir}/{treatment}_vs_{control}/homer_peaks/{treatment}_vs_{control}_{aligner}_homer.log"
-	benchmark: "{result_dir}/{treatment}_vs_{control}/homer_peaks/{treatment}_vs_{control}_{aligner}_homer_benchmark.json"
-	params: name="{treatment}_vs_{control}_{aligner}_homer", \
-		treatment_tag="{result_dir}/{treatment}_vs_{control}/homer_peaks/treatment_{treatment}_tag", \
-		control_tag="{result_dir}/{treatment}_vs_{control}/homer_peaks/control_{control}_tag", \
+	input: 	treatment="{result_dir}/{treatment}/{treatment}.bed", \
+		control="{result_dir}/{control}/{control}.bed"
+	output: "{result_dir}/{treatment}_vs_{control}/homer-fdr{fdr}_peaks/{treatment}_vs_{control}_homer-fdr{fdr}_peaks.bed"
+	log: "{result_dir}/{treatment}_vs_{control}/homer-fdr{fdr}_peaks/{treatment}_vs_{control}_homer.log"
+	benchmark: "{result_dir}/{treatment}_vs_{control}/homer-fdr{fdr}_peaks/{treatment}_vs_{control}_homer-fdr{fdr}_benchmark.json"
+	params: name="{treatment}_vs_{control}_homer", \
+		treatment_tag="{result_dir}/{treatment}_vs_{control}/homer-fdr{fdr}_peaks/treatment_{treatment}_tag", \
+		control_tag="{result_dir}/{treatment}_vs_{control}/homer-fdr{fdr}_peaks/control_{control}_tag", \
 		genome=config['genome']['fasta'], \
 		style=config["homer"]["style"], \
 		L = config["homer"]["L"], \
@@ -54,8 +54,8 @@ rule homer:
 		fdr = config["homer"]["fdr"], \
 		genome_size = config["genome"]["size"], \
 		qsub=config["qsub"] \
-		+ " -e {result_dir}/{treatment}_vs_{control}/homer_peaks/{treatment}_vs_{control}_{aligner}_homer_qsub.err" \
-		+ " -e {result_dir}/{treatment}_vs_{control}/homer_peaks/{treatment}_vs_{control}_{aligner}_homer_qsub.out" 
+		+ " -e {result_dir}/{treatment}_vs_{control}/homer-fdr{fdr}_peaks/{treatment}_vs_{control}_homer-fdr{fdr}_qsub.err" \
+		+ " -e {result_dir}/{treatment}_vs_{control}/homer-fdr{fdr}_peaks/{treatment}_vs_{control}_homer-fdr{fdr}_qsub.out" 
 	shell:"""(makeTagDirectory {params.treatment_tag} -genome {params.genome} -checkGC {input.treatment} -format bed
 		makeTagDirectory {params.control_tag} -genome {params.genome} -checkGC {input.control} -format bed
 		findPeaks {params.treatment_tag} -style {params.style} -L {params.L} -P {params.P} -F {params.F} -fdr {params.fdr} -gsize {params.genome_size} -o {params.treatment_tag}/peaks.txt -i {params.control_tag}
