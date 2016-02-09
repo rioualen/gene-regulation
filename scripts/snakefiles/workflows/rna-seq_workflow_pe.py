@@ -111,8 +111,8 @@ SAMPLE_CONDITIONS = SAMPLE_DESCR['condition'] ## Second column MUST contain cond
 SAMPLE_NAMES = SAMPLE_DESCR['title'] ## Sample-wise label
 SAMPLE_DIRS = SAMPLE_DESCR['folder']
 FASTQ = SAMPLE_DESCR['fastq_R1']
-#FASTQ_R2 = SAMPLE_DESCR['fastq_R2']
-#FASTQ = list(FASTQ_R1) + list(FASTQ_R2)
+FASTQ_R2 = SAMPLE_DESCR['fastq_R2']
+FASTQ = list(FASTQ_R1) + list(FASTQ_R2)
 
 # Verbosity
 if (verbosity >= 1):
@@ -302,13 +302,13 @@ rule all:
 	"""
 	input: GENOME_INDEX, \
             RAW_QC, \
-            RAW_READNB #, \
-            # SUBREADALIGN_PE_BAM, \
-            # SUBREADALIGN_PE_TDF, \
-            # SUBREADALIGN_PE_PLUSMIN_BAM, \
-            # SUBREADALIGN_PE_PLUSMIN_BAI, \
-            # SUBREADALIGN_PE_PLUSMIN_TDF, \
-            # COUNT_FILES #, COUNT_TABLE
+            RAW_READNB , \
+            SUBREADALIGN_PE_BAM, \
+            SUBREADALIGN_PE_TDF, \
+            SUBREADALIGN_PE_PLUSMIN_BAM, \
+            SUBREADALIGN_PE_PLUSMIN_BAI, \
+            SUBREADALIGN_PE_PLUSMIN_TDF, \
+            COUNT_FILES #, COUNT_TABLE
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
