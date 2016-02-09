@@ -21,7 +21,7 @@ Flowcharts:
         --force flowcharts
 
 
-Authors: Justine Long, Jeanne Cheneby, Lucie Khamvongsa, Claire Rioualen & Jacques van Helden
+Authors: Jacques van Helden, Justine Long, Jeanne Cheneby, Lucie Khamvongsa, Claire Rioualen
 Contact: Jacques.van-Helden@univ-amu.fr
 """
 
@@ -54,13 +54,13 @@ verbosity = int(config["verbosity"])
 # # able to build suffixes from other config values due to JSON
 # # limitations.
 # # ================================================================#
-# config["suffix"]["trimmed"] = "sickle_pe_q" + config["sickle"]["threshold"]
-# config["suffix"]["mapped"] = config["suffix"]["trimmed"] + "_bowtie2_pe"
+# config["suffix"]["trimmed"] = "sickle_se_q" + config["sickle"]["threshold"]
+# config["suffix"]["mapped"] = config["suffix"]["trimmed"] + "_bowtie2_se"
 # config["suffix"]["featurecounts"] = config["suffix"]["mapped"] + "_featurecounts"
 # config["suffix"]["sorted_pos"] = config["suffix"]["mapped"] + "_sorted_pos"
 # config["suffix"]["sorted_name"] = config["suffix"]["mapped"] + "_sorted_name"
 # config["suffix"]["htseq_counts"] = config["suffix"]["sorted_name"] + "_HTSeqcount"
-# config["suffix"]["deg"] = "sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie2_pe_sorted_" + config["htseq"]["order"]
+# config["suffix"]["deg"] = "sickle_se_q" + config["sickle"]["threshold"] + "_bowtie2_se_sorted_" + config["htseq"]["order"]
 # config["suffix"]["edgeR"] = config["suffix"]["deg"] + config["edgeR"]["suffix"]
 # config["suffix"]["DESeq2"] = config["suffix"]["deg"] + config["DESeq2"]["suffix"]
 #
@@ -110,9 +110,7 @@ SAMPLE_IDS = SAMPLE_DESCR.iloc[:,0] ## First column MUST contain the sample ID
 SAMPLE_CONDITIONS = SAMPLE_DESCR['condition'] ## Second column MUST contain condition for each sample
 SAMPLE_NAMES = SAMPLE_DESCR['title'] ## Sample-wise label
 SAMPLE_DIRS = SAMPLE_DESCR['folder']
-FASTQ = SAMPLE_DESCR['fastq_R1']
-#FASTQ_R2 = SAMPLE_DESCR['fastq_R2']
-#FASTQ = list(FASTQ_R1) + list(FASTQ_R2)
+FASTQ = SAMPLE_DESCR['fastq']
 
 # Verbosity
 if (verbosity >= 1):
@@ -164,34 +162,34 @@ RAW_READNB = [filename.replace('.fastq','_fastq_readnb.txt') for filename in FAS
 # faster than any of these.
 
 ## Aligned reads produced by subread-align (10 times faster than bowtie2).
-SUBREADALIGN_PE_BAM=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe.bam", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+SUBREADALIGN_SE_BAM=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_se.bam", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
 if (verbosity >= 3):
-    print("\tSUBREADALIGN_PE_BAM:\t" + ";".join(SUBREADALIGN_PE_BAM))
+    print("\tSUBREADALIGN_SE_BAM:\t" + ";".join(SUBREADALIGN_SE_BAM))
 
 
 ## split reads acording to their strand (plus or minus)
-SUBREADALIGN_PE_PLUS_BAM=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_plus_sorted_pos.bam", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
-SUBREADALIGN_PE_MIN_BAM=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_min_sorted_pos.bam", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
-SUBREADALIGN_PE_PLUSMIN_BAM = SUBREADALIGN_PE_PLUS_BAM + SUBREADALIGN_PE_MIN_BAM
-SUBREADALIGN_PE_MIN_BAI=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_min_sorted_pos.bam.bai", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
-SUBREADALIGN_PE_PLUS_BAI=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_plus_sorted_pos.bam.bai", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
-SUBREADALIGN_PE_PLUSMIN_BAI = SUBREADALIGN_PE_PLUS_BAI + SUBREADALIGN_PE_MIN_BAI
-SUBREADALIGN_PE_PLUS_TDF=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_plus_sorted_pos.tdf", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
-SUBREADALIGN_PE_MIN_TDF=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_min_sorted_pos.tdf", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
-SUBREADALIGN_PE_PLUSMIN_TDF = SUBREADALIGN_PE_PLUS_TDF + SUBREADALIGN_PE_MIN_TDF
+SUBREADALIGN_SE_PLUS_BAM=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_se_plus_sorted_pos.bam", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+SUBREADALIGN_SE_MIN_BAM=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_se_min_sorted_pos.bam", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+SUBREADALIGN_SE_PLUSMIN_BAM = SUBREADALIGN_SE_PLUS_BAM + SUBREADALIGN_SE_MIN_BAM
+SUBREADALIGN_SE_MIN_BAI=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_se_min_sorted_pos.bam.bai", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+SUBREADALIGN_SE_PLUS_BAI=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_se_plus_sorted_pos.bam.bai", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+SUBREADALIGN_SE_PLUSMIN_BAI = SUBREADALIGN_SE_PLUS_BAI + SUBREADALIGN_SE_MIN_BAI
+SUBREADALIGN_SE_PLUS_TDF=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_se_plus_sorted_pos.tdf", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+SUBREADALIGN_SE_MIN_TDF=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_se_min_sorted_pos.tdf", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+SUBREADALIGN_SE_PLUSMIN_TDF = SUBREADALIGN_SE_PLUS_TDF + SUBREADALIGN_SE_MIN_TDF
 
 ## Genome coverage file (number of reads per genomic window), useful
 ## for visualisation. The bedgraph format is essentially used as
 ## intermediate to obtain TDF files, preferred by IGV.
-SUBREADALIGN_PE_BG=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_sorted_pos.bg", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+SUBREADALIGN_SE_BG=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_se_sorted_pos.bg", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
 if (verbosity >= 3):
-    print("\tSUBREADALIGN_PE_BG:\t" + ";".join(SUBREADALIGN_PE_BG))
+    print("\tSUBREADALIGN_SE_BG:\t" + ";".join(SUBREADALIGN_SE_BG))
 
 ## Genome coverage file (number of reads per genomic window), useful
 ## for visualisation. The TDF format is the standard for IGV.
-SUBREADALIGN_PE_TDF=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_sorted_pos.tdf", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+SUBREADALIGN_SE_TDF=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_se_sorted_pos.tdf", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
 if (verbosity >= 3):
-    print("\tSUBREADALIGN_PE_TDF:\t" + ";".join(SUBREADALIGN_PE_TDF))
+    print("\tSUBREADALIGN_SE_TDF:\t" + ";".join(SUBREADALIGN_SE_TDF))
 
 # #----------------------------------------------------------------#
 # # Trimmed reads
@@ -201,8 +199,8 @@ if (verbosity >= 3):
 # # name per group of lanes: I only glob the first lane, and I use the
 # # list of directories and basenames.
 # SAMPLE_L1R1, PAIRED_DIRS, PAIRED_BASENAMES=glob_multi_dir(SAMPLE_DIRS, "*_L001" + config["suffix"]["reads_fwd"] + ".fastq.gz", config["dir"]["reads"], "_L001" + config["suffix"]["reads_fwd"] + ".fastq.gz")
-# TRIMMED_MERGED_FWD=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_fwd"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
-# TRIMMED_MERGED_REV=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_rev"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+# TRIMMED_MERGED_FWD=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_fwd"] + "_sickle_se_q" + config["sickle"]["threshold"] + ".fastq", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
+# TRIMMED_MERGED_REV=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged" + config["suffix"]["reads_rev"] + "_sickle_se_q" + config["sickle"]["threshold"] + ".fastq", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
 # TRIMMED_MERGED=TRIMMED_MERGED_FWD + TRIMMED_MERGED_REV
 # if verbosity >= 3:
 #     print ("PAIRED_DIRS:\n\t" + "\n\t".join(PAIRED_DIRS))
@@ -222,7 +220,7 @@ if (verbosity >= 3):
 #----------------------------------------------------------------#
 
 #FEATURECOUNTS=expand(config["dir"]["reads"] + "/{sample_dir}/{sample_basename}_merged_" + config["suffix"]["featurecounts"] + ".tab", zip, sample_dir=PAIRED_DIRS, sample_basename=PAIRED_BASENAMES)
-COUNT_FILES=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_featurecounts.tab", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+COUNT_FILES=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_se_featurecounts.tab", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
 if (verbosity >= 3):
     print ("COUNT_FILES:\n\t" + "\n\t".join(COUNT_FILES))
 
@@ -302,13 +300,13 @@ rule all:
 	"""
 	input: GENOME_INDEX, \
             RAW_QC, \
-            RAW_READNB #, \
-            # SUBREADALIGN_PE_BAM, \
-            # SUBREADALIGN_PE_TDF, \
-            # SUBREADALIGN_PE_PLUSMIN_BAM, \
-            # SUBREADALIGN_PE_PLUSMIN_BAI, \
-            # SUBREADALIGN_PE_PLUSMIN_TDF, \
-            # COUNT_FILES #, COUNT_TABLE
+            RAW_READNB, \
+            SUBREADALIGN_SE_BAM, \
+            SUBREADALIGN_SE_TDF, \
+            SUBREADALIGN_SE_PLUSMIN_BAM, \
+            SUBREADALIGN_SE_PLUSMIN_BAI, \
+            SUBREADALIGN_SE_PLUSMIN_TDF, \
+            COUNT_FILES, COUNT_TABLE
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
@@ -319,9 +317,9 @@ rule all:
 #     Run all the required analyses
 #     """
 # #    input: TRIMMED_SUMMARIES ## Still working ?
-# #    input: MERGED_RAWR_QC, RAWR_MERGED, TRIMMED_MERGED, TRIMMED_QC, MAPPED_BOWTIE2_PE_SAM, MAPPED_BOWTIE2_PE_BAM,
+# #    input: MERGED_RAWR_QC, RAWR_MERGED, TRIMMED_MERGED, TRIMMED_QC, MAPPED_BOWTIE2_SE_SAM, MAPPED_BOWTIE2_SE_BAM,
 #     input: GENOMECOV, GENOMECOV_PLUS, GENOMECOV_MINUS
-# #        MAPPED_PE_SORTED,  \
+# #        MAPPED_SE_SORTED,  \
 # #        GENOMECOV, \
 # #        HTSEQ_COUNTS, \
 # #        FEATUREOUNTS, \
@@ -367,10 +365,10 @@ rule all:
 # SAMPLE_DIRS_OL=report_numbered_list(SAMPLE_DIRS)
 # RAWR_MERGED_OL=report_numbered_list(RAWR_MERGED)
 # TRIMMED_MERGED_OL=report_numbered_list(TRIMMED_MERGED)
-# MAPPED_BOWTIE2_PE_SAM_OL=report_numbered_list(MAPPED_BOWTIE2_PE_SAM)
-# MAPPED_BOWTIE2_PE_BAM_OL=report_numbered_list(MAPPED_BOWTIE2_PE_BAM)
-# MAPPED_PE_SORTED_OL = report_numbered_list(MAPPED_PE_SORTED)
-# MAPPED_PE_SORTED_BY_NAME_OL = report_numbered_list(MAPPED_PE_SORTED_BY_NAME)
+# MAPPED_BOWTIE2_SE_SAM_OL=report_numbered_list(MAPPED_BOWTIE2_SE_SAM)
+# MAPPED_BOWTIE2_SE_BAM_OL=report_numbered_list(MAPPED_BOWTIE2_SE_BAM)
+# MAPPED_SE_SORTED_OL = report_numbered_list(MAPPED_SE_SORTED)
+# MAPPED_SE_SORTED_BY_NAME_OL = report_numbered_list(MAPPED_SE_SORTED_BY_NAME)
 # HTSEQ_COUNTS_OL = report_numbered_list(HTSEQ_COUNTS)
 # FEATURECOUNTS_OL = report_numbered_list(FEATURECOUNTS)
 # COUNT_FILES_OL = report_numbered_list(COUNT_FILES)
@@ -444,19 +442,19 @@ rule all:
 #
 #         Sam format (uncompressed)
 #
-#         {MAPPED_BOWTIE2_PE_SAM_OL}
+#         {MAPPED_BOWTIE2_SE_SAM_OL}
 #
 #         Bam format (compressed)
 #
-#         {MAPPED_BOWTIE2_PE_BAM_OL}
+#         {MAPPED_BOWTIE2_SE_BAM_OL}
 #
 #         Bam format (sorted by positions)
 #
-#         {MAPPED_PE_SORTED_OL}
+#         {MAPPED_SE_SORTED_OL}
 #
 #         Bam format (sorted by names)
 #
-#         {MAPPED_PE_SORTED_BY_NAME_OL}
+#         {MAPPED_SE_SORTED_BY_NAME_OL}
 #
 #         Count files
 #         -----------
