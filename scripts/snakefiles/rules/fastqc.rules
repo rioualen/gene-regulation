@@ -24,10 +24,13 @@ rule fastqc:
 
     """
     input: "{data_dir}/{dataset}.fastq"
+    output: "{data_dir}/{dataset}_fastqc/{dataset}_fastqc.html"
+    log: "{data_dir}/{dataset}_fastqc/{dataset}_fastqc.log"
+    benchmark: "{data_dir}/{dataset}_fastqc/{dataset}_fastqc_benchmark.json"
     output: outdir="{data_dir}/{dataset}_fastqc/", benchmark="{data_dir}/{dataset}_fastqc/{dataset}_fastqc_benchmark.json"
     log: "{data_dir}/{dataset}_fastqc/{dataset}_fastqc.log"
     benchmark: "{data_dir}/{dataset}_fastqc/{dataset}_fastqc_benchmark.json"
     params: qsub = config["qsub"] + " -e {data_dir}/{dataset}_fastqc/{dataset}_fastqc_qsub.err -o {data_dir}/{dataset}_fastqc/{dataset}_fastqc_qsub.out", \
-            options = config["fastqc"]["other_options"]
-    shell:"fastqc --outdir {output.outdir} --format fastq {input} {params.options} 2> {log} "
-
+            options = config["fastqc"]["other_options"], \
+            outdir = "{data_dir}/{dataset}_fastqc/"
+    shell:"fastqc --outdir {params.outdir} --format fastq {input} {params.options} 2> {log} "

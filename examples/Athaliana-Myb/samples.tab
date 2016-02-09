@@ -1,14 +1,6 @@
 ; Sample description file
 ; Organism: Pseudomonas aeruginosa
 ; Experiment type: ChIP-seq
-; Input type: genomic
-; 
-; Columns
-;	1	ID		Sample ID
-;	2	condition	Experimental condition (genotype + culture medium)
-;	3	type		Sample type (ChIP, input)
-;	4	chipped		ChIPped protein (factor or mark name)
-;	5	descr		Description
-ID	condition	type	chipped	treat	descr
-GSM1482283	-	chip	-	-
-GSM1482284	-	input	-	-
+ID	SRR
+GSM1482283	SRR1554463
+GSM1482284	SRR1554464

@@ -306,7 +306,7 @@ rule all:
             SUBREADALIGN_SE_PLUSMIN_BAM, \
             SUBREADALIGN_SE_PLUSMIN_BAI, \
             SUBREADALIGN_SE_PLUSMIN_TDF, \
-            COUNT_FILES, COUNT_TABLE
+            COUNT_FILES #, COUNT_TABLE
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 

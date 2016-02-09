@@ -1,0 +1,31 @@
+"""Download sra files using srr ids mentioned in samples.tab
+
+"""
+if not (("dir" in config.keys()) and ("reads_source" in config["dir"].keys())):
+    sys.exit("The parameter config['genome']['reads_source'] should be specified in the config file.")
+
+rule download_sra:
+    """Fetch .sra data from GEO website using SRR IDs.
+    """
+    input: datadir = config['dir']['reads_source']
+    output: sra=config["dir"]["reads_source"] + "{sample}/{srr}.sra"
+    log: config["dir"]["reads_source"] + "{sample}/{srr}_download_sra.log"
+    benchmark: config["dir"]["reads_source"] + "{sample}/{srr}_download_sra_benchmark.json"
+    params: srr="{srr}", \
+        outdir=config["dir"]["reads_source"] + "{sample}", \
+        qsub = config["qsub"] \
+            + " -e " + config["dir"]["reads_source"] + "{sample}/{srr}_download_sra_qsub.err " \
+            + " -o " + config["dir"]["reads_source"] + "{sample}/{srr}_download_rsa_qsub.out "
+    shell: """
+(prefetch --verbose {params.srr}; mv ~/ncbi/public/sra/{params.srr}.sra {params.outdir}) 2> {log}
+"""
+
+
+
+
+
+
+
+
+
+

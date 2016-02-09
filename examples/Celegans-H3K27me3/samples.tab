@@ -1,17 +1,9 @@
 ; Sample description file
-; Organism: Pseudomonas aeruginosa
+; Organism: Caenorhabditis elegans
 ; Experiment type: ChIP-seq
-; Input type: genomic
-; 
-; Columns
-;	1	ID		Sample ID
-;	2	condition	Experimental condition (genotype + culture medium)
-;	3	type		Sample type (ChIP, input)
-;	4	chipped		ChIPped protein (factor or mark name)
-;	5	descr		Description
-ID	condition	type	chipped	treat	descr
-GSM1217457	unknown	input	H3K27me3
-;GSM1217458	unknown	input	H3K27me3
-GSM1217459	unknown	chip	H3K27me3
-;GSM1217460	unknown	chip	H3K27me3
+ID	SRR	type	chipped
+GSM1217457	SRR1198569	input	H3K27me3
+;GSM1217458	SRR1198570	input	H3K27me3
+GSM1217459	SRR1198571	chip	H3K27me3
+;GSM1217460	SRR1198572	chip	H3K27me3
 

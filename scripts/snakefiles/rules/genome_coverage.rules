@@ -93,7 +93,6 @@ rule bedgraph_to_tdf:
             qsub = config["qsub"] + " -e {coverage}_bedgraph_to_tdf_qsub.err -o {coverage}_bedgraph_to_tdf_qsub.out"
     shell: "igvtools totdf {input} {output} {params.genome} 2> {log}"
 
-
 rule bam2wig:    
     """Compute genome coverage from a bam-formatted file with aligned
     reads and produce a wig or bigWig file, the recommended format to
@@ -108,10 +107,15 @@ rule bam2wig:
             chromsize = config["genome"]["chromsize"], \
             qsub = config["qsub"] + " -e {reads}_bam2wig_qsub.err -o {reads}_bam2wig_qsub.out"
     shell: "bam2wig.py -i {input} -s {params.chromsize} -o {params.output_prefix} 2> {log}" 
-    
 
-# rule bedgraph_to_bigwig:
+
+
+## rule bedgraph_to_bigwig:
 # TO BE WRITTEN    
+
+## rule bam_to_tdf:
+# TO BE WRITTEN, TAKING INTO ACCOUNT THE STRAND
+# igvtools help count  to find the proper way
 
 rule bedgraphtobigwig:
     """Convert bedGraph to bigWig format."""

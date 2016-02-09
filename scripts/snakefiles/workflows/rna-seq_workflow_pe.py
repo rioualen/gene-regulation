@@ -43,9 +43,14 @@ import pandas as pd
 
 ## Config file must be specified on the command line, with the option --configfile
 
+if not ("dir" in config.keys()) & ("base" in config["dir"].keys()) :
+    config["dir"]["base"] = "."
+
 workdir: config["dir"]["base"]
 
-# Beware: verbosity messages are incompatible with the flowcharts
+# Define verbosity
+if not ("verbosity" in configkeys()):
+    config["verbosity"] = 0
 verbosity = int(config["verbosity"])
 
 # #================================================================#
@@ -74,10 +79,9 @@ verbosity = int(config["verbosity"])
 #================================================================#
 if not ("dir" in config.keys()) & ("fg_lib" in config["dir"].keys()) :
     sys.exit("The parameter config['dir']['fg_lib'] should be specified in the config file.")
-
 FG_LIB = os.path.abspath(config["dir"]["fg_lib"])
 RULES = os.path.join(FG_LIB, "scripts/snakefiles/rules")
-PYTHON = os.path.join(FG_LIB, "scripts/snakefiles/python_lib")
+PYTHON = os.path.join(FG_LIB, "scripts/python_lib")
 
 include: os.path.join(PYTHON, "util.py")                      ## Python utilities for our snakemake workflows
 include: os.path.join(RULES, "util.rules")                    ## Snakemake utilities
@@ -289,8 +293,6 @@ COUNT_TABLE=config['files']['count_table']
 # include: os.path.join(RULES, "diff_expr.rules")                  ## Differential expression analysis with BioConductor edgeR and DESeq2 packates
 # #include: os.path.join(RULES, "edgeR.rules")                  ## Differential expression analysis with BioConductor edgeR package
 # #include: os.path.join(RULES, "DESeq2.rules")                 ## Differential expression analysis with BioConductor DESeq2 package
-
-
 
 #================================================================#
 #                        Rule all                                #

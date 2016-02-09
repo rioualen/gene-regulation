@@ -1,9 +1,4 @@
-; Design for the peak-calling of ChIP-seq analysis
-; 
-; Columns
-;	1	treatment	ID of the chipped sample (test sample)
-;	2	control		ID of the sample used as input
-;	3	descr		free description
+; Design for the peak-calling of Celegans-H3K27me3
 treatment	control		descr
 GSM1217459	GSM1217457	-
 ;GSM1217460	GSM1217457	-

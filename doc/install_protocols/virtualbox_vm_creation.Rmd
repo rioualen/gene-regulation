@@ -2,35 +2,59 @@
 title: "Creating a virtual machine with Virtualbox"
 author: "Claire Rioualen & Jacques van Helden"
 output:
+  pdf_document:
+    fig_caption: yes
+    highlight: zenburn
+    toc: yes
+    toc_depth: 5
   html_document:
     fig_caption: yes
     highlight: zenburn
     theme: cerulean
     toc: yes
     toc_depth: 5
-  pdf_document:
-    fig_caption: yes
-    highlight: zenburn
-    toc: yes
-    toc_depth: 5
   word_document: default
 ---
 # Creating an NGS VM under Virtualbox
 
-
+<!--
 ## To do
 
 1. Create a separate virtual disk for the data, and explain how to mount it on the virtual machine.
-
+-->
 ## Requirements
 
-1. Virtualbox software can be downloaded from
-    [https://www.virtualbox.org/](https://www.virtualbox.org/)
+### Virtualbox software
 
-2. The VM is built under Ubuntu 14.04 (latest long-term supported version)
+We used VirtualBox 5.0.2, downloadable from [https://www.virtualbox.org/](https://www.virtualbox.org/) or to be installed manually:
+```
+sudo apt-get install virtualbox-5.0
+```
+VirtualBox extension pack can be requested (eg. for handling USB2.0, see 'errors' section).
+```
+wget http://download.virtualbox.org/virtualbox/5.0.2/Oracle_VM_VirtualBox_Extension_Pack-5.0.2.vbox-extpack
+```
 
-    [http://releases.ubuntu.com/14.04/ubuntu-14.04.2-desktop-amd64.iso](http://releases.ubuntu.com/14.04/ubuntu-14.04.2-desktop-amd64.iso)
+<!-- 
+addgroup: The group `vboxusers' already exists as a system group. Exiting.
+insserv: script vboxdrv: service vboxdrv already provided!
+insserv: exiting now!
+update-rc.d: error: insserv rejected the script header
+Stopping VirtualBox kernel modules ...done.
+Uninstalling old VirtualBox DKMS kernel modules ...done.
+Trying to register the VirtualBox kernel modules using DKMS ...done.
+Starting VirtualBox kernel modules ...done.
+insserv: script vboxdrv: service vboxdrv already provided!
+insserv: script vboxdrv: service vboxdrv already provided!
+insserv: script vboxdrv: service vboxdrv already provided!
+-->
 
+### Base Ubuntu image 
+
+In this tutorial we used Ubuntu 14.04.3, latest long-term supported version.
+```
+wget http://releases.ubuntu.com/14.04/ubuntu-14.04.3-desktop-amd64.iso
+```
 ------------------------------------------
 
 
@@ -44,7 +68,7 @@ output:
 
 - Name and operating system
 
-    - Name: reg-genomics-vm-2015-07
+    - Name: gene-regulation
     - Type: Linux
     - Version: Ubuntu (64 bits)
     
@@ -52,30 +76,40 @@ output:
 
 - Hard drive:	*Create a virtual hard drive now*. 
 
+- Hard drive file type: *VDI* (VirtualBox Disk Image).
+
+
+<!--
 - Hard drive file type: *VMDK* (Virtual Machine Disk). 
 
     I chose this option because it ensures a wider compatibility with other OS and Virtual Machine management systems. 
 
 	   Another potential advantage of VMDK is that it enables to split virtualdisks in files <=2Gb, which is convenient to store them on FAT partitions. 
+-->
 
 - Storage on physical hard drive
     - Select *Dynamically allocated*
+    
+<!--
     - Activate the option *Split into files less than 2Gb*, which allows to store the VM on FAT partitions for Windows host machines.
-
+-->
 
 - File location and size
-    - name of virtual hard drive file:    reg-genomics-hdd
-    - max size of virtual hard drive:	    18GB
+    - name of virtual hard drive file:    gene-regulation-harddrive
+    - max size of virtual hard drive:	    100GB
     - click on **Create** button
 
+*Note:* you should adapt the virtual hard drive size to your needs. Be aware that it's difficult to extend later on, so you should aim larger than expected. Since the size is dynamically allocated, it won't take up too much space until you fill it. 
+<!--
         Beware: the size has to be larger than you real needs, because Ubuntu will automatically create some big  partitions (/dev and /run/shm). Since we allow dynamical memory allocation, it is fine to set the max size to 18Gb, which will be grossly assigned as follows:
 
         - max 14Gb for the root partition /
         - 2Gb for /dev
 	      - 2Gb for /run/user
+-->
 
 
-
+...
 
 At this stage, the VM has been created and needs to be configured before installing the operating system. 
 
@@ -86,7 +120,7 @@ At this stage, the VM has been created and needs to be configured before install
 
 Before configuring the virtual machine, we need to tell VirtualBox how it will enable your local virtual machines to interact with their host (the operating system of the machine on which the VM is running).
 
-1. Open **VirtualBox Preferences**
+1. Open *VirtualBox > File > Preferences...*
 
 2. Open the tab *Network* > *Host-only Networks*
      - click on the "+" icon
@@ -107,7 +141,7 @@ Before configuring the virtual machine, we need to tell VirtualBox how it will e
 
 ## Configuration of the virtual machine
 
-In the VirtualBox main window, select the newly created virtual machine, and click on the **Settings** button. We will successively select the different tabs and configure them. 
+In the VirtualBox main window, select the newly created virtual machine, and click on the **Settings** button. 
 
 ### Network
 
@@ -115,7 +149,7 @@ VirtualBox offers many alternative ways to configure network communications betw
 
 To get more information about network settings: 
 
-* VirtualBox manual page: [https://www.virtualbox.org/manual/ch06.html](https://www.virtualbox.org/manual/ch06.html)).
+* VirtualBox manual page: [https://www.virtualbox.org/manual/ch06.html](https://www.virtualbox.org/manual/ch06.html)
 * An excellent tutorial: [http://christophermaier.name/blog/2010/09/01/host-only-networking-with-virtualbox](http://christophermaier.name/blog/2010/09/01/host-only-networking-with-virtualbox)
 
 We present here one possible way to configure your Virtual machine, but this should be adapted to the particular security/flexibility requirements of the network where the maching has to run. 
@@ -132,7 +166,7 @@ In the VM settings, select tne *Network* tab. VirtualBox enables you to specify 
 #### Additional networks (optional)
 
 
-**BEWARE!** If you activate his adaptor your VM will be visible from external computers in the same network as the host  machine.
+**BEWARE!** If you activate this adaptor your VM will be visible from external computers in the same network as the host  machine.
 
 See information at: [https://www.virtualbox.org/manual/ch06.html#network_bridged](https://www.virtualbox.org/manual/ch06.html#network_bridged)
 
@@ -146,10 +180,16 @@ Note: you can also activate a third adapter, for example to support both an ethe
 
 ### Storage
 
-Click on the **Empty** disc icon in the storage tree.  Select the disc icon on the right and fetch the downloaded \*.iso image  (see **Requirements**)
-Click on *OK*
+Click on the **Empty** disc icon in the storage tree.  Select the disc icon on the right and fetch the downloaded \*.iso image  (see **Requirements**).
+Click on *OK*.
 
-You can now start the VM. 
+...
+
+**You can now start the VM. **
+
+This can raise several errors, if so see dedicated section below. 
+
+
 
 ## Operating system installation
 
@@ -169,10 +209,10 @@ You can now start the VM.
       - French - French
 
 * Who are you ?
-      - Your name			        Regulatory Genomics
-      - Your computer's name	reg-genomics
-      - Pick a username 		  rg
-      - Choose a password     reg-genomics
+      - Your name:			        gene-regulation
+      - Your computer's name:	gene-regulation-virtual
+      - Pick a username: 		  gr
+      - Choose a password:     vm-user-rg
       - (Activate the option Log in automatically)
       
 Restart once installation is completed. 
@@ -183,9 +223,9 @@ Run it.
 The VirtualBox Guest Additions will provide closer integration between host and guest and improve the interactive performance of guest systems.
 Reboot again to see the new display.
 
-## Ubuntu tips
+## Hacks and tricks
 
-### Shell coloring
+### Ubuntu shell coloring
 
 ```
 nano ~/.bashrc
@@ -201,6 +241,15 @@ force_color_prompt=yes
 source ~/.bashrc
 ```
 
+### Clipboard sharing between guest and host
+
+For the desktop version of Ubuntu, it is convenient to enable copy-paste between the guest and the host.
+
+- Select the VM
+- In the VirtualBox menu, select *Machine* -> *Settings*
+- In panel *General*, select the tab *Advanced*
+- Set *Shared clipboard* to *Bidirectional*
+
 
 ## Connection to VM through the host machine. 
 
@@ -211,7 +260,7 @@ ifconfig ## get the IP
 ```
 **In the host's terminal:**
 ```
-ssh rg@192.168.56.101 ## access the VM by ssh using its IP address
+ssh gene-regulation@192.168.56.101 ## access the VM by ssh using its IP address
 ```
 **Note:** If you're running or have been running several virtual machines, you might encounter problems with the host's known keys
 when trying to connect to your VM via `ssh`, such as: 
@@ -226,27 +275,16 @@ In such case, just proceed with the recommended command, which will remove previ
 ```
 ssh-keygen -f "$HOME/.ssh/known_hosts" -R 192.168.56.101
 ```
-Once you're connected to the VM via `ssh`, proceed with:
+Once you're connected to the VM via `ssh`, you can upload your ssh parameters with:
 ```
-rsync -ruptvl {me}@{myIP}:.ssh .
+rsync -ruptvl gene-regulation@192.168.56.101:.ssh .
 ssh-agent > ~/agent
 source ~/agent
 ssh-add
 ```
 
-**/!\\ TODO**
-15/08/31 Add visudo edition? How is it not yet?
-
+<!--
 # VirtualBox hacks and tricks
-
-## Clipboard sharing between guest and host
-
-For the desktop version of Ubuntu, it is convenient to enable copy-paste between the guest and the host.
-
-- Select the VM
-- In the VirtualBox menu, select *Machine* -> *Settings*
-- In panel *General*, select the tab *Advanced*
-- Set *Shared clipboard* to *Bidirectional*
 
 ## Useful commands to manage VirtualBox
 
@@ -292,6 +330,55 @@ VBoxManage clonehd "reg-genomics-150730-hdd.vmdk" "cloned.vdi" --format vdi
 VBoxManage modifyhd "cloned.vdi" --resize 100000
 VBoxManage clonehd "cloned.vdi" "resized-reg-genomics-150730-hdd.vmdk" --format vmdk
 ```
+-->
+
+
+## VirtualBox connection errors
+
+### When starting VirtualBox
+
+```
+Kernel driver not installed (rc=-1908)
+
+The VirtualBox Linux kernel driver (vboxdrv) is either not loaded or there is a permission problem with /dev/vboxdrv. Please reinstall the kernel module by executing
+
+'/etc/init.d/vboxdrv setup'
+
+as root. If it is available in your distribution, you should install the DKMS package first. This package keeps track of Linux kernel changes and recompiles the vboxdrv kernel module if necessary.
+
+```
+
+Proposed solution: type command in host terminal and then restart the VM. 
+```
+sudo /etc/init.d/vboxdrv setup
+```
+
+### When starting the VM
+
+```
+Implementation of the USB 2.0 controller not found!
+Because the USB 2.0 controller state is part of the saved VM state, the VM cannot be started. To fix this problem, either install the 'Oracle VM VirtualBox Extension Pack' or disable USB 2.0 support in the VM settings (VERR_NOT_FOUND).
+
+
+Result Code: 
+NS_ERROR_FAILURE (0x80004005)
+Component: 
+ConsoleWrap
+Interface: 
+IConsole {872da645-4a9b-1727-bee2-5585105b9eed}
+```
+
+Proposed solutions: 
+
+* Download Oracle VBox Extension pack: did not work for us. 
+```
+wget http://download.virtualbox.org/virtualbox/5.0.2/Oracle_VM_VirtualBox_Extension_Pack-5.0.2.vbox-extpack
+```
+
+* Deactivating USB 2.0 controller:
+    * VM settings > *USB* > Untick *Enable usb controller* or set it to USB 1.1 (same effect).
+
+
 
 
 # Then...

@@ -134,7 +134,7 @@ MOTIFS=expand(expand("{treat}_vs_{control}/{{peakcaller}}/peak-motifs/{treat}_vs
 # Quality control
 #----------------------------------------------------------------#
 
-RAW_QC = expand(RESULTS_DIR + "{samples}/{samples}_fastqc/", samples=SAMPLE_IDS)
+RAW_QC = expand(RESULTS_DIR + "{samples}/{samples}_fastqc/{samples}_fastqc.html", samples=SAMPLE_IDS)
 RAW_READNB = expand(RESULTS_DIR + "{samples}/{samples}_fastq_readnb.txt", samples=SAMPLE_IDS)
 
 TRIM = expand(RESULTS_DIR + "{trimming}.fastq", trimming=TRIMMING)

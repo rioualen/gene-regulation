@@ -1,3 +1,6 @@
+if not "r_libs" in config["dir"].keys():
+    sys.exit("Error: please specify the R libs directory.")
+
 if not "spp" in config.keys():
     config["spp"] = {}
 
@@ -19,6 +22,7 @@ rule spp:
 	input: 	treatment="{result_dir}/{treatment}/{treatment}_{aligner}.bam", \
             	control="{result_dir}/{control}/{control}_{aligner}.bam"
 	params:	fdr = config["spp"]["fdr"], \
+            Rlibs=config["dir"]["r_libs"], \
 			qsub=config["qsub"] \
                   + " -e {result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + "_qsub.err" \
                   + " -o {result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + "_qsub.out" 
@@ -35,7 +39,7 @@ rule spp:
 		R("""sink("{log}")
 
 		library(caTools)
-		library(spp)
+		library(spp, lib.loc="{params.Rlibs}")
 
 		getwd()
 
