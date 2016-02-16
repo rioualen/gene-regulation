@@ -24,6 +24,7 @@
     snakefile: "scripts/snakefiles/workflows/factor_workflow.py"                # required for flowcharts generation; maybe this should be revised
 
   dir: 
+    fg_lib: "."
     reads_source: "/root/mydisk/data/"                                        # required: dir containing raw data organized in sub directories named after the samples
     results: "/root/mydisk/results/"                                     # required: path where all result files should be stored
     reports: "/root/mydisk/results/"                                     # required: where to store reports
