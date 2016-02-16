@@ -1,0 +1,21 @@
+rule split_bam_strands:
+    """Split a bam file in two separate bam files containing respectively 
+    the reads on the plus and minus strand. """
+    input: "{reads}.bam"
+    output: min="{reads}_min.bam", plus="{reads}_plus.bam"
+    params: qsub = config["qsub"] \
+            + " -e {reads}_split_bam_strands_qsub.err " \
+            + " -o {reads}_split_bam_strands_qsub.out"
+    log: "{reads}_split_bam_strands.log"
+    benchmark: "{reads}_split_bam_strands_benchmark.json"
+    shell: """
+(samtools  view -f99 -hb {input} > {output.min}_99.bam
+samtools  view -f147 -hb {input} > {output.min}_147.bam
+samtools  view -f83 -hb {input} > {output.plus}_83.bam
+samtools  view -f163 -hb {input} > {output.plus}_163.bam
+
+samtools merge -h {output.min}_99.bam  {output.min} {output.min}_99.bam {output.min}_147.bam
+samtools merge -h {output.plus}_83.bam {output.plus} {output.plus}_83.bam {output.plus}_163.bam
+
+rm -f {output.min}_99.bam  {output.min}_147.bam {output.plus}_83.bam {output.plus}_163.bam) 2> {log}
+"""
