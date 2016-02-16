@@ -7,7 +7,7 @@
     Optional parameters, if not provided, are automatically set to the default value provided with the given program.
 
   author: "Claire Rioualen"
-  qsub: "" 
+  qsub: ""
   genome:
     organism: "Arabidopsis thaliana"
     size: "135000000"                                                           # required: if using macs2, macs14, homer...
@@ -18,12 +18,13 @@
     url: "ftp://ftp.ensemblgenomes.org/pub/plants/release-30/fasta/arabidopsis_thaliana/dna/Arabidopsis_thaliana.TAIR10.30.dna.genome.fa.gz"            # required for genome download: provide url to .fa.gz
 
 
-  files: 
+  files:
+    lane_merging: "examples/Athaliana-Myb/merge.tab"
     samples: "examples/Athaliana-Myb/samples.tab"                               # required: has to contain at least sample ids
     design: "examples/Athaliana-Myb/design.tab"                                 # required: has to contain at least ids of pairs of samples to be compared
     snakefile: "scripts/snakefiles/workflows/factor_workflow.py"                # required for flowcharts generation; maybe this should be revised
 
-  dir: 
+  dir:
     fg_lib: "."
     reads_source: "/root/mydisk/data/"                                        # required: dir containing raw data organized in sub directories named after the samples
     results: "/root/mydisk/results/"                                     # required: path where all result files should be stored
@@ -31,14 +32,14 @@
     genomes: "/root/mydisk/genomes/"                                                   # required: where to store genomes
     r_libs: "~/bin/R-packages/"                                                 # required: where to look for installed R libraries (spp, bPeaks...)
 
-  reports: 
+  reports:
     dag: "/root/mydisk/results/dag"
     rulegraph: "/root/mydisk/results/rule"
 
   fastqc: 
     other_options: ""                                                           # optional (def: empty string)
 
-  bwa: 
+  bwa:
     dir: "/data/genomes/TAIR10/BWAIndex/"                                       # optional: where to index the genome if needed, where to look for index if already existing (def: <genome dir>/BWAIndex)
     threads: "10"                                                               # optional: number of threads to speed up calculations (def: 1)
 
@@ -47,7 +48,7 @@
     threads: "10"                                                               # optional: number of threads to speed up calculations (def: 1)
     max_mismatches: "1"                                                         # optional (default: 0)
 
-  samtools: 
+  samtools:
     sort_by_name: ""                                                            # optional
 
   macs14:
