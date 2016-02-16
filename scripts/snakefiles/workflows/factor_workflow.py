@@ -79,7 +79,7 @@ include: os.path.join(RULES, "get_chrom_sizes.rules")
 include: os.path.join(RULES, "homer.rules")
 include: os.path.join(RULES, "macs2.rules")
 include: os.path.join(RULES, "macs14.rules")
-#include: os.path.join(RULES, "merge_lanes.rules")               ## Merge lanes by sample, based on a tab-delimited file indicainclude: os.path.join(RULES, "peak_motifs.rules")
+include: os.path.join(RULES, "merge_lanes.rules")               ## Merge lanes by sample, based on a tab-delimited file indicainclude: os.path.join(RULES, "peak_motifs.rules")
 #include: os.path.join(RULES, "spp.rules")
 include: os.path.join(RULES, "sra_to_fastq.rules")
 #include: os.path.join(RULES, "swembl.rules")
@@ -144,8 +144,11 @@ MOTIFS=expand(expand("{treat}_vs_{control}/{{peakcaller}}/peak-motifs/{treat}_vs
 
 ## Data import & merging.
 
+ruleorder: sra_to_fastq > merge_lanes
+
 DOWNLOAD = expand(READS + "{samples}/{srr}.sra", zip, samples=SAMPLE_IDS, srr=SRR_IDS)
 IMPORT = expand(RESULTS_DIR + "{samples}/{srr}.fastq", zip, samples=SAMPLE_IDS, srr=SRR_IDS)
+MERGE = expand(RESULTS_DIR + "{samples}/{samples}.fastq" samples=SAMPLE_IDS)
 
 # Verbosity
 if (verbosity >= 3):
@@ -202,6 +205,6 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: DOWNLOAD, IMPORT, RAW_QC, MAPPING#, PEAKS#, PEAK_MOTIFS#GRAPHICS, CHROM_SIZES, PEAKS, TDF
+	input: DOWNLOAD, IMPORT, MERGE#, RAW_QC, MAPPING#, PEAKS#, PEAK_MOTIFS#GRAPHICS, CHROM_SIZES, PEAKS, TDF
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
