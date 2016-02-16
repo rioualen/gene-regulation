@@ -148,7 +148,7 @@ ruleorder: sra_to_fastq > merge_lanes
 
 DOWNLOAD = expand(READS + "{samples}/{srr}.sra", zip, samples=SAMPLE_IDS, srr=SRR_IDS)
 IMPORT = expand(RESULTS_DIR + "{samples}/{srr}.fastq", zip, samples=SAMPLE_IDS, srr=SRR_IDS)
-MERGE = expand(RESULTS_DIR + "{samples}/{samples}.fastq" samples=SAMPLE_IDS)
+MERGE = expand(RESULTS_DIR + "{samples}/{samples}.fastq", samples=SAMPLE_IDS)
 
 # Verbosity
 if (verbosity >= 3):
