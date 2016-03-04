@@ -8,7 +8,7 @@ if (verbosity >= 3):
     print("\tconfig['dir']['reads_source']\t" + config["dir"]["reads_source"])
     print("\tconfig['dir']['results']\t" + config["dir"]["results"])
 
-rule import_sra_to_fastq:
+rule sra_to_fastq:
 	"""Converts SRA files in fastq format with SRA toolkit. 
 	
 	TODO locally in workflow: 
