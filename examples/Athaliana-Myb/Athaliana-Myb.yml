@@ -18,12 +18,14 @@
     url: "ftp://ftp.ensemblgenomes.org/pub/plants/release-30/fasta/arabidopsis_thaliana/dna/Arabidopsis_thaliana.TAIR10.30.dna.genome.fa.gz"            # required for genome download: provide url to .fa.gz
 
 
-  files: 
+  files:
+    lane_merging: "examples/Athaliana-Myb/merge.tab"
     samples: "examples/Athaliana-Myb/samples.tab"                               # required: has to contain at least sample ids
     design: "examples/Athaliana-Myb/design.tab"                                 # required: has to contain at least ids of pairs of samples to be compared
     snakefile: "scripts/snakefiles/workflows/factor_workflow.py"                # required for flowcharts generation; maybe this should be revised
 
-  dir: 
+  dir:
+    fg_lib: "."                                                                 # required
     reads_source: "/data/Athaliana-Myb/"                                        # required: dir containing raw data organized in sub directories named after the samples
     results: "/data/results/Athaliana-Myb/"                                     # required: path where all result files should be stored
     reports: "/data/results/Athaliana-Myb/"                                     # required: where to store reports
@@ -75,7 +77,7 @@
     fdr: "0.01"                                                                 # optional (def: 0.001)
 
   spp: 
-    fdr: "0.001"                                                             # optional (def: 0.01)
+    fdr: "0.001"                                                                # optional (def: 0.01)
 
   bPeaks: 
     IPcoeff: "2"                                                                # optional (def: 2)
