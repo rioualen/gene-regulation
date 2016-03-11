@@ -1,5 +1,30 @@
+"""Peak-calling with SPP (R package).
+    Input: bam
+    Output: narrowPeak format (bed-like format)
+
+Usage example: 
+    PEAKCALLER= "spp-fdr" + config["spp"]["fdr"]
+    PEAKCALLING=expand(expand(PEAKS_DIR + "{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER)
+    PEAKS = expand("{peakcalling}.bed", peakcalling=PEAKCALLING)
+        
+Required parameters:
+    config["qsub"]
+    config["dir"]["r_libs"]
+
+Optional parameters:
+    config["spp"]["fdr"]
+
+
+Contributors: 
+    Claire Rioualen
+"""
+
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
 if not "r_libs" in config["dir"].keys():
-    sys.exit("Error: please specify the R libs directory.")
+    sys.exit("Error: please specify the R libs directory in the config file.")
 
 if not "spp" in config.keys():
     config["spp"] = {}
@@ -7,81 +32,83 @@ if not "spp" in config.keys():
 if not "fdr" in config["spp"].keys():
     config["spp"]["fdr"] = "0.01"
 
+#TODO choice between narrow/broad peaks
+#if not "type" in config["spp"].keys():
+#    config["spp"]["type"] = "narrow"
+
+# Define paths
+if not "samples" in config["dir"].keys():
+    config["dir"]["samples"] = config["dir"]["results"]
+
+if not "peaks" in config["dir"].keys():
+    config["dir"]["peaks"] = config["dir"]["results"]
+
+suffix = "spp-fdr" + config["spp"]["fdr"]                                       # check consistency with the list of peak-callers in the workflow file
+
+
 rule spp:
-	"""Peak-calling with SPP.
-	Output in .narrowPeak format (bed-like format).
+    input:
+        treatment = config["dir"]["samples"] + "{treatment}/{treatment}{preprocess}_sorted_pos.bam", \
+        control = config["dir"]["samples"] + "{control}/{control}{preprocess}_sorted_pos.bam"
+    output:
+        peaks = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_peaks.narrowPeak", \
+        peaks_bed = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + ".bed", \
+#        peaks_broadPeak = "{result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".broadPeak", \
+    params:
+        fdr = config["spp"]["fdr"], \
+        Rlibs = config["dir"]["r_libs"], \
+        qsub=config["qsub"] \
+          + " -e " + config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_qsub.err" \
+          + " -o " + config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_qsub.out"
+    log: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + ".log"
+    benchmark: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_benchmark.json"
+    run:
+        R("""sink("{log}")
 
-	Required parameters:
-		config["qsub"]
-		config["spp"]["fdr"]
+        library(caTools)
+        library(spp, lib.loc="{params.Rlibs}")
 
-	Usage: 
-		PEAKS_SPP = expand(expand(RESULTS_DIR + "{treat}_vs_{ctrl}/spp-fdr" + config["spp"]["fdr"] + "/{treat}_vs_{ctrl}{{trimming}}_{{aligner}}_spp.narrowPeak", 
-	               zip, treat=TREATMENT, ctrl=CONTROL), trimming=config["sickle"]["suffix"], aligner=config["bwa"]["suffix"])
-	"""
-	input: 	treatment="{result_dir}/{treatment}/{treatment}_{aligner}.bam", \
-            	control="{result_dir}/{control}/{control}_{aligner}.bam"
-	params:	fdr = config["spp"]["fdr"], \
-            Rlibs=config["dir"]["r_libs"], \
-			qsub=config["qsub"] \
-                  + " -e {result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + "_qsub.err" \
-                  + " -o {result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + "_qsub.out" 
-	log: "{result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".log"
-	benchmark: "{result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + "_benchmark.json"
-	output: peaks_narrowPeak = "{result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".narrowPeak", \
-		peaks_bed = "{result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".bed", \
-		pdf = "{result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".crosscorrelation.pdf", \
-		sm_density_wig = "{result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".smoothed.density.wig", \
-		enrich_est_wig = "{result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".enrichment.estimates.wig", \
-		peaks_broadPeak = "{result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".broadPeak", \
-		bdg_positions = "{result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".binding.positions.txt"
-	run:
-		R("""sink("{log}")
-
-		library(caTools)
-		library(spp, lib.loc="{params.Rlibs}")
-
-		getwd()
+        getwd()
 
 
-		treatment.data <- read.bam.tags("{input.treatment}")
-		control.data <- read.bam.tags("{input.control}")
+        treatment.data <- read.bam.tags("{input.treatment}")
+        control.data <- read.bam.tags("{input.control}")
 
-		binding.characteristics <- get.binding.characteristics(treatment.data,srange=c(50,500),bin=5, accept.all.tags = T) 
+        binding.characteristics <- get.binding.characteristics(treatment.data,srange=c(50,500),bin=5, accept.all.tags = T) 
 
-		pdf(file="{output.pdf}",width=5,height=5)
-		par(mar = c(3.5,3.5,1.0,0.5), mgp = c(2,0.65,0), cex = 0.8)
-		plot(binding.characteristics$cross.correlation,type='l',xlab="strand shift",ylab="cross-correlation")
-		abline(v=binding.characteristics$peak$x,lty=2,col=2)
-		dev.off()
+        pdf(file="{output.pdf}",width=5,height=5)
+        par(mar = c(3.5,3.5,1.0,0.5), mgp = c(2,0.65,0), cex = 0.8)
+        plot(binding.characteristics$cross.correlation,type='l',xlab="strand shift",ylab="cross-correlation")
+        abline(v=binding.characteristics$peak$x,lty=2,col=2)
+        dev.off()
 
-		treatment.data.info <- select.informative.tags(treatment.data)
-		control.data.info <- select.informative.tags(control.data)
+        treatment.data.info <- select.informative.tags(treatment.data)
+        control.data.info <- select.informative.tags(control.data)
 
-		treatment.data.qua <- remove.local.tag.anomalies(treatment.data.info)
-		control.data.qua <- remove.local.tag.anomalies(control.data.info)
+        treatment.data.qua <- remove.local.tag.anomalies(treatment.data.info)
+        control.data.qua <- remove.local.tag.anomalies(control.data.info)
 
-		tag.shift <- round(binding.characteristics$peak$x/2)
-		smoothed.density <- get.smoothed.tag.density(treatment.data.qua,control.tags=control.data.qua,bandwidth=200,step=100,tag.shift=tag.shift)
-		writewig(smoothed.density,"{output.sm_density_wig}","s_1 smoothed, background-subtracted tag density")
+        tag.shift <- round(binding.characteristics$peak$x/2)
+        smoothed.density <- get.smoothed.tag.density(treatment.data.qua,control.tags=control.data.qua,bandwidth=200,step=100,tag.shift=tag.shift)
+        writewig(smoothed.density,"{output.sm_density_wig}","s_1 smoothed, background-subtracted tag density")
 
-		enrichment.estimates <- get.conservative.fold.enrichment.profile(treatment.data.qua,control.data.qua,fws=500,step=100,alpha=0.01)
-		writewig(enrichment.estimates,"{output.enrich_est_wig}","conservative fold-enrichment/depletion estimates shown on log2 scale")
+        enrichment.estimates <- get.conservative.fold.enrichment.profile(treatment.data.qua,control.data.qua,fws=500,step=100,alpha=0.01)
+        writewig(enrichment.estimates,"{output.enrich_est_wig}","conservative fold-enrichment/depletion estimates shown on log2 scale")
 
-		broad.clusters <- get.broad.enrichment.clusters(treatment.data.qua, control.data.qua, window.size=1e3, z.thr=3,tag.shift=round(binding.characteristics$peak$x/2))
-		write.broadpeak.info(broad.clusters,"{output.peaks_broadPeak}")
+        broad.clusters <- get.broad.enrichment.clusters(treatment.data.qua, control.data.qua, window.size=1e3, z.thr=3,tag.shift=round(binding.characteristics$peak$x/2))
+        write.broadpeak.info(broad.clusters,"{output.peaks_broadPeak}")
 
-		fdr <- {params.fdr}
-		detection.window.halfsize <- binding.characteristics$whs;
-		bp <- find.binding.positions(signal.data=treatment.data.qua,control.data=control.data.qua,fdr=fdr,whs=detection.window.halfsize)
-		print(paste("detected",sum(unlist(lapply(bp$npl,function(d) length(d$x)))),"peaks"))
-		output.binding.results(bp,"{output.bdg_positions}");
+        fdr <- {params.fdr}
+        detection.window.halfsize <- binding.characteristics$whs;
+        bp <- find.binding.positions(signal.data=treatment.data.qua,control.data=control.data.qua,fdr=fdr,whs=detection.window.halfsize)
+        print(paste("detected",sum(unlist(lapply(bp$npl,function(d) length(d$x)))),"peaks"))
+        output.binding.results(bp,"{output.bdg_positions}");
 
-		#bp <- add.broad.peak.regions(treatment.data.qua, control.data.qua, bp, window.size=1000,z.thr=3)
-		write.narrowpeak.binding(bp,"{output.peaks_narrowPeak}")
+        #bp <- add.broad.peak.regions(treatment.data.qua, control.data.qua, bp, window.size=1000,z.thr=3)
+        write.narrowpeak.binding(bp,"{output.peaks_narrowPeak}")
 
-		bed <- read.table("{output.peaks_narrowPeak}")
-		write.table(bed, "{output.peaks_bed}", row.names=FALSE, col.names=FALSE, sep="\t", quote=FALSE)
+        bed <- read.table("{output.peaks_narrowPeak}")
+        write.table(bed, "{output.peaks_bed}", row.names=FALSE, col.names=FALSE, sep="\t", quote=FALSE)
 
-		sink()
-		""") 
+        sink()
+        """) 
