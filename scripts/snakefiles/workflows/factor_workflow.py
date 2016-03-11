@@ -71,6 +71,8 @@ include: os.path.join(RULES, "bam_to_bed.rules")
 include: os.path.join(RULES, "bowtie2_index.rules")
 include: os.path.join(RULES, "bowtie2_se.rules")
 include: os.path.join(RULES, "bPeaks.rules")
+include: os.path.join(RULES, "bwa_index.rules")
+include: os.path.join(RULES, "bwa_se.rules")
 include: os.path.join(RULES, "count_reads.rules")
 #include: os.path.join(RULES, "download_from_GEO.rules")
 include: os.path.join(RULES, "fastqc.rules")
@@ -109,10 +111,10 @@ TREATMENT = DESIGN['treatment']
 CONTROL = DESIGN['control']
 
 ## Genome
-GENOME = config["genome"]["version"]
-GENOME_DIR = config["genome"]["dir"]
-CHROM_SIZES = expand(GENOME_DIR + "{genome}.genome", genome=GENOME)
-config["genome"]["chromsize"] = CHROM_SIZES
+#GENOME = config["genome"]["version"]
+#GENOME_DIR = config["genome"]["dir"]
+#CHROM_SIZES = expand(GENOME_DIR + "{genome}.genome", genome=GENOME)
+#config["genome"]["chromsize"] = CHROM_SIZES
 
 ## Data & results dir
 
@@ -177,13 +179,14 @@ RAW_READNB = expand(SAMPLE_DIR + "{samples}/{samples}_fastq_readnb.txt", samples
 #----------------------------------------------------------------#
 
 
-ALIGNER=["bowtie2"]
+ALIGNER=["bowtie2", "bwa"]
 ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)
 
 
+INDEX = expand(config["dir"]["genomes"] + config["genome"]["version"] + "/{aligner}/" + config["genome"]["version"] + ".fa", aligner=ALIGNER)
 
-BWA_INDEX = expand(config["dir"]["genomes"] + "{genome}/BWAIndex/{genome}.fa.bwt", genome=GENOME)
-BOWTIE2_INDEX = expand(config["dir"]["genomes"] + "{genome}/Bowtie2Index/{genome}.fa.1.bt2", genome=GENOME)
+#BWA_INDEX = expand(config["dir"]["genomes"] + "{genome}/BWAIndex/{genome}.fa.bwt", genome=GENOME)
+#BOWTIE2_INDEX = expand(config["dir"]["genomes"] + "{genome}/Bowtie2Index/{genome}.fa.1.bt2", genome=GENOME)
 
 MAPPING = expand("{alignment}.sam", alignment=ALIGNMENT)
 
@@ -234,6 +237,6 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: IMPORT, RAW_QC, MAPPING, PEAKS, PEAK_MOTIFS, GRAPHICS#, CHROM_SIZES, PEAKS, TDF
+	input: IMPORT, INDEX, MAPPING#, PEAKS, PEAK_MOTIFS, GRAPHICS#, CHROM_SIZES, PEAKS, TDFRAW_QC, 
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
