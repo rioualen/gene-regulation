@@ -3,25 +3,31 @@ Input: bed (others supported)
 Output: bed
 
 Usage example: 
-    PEAKCALLER="macs14-pval" + config["macs14"]["pval"] + "_peaks"
+    PEAKCALLER="macs14-pval" + config["macs14"]["pval"]
     PEAKCALLING=expand(expand("{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER)
     PEAKS = expand(RESULTS_DIR + "{peakcalling}.bed", peakcalling=PEAKCALLING)
 
 Required parameters:
     config["genome"]["size"]
+    config["qsub"]
+
 Optional parameters:
     config["macs14"]["pval"]
     config["macs14"]["keep_dup"]
     config["macs14"]["bandwidth"]
     config["macs14"]["mfold"]
     config["macs14"]["other_options"]
-"""
-# Contributors: 
-#        Lucie Khamvongsa, Claire Rioualen
 
-# Set defaults params in case they're not defined in config file. 
+Contributors: 
+    Lucie Khamvongsa, Claire Rioualen
+"""
+
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
 if not "size" in config["genome"].keys():
-    sys.exit("The parameter genome size must be defined in the JSON file")
+    sys.exit("The parameter genome size must be defined in the config file")
 
 if not "macs14" in config.keys():
     config["macs14"] = {}
@@ -41,14 +47,24 @@ if not "keep_dup" in config["macs14"].keys():
 if not "other_options" in config["macs14"].keys():
     config["macs14"]["other_options"] = ""
 
-# Rule
+# Define paths
+if not "samples" in config["dir"].keys():
+    config["dir"]["samples"] = config["dir"]["results"]
+
+if not "peaks" in config["dir"].keys():
+    config["dir"]["peaks"] = config["dir"]["results"]
+
+suffix = "macs14-pval" + config["macs14"]["pval"]                    # check consistency with the list of peak-callers in the workflow file
+
 rule macs14:
     input:
-        treatment="{result_dir}/{treatment}/{treatment}_{aligner}.bed", \
-        control="{result_dir}/{control}/{control}_{aligner}.bed"
+        treatment = config["dir"]["samples"] + "{treatment}/{treatment}{preprocess}_sorted_pos.bed", \
+        control=config["dir"]["samples"] + "{control}/{control}{preprocess}_sorted_pos.bed"
+    output:
+        peaks_bed = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + ".bed"
     params:
-        outdir="{result_dir}/{treatment}_vs_{control}/macs14-pval{pval}_peaks/", \
-        name="{treatment}_vs_{control}_{aligner}_macs14-pval{pval}", \
+        outdir = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix, \
+        name = "{treatment}_vs_{control}{preprocess}_" + suffix, \
         pval = config["macs14"]["pval"], \
         keep_dup = config["macs14"]["keep_dup"], \
         mfold = config["macs14"]["mfold"], \
@@ -56,20 +72,14 @@ rule macs14:
         other_options = config["macs14"]["other_options"], \
         genome_size = config["genome"]["size"], \
         qsub=config["qsub"] \
-          + " -e {result_dir}/{treatment}_vs_{control}/macs14-pval{pval}_peaks/{treatment}_vs_{control}_{aligner}_macs14_qsub.err" \
-          + " -o {result_dir}/{treatment}_vs_{control}/macs14-pval{pval}_peaks/{treatment}_vs_{control}_{aligner}_macs14_qsub.out"
-    output:
-        peaks_bed = "{result_dir}/{treatment}_vs_{control}/macs14-pval{pval}_peaks/{treatment}_vs_{control}_{aligner}_macs14-pval{pval}_peaks.bed", \
-        summits = "{result_dir}/{treatment}_vs_{control}/macs14-pval{pval}_peaks/{treatment}_vs_{control}_{aligner}_macs14-pval{pval}_summits.bed", \
-        xls = "{result_dir}/{treatment}_vs_{control}/macs14-pval{pval}_peaks/{treatment}_vs_{control}_{aligner}_macs14-pval{pval}_peaks.xls", \
-        negative = "{result_dir}/{treatment}_vs_{control}/macs14-pval{pval}_peaks/{treatment}_vs_{control}_{aligner}_macs14-pval{pval}_negative_peaks.xls"
-        # subpeaks file, see doc. TODO
-    log: "{result_dir}/{treatment}_vs_{control}/macs14-pval{pval}_peaks/{treatment}_vs_{control}_{aligner}_macs14.log"
-    benchmark: "{result_dir}/{treatment}_vs_{control}/macs14-pval{pval}_peaks/{treatment}_vs_{control}_{aligner}_macs14_benchmark.json"
+          + " -e " + config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_qsub.err" \
+          + " -o " + config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_qsub.out"
+    log: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + ".log"
+    benchmark: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_benchmark.json"
     shell: """
-mkdir -p {params.outdir}
+(mkdir -p {params.outdir}
 cd {params.outdir}
-macs14 -t {input.treatment} -c {input.control} -f BED -g {params.genome_size} -m {params.mfold} --pvalue {params.pval} --keep-dup {params.keep_dup} -n {params.name} --bw {params.bandwidth} {params.other_options} 2> {log}
+macs14 -t {input.treatment} -c {input.control} -f BED -g {params.genome_size} -m {params.mfold} --pvalue {params.pval} --keep-dup {params.keep_dup} -n {params.name} --bw {params.bandwidth} {params.other_options}
+mv {params.name}_peaks.bed {params.name}.bed ) &> {log}
 """
-
 

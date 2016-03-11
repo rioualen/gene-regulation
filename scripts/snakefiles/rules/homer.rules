@@ -1,65 +1,92 @@
-	"""Peak-calling with HOMER software, findPeaks algorithm (!).
-	Input formats: .sam, .bam, .bed (bam input requires samtools to be installed)
+"""Peak-calling with HOMER software, findPeaks algorithm (!).
+Input formats: .sam, .bam, .bed (bam input requires samtools to be installed)
 
-	The genome parameter can be either:
-		- the code of a genome installed in Homer (eg HG18, dm3...)
-		- a fasta file (see http://homer.salk.edu/homer-fdr{fdr}_peaks/introduction/update.html)          TO be changed
+The genome parameter can be either:
+    - the code of a genome installed in Homer (eg HG18, dm3...)
+    - a fasta file (see http://homer.salk.edu/homer-fdr{fdr}_peaks/introduction/update.html)          TO be changed
 
-	"""
+Required parameters:
+# Set parameters
+    config["genome"]["fasta"]
+    config["genome"]["size"]
 
-# Check if each required parameter has been defined in the JSON
-# configuration file, otherwise use default values
-#
-# /!\ Options yet to be implemented and refined
+Optional parameters:
+    config["homer"]["style"]
+    config["homer"]["L"]
+    config["homer"]["F"]
+    config["homer"]["P"]
+    config["homer"]["fdr"]
 
-if not "homer" in config.keys():
-	config["homer"] = {}
+Usage example:
+    PEAKCALLER = "homer-fdr" + config["homer"]["fdr"] + "_peaks"
+    PEAKCALLING = expand(expand(PEAKS_DIR + "{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER)
+    PEAKS = expand("{peakcalling}.bed", peakcalling=PEAKCALLING)
+
+"""
+
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
 
 if not "fasta" in config["genome"].keys():
-	sys.exit("The parameter genome fasta must be defined in the config file")
+    sys.exit("The parameter genome fasta must be defined in the config file")
 
 if not "size" in config["genome"].keys():
-	sys.exit("The parameter genome size must be defined in the config file")
+    sys.exit("The parameter genome size must be defined in the config file")
+
+if not "homer" in config.keys():
+    config["homer"] = {}
 
 if not "style" in config["homer"].keys():
-	config["homer"]["style"] = "factor"
+    config["homer"]["style"] = "factor"
 
 if not "L" in config["homer"].keys():
-	config["homer"]["L"] = "4"
+    config["homer"]["L"] = "4"
 
 if not "F" in config["homer"].keys():
-	config["homer"]["F"] = "4"
+    config["homer"]["F"] = "4"
 
 if not "P" in config["homer"].keys():
-	config["homer"]["P"] = "0.0001"
+    config["homer"]["P"] = "0.0001"
 
 if not "fdr" in config["homer"].keys():
-	config["homer"]["fdr"] = "0.001"
+    config["homer"]["fdr"] = "0.001"
 
+# Define paths
+if not "samples" in config["dir"].keys():
+    config["dir"]["samples"] = config["dir"]["results"]
+
+if not "peaks" in config["dir"].keys():
+    config["dir"]["peaks"] = config["dir"]["results"]
+
+suffix = "homer-fdr" + config["homer"]["fdr"] + "_peaks"
 
 rule homer:
-	input: 	treatment="{result_dir}/{treatment}/{treatment}.bed", \
-		control="{result_dir}/{control}/{control}.bed"
-	output: "{result_dir}/{treatment}_vs_{control}/homer-fdr{fdr}_peaks/{treatment}_vs_{control}_homer-fdr{fdr}_peaks.bed"
-	log: "{result_dir}/{treatment}_vs_{control}/homer-fdr{fdr}_peaks/{treatment}_vs_{control}_homer.log"
-	benchmark: "{result_dir}/{treatment}_vs_{control}/homer-fdr{fdr}_peaks/{treatment}_vs_{control}_homer-fdr{fdr}_benchmark.json"
-	params: name="{treatment}_vs_{control}_homer", \
-		treatment_tag="{result_dir}/{treatment}_vs_{control}/homer-fdr{fdr}_peaks/treatment_{treatment}_tag", \
-		control_tag="{result_dir}/{treatment}_vs_{control}/homer-fdr{fdr}_peaks/control_{control}_tag", \
-		genome=config['genome']['fasta'], \
-		style=config["homer"]["style"], \
-		L = config["homer"]["L"], \
-		P = config["homer"]["P"], \
-		F = config["homer"]["F"], \
-		fdr = config["homer"]["fdr"], \
-		genome_size = config["genome"]["size"], \
-		qsub=config["qsub"] \
-		+ " -e {result_dir}/{treatment}_vs_{control}/homer-fdr{fdr}_peaks/{treatment}_vs_{control}_homer-fdr{fdr}_qsub.err" \
-		+ " -e {result_dir}/{treatment}_vs_{control}/homer-fdr{fdr}_peaks/{treatment}_vs_{control}_homer-fdr{fdr}_qsub.out" 
-	shell:"""(makeTagDirectory {params.treatment_tag} -genome {params.genome} -checkGC {input.treatment} -format bed
-		makeTagDirectory {params.control_tag} -genome {params.genome} -checkGC {input.control} -format bed
-		findPeaks {params.treatment_tag} -style {params.style} -L {params.L} -P {params.P} -F {params.F} -fdr {params.fdr} -gsize {params.genome_size} -o {params.treatment_tag}/peaks.txt -i {params.control_tag}
-		pos2bed.pl {params.treatment_tag}/peaks.txt > {output}
-		makeUCSCfile {params.treatment_tag} -o auto
-		makeUCSCfile {params.control_tag} -o auto) &> {log}
-		"""
+    input:
+        treatment = config["dir"]["samples"] + "{treatment}/{treatment}{preprocess}_sorted_pos.bed", \
+        control=config["dir"]["samples"] + "{control}/{control}{preprocess}_sorted_pos.bed"
+    output: peaks_bed = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + ".bed"
+    params:    # name="{treatment}_vs_{control}_homer", \
+        treatment_tag=config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_tag", \
+        control_tag=config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{control}_tag", \
+        genome=config['genome']['fasta'], \
+        style=config["homer"]["style"], \
+        L = config["homer"]["L"], \
+        P = config["homer"]["P"], \
+        F = config["homer"]["F"], \
+        fdr = config["homer"]["fdr"], \
+        genome_size = config["genome"]["size"], \
+        qsub=config["qsub"] \
+          + " -e " + config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_qsub.err" \
+          + " -o " + config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_qsub.out"
+    log: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + ".log"
+    benchmark: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_benchmark.json"
+    shell:"""
+(makeTagDirectory {params.treatment_tag} -genome {params.genome} -checkGC {input.treatment} -format bed
+makeTagDirectory {params.control_tag} -genome {params.genome} -checkGC {input.control} -format bed
+findPeaks {params.treatment_tag} -style {params.style} -L {params.L} -P {params.P} -F {params.F} -fdr {params.fdr} -gsize {params.genome_size} -o {params.treatment_tag}/peaks.txt -i {params.control_tag}
+pos2bed.pl {params.treatment_tag}/peaks.txt > {output}
+makeUCSCfile {params.treatment_tag} -o auto
+makeUCSCfile {params.control_tag} -o auto) &> {log}
+"""
+
