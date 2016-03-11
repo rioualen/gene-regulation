@@ -1,0 +1,6 @@
+; Sample description file
+; Organism: Saccharomyces cerevisiae
+; Experiment type: ChIP-seq
+ID	SRR
+GSM521934	SRR051929
+GSM521935	SRR051930

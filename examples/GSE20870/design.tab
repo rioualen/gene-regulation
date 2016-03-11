@@ -1,0 +1,3 @@
+; Design for the peak-calling of ChIP-seq analysis
+treatment	control		descr
+GSM521935	GSM521934	-
