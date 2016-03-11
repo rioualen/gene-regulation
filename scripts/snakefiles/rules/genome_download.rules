@@ -1,15 +1,53 @@
+"""
+Download genome sequence to location specified in the config file.
+
+Assumes you provided a url corresponding to a .fa.gz file.
+
+Usage example:
+
+Required parameters:
+    config["qsub"]
+    config["dir"]["genomes"]
+    config["genome"]["version"]
+    config["genome"]["url"]
+
+Optional parameters:
+
+Authors: 
+    Claire Rioualen
+"""
+
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "version" in config["genome"].keys():
+    sys.exit("Genome version must be defined in the config file")
+
+if not "genomes" in config["dir"].keys():
+    sys.exit("Genome dir must be defined in the dir section of the config file")
+
 if not "url" in config["genome"].keys():
     sys.exit("The parameter genome url must be defined in the config file")
 
-"""Download genome sequence to location specified in the config file.
-"""
+# Define paths
+genome_version = config["genome"]["version"]
+genome_dir = config["dir"]["genomes"] + genome_version + "/"
+genome_file = genome_dir + genome_version + ".fa"
+
 rule genome_download:
-	input: "."
-	output: "{genome}.fa"
-	log: "{genome}_download.log"
-	benchmark: "{genome}_download_benchmark.json"
-	params: url = config["genome"]["url"], dir = config["genome"]["dir"], version = config["genome"]["version"]
-	shell:"""
+    input: "."
+    output: genome_file
+    log: genome_file + ".log"
+    benchmark: genome_file + "_benchmark.json"
+    params:
+        url = config["genome"]["url"], \
+        dir = genome_dir, \
+        version = genome_version, \
+        qsub = config["qsub"] \
+          + " -e " + genome_dir + "download_qsub.err" \
+          + " -o " + genome_dir + "download_qsub.out"
+    shell:"""
 (cd {params.dir}
 wget {params.url}
 filename=$(basename {params.url})

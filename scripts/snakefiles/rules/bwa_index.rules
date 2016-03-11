@@ -4,36 +4,51 @@ when aligning.
 
 Required parameters:
     config["qsub"]
+
 Optional parameters:
-    config["bwa"]["dir"]
+
 
 Usage example:
-    BWA_INDEX = expand(config["dir"]["genome"] + "{genome}/BWAIndex/{genome}.fa.bwt", genome=GENOME)
+
 
 Contributors: 
     Claire Rioualen
 """
 
-# Set optional params to defaults values in case they're not defined in config file.
-if not "bwa" in config.keys():
-    config["bwa"] = {}
 
-if not "dir" in config["bwa"].keys():
-    config["bwa"]["dir"] = config["genome"]["dir"] + "BWAIndex/"
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
 
-# Rule index genome with BWA
+if not "version" in config["genome"].keys():
+    sys.exit("Genome version must be defined in the config file")
+
+if not "genomes" in config["dir"].keys():
+    sys.exit("Genome dir must be defined in the 'dir' section of the config file")
+
+# Define paths
+genome_version = config["genome"]["version"]
+genome_dir = config["dir"]["genomes"] + genome_version + "/"
+genome_file = genome_dir + genome_version + ".fa"
+bwa_dir = genome_dir + "bwa/"
+bwa_index = bwa_dir + genome_version + ".fa"
+
 rule bwa_index:
-    input: "{genome_dir}{genome_version}/{genome_version}.fa"
-    output: "{genome_dir}{genome_version}/{bwa_dir}/{genome_version}.fa.bwt"
-    log: "{genome_dir}{genome_version}/{bwa_dir}/{genome_version}_bwa-index.log"
-    benchmark: "{genome_dir}{genome_version}/{bwa_dir}/{genome_version}_bwa-index_benchmark.json"
-    message: "Indexing genome to" + config["bwa"]["dir"]
+    input: genome_file
+    output: bwa_index
     params:
-        bwa_dir = config["bwa"]["dir"], \
-        qsub = config["qsub"] + " -e {genome_dir}_bwa-index_qsub.err -o {genome_dir}_bwa-index_qsub.out"
+        dir = bwa_dir, \
+        version = genome_version, \
+        qsub = config["qsub"] \
+          + " -e " + bwa_dir + "index_qsub.err" \
+          + " -o " + bwa_dir + "index_qsub.out"
+    log: bwa_index + ".log"
+    benchmark: bwa_index + "_benchmark.json"
+    message: "Indexing genome to " + bwa_dir
     shell: """
-mkdir -p {params.bwa_dir}
-cp {input} {params.bwa_dir}
-cd {params.bwa_dir}
-bwa index {params.bwa_dir}{wildcards.genome_version}.fa 2> {log}
+mkdir -p {params.dir}
+cp {input} {params.dir}
+cd {params.dir}
+bwa index {params.dir}{params.version}.fa 2> {log}
 """
+

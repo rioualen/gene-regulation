@@ -6,29 +6,34 @@ file {genome}.fa.1.bt2
 Required parameters:
     config["genome"]["version"]
     config["qsub"]
+    config["bowtie2"]["max_mismatches"]
 
 Optional parameters:
     config["bowtie2"]["dir"]
     config["bowtie2"]["threads"]
 
 Usage example:
-    MAPPING = expand(RESULTS_DIR + "{alignment}.sam", alignment=ALIGNMENT)
+    ALIGNER=["bowtie2"]
+    ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)
+    BOWTIE2_INDEX = expand(config["dir"]["genomes"] + "{genome}/Bowtie2Index/{genome}.fa.1.bt2", genome=GENOME)
+    MAPPING = expand("{alignment}.sam", alignment=ALIGNMENT)
 
 Contributors: 
     Claire Rioualen
 """
-#TODO: add # mismatches param
 
-# Raise an error and exit if required parameter is missing
-# Set optional params to defaults values in case they're not defined in config file
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
 if not "version" in config["genome"].keys():
     sys.exit("Genome version must be defined in the config file")
 
+if not "genomes" in config["dir"].keys():
+    sys.exit("Genome dir must be defined in the dir section of the config file")
+
 if not "bowtie2" in config.keys():
     config["bowtie2"] = {}
-
-if not "dir" in config["bowtie2"].keys():
-    config["bowtie2"]["dir"] = config["genome"]["dir"] + "Bowtie2Index/"
 
 if not "threads" in config["bowtie2"].keys():
     config["bowtie2"]["threads"] = "1"
@@ -36,21 +41,34 @@ if not "threads" in config["bowtie2"].keys():
 if not "max_mismatches" in config["bowtie2"].keys():
     config["bowtie2"]["max_mismatches"] = "0"
 
-# Rule for single end reads mapping with Bowtie 2
+# Define paths
+if not "samples" in config["dir"].keys():
+    config["dir"]["samples"] = config["dir"]["results"]
+
+genome_version = config["genome"]["version"]
+genome_dir = config["dir"]["genomes"] + genome_version + "/"
+genome_file = genome_dir + genome_version + ".fa"
+bowtie2_dir = genome_dir + "bowtie2/"
+bowtie2_index = bowtie2_dir + genome_version + ".fa"
+
+
+
 rule bowtie2_se:
     input:
-        reads="{reads}.fastq", \
-        index=config["bowtie2"]["dir"] + config["genome"]["version"] + ".fa.1.bt2"
-    output: sam="{reads}_bowtie2.sam", \
-        summary="{reads}_bowtie2_summary.txt"
+        reads = "{reads}.fastq", \
+        index = bowtie2_index
+    output:
+        sam = "{reads}_bowtie2.sam", \
+        summary = "{reads}_bowtie2_summary.txt"
+    params:
+        max_mismatches = config["bowtie2"]["max_mismatches"], \
+        threads = config["bowtie2"]["threads"], \
+#        index = config["bowtie2"]["dir"] + config["genome"]["version"] + ".fa", \
+        qsub = config["qsub"] \
+          + " -e " + "{reads}_bowtie2_qsub.err" \
+          + " -o " + "{reads}_bowtie2_qsub.out"
     log: "{reads}_bowtie2.log"
     benchmark: "{reads}_bowtie2_benchmark.json"
     message: "Mapping reads on reference genome {input.index} using Bowtie2..."
-    params:
-        max_mismatches = config["bowtie2"]["max_mismatches"], \
-        qsub=config["qsub"] + " -e {reads}_bowtie2_qsub.err -o {reads}_bowtie2_qsub.out", \
-        threads = config["bowtie2"]["threads"], \
-        index=config["bowtie2"]["dir"] + config["genome"]["version"] + ".fa", \
-        stats = "{reads}_bowtie2_sam_stat.txt"
-    shell: "bowtie2 -x {params.index} -U {input.reads} -S {output.sam} --threads {params.threads} --phred33 -N {params.max_mismatches} > {output.summary} 2> {log}"
+    shell: "bowtie2 -x {input.index} -U {input.reads} -S {output.sam} --threads {params.threads} --phred33 -N {params.max_mismatches} > {output.summary} 2> {log}"
 

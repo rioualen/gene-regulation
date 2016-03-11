@@ -1,7 +1,6 @@
 """Read mapping for single end data using BWA. 
 Requires the indexing to have previously been done (using the
-rule bwa_index).  This is checked by testing the presence of
-file {genome}.fa.bwt
+rule bwa_index).
 
 Required parameters:
     config["genome"]["version"]
@@ -12,45 +11,61 @@ Optional parameters:
     config["bwa"]["threads"]
 
 Usage example:
-    MAPPING = expand(RESULTS_DIR + "{alignment}.sam", alignment=ALIGNMENT)
+
 
 Contributors: 
     Claire Rioualen
 """
-#TODO: add # mismatches param
 
-# Raise an error and exit if required parameter is missing
-# Set optional params to defaults values in case they're not defined in config file
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
 if not "version" in config["genome"].keys():
     sys.exit("Genome version must be defined in the config file")
+
+if not "genomes" in config["dir"].keys():
+    sys.exit("Genome dir must be defined in the dir section of the config file")
 
 if not "bwa" in config.keys():
     config["bwa"] = {}
 
-if not "dir" in config["bwa"].keys():
-    config["bwa"]["dir"] = config["genome"]["dir"] + "BWAIndex/"
-
 if not "threads" in config["bwa"].keys():
     config["bwa"]["threads"] = "1"
 
-# Rule for reads mapping with BWA
+# Define paths
+if not "samples" in config["dir"].keys():
+    config["dir"]["samples"] = config["dir"]["results"]
+
+genome_version = config["genome"]["version"]
+genome_dir = config["dir"]["genomes"] + genome_version + "/"
+genome_file = genome_dir + genome_version + ".fa"
+bwa_dir = genome_dir + "bwa/"
+bwa_index = bwa_dir + genome_version + ".fa"
+
+
 rule bwa_se:
     input:
-        reads="{reads}.fastq", \
-        index=config["bwa"]["dir"] + config["genome"]["version"] + ".fa.bwt"
-    output: "{reads}_bwa.sam"
+        reads = "{reads}.fastq", \
+        index = bwa_index
+    output:
+        sam = "{reads}_bwa.sam"
+    params:
+        threads = config["bwa"]["threads"], \
+        sai= "{reads}_bwa.sai", \
+        qsub = config["qsub"] \
+          + " -e " + "{reads}_bwa_qsub.err" \
+          + " -o " + "{reads}_bwa_qsub.out"
     log: "{reads}_bwa.log"
     benchmark: "{reads}_bwa_benchmark.json"
     message: "Mapping reads on reference genome {input.index} using BWA..."
-    params:
-        genome_index = config["bwa"]["dir"] + config["genome"]["version"] + ".fa", \
-        sai= "{reads}_bwa.sai", \
-        qsub = config["qsub"] + " -e {reads}_bwa_qsub.err -o {reads}_bwa_qsub.out", \
-        threads = config["bwa"]["threads"]
     shell:"""
-bwa aln -t {params.threads} {params.genome_index} {input.reads} > {params.sai} 2> {log}
-bwa samse {params.genome_index} {params.sai} {input.reads} > {output} 2> {log}
+bwa aln -t {params.threads} {input.index} {input.reads} > {params.sai} 2> {log}
+bwa samse {input.index} {params.sai} {input.reads} > {output} 2> {log}
 """
+
+
+
 
 
 
