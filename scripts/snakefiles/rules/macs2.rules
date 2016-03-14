@@ -2,11 +2,6 @@
 Input: sam, bam, bed... automatically detected by macs' callpeak algorithm. Bed format was used here. 
 Output: bed
 
-Usage example: 
-    PEAKCALLER= "macs2-qval" + config["macs2"]["qval"]
-    PEAKCALLING=expand(expand(PEAKS_DIR + "{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER)
-    PEAKS = expand("{peakcalling}.bed", peakcalling=PEAKCALLING)
-        
 Required parameters:
     config["genome"]["size"]
     config["qsub"]
@@ -19,6 +14,11 @@ Optional parameters:
     config["macs2"]["mfold_max"]
     config["macs2"]["other_options"]
     config["macs2"]["type"]
+
+Usage example: 
+    PEAKCALLER= "macs2-qval" + config["macs2"]["qval"]
+    PEAKCALLING=expand(expand(PEAKS_DIR + "{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER)
+    PEAKS = expand("{peakcalling}.bed", peakcalling=PEAKCALLING)
 
 Contributors: 
     Claire Rioualen, Lucie Khamvongsa
@@ -67,7 +67,7 @@ suffix = "macs2-qval" + config["macs2"]["qval"]                                 
 rule macs2:
     input:
         treatment = config["dir"]["samples"] + "{treatment}/{treatment}{preprocess}_sorted_pos.bed", \
-        control=config["dir"]["samples"] + "{control}/{control}{preprocess}_sorted_pos.bed"
+        control = config["dir"]["samples"] + "{control}/{control}{preprocess}_sorted_pos.bed"
     output:
         peaks = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_peaks." + config["macs2"]["type"] + "Peak", \
         peaks_bed = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + ".bed", \
