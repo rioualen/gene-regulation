@@ -36,7 +36,7 @@ genome_dir = config["dir"]["genomes"] + genome_version + "/"
 genome_file = genome_dir + genome_version + ".fa"
 
 rule genome_download:
-    input: "."
+#    input: "."
     output: genome_file
     log: genome_file + ".log"
     benchmark: genome_file + "_benchmark.json"
