@@ -1,11 +1,29 @@
+"""
+Sort aligned reads (in bam format) by positions.
+
+Beware This was updated with Samtools V 1.3.
+
+Required parameters:
+    config["qsub"]
+
+Authors:
+    Jacques van Helden, Claire Rioualen
+"""
+
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+
 rule bam_by_pos:
-    """
-    Sort aligned reads (in bam format) by positions.
-    """
     input: "{aligned_reads}.bam"
     output: "{aligned_reads}_sorted_pos.bam"
     log: "{aligned_reads}_sorted_pos.log"
     benchmark: "{aligned_reads}_sorted_pos_benchmark.json"
     params: prefix = "{aligned_reads}_sorted_pos", \
             qsub = config["qsub"] + " -e {aligned_reads}_sorted_pos_qsub.err -o {aligned_reads}_sorted_pos_qsub.out"
-    shell:"samtools sort  {input} {params.prefix} 2> {log}; samtools index {output} 2>> {log}"
+    shell:"""
+samtools sort  {input} -o {output}
+"""
+
+#samtools index {output}
