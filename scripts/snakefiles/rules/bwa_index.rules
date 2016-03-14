@@ -9,6 +9,10 @@ Optional parameters:
 
 
 Usage example:
+    ALIGNER=["bowtie", "bowtie2", "bwa"]
+    ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)
+    INDEX = expand(config["dir"]["genomes"] + config["genome"]["version"] + "/{aligner}/" + config["genome"]["version"] + ".fa", aligner=ALIGNER)
+    MAPPING = expand("{alignment}.sam", alignment=ALIGNMENT)
 
 
 Contributors: 
@@ -44,7 +48,6 @@ rule bwa_index:
           + " -o " + bwa_dir + "index_qsub.out"
     log: bwa_index + ".log"
     benchmark: bwa_index + "_benchmark.json"
-    message: "Indexing genome to " + bwa_dir
     shell: """
 mkdir -p {params.dir}
 cp {input} {params.dir}
