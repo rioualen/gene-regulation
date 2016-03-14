@@ -1,15 +1,23 @@
-rule bam_to_bed:
-	"""Converts sam files into bam files.
-	
-	Required parameters:
-		config["qsub"]
+"""Converts sam files into bam files.
 
-	Usage: 
-		input:expand('{read_dir}/{sample}/{sample}_{aligner}.bed', sample=SAMPLES, read_dir=READS, aligner=ALIGNERS)
-	"""
-	input: "{reads}.bam"
-	output: "{reads}.bed"
-	log: "{reads}_bam_to_bed.log"
-	benchmark: "{reads}_bam_to_bed_benchmark.json"
-	params: qsub=config["qsub"]+" -e {reads}_bam_to_bed_qsub.err -o {reads}_bam_to_bed_qsub.out"
-	shell:"bedtools bamtobed -i {input} > {output} 2> {log}"
+Required parameters:
+    config["qsub"]
+
+Usage: 
+    input:expand('{read_dir}/{sample}/{sample}_{aligner}.bed', sample=SAMPLES, read_dir=READS, aligner=ALIGNERS)
+"""
+
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+rule bam_to_bed:
+    input: "{reads}.bam"
+    output: "{reads}.bed"
+    params:
+        qsub = config["qsub"]\
+            + " -e {reads}_bam_to_bed_qsub.err"\
+            + " -o {reads}_bam_to_bed_qsub.out"
+    log: "{reads}_bam_to_bed.log"
+    benchmark: "{reads}_bam_to_bed_benchmark.json"
+    shell:"bedtools bamtobed -i {input} > {output} 2> {log}"
