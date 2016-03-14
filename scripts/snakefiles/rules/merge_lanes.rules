@@ -5,6 +5,9 @@
 if not (("dir" in config.keys()) and ("results" in config["dir"].keys())):
     sys.exit("The parameter config['dir']['results'] should be specified in the config file.")
 
+if not "samples" in config["dir"].keys():
+    config["dir"]["samples"] = config["dir"]["results"]
+
 if not (("files" in config.keys()) and ("lane_merging" in config["files"].keys())):
     sys.exit("The parameter config['files']['lane_merging'] should be specified in the config file.")
 
@@ -40,9 +43,9 @@ rule merge_lanes:
 
     """
     input: config["files"]["lane_merging"]
-    output: config["dir"]["results"] + "/lane_merging_benchmark.json"
-    log: config["dir"]["results"] + "/lane_merging_log.txt"
-    benchmark: config["dir"]["results"] + "/lane_merging_benchmark.json"
+    output: config["dir"]["samples"] + "/lane_merging_benchmark.json"
+    log: config["dir"]["samples"] + "/lane_merging_log.txt"
+    benchmark: config["dir"]["samples"] + "/lane_merging_benchmark.json"
     run:
         if (verbosity >= 0):
             print("Lane merging table:\t" + config["files"]["lane_merging"])
