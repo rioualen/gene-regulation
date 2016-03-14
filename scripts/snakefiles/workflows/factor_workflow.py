@@ -68,6 +68,9 @@ include: os.path.join(PYTHON, "util.py")
 include: os.path.join(RULES, "bam_by_name.rules")
 include: os.path.join(RULES, "bam_by_pos.rules")
 include: os.path.join(RULES, "bam_to_bed.rules")
+include: os.path.join(RULES, "bam_stats.rules")
+include: os.path.join(RULES, "bowtie_index.rules")
+include: os.path.join(RULES, "bowtie_se.rules")
 include: os.path.join(RULES, "bowtie2_index.rules")
 include: os.path.join(RULES, "bowtie2_se.rules")
 include: os.path.join(RULES, "bPeaks.rules")
@@ -84,8 +87,9 @@ include: os.path.join(RULES, "get_chrom_sizes.rules")
 include: os.path.join(RULES, "homer.rules")
 include: os.path.join(RULES, "macs2.rules")
 include: os.path.join(RULES, "macs14.rules")
-include: os.path.join(RULES, "merge_lanes.rules")               ## Merge lanes by sample, based on a tab-delimited file indicainclude: os.path.join(RULES, "peak_motifs.rules")
+include: os.path.join(RULES, "merge_lanes.rules")
 include: os.path.join(RULES, "peak_motifs.rules")
+include: os.path.join(RULES, "sickle_se.rules")
 include: os.path.join(RULES, "sra_to_fastq.rules")
 include: os.path.join(RULES, "swembl.rules")
 include: os.path.join(RULES, "sam_to_bam.rules")
@@ -153,15 +157,8 @@ if not os.path.exists(PEAKS_DIR):
 
 ## Data import & merging.
 
-
 #DOWNLOAD = expand(READS + "{samples}/{srr}.sra", zip, samples=SAMPLE_IDS, srr=SRR_IDS)
 IMPORT = expand(SAMPLE_DIR + "{samples}/{samples}.fastq", zip, samples=SAMPLE_IDS, srr=SRR_IDS)
-
-
-## Verbosity
-#if (verbosity >= 3):
-#    print("\tDOWNLOAD:\t" + ";".join(DOWNLOAD))
-#    print("\tIMPORT:\t" + ";".join(IMPORT))
 
 ### Graphics & reports
 GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
@@ -172,38 +169,49 @@ GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
 #----------------------------------------------------------------#
 
 RAW_QC = expand(SAMPLE_DIR + "{samples}/{samples}_fastqc/{samples}_fastqc.html", samples=SAMPLE_IDS)
-RAW_READNB = expand(SAMPLE_DIR + "{samples}/{samples}_fastq_readnb.txt", samples=SAMPLE_IDS)
+
+
+#----------------------------------------------------------------#
+# Trimming
+#----------------------------------------------------------------#
+
+TRIMMER="sickle-se-q" + config["sickle"]["threshold"]
+TRIMMING=expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}", samples=SAMPLE_IDS, trimmer=TRIMMER)
+TRIM = expand(SAMPLE_DIR + "{trimming}.fastq", trimming=TRIMMING)
+
+TRIM_QC = expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}_fastqc/{samples}_{trimmer}_fastqc.html", samples=SAMPLE_IDS, trimmer=TRIMMER)
+QC = RAW_QC + TRIM_QC
+
 
 #----------------------------------------------------------------#
 # Alignment
 #----------------------------------------------------------------#
 
 
-ALIGNER=["bowtie2", "bwa"]
-ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)
-
+ALIGNER=["bowtie", "bowtie2", "bwa"]
+ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER, trimmer=TRIMMER)
 
 INDEX = expand(config["dir"]["genomes"] + config["genome"]["version"] + "/{aligner}/" + config["genome"]["version"] + ".fa", aligner=ALIGNER)
 
-#BWA_INDEX = expand(config["dir"]["genomes"] + "{genome}/BWAIndex/{genome}.fa.bwt", genome=GENOME)
-#BOWTIE2_INDEX = expand(config["dir"]["genomes"] + "{genome}/Bowtie2Index/{genome}.fa.1.bt2", genome=GENOME)
-
 MAPPING = expand("{alignment}.sam", alignment=ALIGNMENT)
 
+BAM_STATS = expand("{alignment}_bam_stats.txt", alignment=ALIGNMENT)
 
-# Sorted and converted reads (bam, bed)
-SORTED_MAPPED_READS_BWA = expand(SAMPLE_DIR + "{alignment}_sorted_pos.bam", alignment=ALIGNMENT)
+# Sort mapped reads
+
+## Why not work ?
+SORTED_BY_POS = expand(SAMPLE_DIR + "{alignment}_sorted_pos.bam", alignment=ALIGNMENT)
+SORTED_BY_NAME = expand(SAMPLE_DIR + "{alignment}_sorted_name.bam", alignment=ALIGNMENT)
 #BAM_READNB = expand(RESULTS_DIR + "{alignment}_sorted_pos_bam_readnb.txt", alignment=ALIGNMENT)
 SORTED_READS_BED = expand(SAMPLE_DIR + "{alignment}_sorted_pos.bed", alignment=ALIGNMENT)
 #BED_FEAT_COUNT = expand(RESULTS_DIR + "{alignment}_sorted_pos_bed_nb.txt", alignment=ALIGNMENT)
+
 
 #TDF = expand(RESULTS_DIR + "{alignment}_sorted_pos.tdf", alignment=ALIGNMENT)
 
 # ----------------------------------------------------------------
 # Peak-calling
 # ----------------------------------------------------------------
-
-
 
 PEAKCALLER=[
     "homer-fdr" + config["homer"]["fdr"] + "_peaks", 
@@ -214,7 +222,7 @@ PEAKCALLER=[
     "bPeaks_allGenome"
 ]
 
-PEAKCALLING=expand(expand(PEAKS_DIR + "{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER)
+PEAKCALLING=expand(expand(PEAKS_DIR + "{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER, trimmer=TRIMMER)
 
 PEAKS = expand("{peakcalling}.bed", peakcalling=PEAKCALLING)
 
@@ -223,7 +231,7 @@ PEAKS = expand("{peakcalling}.bed", peakcalling=PEAKCALLING)
 # ----------------------------------------------------------------
 
 
-MOTIFS=expand(expand("{treat}_vs_{control}/{{peakcaller}}/peak-motifs/{treat}_vs_{control}_{{aligner}}_{{peakcaller}}_peak-motifs_synthesis", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER)
+MOTIFS=expand(expand("{treat}_vs_{control}/{{peakcaller}}/peak-motifs/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}_peak-motifs_synthesis", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER, trimmer=TRIMMER)
 
 
 GET_FASTA = expand(PEAKS_DIR + "{peakcalling}.fasta", peakcalling=PEAKCALLING)
@@ -237,6 +245,6 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: IMPORT, INDEX, MAPPING#, PEAKS, PEAK_MOTIFS, GRAPHICS#, CHROM_SIZES, PEAKS, TDFRAW_QC, 
+	input: GRAPHICS, QC, BAM_STATS, PEAK_MOTIFS#, CHROM_SIZES, PEAKS, TDFRAW_QC, MAPPING, PEAKS, IMPORT, INDEX, PEAKS, 
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
