@@ -1,7 +1,0 @@
-rule narrowpeak_to_bed:
-	"""Converts narrowPeak to bed file format.
-	NB: narrowPeak is technically a bed file...
-	"""
-	input: "{file}.narrowPeak"
-	output: "{file}.bed"
-	shell: "cp {input} {output}"
