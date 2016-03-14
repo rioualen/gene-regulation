@@ -41,6 +41,9 @@
   fastqc: 
     other_options: ""                                                           # optional (def: empty string)
 
+  sickle:
+    threshold: "20"                                                             # ... TODO
+
   bwa: 
     threads: "10"                                                               # optional: number of threads to speed up calculations (def: 1)
 
