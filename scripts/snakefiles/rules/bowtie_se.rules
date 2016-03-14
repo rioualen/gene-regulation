@@ -1,0 +1,72 @@
+"""Read mapping for single end data using bowtie. 
+Requires the indexing to have previously been done (using the
+rule bowtie_index).
+
+Required parameters:
+    config["genome"]["version"]
+    config["qsub"]
+    config["bowtie"]["max_mismatches"]
+
+Optional parameters:
+    config["bowtie"]["dir"]
+    config["bowtie"]["threads"]
+
+Usage example:
+    ALIGNER=["bowtie", "bowtie2", "bwa"]
+    ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)
+    INDEX = expand(config["dir"]["genomes"] + config["genome"]["version"] + "/{aligner}/" + config["genome"]["version"] + ".fa", aligner=ALIGNER)
+    MAPPING = expand("{alignment}.sam", alignment=ALIGNMENT)
+
+Contributors: 
+    Jacques van Helden, Lucie Khamvongsa, Claire Rioualen
+"""
+
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "version" in config["genome"].keys():
+    sys.exit("Genome version must be defined in the config file")
+
+if not "genomes" in config["dir"].keys():
+    sys.exit("Genome dir must be defined in the dir section of the config file")
+
+if not "bowtie" in config.keys():
+    config["bowtie"] = {}
+
+if not "threads" in config["bowtie"].keys():
+    config["bowtie"]["threads"] = "1"
+
+if not "max_mismatches" in config["bowtie"].keys():
+    config["bowtie"]["max_mismatches"] = "0"
+
+# Define paths
+if not "samples" in config["dir"].keys():
+    config["dir"]["samples"] = config["dir"]["results"]
+
+genome_version = config["genome"]["version"]
+genome_dir = config["dir"]["genomes"] + genome_version + "/"
+genome_file = genome_dir + genome_version + ".fa"
+bowtie_dir = genome_dir + "bowtie/"
+bowtie_index = bowtie_dir + genome_version + ".fa"
+
+
+rule bowtie_se:
+    input:
+        reads = "{reads}.fastq", \
+        index = bowtie_index
+    output:
+        sam = "{reads}_bowtie.sam"
+    params:
+        max_mismatches = config["bowtie"]["max_mismatches"], \
+        threads = config["bowtie"]["threads"], \
+        qsub = config["qsub"] \
+          + " -e " + "{reads}_bowtie_qsub.err" \
+          + " -o " + "{reads}_bowtie_qsub.out"
+    log: "{reads}_bowtie.log"
+    benchmark: "{reads}_bowtie_benchmark.json"
+	shell: "bowtie -t -q -S -n {params.max_mismatches} --phred33-quals {input.index} {input.reads} {output.sam} 2> {log}"
+
+#reads_iso = config["bowtie"]["reads_iso"], \
+#-m {params.reads_iso}
+

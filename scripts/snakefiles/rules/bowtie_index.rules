@@ -1,0 +1,54 @@
+"""Rule for the creation of Bowtie 1 index. Has to be done only once.  The
+output file is used to test whether the index already exists
+when aligning.
+
+Required parameters:
+    config["qsub"]
+    config["dir"]["genomes"]
+    config["genome"]["version"]
+
+Optional parameters:
+
+Usage example:
+    ALIGNER=["bowtie"]
+    INDEX = expand(config["dir"]["genomes"] + config["genome"]["version"] + "/{aligner}/" + config["genome"]["version"] + ".fa", aligner=ALIGNER)
+
+Contributors: 
+    Jacques van Helden, Lucie Khamvongsa, Claire Rioualen
+"""
+
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "version" in config["genome"].keys():
+    sys.exit("Genome version must be defined in the config file")
+
+if not "genomes" in config["dir"].keys():
+    sys.exit("Genome dir must be defined in the 'dir' section of the config file")
+
+# Define paths
+genome_version = config["genome"]["version"]
+genome_dir = config["dir"]["genomes"] + genome_version + "/"
+genome_file = genome_dir + genome_version + ".fa"
+bowtie_dir = genome_dir + "bowtie/"
+bowtie_index = bowtie_dir + genome_version + ".fa"
+
+rule bowtie_index:
+    input: genome_file
+    output: bowtie_index
+    params:
+        dir = bowtie_dir, \
+        version = genome_version, \
+        qsub = config["qsub"] \
+          + " -e " + bowtie_dir + "index_qsub.err" \
+          + " -o " + bowtie_dir + "index_qsub.out"
+    log: bowtie_index + ".log"
+    benchmark: bowtie_index + "_benchmark.json"
+    shell: """
+mkdir -p {params.dir}
+cp {input} {params.dir}
+cd {params.dir}
+bowtie-build  {params.dir}{params.version}.fa  {params.dir}{params.version}.fa &> {log}
+"""
+
