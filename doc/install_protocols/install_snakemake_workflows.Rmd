@@ -388,11 +388,15 @@ SAM (Sequence Alignment/Map) format is a generic format for storing large nucleo
 
 [SAMtools](http://samtools.sourceforge.net/) provides several tools to process such files.
 
+TODO: install samtools from website, not from apt-get repositories. 
+
+<!--
 ```
 sudo apt-get install samtools
 ```
 V: 0.1.19
 Latest: 1.2
+--> 
 
 ### Bedtools
 
