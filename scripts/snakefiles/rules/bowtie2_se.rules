@@ -1,7 +1,6 @@
 """Read mapping for single end data using Bowtie2. 
 Requires the indexing to have previously been done (using the
-rule bwa_index).  This is checked by testing the presence of
-file {genome}.fa.1.bt2
+rule bowtie2_index).
 
 Required parameters:
     config["genome"]["version"]
@@ -58,17 +57,14 @@ rule bowtie2_se:
         reads = "{reads}.fastq", \
         index = bowtie2_index
     output:
-        sam = "{reads}_bowtie2.sam", \
-        summary = "{reads}_bowtie2_summary.txt"
+        sam = "{reads}_bowtie2.sam"
     params:
         max_mismatches = config["bowtie2"]["max_mismatches"], \
         threads = config["bowtie2"]["threads"], \
-#        index = config["bowtie2"]["dir"] + config["genome"]["version"] + ".fa", \
         qsub = config["qsub"] \
           + " -e " + "{reads}_bowtie2_qsub.err" \
           + " -o " + "{reads}_bowtie2_qsub.out"
     log: "{reads}_bowtie2.log"
     benchmark: "{reads}_bowtie2_benchmark.json"
-    message: "Mapping reads on reference genome {input.index} using Bowtie2..."
-    shell: "bowtie2 -x {input.index} -U {input.reads} -S {output.sam} --threads {params.threads} --phred33 -N {params.max_mismatches} > {output.summary} 2> {log}"
+    shell: "bowtie2 -x {input.index} -U {input.reads} -S {output.sam} --threads {params.threads} --phred33 -N {params.max_mismatches} 2> {log}"
 
