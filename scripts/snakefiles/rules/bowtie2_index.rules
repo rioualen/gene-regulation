@@ -4,12 +4,13 @@ when aligning.
 
 Required parameters:
     config["qsub"]
-
-
+    config["dir"]["genomes"]
+    config["genome"]["version"]
 Optional parameters:
 
-
 Usage example:
+    ALIGNER=["bowtie2", "bwa"]
+    INDEX = expand(config["dir"]["genomes"] + config["genome"]["version"] + "/{aligner}/" + config["genome"]["version"] + ".fa", aligner=ALIGNER)
 
 Contributors: 
     Claire Rioualen
@@ -44,7 +45,6 @@ rule bowtie2_index:
           + " -o " + bowtie2_dir + "index_qsub.out"
     log: bowtie2_index + ".log"
     benchmark: bowtie2_index + "_benchmark.json"
-    message: "Indexing genome to " + bowtie2_dir
     shell: """
 mkdir -p {params.dir}
 cp {input} {params.dir}
