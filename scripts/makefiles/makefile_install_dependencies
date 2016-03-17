@@ -8,10 +8,10 @@ export LANG=C
 
 
 #.PHONY: help bashrc miscellaneous_tools add_pub_key \
-#    add_repos desktop_and_x2go R_installation R_lib_install \
-#    Rstudio_install python_2and3_install sickle_install \
-#    bowtie_install bowtie2_install tophat2_install \
-#    subread_install fastqc_install deep_tool_install get_all_version
+#	add_repos desktop_and_x2go R_installation R_lib_install \
+#	Rstudio_install python_2and3_install sickle_install \
+#	bowtie_install bowtie2_install tophat2_install \
+#	subread_install fastqc_install deep_tool_install get_all_version
 
 
 ##########################
@@ -19,7 +19,7 @@ export LANG=C
 ##########################
 
 USR_BIN="$HOME/bin"
-mkdir $(USR_BIN)
+
 export PATH=$PATH:$(USR_BIN)
 
 UBUNTU_VER_NAME="trusty"
@@ -57,63 +57,63 @@ IGV_VER=2.3.59
 ##########################
 
 #bashrc:
-##    @echo "" >> /etc/bash.bashrc
-##    @echo 'alias ls="ls --color"' >> /etc/bash.bashrc
-##    @echo 'alias rm="rm -i"' >> /etc/bash.bashrc
-##    @echo "" >> /etc/bash.bashrc
-##    @echo "export LC_ALL=C" >> /etc/bash.bashrc
-##    @echo "export LANG=C" >> /etc/bash.bashrc
-##    @echo 'export force_color_prompt=yes' >> /etc/bash.bashrc
-##    @echo 'export LC_COLLATE=C' >> /etc/bash.bashrc
-##    @echo "" >> /etc/profile
-##    @echo 'source /etc/bash.bashrc' >> /etc/profile
+##	@echo "" >> /etc/bash.bashrc
+##	@echo 'alias ls="ls --color"' >> /etc/bash.bashrc
+##	@echo 'alias rm="rm -i"' >> /etc/bash.bashrc
+##	@echo "" >> /etc/bash.bashrc
+##	@echo "export LC_ALL=C" >> /etc/bash.bashrc
+##	@echo "export LANG=C" >> /etc/bash.bashrc
+##	@echo 'export force_color_prompt=yes' >> /etc/bash.bashrc
+##	@echo 'export LC_COLLATE=C' >> /etc/bash.bashrc
+##	@echo "" >> /etc/profile
+##	@echo 'source /etc/bash.bashrc' >> /etc/profile
 
 
 add_repos: 
-#    @apt-get install --yes python-software-properties #installation de la commande "add-apt-repository"
-#    @add-apt-repository ppa:x2go/stable --yes;
-#    @apt-add-repository ppa:ubuntu-mate-dev/ppa --yes;
-    @apt-add-repository ppa:ubuntu-mate-dev/trusty-mate --yes;
-#    @add-apt-repository ppa:ravefinity-project/ppa --yes ;
-    @apt-get update --yes
+	@apt-get install --yes python-software-properties #installation de la commande "add-apt-repository"
+#	@add-apt-repository ppa:x2go/stable --yes;
+#	@apt-add-repository ppa:ubuntu-mate-dev/ppa --yes;
+	@apt-add-repository ppa:ubuntu-mate-dev/trusty-mate --yes;
+#	@add-apt-repository ppa:ravefinity-project/ppa --yes ;
+	@apt-get update --yes
 
 essential_packages:
-    @apt-get -y install ssh rsync git graphviz                                  # Basic packages that usually already come with u buntu install
-    @apt-get -y install zlibc zlib1g-dev                                        # Required by sickle, bamtools...
-    @apt-get -y install build-essential                                         # Includes gcc compiler
-    @apt-get -y install libncurses5-dev libncursesw5-dev                        # Required at least by samtools
+	@apt-get -y install ssh rsync git graphviz								  # Basic packages that usually already come with u buntu install
+	@apt-get -y install zlibc zlib1g-dev										# Required by sickle, bamtools...
+	@apt-get -y install build-essential										 # Includes gcc compiler
+	@apt-get -y install libncurses5-dev libncursesw5-dev						# Required at least by samtools
 
 R_installation:
-    @echo "" >> /etc/apt/sources.list
-    @echo "deb $(CRAN_MIRROR)/bin/linux/ubuntu $(UBUNTU_VER_NAME)/" >> /etc/apt/sources.list
-    @apt-get update
-    @apt-get -y install r-base r-base-dev libcurl4-openssl-dev libxml2-dev
-    @echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);" >> ~/.Rprofile
+	@echo "" >> /etc/apt/sources.list
+	@echo "deb $(CRAN_MIRROR)/bin/linux/ubuntu $(UBUNTU_VER_NAME)/" >> /etc/apt/sources.list
+	@apt-get update
+	@apt-get -y install r-base r-base-dev libcurl4-openssl-dev libxml2-dev
+	@echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);" >> ~/.Rprofile
 
 
 R_lib_install: 
-    @Rscript -e "pack.list <- c($(CRAN_PACK_LIST)); \
-    pack <- pack.list[!(pack.list %in% installed.packages()[,'Package'])]; \
-    if(length(pack)) install.packages(pack); \
-    source('http://bioconductor.org/biocLite.R'); \
-    pack.list <- c($(BIOC_PACK_LIST)); \
-    pack <- pack.list[!(pack.list %in% installed.packages()[,'Package'])]; \
-    if(length(pack)) biocLite(pack)"
+	@Rscript -e "pack.list <- c($(CRAN_PACK_LIST)); \
+	pack <- pack.list[!(pack.list %in% installed.packages()[,'Package'])]; \
+	if(length(pack)) install.packages(pack); \
+	source('http://bioconductor.org/biocLite.R'); \
+	pack.list <- c($(BIOC_PACK_LIST)); \
+	pack <- pack.list[!(pack.list %in% installed.packages()[,'Package'])]; \
+	if(length(pack)) biocLite(pack)"
 
 #Rstudio_install: 
-#    @apt-get install -y libjpeg62
-#    @wget --no-clobber https://download1.rstudio.org/rstudio-$(RSTUDIO_VER)-amd64.deb
-#    @yes | PATH=/sbin:$$PATH  gdebi rstudio-$(RSTUDIO_VER)-amd64.deb
-#    @rm -f rstudio-$(RSTUDIO_VER)-amd64.deb
+#	@apt-get install -y libjpeg62
+#	@wget --no-clobber https://download1.rstudio.org/rstudio-$(RSTUDIO_VER)-amd64.deb
+#	@yes | PATH=/sbin:$$PATH  gdebi rstudio-$(RSTUDIO_VER)-amd64.deb
+#	@rm -f rstudio-$(RSTUDIO_VER)-amd64.deb
 
 python_install: 
-    @apt-get -y install python-pip python-dev                                   # ipython-notebook python-matplotlib 
-    @apt-get -y install python3-pip python3.4-dev                               # ipython3-notebook python3-matplotlib
-    @pip3 install snakemake docutils pandas
-    @pip3 install "rpy2<2.3.10"
+	@apt-get -y install python-pip python-dev								   # ipython-notebook python-matplotlib 
+	@apt-get -y install python3-pip python3.4-dev							   # ipython3-notebook python3-matplotlib
+	@pip3 install snakemake docutils pandas
+	@pip3 install "rpy2<2.3.10"
 
 # ================================================================
-#                              NGS
+#							  NGS
 # ================================================================
 
 # ----------------------------------------------------------------
@@ -121,29 +121,29 @@ python_install:
 # ----------------------------------------------------------------
 
 samtools_install:
-    @cd $(USR_BIN)
-    @wget --no-clobber http://sourceforge.net/projects/samtools/files/samtools/$(SAMTOOLS_VER)/samtools-$(SAMTOOLS_VER).tar.bz2
-    @bunzip2 -f samtools-$(SAMTOOLS_VER).tar.bz2
-    @tar xvf samtools-$(SAMTOOLS_VER).tar
-    @cd samtools-$(SAMTOOLS_VER); \
-        make ;\
-        make install
-    @rm -rf samtools*
+	@cd $(USR_BIN)
+	@wget --no-clobber http://sourceforge.net/projects/samtools/files/samtools/$(SAMTOOLS_VER)/samtools-$(SAMTOOLS_VER).tar.bz2
+	@bunzip2 -f samtools-$(SAMTOOLS_VER).tar.bz2
+	@tar xvf samtools-$(SAMTOOLS_VER).tar
+	@cd samtools-$(SAMTOOLS_VER); \
+		make ;\
+		make install
+	@rm -rf samtools*
 
 bedtools_install:
-    @cd $(USR_BIN)
-    @wget --no-clobber https://github.com/arq5x/bedtools2/releases/download/v$(BEDTOOLS_VER)/bedtools-$(BEDTOOLS_VER).tar.gz
-    @tar xvfz bedtools-$(BEDTOOLS_VER).tar.gz
-    @cd bedtools2; \
-        make ;\
-        make install
-    @rm -rf bedtools*
+	@cd $(USR_BIN)
+	@wget --no-clobber https://github.com/arq5x/bedtools2/releases/download/v$(BEDTOOLS_VER)/bedtools-$(BEDTOOLS_VER).tar.gz
+	@tar xvfz bedtools-$(BEDTOOLS_VER).tar.gz
+	@cd bedtools2; \
+		make ;\
+		make install
+	@rm -rf bedtools*
 
 sratoolkit_install:
-    @wget -nc http://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/$(SRATOOLKIT_VER)/sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz
-    @tar -xvzf sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz
-    @rm sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz
-    @export PATH=$PATH:$(USR_BIN)/sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin 
+	@wget -nc http://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/$(SRATOOLKIT_VER)/sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz
+	@tar -xvzf sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz
+	@rm sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz
+	@export PATH=$PATH:$(USR_BIN)/sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin 
 
 
 # ----------------------------------------------------------------
@@ -151,49 +151,49 @@ sratoolkit_install:
 # ----------------------------------------------------------------
 
 fastqc_install:
-    @wget -nc http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v$(FASTQC_VER).zip
-    @unzip -o fastqc_$(FASTQC_VER).zip;\
-    @rm -f fastqc_$(FASTQC_VER).zip;\
-    @export PATH=$PATH:$(USR_BIN)/FastQC                                # TODO adapt path
+	@wget -nc http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v$(FASTQC_VER).zip
+	@unzip -o fastqc_$(FASTQC_VER).zip;\
+	@rm -f fastqc_$(FASTQC_VER).zip;\
+	@export PATH=$PATH:$(USR_BIN)/FastQC								# TODO adapt path
 
 sickle_install: 
-    @git clone https://github.com/najoshi/sickle.git; \
-    cd sickle;\
-    make; \
-    mv sickle $(USR_BIN) ;\
-    cd ..;\
-    rm -Rf sickle
+	@git clone https://github.com/najoshi/sickle.git; \
+	cd sickle;\
+	make; \
+	mv sickle $(USR_BIN) ;\
+	cd ..;\
+	rm -Rf sickle
 
 # ----------------------------------------------------------------
 # Mapping tools
 # ----------------------------------------------------------------
 
 bowtie_install: 
-    @cd $(USR_BIN)
-    @wget --no-clobber http://downloads.sourceforge.net/project/bowtie-bio/bowtie/$(BOWTIE1_VER)/bowtie-$(BOWTIE1_VER)-linux-x86_64.zip;\
-    unzip bowtie-$(BOWTIE1_VER)-linux-x86_64.zip;\
-    rm bowtie-$(BOWTIE1_VER)-linux-x86_64.zip;\
-    cd bowtie-$(BOWTIE1_VER);\
-    mv bowtie* /usr/local/bin/;\
-    cd ..;\
-    rm -Rf bowtie-$(BOWTIE1_VER)*
+	@cd $(USR_BIN)
+	@wget --no-clobber http://downloads.sourceforge.net/project/bowtie-bio/bowtie/$(BOWTIE1_VER)/bowtie-$(BOWTIE1_VER)-linux-x86_64.zip;\
+	unzip bowtie-$(BOWTIE1_VER)-linux-x86_64.zip;\
+	rm bowtie-$(BOWTIE1_VER)-linux-x86_64.zip;\
+	cd bowtie-$(BOWTIE1_VER);\
+	mv bowtie* /usr/local/bin/;\
+	cd ..;\
+	rm -Rf bowtie-$(BOWTIE1_VER)*
 
 bowtie2_install:
-    @wget --no-clobber http://downloads.sourceforge.net/project/bowtie-bio/bowtie2/$(BOWTIE2_VER)/bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
-    unzip bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
-    rm bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
-    cd bowtie2-$(BOWTIE2_VER);\
-    mv bowtie2* /usr/local/bin/;\
-    cd ..;\
-    rm -Rf bowtie2-$(BOWTIE2_VER)*
+	@wget --no-clobber http://downloads.sourceforge.net/project/bowtie-bio/bowtie2/$(BOWTIE2_VER)/bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
+	unzip bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
+	rm bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
+	cd bowtie2-$(BOWTIE2_VER);\
+	mv bowtie2* /usr/local/bin/;\
+	cd ..;\
+	rm -Rf bowtie2-$(BOWTIE2_VER)*
 
 bwa_install:
-    @cd $(USR_BIN)
-    @wget -nc https://sourceforge.net/projects/bio-bwa/files/bwa-$(BWA_VER).tar.bz2
-    @bunzip2 -f bwa-$(BWA_VER).tar.bz2
-    @tar xvf bwa-$(BWA_VER).tar
-    @rm bwa-$(BWA_VER).tar
-    @export PATH=$PATH:$(USR_BIN)/bwa-$(BWA_VER)
+	@cd $(USR_BIN)
+	@wget -nc https://sourceforge.net/projects/bio-bwa/files/bwa-$(BWA_VER).tar.bz2
+	@bunzip2 -f bwa-$(BWA_VER).tar.bz2
+	@tar xvf bwa-$(BWA_VER).tar
+	@rm bwa-$(BWA_VER).tar
+	@export PATH=$PATH:$(USR_BIN)/bwa-$(BWA_VER)
 
 
 ## TODO review & test until here @ IFB
@@ -203,56 +203,58 @@ bwa_install:
 # ----------------------------------------------------------------
 
 macs1_install:
-    @wget --no-clobber https://github.com/downloads/taoliu/MACS/MACS-$(MACS_VER)-1.tar.gz
-    @tar xvfz MACS-$(MACS_VER)-1.tar.gz 
-    @cd MACS-$(MACS_VER); python setup.py install
-    @rm -Rf MACS-$(MACS_VER)*
+	@wget --no-clobber https://github.com/downloads/taoliu/MACS/MACS-$(MACS_VER)-1.tar.gz
+	@tar xvfz MACS-$(MACS_VER)-1.tar.gz 
+	@cd MACS-$(MACS_VER); python setup.py install
+	@rm -Rf MACS-$(MACS_VER)*
 
 #java9_install:
-#    @echo debconf shared/accepted-oracle-license-v1-1 select true | debconf-set-selections; \
-#    echo debconf shared/accepted-oracle-license-v1-1 seen true | debconf-set-selections;\
-#    add-apt-repository -y ppa:webupd8team/java; \
-#    apt-get update ;\
-#    apt-get -y install oracle-java9-installer ;\
-#    apt-get install oracle-java9-set-default
+#	@echo debconf shared/accepted-oracle-license-v1-1 select true | debconf-set-selections; \
+#	echo debconf shared/accepted-oracle-license-v1-1 seen true | debconf-set-selections;\
+#	add-apt-repository -y ppa:webupd8team/java; \
+#	apt-get update ;\
+#	apt-get -y install oracle-java9-installer ;\
+#	apt-get install oracle-java9-set-default
 
 #igv_install:
-#    @wget --no-clobber http://data.broadinstitute.org/igv/projects/downloads/IGV_$(IGV_VER).zip; \
-#    mv IGV_$(IGV_VER).zip /opt;\
-#    cd /opt; unzip  IGV_$(IGV_VER).zip;\
-#    cd IGV_$(IGV_VER);\
-#    echo "" >> /etc/bash.bashrc;\
-#    echo "alias igv='cd /opt/IGV_$(IGV_VER); ./igv.sh'" >> /etc/bash.bashrc
+#	@wget --no-clobber http://data.broadinstitute.org/igv/projects/downloads/IGV_$(IGV_VER).zip; \
+#	mv IGV_$(IGV_VER).zip /opt;\
+#	cd /opt; unzip  IGV_$(IGV_VER).zip;\
+#	cd IGV_$(IGV_VER);\
+#	echo "" >> /etc/bash.bashrc;\
+#	echo "alias igv='cd /opt/IGV_$(IGV_VER); ./igv.sh'" >> /etc/bash.bashrc
 
 
 get_all_version:
-#    SICKLE_VER=$(shell sickle --version | grep "sickle version" | sed 's/sickle version //')
-    PYTHON3_VER=$(shell python3 --version | sed 's/Python //')
-    PYTHON_VER=$(shell python --version 2>&1 | sed 's/Python //')
-#    EMACS_VER=$(shell emacs --version| head -1 |sed 's/GNU Emacs //')
-#    MATE_DESKTOP=$(shell mate-session  --version| sed 's/mate-session //' )
-    SNAKEMAKE_VER=$(shell snakemake --version)
-#    @echo emacs $(EMACS_VER)
-#    @echo tophat $(TOPHAT2_VER)
-#    @echo rstudio $(RSTUDIO_VER)
-#    @echo sickle $(SICKLE_VER)
-#    @echo bowtie1 $(BOWTIE1_VER)
-    @echo bowtie2 $(BOWTIE2_VER)
-    @echo tophat2 $(TOPHAT_VER)
-#    @echo subread $(SUBREAD_VER)
-    @echo python3 $(PYTHON3_VER)
-    @echo python $(PYTHON_VER)
-#    @echo fastqc $(FASTQC_VER)
-#    @echo deeptools $(DEEPTOOLS_VER)
-    @echo numpy $(NUMPY_VER)
-#    @echo bx-python $(BXPYTHON_VER)
-#    @echo matplotlib $(MATPLOTLIB_VER)
-#    @echo pysam $(PYSAM_VER)
-    @echo scipy $(SCIPY_VER) 
-#    @echo RSeQC $(RSEQC_VER)
-    @echo igv $(IGV_VER)
-#    @echo igv $(IGVTOOLS_VER)
+#	SICKLE_VER=$(shell sickle --version | grep "sickle version" | sed 's/sickle version //')
+	PYTHON3_VER=$(shell python3 --version | sed 's/Python //')
+	PYTHON_VER=$(shell python --version 2>&1 | sed 's/Python //')
+#	EMACS_VER=$(shell emacs --version| head -1 |sed 's/GNU Emacs //')
+#	MATE_DESKTOP=$(shell mate-session  --version| sed 's/mate-session //' )
+	SNAKEMAKE_VER=$(shell snakemake --version)
+#	@echo emacs $(EMACS_VER)
+#	@echo tophat $(TOPHAT2_VER)
+#	@echo rstudio $(RSTUDIO_VER)
+#	@echo sickle $(SICKLE_VER)
+#	@echo bowtie1 $(BOWTIE1_VER)
+	@echo bowtie2 $(BOWTIE2_VER)
+	@echo tophat2 $(TOPHAT_VER)
+#	@echo subread $(SUBREAD_VER)
+	@echo python3 $(PYTHON3_VER)
+	@echo python $(PYTHON_VER)
+#	@echo fastqc $(FASTQC_VER)
+#	@echo deeptools $(DEEPTOOLS_VER)
+	@echo numpy $(NUMPY_VER)
+#	@echo bx-python $(BXPYTHON_VER)
+#	@echo matplotlib $(MATPLOTLIB_VER)
+#	@echo pysam $(PYSAM_VER)
+	@echo scipy $(SCIPY_VER) 
+#	@echo RSeQC $(RSEQC_VER)
+	@echo igv $(IGV_VER)
+#	@echo igv $(IGVTOOLS_VER)
 
 
-all_install: add_packages essential_packages R_installation R_lib_install
+all_install: 
+	@mkdir $(USR_BIN)\
+	add_packages essential_packages R_installation R_lib_install
 #all_install: bashrc add_repos R_installation R_lib_install python_2and3_install bowtie2_install samtools_install bedtools_install snakemake_install macs_install java9_install igv_install get_all_version
