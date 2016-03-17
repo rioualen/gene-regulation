@@ -1,4 +1,4 @@
-MAKEFILE=makefile_claire
+MAKEFILE=makefile_install_dependencies
 
 # The shell variables below will be available for 
 # recipe.
@@ -6,7 +6,11 @@ export LC_ALL=C
 export LANG=C
 #export PATH=/ifb/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games
 
-
+.PHONY: essential_packages R_installation R_lib_install python_install \
+	samtools_install bedtools_install \
+	fastqc_install sickle_install sratoolkit_install \
+	bowtie_install bowtie2_install bwa_install \
+	macs1_install
 #.PHONY: help bashrc miscellaneous_tools add_pub_key \
 #	add_repos desktop_and_x2go R_installation R_lib_install \
 #	Rstudio_install python_2and3_install sickle_install \
@@ -18,21 +22,21 @@ export LANG=C
 # Installation variables
 ##########################
 
-USR_BIN="$HOME/bin"
-
-export PATH=$PATH:$(USR_BIN)
+USR_BIN=$(HOME)/bin
 
 UBUNTU_VER_NAME="trusty"
 CRAN_MIRROR="http://cran.univ-lyon1.fr"
-CRAN_PACK_LIST='XML', 'bPeaks', 'spp'
-BIOC_PACK_LIST='affy', 'biomaRt'
-#PUB_KEY=51716619E084DAB9 F7B8CEA6056E8E56   
+CRAN_PACK_LIST='XML', 'bPeaks', 'caTools'
+BIOC_PACK_LIST='affy', 'biomaRt', 'Rsamtools'
+PUB_KEY=51716619E084DAB9 F7B8CEA6056E8E56   
 
 ###########################
 # Tool versions
 ###########################
 
 JAVA_VER=oracle-java9
+
+RPY2_VER=2.5.6
 
 SAMTOOLS_VER=1.3
 BEDTOOLS_VER=2.24.0
@@ -48,6 +52,7 @@ NUMPY_VER=1.9.2
 SCIPY_VER=0.16.0
 
 MACS_VER=1.4.2
+SPP_VER=1.13
 
 
 IGV_VER=2.3.59
@@ -69,6 +74,9 @@ IGV_VER=2.3.59
 ##	@echo 'source /etc/bash.bashrc' >> /etc/profile
 
 
+add_pub_key:
+	for i in '$(PUB_KEY)'; do echo "PUB_KEY: $$i"; apt-key adv --recv-keys --keyserver keyserver.ubuntu.com $$i; done
+
 add_repos: 
 	@apt-get install --yes python-software-properties #installation de la commande "add-apt-repository"
 #	@add-apt-repository ppa:x2go/stable --yes;
@@ -78,16 +86,18 @@ add_repos:
 	@apt-get update --yes
 
 essential_packages:
-	@apt-get -y install ssh rsync git graphviz								  # Basic packages that usually already come with u buntu install
+	@apt-get -y install ssh rsync git graphviz
+	@apt-get -y install gedit-plugins								  # Basic packages that usually already come with u buntu install
 	@apt-get -y install zlibc zlib1g-dev										# Required by sickle, bamtools...
 	@apt-get -y install build-essential										 # Includes gcc compiler
 	@apt-get -y install libncurses5-dev libncursesw5-dev						# Required at least by samtools
+	@apt-get -y install libboost-dev						# might me required for spp, to be checked
 
 R_installation:
 	@echo "" >> /etc/apt/sources.list
 	@echo "deb $(CRAN_MIRROR)/bin/linux/ubuntu $(UBUNTU_VER_NAME)/" >> /etc/apt/sources.list
 	@apt-get update
-	@apt-get -y install r-base r-base-dev libcurl4-openssl-dev libxml2-dev
+	@apt-get --force-yes install r-base r-base-dev libcurl4-openssl-dev libxml2-dev
 	@echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);" >> ~/.Rprofile
 
 
@@ -109,8 +119,10 @@ R_lib_install:
 python_install: 
 	@apt-get -y install python-pip python-dev								   # ipython-notebook python-matplotlib 
 	@apt-get -y install python3-pip python3.4-dev							   # ipython3-notebook python3-matplotlib
+	@pip3 install "rpy2<$(RPY2_VER)"
 	@pip3 install snakemake docutils pandas
-	@pip3 install "rpy2<2.3.10"
+	@pip3 install pyyaml
+
 
 # ================================================================
 #							  NGS
@@ -141,20 +153,23 @@ bedtools_install:
 
 sratoolkit_install:
 	@wget -nc http://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/$(SRATOOLKIT_VER)/sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz
-	@tar -xvzf sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz
-	@rm sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz
-	@export PATH=$PATH:$(USR_BIN)/sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin 
+	mv sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz $(USR_BIN)
+	cd $(USR_BIN); \
+	tar xvzf sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz; \
+	rm sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz; \
+	ln -s sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin/fastq-dump fastq-dump; \
+	ln -s sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin/prefetch prefetch
+#	sudo mv sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin/fastq-dump /usr/local/bin; \
+#	sudo mv sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin/prefetch /usr/local/bin
+##	export PATH=$(PATH):$(USR_BIN)/sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin 
 
 
 # ----------------------------------------------------------------
-# Quality assesment & trimming
+# Quality assessment & trimming
 # ----------------------------------------------------------------
 
 fastqc_install:
-	@wget -nc http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v$(FASTQC_VER).zip
-	@unzip -o fastqc_$(FASTQC_VER).zip;\
-	@rm -f fastqc_$(FASTQC_VER).zip;\
-	@export PATH=$PATH:$(USR_BIN)/FastQC								# TODO adapt path
+	@apt-get install fastqc
 
 sickle_install: 
 	@git clone https://github.com/najoshi/sickle.git; \
@@ -169,34 +184,30 @@ sickle_install:
 # ----------------------------------------------------------------
 
 bowtie_install: 
-	@cd $(USR_BIN)
 	@wget --no-clobber http://downloads.sourceforge.net/project/bowtie-bio/bowtie/$(BOWTIE1_VER)/bowtie-$(BOWTIE1_VER)-linux-x86_64.zip;\
+	mv bowtie-$(BOWTIE1_VER)-linux-x86_64.zip $(USR_BIN); \
+	cd $(USR_BIN); \
 	unzip bowtie-$(BOWTIE1_VER)-linux-x86_64.zip;\
 	rm bowtie-$(BOWTIE1_VER)-linux-x86_64.zip;\
-	cd bowtie-$(BOWTIE1_VER);\
-	mv bowtie* /usr/local/bin/;\
-	cd ..;\
-	rm -Rf bowtie-$(BOWTIE1_VER)*
+	sudo mv bowtie-$(BOWTIE1_VER)/bowtie* /usr/local/bin
+	rm -rf bowtie-$(BOWTIE1_VER)
+#	export PATH=$(PATH):$(USR_BIN)/bowtie-$(BOWTIE1_VER);\
 
 bowtie2_install:
 	@wget --no-clobber http://downloads.sourceforge.net/project/bowtie-bio/bowtie2/$(BOWTIE2_VER)/bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
 	unzip bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
 	rm bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
 	cd bowtie2-$(BOWTIE2_VER);\
-	mv bowtie2* /usr/local/bin/;\
+	sudo mv bowtie2* /usr/local/bin/;\
 	cd ..;\
 	rm -Rf bowtie2-$(BOWTIE2_VER)*
 
 bwa_install:
-	@cd $(USR_BIN)
-	@wget -nc https://sourceforge.net/projects/bio-bwa/files/bwa-$(BWA_VER).tar.bz2
-	@bunzip2 -f bwa-$(BWA_VER).tar.bz2
-	@tar xvf bwa-$(BWA_VER).tar
-	@rm bwa-$(BWA_VER).tar
-	@export PATH=$PATH:$(USR_BIN)/bwa-$(BWA_VER)
+	@apt-get -y install bwa
+#	@wget -nc https://sourceforge.net/projects/bio-bwa/files/bwa-$(BWA_VER).tar.bz2; \
 
 
-## TODO review & test until here @ IFB
+
 
 # ----------------------------------------------------------------
 # Peak analysis
@@ -207,6 +218,13 @@ macs1_install:
 	@tar xvfz MACS-$(MACS_VER)-1.tar.gz 
 	@cd MACS-$(MACS_VER); python setup.py install
 	@rm -Rf MACS-$(MACS_VER)*
+
+spp_install:
+	@wget https://github.com/hms-dbmi/spp/archive/$(SPP_VER).tar.gz;\
+	mv $(SPP_VER).tar.gz $(USR_BIN);\
+	cd $(USR_BIN);\
+	R CMD INSTALL $(SPP_VER).tar.gz
+
 
 #java9_install:
 #	@echo debconf shared/accepted-oracle-license-v1-1 select true | debconf-set-selections; \
@@ -254,7 +272,20 @@ get_all_version:
 #	@echo igv $(IGVTOOLS_VER)
 
 
-all_install: 
-	@mkdir $(USR_BIN)\
-	add_packages essential_packages R_installation R_lib_install
+all_install: python_install	
+
+#macs1_install 
+
+#bowtie_install bowtie2_install bwa_install
+
+#fastqc_install 
+
+#sickle_install sratoolkit_install
+
+#add_pub_key essential_packages R_installation R_lib_install spp_install python_install \
+#	samtools_install bedtools_install \
+#	fastqc_install sickle_install sratoolkit_install
+
+
+
 #all_install: bashrc add_repos R_installation R_lib_install python_2and3_install bowtie2_install samtools_install bedtools_install snakemake_install macs_install java9_install igv_install get_all_version
