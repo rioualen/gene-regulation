@@ -78,11 +78,11 @@ Data is downloadable from the GEO platform. The automatic downloading is soon to
 
 # Workflow execution
 
-The workflow has to include the configuration file using this code:
+The workflow includes the configuration file using this code:
 ```
 configfile: "examples/GSE20870/GSE20870.yml"
 ```
-You can then chose what program(s) to use for mapping and peak-calling by commenting/uncommenting the following line:
+You can then chose what program(s) to use for mapping and peak-calling by commenting/uncommenting the following lines:
 
 ```
 ALIGNER=[
@@ -102,6 +102,10 @@ PEAKCALLER=[
 ]
 ```
 
+You can now run the workflow:
+```
+snakemake -s scripts/snakefiles/workflows/factor_workflow.py
+```
 
 The workflow generates a flowchart of the analysis:
 
@@ -124,37 +128,24 @@ different bioinformaticians involved in ChIP-seq and RNA-seq projects.
 3. Enable validation of the code by independent users.
 
 
+# Pre-requisites
 
-### Execution 
-
-The file `factor_workflow.py` is designed to perform ChIP-seq analysis on transcription factor studies. 
-
-Two associated config files are designed to work with this workflow: `Athaliana-Myb.yml` and `Scerevisiae-GCN4.yml`.
-
-In order to launch the workflows, you can enter the following commands from the root of the repository:
-
-```
-snakemake -s scripts/snakefiles/workflows/factor_workflow.py --configfile examples/Scerevisiae-GCN4/Scerevisiae-GCN4.yml -p -n
-snakemake -s scripts/snakefiles/workflows/factor_workflow.py --configfile examples/Athaliana-Myb/Athaliana-Myb.yml -p -n
-```
-This ensures the workflows are executable. Remove the -n option to actually run them. 
-
-# Pre-requisites:
+In order to run the workflow as shown above, you should have the following programs installed:
 
 * R 3+
 * Python 3.3+
 * Snakemake 3.3+
 
-* [SRA Toolkit](http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software)
+<!--* [SRA Toolkit](http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software)-->
 * [Sickle](https://github.com/najoshi/sickle)
-* [BWA](http://bio-bwa.sourceforge.net/)
-* Bowtie 1
+<!-- * [BWA](http://bio-bwa.sourceforge.net/)
+* Bowtie 1-->
 * [Bowtie 2](http://bowtie-bio.sourceforge.net/)
 * [SAMtools 1.3+](http://samtools.sourceforge.net/)
 * [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 * [bedtools](http://bedtools.readthedocs.org/)
 * [HOMER](http://homer.salk.edu/homer/index.html)
-* [MACS1.4](http://liulab.dfci.harvard.edu/MACS/index.html)
+<!--* [MACS1.4](http://liulab.dfci.harvard.edu/MACS/index.html)-->
 * [MACS2](https://github.com/taoliu/MACS/)
 * [SWEMBL](http://www.ebi.ac.uk/~swilder/SWEMBL/)
 * [RSAT](http://rsat.eu/)
@@ -162,10 +153,7 @@ This ensures the workflows are executable. Remove the -n option to actually run 
 
 
 See `doc/install_protocols/install_snakemake_workflows.Rmd` for a detailed manual on how to install programs and dependencies.
-
-
-
-## RNA-seq (TODO)
+A makefile will soon be available to perform the installation of dependencies.
 
 # Documentation
 
