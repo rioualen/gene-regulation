@@ -64,7 +64,9 @@ Here, we analyse raw samples (\*.sra) located in the `/data` directory:
         GSM521935/
             SRR051930.sra
 ```
-It is assumed that the reference genome is to be downloaded to the `/data/genome` directory:
+Raw data is downloadable from the GEO platform. The automatic downloading is soon to be integrated in the workflow. 
+
+The reference genome will be automatically downloaded in the `/data/genome` directory:
 
 ```
 /data/
@@ -73,8 +75,7 @@ It is assumed that the reference genome is to be downloaded to the `/data/genome
             sacCer2.fa
 ```
 
-You should adapt the configuration file to your own file organization. 
-Data is downloadable from the GEO platform. The automatic downloading is soon to be integrated in the workflow. 
+You should adapt the configuration file required fields to your own file organization. 
 
 # Workflow execution
 
@@ -136,16 +137,13 @@ In order to run the workflow as shown above, you should have the following progr
 * Python 3.3+
 * Snakemake 3.3+
 
-<!--* [SRA Toolkit](http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software)-->
+* [SRA Toolkit](http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software)
 * [Sickle](https://github.com/najoshi/sickle)
-<!-- * [BWA](http://bio-bwa.sourceforge.net/)
-* Bowtie 1-->
 * [Bowtie 2](http://bowtie-bio.sourceforge.net/)
 * [SAMtools 1.3+](http://samtools.sourceforge.net/)
 * [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 * [bedtools](http://bedtools.readthedocs.org/)
 * [HOMER](http://homer.salk.edu/homer/index.html)
-<!--* [MACS1.4](http://liulab.dfci.harvard.edu/MACS/index.html)-->
 * [MACS2](https://github.com/taoliu/MACS/)
 * [SWEMBL](http://www.ebi.ac.uk/~swilder/SWEMBL/)
 * [RSAT](http://rsat.eu/)
