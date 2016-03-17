@@ -188,7 +188,7 @@ QC = RAW_QC + TRIM_QC
 #----------------------------------------------------------------#
 
 
-ALIGNER=["bowtie", "bowtie2", "bwa"]
+ALIGNER=["bwa"]
 ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER, trimmer=TRIMMER)
 
 INDEX = expand(config["dir"]["genomes"] + config["genome"]["version"] + "/{aligner}/" + config["genome"]["version"] + ".fa", aligner=ALIGNER)
@@ -218,7 +218,7 @@ PEAKCALLER=[
 #    "macs2-qval" + config["macs2"]["qval"], 
 #    "swembl-R" + config["swembl"]["R"],
     "macs14-pval" + config["macs14"]["pval"],
-#    "spp-fdr" + config["spp"]["fdr"],
+    "spp-fdr" + config["spp"]["fdr"],
     "bPeaks_allGenome"
 ]
 
@@ -245,6 +245,6 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: GRAPHICS, QC, BAM_STATS, PEAK_MOTIFS#, CHROM_SIZES, PEAKS, TDFRAW_QC, MAPPING, PEAKS, IMPORT, INDEX, PEAKS, 
+	input: GRAPHICS, IMPORT#, QC, BAM_STATS, PEAKS#PEAK_MOTIFS#, CHROM_SIZES, PEAKS, TDFRAW_QC, MAPPING, PEAKS, IMPORT, INDEX, PEAKS, 
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
