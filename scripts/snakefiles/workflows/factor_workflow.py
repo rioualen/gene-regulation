@@ -246,6 +246,6 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: GRAPHICS, IMPORT, MAPPING, BAM_STATS, PEAKS, QC,#PEAK_MOTIFS#, CHROM_SIZES, PEAKS, TDFRAW_QC, MAPPING, PEAKS, IMPORT, INDEX, PEAKS, 
+	input: GRAPHICS, BAM_STATS, PEAKS, QC,#PEAK_MOTIFS#, CHROM_SIZES, PEAKS, TDFRAW_QC, MAPPING, PEAKS, IMPORT, INDEX, PEAKS, 
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
