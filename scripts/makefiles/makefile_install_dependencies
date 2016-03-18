@@ -106,7 +106,7 @@ R_installation:
 	@echo "" >> /etc/apt/sources.list
 	@echo "deb $(CRAN_MIRROR)/bin/linux/ubuntu $(UBUNTU_VER_NAME)/" >> /etc/apt/sources.list
 	@apt-get update
-	@apt-get --force-yes install r-base r-base-dev libcurl4-openssl-dev libxml2-dev
+	@apt-get -y install r-base r-base-dev libcurl4-openssl-dev libxml2-dev
 	@echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);" >> ~/.Rprofile
 
 
@@ -117,7 +117,7 @@ R_lib_install:
 	source('http://bioconductor.org/biocLite.R'); \
 	pack.list <- c($(BIOC_PACK_LIST)); \
 	pack <- pack.list[!(pack.list %in% installed.packages()[,'Package'])]; \
-	if(length(pack)) biocLite(pack)
+	if(length(pack)) biocLite(pack)"
 
 #Rstudio_install: 
 #	@apt-get install -y libjpeg62
@@ -296,12 +296,11 @@ get_all_version:
 #	@echo igv $(IGVTOOLS_VER)
 
 
-all_install: 
-#add_pub_key essential_packages R_installation R_lib_install  python_install java9_install \
-#	samtools_install bedtools_install sratoolkit_install \
-#	fastqc_install sickle_install \
-#	bowtie_install bowtie2_install bwa_install \
-#	macs1_install spp_install 
+all_install: add_pub_key essential_packages R_installation R_lib_install  python_install java9_install \
+	samtools_install bedtools_install sratoolkit_install \
+	fastqc_install sickle_install \
+	bowtie_install bowtie2_install bwa_install \
+	macs1_install spp_install 
 
 
 
