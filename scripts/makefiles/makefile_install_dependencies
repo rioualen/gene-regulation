@@ -23,6 +23,7 @@ export LANG=C
 ##########################
 
 USR_BIN=$(HOME)/bin
+PATH_VAR=$(PATH)
 #export PATH=$(PATH):$(USR_BIN)
 #export PATH := $(USR_BIN):$(PATH)
 #SHELL := /bin/bash
@@ -254,10 +255,22 @@ spp_install:
 	@wget http://compbio.med.harvard.edu/Supplements/ChIP-seq/spp_$(SPP_VER).tar.gz
 	mv spp_$(SPP_VER).tar.gz $(USR_BIN);\
 	cd $(USR_BIN);\
-	R CMD INSTALL spp_$(SPP_VER).tar.gz
+	R CMD INSTALL spp_$(SPP_VER).tar.gz; \
 
 
+homer_install:
+	@wget "http://homer.salk.edu/homer/configureHomer.pl"; \
+	mkdir $(USR_BIN)/HOMER; \
+	mv configureHomer.pl $(USR_BIN)/HOMER; \
+	cd $(USR_BIN)/HOMER; \
+	perl configureHomer.pl -install homer; \
+	echo 'PATH=$$PATH:'$(USR_BIN)'/HOMER/bin' >> ~/.bashrc
+	echo source $(HOME)/.bashrc
+#	PATH=$(USR_BIN)/HOMER/bin:$$PATH
+#	PATH_VAR=$(PATH_VAR):$(USR_BIN)/HOMER/bin; \
+#	echo "export PATH="$(PATH_VAR)
 
+#	@echo 'PATH=$$PATH:'$(USR_BIN) >> ~/.bashrc
 #igv_install:
 #	@wget --no-clobber http://data.broadinstitute.org/igv/projects/downloads/IGV_$(IGV_VER).zip; \
 #	mv IGV_$(IGV_VER).zip /opt;\
