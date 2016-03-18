@@ -33,8 +33,8 @@ Contributors:
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
-if not "r_libs" in config["dir"].keys():
-    sys.exit("The r_libs directory must be defined in the config file")
+#if not "r_libs" in config["dir"].keys():
+#    sys.exit("The r_libs directory must be defined in the config file")
 
 if not "bPeaks" in config.keys():
     config["bPeaks"] = {}
@@ -76,7 +76,7 @@ rule bPeaks:
     params:
         outdir = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix, \
         name = "{treatment}_vs_{control}{preprocess}", \
-        r_libs=config["dir"]["r_libs"], \
+#        r_libs=config["dir"]["r_libs"], \
         IPcoeff = config["bPeaks"]["IPcoeff"], \
         controlCoeff = config["bPeaks"]["controlCoeff"], \
         log2FC = config["bPeaks"]["log2FC"], \
@@ -91,7 +91,7 @@ rule bPeaks:
     run: 
         R("""sink("{log}")
         
-        library("bPeaks", lib.loc="{params.r_libs}")
+        library("bPeaks")
 
         setwd("{params.outdir}")
 
