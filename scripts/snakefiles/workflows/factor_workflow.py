@@ -90,6 +90,7 @@ include: os.path.join(RULES, "macs14.rules")
 include: os.path.join(RULES, "merge_lanes.rules")
 include: os.path.join(RULES, "peak_motifs.rules")
 include: os.path.join(RULES, "sickle_se.rules")
+include: os.path.join(RULES, "spp.rules")
 include: os.path.join(RULES, "sra_to_fastq.rules")
 include: os.path.join(RULES, "swembl.rules")
 include: os.path.join(RULES, "sam_to_bam.rules")
@@ -245,6 +246,6 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: GRAPHICS, IMPORT#, QC, BAM_STATS, PEAKS#PEAK_MOTIFS#, CHROM_SIZES, PEAKS, TDFRAW_QC, MAPPING, PEAKS, IMPORT, INDEX, PEAKS, 
+	input: GRAPHICS, IMPORT, MAPPING, BAM_STATS, PEAKS, QC,#PEAK_MOTIFS#, CHROM_SIZES, PEAKS, TDFRAW_QC, MAPPING, PEAKS, IMPORT, INDEX, PEAKS, 
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
