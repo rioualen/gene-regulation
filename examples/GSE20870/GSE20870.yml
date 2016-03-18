@@ -27,7 +27,7 @@
     reads_source: "/data/GSE20870/"                                             # required: dir containing raw data organized in sub directories named after the samples
     genomes: "/data/genomes/"                                                   # required: where to store genomes
     results: "/data/results/GSE20870/"                                          # required: dir for all result files that are produced by the pipeline
-    r_libs: "~/bin/R-packages/"                                                 # required: where to look for installed R libraries (spp, bPeaks...)
+#    r_libs: "~/bin/R-packages/"                                                 # required: where to look for installed R libraries (spp, bPeaks...)
     fg_lib: "."                                                                 # required: location of the snakemake library
 
     samples: "/data/results/GSE20870/samples/"                                  # optional: will hold sample treatment (trimming, alignment, QC...).    If not mentioned, will be config["dir"]["results"]
@@ -80,7 +80,7 @@
     fdr: "0.01"                                                                 # optional (def: 0.001)
 
   spp: 
-    fdr: "0.001"                                                                # optional (def: 0.01)
+    fdr: "0.01"                                                                # optional (def: 0.01)
 
   bPeaks: 
     IPcoeff: "2"                                                                # optional (def: 2)
