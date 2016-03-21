@@ -1,0 +1,33 @@
+"""Compute genome coverage from a bam-formatted file with aligned
+reads.  The coverage file is in bedgraph format (with extension
+.bedgraph), which can be loaded in the genome viewer IGV. 
+
+Note however that IGV issues a warning when bedgraph files are
+given in input, and recommends to use the tdf format instead. We
+implemented hereafter rules to convert bedgraph to tdf.
+"""
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "version" in config["genome"].keys():
+    sys.exit("Genome version must be defined in the config file")
+
+if not "genomes" in config["dir"].keys():
+    sys.exit("Genome dir must be defined in the 'dir' section of the config file")
+
+# Define paths
+genome_version = config["genome"]["version"]
+genome_dir = config["dir"]["genomes"] + genome_version + "/"
+genome_file = genome_dir + genome_version + ".fa"
+bowtie_dir = genome_dir + "bowtie/"
+bowtie_index = bowtie_dir + genome_version + ".fa"
+chrom_size=genome_dir + genome_version + ".genome"
+
+rule genome_coverage_bedgraph:
+    input: reads = "{reads}_sorted_pos.bam", chrom_size = chrom_size
+    output: bedg = "{reads}.bedgraph"
+    params: qsub = config["qsub"] + " -e {reads}_genomecov_bedgraph_qsub.err -o {reads}_genomecov_bedgraph_qsub.out"
+    log:  "{reads}_genomecov_bedgraph.log"
+    benchmark:  "{reads}_genomecov_bedgraph_benchmark.json"
+    shell: "bedtools genomecov -bg -ibam {input.reads} -g {input.chrom_size} > {output.bedg} 2> {log}" 

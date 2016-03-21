@@ -1,0 +1,15 @@
+rule genome_coverage_wig:    
+    """Compute genome coverage from a bam-formatted file with aligned
+    reads and produce a wig or bigWig file, the recommended format to
+    upload coverage-type data as UCSC tracks.
+
+    """
+    input: "{reads}.bam"
+    output: "{reads}.wig"
+    log:  "{reads}_bam2wig.log"
+    benchmark:  "{reads}_bam2wig_benchmark.json"
+    params: output_prefix = "{reads}", \
+            chromsize = config["genome"]["chromsize"], \
+            qsub = config["qsub"] + " -e {reads}_bam2wig_qsub.err -o {reads}_bam2wig_qsub.out"
+    shell: "bam2wig.py -i {input} -s {params.chromsize} -o {params.output_prefix} 2> {log}" 
+

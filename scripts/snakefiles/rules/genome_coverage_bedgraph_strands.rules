@@ -1,0 +1,16 @@
+rule genome_coverage_bedgraph_strands:
+    """Compute two strand-specific genome coverage files (with suffixes
+    _strand- and _strand+) from a bam-formatted file with aligned
+    reads.  The coverage files are in bedgraph format, which can be
+    loaded in the genome viewer IGV.
+
+    """
+    input: reads = "{reads}.bam"
+    output: bedg_plus = "{reads}_genomecov_strand+.bedgraph", \
+            bedg_minus = "{reads}_genomecov_strand-.bedgraph"
+    log:  "{reads}_genomecov_bedgraph_str.log"
+    benchmark:  "{reads}_genomecov_bedgraph_str_benchmark.json"
+    params: qsub = config["qsub"] + " -e {reads}_genomecov_bedgraph_str_qsub.err -o {reads}_genomecov_bedgraph_str_qsub.out"
+    shell: "bedtools genomecov -bg -strand + -ibam {input.reads} > {output.bedg_plus} 2> {log}" \
+        + "; bedtools genomecov -bg -strand - -ibam {input.reads} > {output.bedg_minus} 2>> {log}"
+

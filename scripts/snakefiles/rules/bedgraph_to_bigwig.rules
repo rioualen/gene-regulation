@@ -1,0 +1,8 @@
+rule bedgraph_to_bigwig:
+    """Convert bedGraph to bigWig format."""
+    input: chromizes="", bedgraph="{coverage}.bedGraph"
+    output: "{coverage}.bw"
+    log:  "{coverage}_bedGraphToBigWig.log"
+    benchmark:  "{coverage}_bedGraphToBigWig.json"
+    params: qsub = config["qsub"] + " -e {coverage}_bedGraphToBigWig_qsub.err -o {coverage}_bedGraphToBigWig_qsub.out"
+    shell: "bedGraphToBigWig {input.bedgrap} {input.chromsizes} {output} 2> {log}"

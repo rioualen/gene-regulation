@@ -1,0 +1,15 @@
+rule bedgraph_to_tdf:
+    """Convert bedgraph to TDF format, which is recommended to load
+    coverage data in IGV.
+    
+    The conversion relies on igvtools:
+    https://www.broadinstitute.org/software/igv/igvtools
+
+    """
+    input: "{coverage}.bedgraph"
+    output: "{coverage}.tdf"
+    log: "{coverage}_bedgraph_to_tdf.log"
+    benchmark: "{coverage}_bedgraph_to_tdf_benchmark.json"
+    params: genome=config["genome"]["fasta"], \
+            qsub = config["qsub"] + " -e {coverage}_bedgraph_to_tdf_qsub.err -o {coverage}_bedgraph_to_tdf_qsub.out"
+    shell: "igvtools totdf {input} {output} {params.genome} 2> {log}"
