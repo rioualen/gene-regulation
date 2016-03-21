@@ -1,3 +1,16 @@
+#################################################
+# Attention
+#################################################
+
+# This file is to be deleted. Please use instead: 
+
+# genome_coverage_dz.rules
+# genome_coverage_bedgraph.rules
+# genome_coverage_bedgraph_strands.rules
+# bedgraph_to_tdf.rules
+# genome_coverage_wig.rules
+# bedgraph_to_bigwig.rules
+
 """Compute genome coverage from aligned reads.
 
 Requirements: 
