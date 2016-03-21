@@ -6,17 +6,12 @@ export LC_ALL=C
 export LANG=C
 
 
-.PHONY: essential_packages R_installation R_lib_install python_install \
+.PHONY: add_repos essential_packages R_installation R_lib_install python_install \
 	samtools_install bedtools_install \
 	fastqc_install sickle_install sratoolkit_install \
 	bowtie_install bowtie2_install bwa_install \
-	macs1_install
-#.PHONY: help bashrc miscellaneous_tools add_pub_key \
-#	add_repos desktop_and_x2go R_installation R_lib_install \
-#	Rstudio_install python_2and3_install sickle_install \
-#	bowtie_install bowtie2_install tophat2_install \
-#	subread_install fastqc_install deep_tool_install get_all_version
-
+	macs1_install homer_install \
+	Rstudio_install igv_install igv_tools_install
 
 ##########################
 # Installation variables
@@ -39,28 +34,26 @@ PUB_KEY=51716619E084DAB9 F7B8CEA6056E8E56
 # Tool versions
 ###########################
 
-JAVA_VER=oracle-java9
 
-RPY2_VER=2.5.6
 
-SAMTOOLS_VER=1.3
 BEDTOOLS_VER=2.24.0
-SRATOOLKIT_VER=2.5.2
-
-FASTQC_VER=0.11.5
-
 BOWTIE1_VER=1.1.1
 BOWTIE2_VER=2.2.6
 #BWA_VER=0.7.10
-
+FASTQC_VER=0.11.5
+IGV_VER=2.3.59
+IGVTOOLS_VER=2.3.57
+JAVA_VER=oracle-java9
+MACS1_VER=1.4.2
 NUMPY_VER=1.9.2
+RPY2_VER=2.5.6
+RSTUDIO_VER=0.99.473
+SAMTOOLS_VER=1.3
+SRATOOLKIT_VER=2.5.2
 SCIPY_VER=0.16.0
-
-MACS_VER=1.4.2
 SPP_VER=1.11
 
 
-IGV_VER=2.3.59
 
 ##########################
 # ~/.bashrc config
@@ -79,16 +72,13 @@ bashrc:
 	@echo "" >> /etc/profile
 	@echo 'source /etc/bash.bashrc' >> /etc/profile
 
-#update_path:
-#	echo 'PATH=$$PATH:'$(USR_BIN) >> ~/.bashrc
-
 add_pub_key:
 	for i in '$(PUB_KEY)'; do echo "PUB_KEY: $$i"; apt-key adv --recv-keys --keyserver keyserver.ubuntu.com $$i; done
 
 add_repos: 
 	@apt-get install --yes python-software-properties #installation de la commande "add-apt-repository"
-#	@add-apt-repository ppa:x2go/stable --yes;
-#	@apt-add-repository ppa:ubuntu-mate-dev/ppa --yes;
+	@add-apt-repository ppa:x2go/stable --yes;
+	@apt-add-repository ppa:ubuntu-mate-dev/ppa --yes;
 	@apt-add-repository ppa:ubuntu-mate-dev/trusty-mate --yes;
 #	@add-apt-repository ppa:ravefinity-project/ppa --yes ;
 	@apt-get update --yes
@@ -101,7 +91,14 @@ essential_packages:
 	@apt-get -y install build-essential										 # Includes gcc compiler
 	@apt-get -y install libncurses5-dev libncursesw5-dev						# Required at least by samtools
 	@apt-get -y install libboost-dev						# might me required for spp, to be checked
-	mkdir $(USR_BIN)
+	apt-get -y install gdebi								# required by rstudio install
+
+desktop_and_x2go:
+	apt-get install -y x2goserver; \
+	@apt-get install -y --no-install-recommends ubuntu-mate-core ubuntu-mate-desktop; \
+	@apt-get install -y mate-desktop-environment-extra; \
+	@apt-get install -y mate-notification-daemon caja-gksu caja-open-terminal; \
+	@apt-get install --yes ambiance-colors radiance-colors;
 
 R_installation:
 	@echo "" >> /etc/apt/sources.list
@@ -120,11 +117,11 @@ R_lib_install:
 	pack <- pack.list[!(pack.list %in% installed.packages()[,'Package'])]; \
 	if(length(pack)) biocLite(pack)"
 
-#Rstudio_install: 
-#	@apt-get install -y libjpeg62
-#	@wget --no-clobber https://download1.rstudio.org/rstudio-$(RSTUDIO_VER)-amd64.deb
-#	@yes | PATH=/sbin:$$PATH  gdebi rstudio-$(RSTUDIO_VER)-amd64.deb
-#	@rm -f rstudio-$(RSTUDIO_VER)-amd64.deb
+Rstudio_install: 
+	@apt-get install -y libjpeg62
+	@wget --no-clobber https://download1.rstudio.org/rstudio-$(RSTUDIO_VER)-amd64.deb
+	@yes | PATH=/sbin:$$PATH  gdebi rstudio-$(RSTUDIO_VER)-amd64.deb
+	@rm -f rstudio-$(RSTUDIO_VER)-amd64.deb
 
 python_install: 
 	@apt-get -y install python-pip python-dev								   # ipython-notebook python-matplotlib 
@@ -144,7 +141,7 @@ java9_install:
 
 
 # ================================================================
-#							  NGS
+#		  NGS
 # ================================================================
 
 # ----------------------------------------------------------------
@@ -152,35 +149,32 @@ java9_install:
 # ----------------------------------------------------------------
 
 samtools_install:
-	@cd $(USR_BIN)
-	@wget --no-clobber http://sourceforge.net/projects/samtools/files/samtools/$(SAMTOOLS_VER)/samtools-$(SAMTOOLS_VER).tar.bz2
-	@bunzip2 -f samtools-$(SAMTOOLS_VER).tar.bz2
-	@tar xvf samtools-$(SAMTOOLS_VER).tar
-	@cd samtools-$(SAMTOOLS_VER); \
-		make ;\
-		make install
-	@rm -rf samtools*
+	cd $(USR_BIN)
+	wget --no-clobber http://sourceforge.net/projects/samtools/files/samtools/$(SAMTOOLS_VER)/samtools-$(SAMTOOLS_VER).tar.bz2
+	bunzip2 -f samtools-$(SAMTOOLS_VER).tar.bz2
+	tar xvf samtools-$(SAMTOOLS_VER).tar
+	cd samtools-$(SAMTOOLS_VER); \
+	make ;\
+	make install;\
+	rm -rf samtools*
 
 bedtools_install:
-	@cd $(USR_BIN)
-	@wget --no-clobber https://github.com/arq5x/bedtools2/releases/download/v$(BEDTOOLS_VER)/bedtools-$(BEDTOOLS_VER).tar.gz
-	@tar xvfz bedtools-$(BEDTOOLS_VER).tar.gz
-	@cd bedtools2; \
-		make ;\
-		make install
-	@rm -rf bedtools*
+	cd $(USR_BIN)
+	wget --no-clobber https://github.com/arq5x/bedtools2/releases/download/v$(BEDTOOLS_VER)/bedtools-$(BEDTOOLS_VER).tar.gz
+	tar xvfz bedtools-$(BEDTOOLS_VER).tar.gz
+	cd bedtools2; \
+	make ;\
+	make install;\
+	rm -rf bedtools*
 
 sratoolkit_install:
-	@wget -nc http://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/$(SRATOOLKIT_VER)/sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz
+	wget -nc http://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/$(SRATOOLKIT_VER)/sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz
 	mv sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz $(USR_BIN)
 	cd $(USR_BIN); \
 	tar xvzf sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz; \
 	rm sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz; \
 	ln -s sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin/fastq-dump fastq-dump; \
 	ln -s sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin/prefetch prefetch
-#	sudo mv sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin/fastq-dump /usr/local/bin; \
-#	sudo mv sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin/prefetch /usr/local/bin
-##	export PATH=$(PATH):$(USR_BIN)/sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin 
 
 
 # ----------------------------------------------------------------
@@ -196,12 +190,6 @@ fastqc_install:
 	rm fastqc_v$(FASTQC_VER).zip; \
 	chmod +x FastQC/fastqc; \
 	ln -s FastQC/fastqc fastqc; \
-#	echo 'PATH=$$PATH:'$(USR_BIN)'/FastQC' >> ~/.bashrc; \
-#	echo 'source ~/.bashrc'; \
-#	rm -f fastqc_$(FASTQC_VER).zip;\
-#	rm -rf /opt/FastQC; mv FastQC /opt;\
-#	chmod 777 /opt/FastQC/fastqc;\
-#	echo 'PATH=$$PATH:/opt/FastQC/' >> ~/.bashrc
 
 sickle_install: 
 	@git clone https://github.com/najoshi/sickle.git; \
@@ -223,7 +211,6 @@ bowtie_install:
 	rm bowtie-$(BOWTIE1_VER)-linux-x86_64.zip;\
 	mv bowtie-$(BOWTIE1_VER)/bowtie* /usr/local/bin
 	rm -rf bowtie-$(BOWTIE1_VER)
-#	export PATH=$(PATH):$(USR_BIN)/bowtie-$(BOWTIE1_VER);\
 
 bowtie2_install:
 	@wget --no-clobber http://downloads.sourceforge.net/project/bowtie-bio/bowtie2/$(BOWTIE2_VER)/bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
@@ -257,7 +244,6 @@ spp_install:
 	cd $(USR_BIN);\
 	R CMD INSTALL spp_$(SPP_VER).tar.gz; \
 
-
 homer_install:
 	@wget "http://homer.salk.edu/homer/configureHomer.pl"; \
 	mkdir $(USR_BIN)/HOMER; \
@@ -271,50 +257,36 @@ homer_install:
 #	echo "export PATH="$(PATH_VAR)
 
 #	@echo 'PATH=$$PATH:'$(USR_BIN) >> ~/.bashrc
-#igv_install:
-#	@wget --no-clobber http://data.broadinstitute.org/igv/projects/downloads/IGV_$(IGV_VER).zip; \
-#	mv IGV_$(IGV_VER).zip /opt;\
-#	cd /opt; unzip  IGV_$(IGV_VER).zip;\
-#	cd IGV_$(IGV_VER);\
-#	echo "" >> /etc/bash.bashrc;\
-#	echo "alias igv='cd /opt/IGV_$(IGV_VER); ./igv.sh'" >> /etc/bash.bashrc
+
+# ================================================================
+#		  Visualization
+# ================================================================
+
+igv_install:
+	wget --no-clobber http://data.broadinstitute.org/igv/projects/downloads/IGV_$(IGV_VER).zip; \
+	mv IGV_$(IGV_VER).zip $(USR_BIN);\
+	cd $(USR_BIN); \
+	unzip IGV_$(IGV_VER).zip;\
+	rm  IGV_$(IGV_VER).zip;\
+	cd IGV_$(IGV_VER);\
+	ln -s $(USR_BIN)/IGV_$(IGV_VER)/igv.sh $(USR_BIN)/igv
+
+igv_tools_install:
+	wget --no-clobber http://data.broadinstitute.org/igv/projects/downloads/igvtools_$(IGVTOOLS_VER).zip ;\
+	mv igvtools_$(IGVTOOLS_VER).zip $(USR_BIN);\
+	cd $(USR_BIN); \
+	unzip igvtools_$(IGVTOOLS_VER).zip;\
+	rm igvtools_$(IGVTOOLS_VER).zip;\
+	ln -s $(USR_BIN)/IGVTools/igvtools $(USR_BIN)/igvtools
+
+all_install: igv_install igv_tools_install
+
+#add_repos desktop_and_x2go
+
+#add_repos add_pub_key essential_packages R_installation R_lib_install  python_install java9_install \
+#	samtools_install bedtools_install sratoolkit_install \
+#	fastqc_install sickle_install \
+#	bowtie_install bowtie2_install bwa_install \
+#	macs1_install spp_install 
 
 
-get_all_version:
-#	SICKLE_VER=$(shell sickle --version | grep "sickle version" | sed 's/sickle version //')
-	PYTHON3_VER=$(shell python3 --version | sed 's/Python //')
-	PYTHON_VER=$(shell python --version 2>&1 | sed 's/Python //')
-#	EMACS_VER=$(shell emacs --version| head -1 |sed 's/GNU Emacs //')
-#	MATE_DESKTOP=$(shell mate-session  --version| sed 's/mate-session //' )
-	SNAKEMAKE_VER=$(shell snakemake --version)
-#	@echo emacs $(EMACS_VER)
-#	@echo tophat $(TOPHAT2_VER)
-#	@echo rstudio $(RSTUDIO_VER)
-#	@echo sickle $(SICKLE_VER)
-#	@echo bowtie1 $(BOWTIE1_VER)
-	@echo bowtie2 $(BOWTIE2_VER)
-	@echo tophat2 $(TOPHAT_VER)
-#	@echo subread $(SUBREAD_VER)
-	@echo python3 $(PYTHON3_VER)
-	@echo python $(PYTHON_VER)
-#	@echo fastqc $(FASTQC_VER)
-#	@echo deeptools $(DEEPTOOLS_VER)
-	@echo numpy $(NUMPY_VER)
-#	@echo bx-python $(BXPYTHON_VER)
-#	@echo matplotlib $(MATPLOTLIB_VER)
-#	@echo pysam $(PYSAM_VER)
-	@echo scipy $(SCIPY_VER) 
-#	@echo RSeQC $(RSEQC_VER)
-	@echo igv $(IGV_VER)
-#	@echo igv $(IGVTOOLS_VER)
-
-
-all_install: add_pub_key essential_packages R_installation R_lib_install  python_install java9_install \
-	samtools_install bedtools_install sratoolkit_install \
-	fastqc_install sickle_install \
-	bowtie_install bowtie2_install bwa_install \
-	macs1_install spp_install 
-
-
-
-#all_install: bashrc add_repos R_installation R_lib_install python_2and3_install bowtie2_install samtools_install bedtools_install snakemake_install macs_install java9_install igv_install get_all_version
