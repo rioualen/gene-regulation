@@ -80,11 +80,13 @@ include: os.path.join(RULES, "count_reads.rules")
 #include: os.path.join(RULES, "download_from_GEO.rules")
 include: os.path.join(RULES, "fastqc.rules")
 include: os.path.join(RULES, "flowcharts.rules")
+include: os.path.join(RULES, "genome_coverage_bedgraph.rules")
 include: os.path.join(RULES, "genome_download.rules")
 include: os.path.join(RULES, "getfasta.rules")
 include: os.path.join(RULES, "get_chrom_sizes.rules")
-#include: os.path.join(RULES, "genome_coverage.rules")
+include: os.path.join(RULES, "gzip.rules")
 include: os.path.join(RULES, "homer.rules")
+#include: os.path.join(RULES, "igv_session_create.rules")
 include: os.path.join(RULES, "macs2.rules")
 include: os.path.join(RULES, "macs14.rules")
 include: os.path.join(RULES, "merge_lanes.rules")
@@ -198,6 +200,9 @@ MAPPING = expand("{alignment}.sam", alignment=ALIGNMENT)
 
 BAM_STATS = expand("{alignment}_bam_stats.txt", alignment=ALIGNMENT)
 
+GENOME_COVERAGE = expand("{alignment}.bedgraph", alignment=ALIGNMENT)
+GENOME_COVERAGE_GZ = expand("{alignment}.bedgraph.gz", alignment=ALIGNMENT)
+
 # Sort mapped reads
 
 ## Why not work ?
@@ -238,6 +243,12 @@ MOTIFS=expand(expand("{treat}_vs_{control}/{{peakcaller}}/peak-motifs/{treat}_vs
 GET_FASTA = expand(PEAKS_DIR + "{peakcalling}.fasta", peakcalling=PEAKCALLING)
 PEAK_MOTIFS = expand(PEAKS_DIR + "{motifs}.html", motifs=MOTIFS)
 
+# ----------------------------------------------------------------
+# Visualization
+# ----------------------------------------------------------------
+
+VISU = expand(PEAKS_DIR + "igv_session.xml")
+
 #================================================================#
 #                        Rule all                                #
 #================================================================#
@@ -246,6 +257,58 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: GRAPHICS, BAM_STATS, PEAKS, QC,#PEAK_MOTIFS#, CHROM_SIZES, PEAKS, TDFRAW_QC, MAPPING, PEAKS, IMPORT, INDEX, PEAKS, 
+	input: GRAPHICS, BAM_STATS, PEAKS, QC, GENOME_COVERAGE_GZ#PEAK_MOTIFS#, CHROM_SIZES, PEAKS, TDFRAW_QC, MAPPING, PEAKS, IMPORT, INDEX, PEAKS, 
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
+
+#================================================================#
+#                        IGV stuff                               #
+#================================================================#
+
+genome = config["genome"]["version"]
+filename = PEAKS_DIR + "IGV_session.xml"
+
+file = open(filename, "w")
+
+
+
+file.write('<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n')
+file.write('<Session genome="' + genome + '" hasGeneTrack="true" hasSequenceTrack="true" locus="all" path="' + filename + '" version="8">\n')
+
+file.write('    <Resources>\n')
+for i in PEAKS:
+    file.write('        <Resource path="' + i + '"/>\n')
+
+for i in GENOME_COVERAGE_GZ:
+    file.write('        <Resource path="' + i + '"/>\n')
+
+file.write('    </Resources>\n')
+
+file.write('    <Panel height="259" name="DataPanel" width="1901">')
+
+for i in GENOME_COVERAGE_GZ:
+    file.write('        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.DataSourceTrack" color="113,35,30" displayMode="COLLAPSED" featureVisibilityWindow="-1" id="' + i + '" normalize="false" renderer="BAR_CHART" sortable="true" visible="true" windowFunction="max">\n')
+    file.write('            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="200.0" minimum="0.0" type="LINEAR"/>\n')
+    file.write('        </Track>\n')
+file.write('    </Panel>\n')
+
+file.write('    <Panel height="519" name="FeaturePanel" width="1901">\n')
+
+for i in PEAKS:
+    file.write('        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,153,255" colorScale="ContinuousColorScale;0.0;52.0;255,255,255;0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="12" id="' + i + '" renderer="BASIC_FEATURE" sortable="false" visible="true" windowFunction="count">\n')
+    file.write('                <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="52.0" minimum="0.0" type="LINEAR"/>\n')
+    file.write('        </Track>\n')
+
+file.write('    </Panel>\n')
+file.write('    <PanelLayout dividerFractions="0.332484076433121"/>\n')
+file.write('    <HiddenAttributes>\n')
+file.write('        <Attribute name="NAME"/>\n')
+file.write('        <Attribute name="DATA FILE"/>\n')
+file.write('        <Attribute name="DATA TYPE"/>\n')
+file.write('    </HiddenAttributes>\n')
+file.write('</Session>\n')
+
+
+
+
+file.close()
