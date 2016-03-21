@@ -9,7 +9,7 @@ Usage example:
         
 Required parameters:
     config["qsub"]
-    config["dir"]["r_libs"]
+#    config["dir"]["r_libs"]
 
 Optional parameters:
     config["spp"]["fdr"]
@@ -23,8 +23,8 @@ Contributors:
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
-if not "r_libs" in config["dir"].keys():
-    sys.exit("Error: please specify the R libs directory in the config file.")
+#if not "r_libs" in config["dir"].keys():
+#    sys.exit("Error: please specify the R libs directory in the config file.")
 
 if not "spp" in config.keys():
     config["spp"] = {}
@@ -51,12 +51,16 @@ rule spp:
         treatment = config["dir"]["samples"] + "{treatment}/{treatment}{preprocess}_sorted_pos.bam", \
         control = config["dir"]["samples"] + "{control}/{control}{preprocess}_sorted_pos.bam"
     output:
-        peaks = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_peaks.narrowPeak", \
+        peaks_narrowPeak = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_peaks.narrowPeak", \
         peaks_bed = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + ".bed", \
-#        peaks_broadPeak = "{result_dir}/{treatment}_vs_{control}/spp-fdr" + config["spp"]["fdr"] + "/{treatment}_vs_{control}_{aligner}_spp-fdr" + config["spp"]["fdr"] + ".broadPeak", \
+		pdf = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + ".crosscorrelation.pdf", \
+		sm_density_wig = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + ".smoothed.density.wig", \
+		enrich_est_wig = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + ".enrichment.estimates.wig", \
+		peaks_broadPeak = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + ".broadPeak", \
+		bdg_positions = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + ".binding.positions.txt"
     params:
         fdr = config["spp"]["fdr"], \
-        Rlibs = config["dir"]["r_libs"], \
+#        Rlibs = config["dir"]["r_libs"], \
         qsub=config["qsub"] \
           + " -e " + config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_qsub.err" \
           + " -o " + config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_qsub.out"
@@ -66,7 +70,9 @@ rule spp:
         R("""sink("{log}")
 
         library(caTools)
-        library(spp, lib.loc="{params.Rlibs}")
+        library(Rsamtools)
+        library(spp)
+		print(sessionInfo())
 
         getwd()
 
