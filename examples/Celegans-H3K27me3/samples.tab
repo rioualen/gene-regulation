@@ -1,9 +1,0 @@
-; Sample description file
-; Organism: Caenorhabditis elegans
-; Experiment type: ChIP-seq
-ID	SRR	type	chipped
-GSM1217457	SRR1198569	input	H3K27me3
-;GSM1217458	SRR1198570	input	H3K27me3
-GSM1217459	SRR1198571	chip	H3K27me3
-;GSM1217460	SRR1198572	chip	H3K27me3
-
