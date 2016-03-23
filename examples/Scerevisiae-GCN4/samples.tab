@@ -2,11 +2,9 @@
 ; Organism: Saccharomyces cerevisiae
 ; Experiment type: ChIP-seq
 ; Input type: genomic
-ID	SRR	type	chipped
-GSM1470159	SRR1542426	input	gcn4	-
-GSM1470160	SRR1542427	chip	gcn4	-
-GSM1470161	SRR1542428	input	gcn4	-
-GSM1470162	SRR1542429	chip	gcn4	-
-GSM1470163	SRR1542430	input	gcn4	-
-GSM1470164	SRR1542431	chip	gcn4	-
+ID
+GSM1470159
+GSM1470160
+GSM1470161
+GSM1470162
 
