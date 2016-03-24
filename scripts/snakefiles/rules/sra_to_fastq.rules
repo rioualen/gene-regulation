@@ -1,3 +1,61 @@
+rule import_sra_to_fastq:
+	"""Converts SRA files in fastq format with SRA toolkit. 
+	
+	TODO locally in workflow: 
+		- import/merging local rule before conversion, as the output is in working dir by default (or consider including --outdir option)
+		- rename files to sample name even if no merging (input & output files have the same name though sample & raw file can have different names eg. GSM vs SRR)
+	
+	Parameters required:
+		config['qsub']
+		config['dir']['results']
+		config['dir']['reads_source']
+	Usage example :
+		IMPORT = expand(RESULTS_DIR + "{samples}/{samples}.fastq", samples=SAMPLE_IDS) 
+	"""
+	input:	datadir = config['dir']['reads_source']
+	output: fastq = "{results}/{sample}/{sample}.fastq"
+	log: "{results}/{sample}/{sample}_sra-conversion.log"
+	benchmark: "{results}/{sample}/{sample}_sra-conversion_benchmark.json"
+	params: qsub = config["qsub"] + " -q short -e {sample}_sra-conversion_qsub.err -o {sample}_sra-conversion_qsub.out",  \
+		results = config['dir']['results'], \
+		samples = "{sample}"
+	shell:"""
+(echo "SHELL: $SHELL"
+samples={params.samples}
+for sam in ${{samples[@]}}
+do
+	mkdir -p {params.results}$sam
+	echo -e "Reading $sam directory {input.datadir}$sam... \n"
+	files=({input.datadir}$sam/*)
+	if [ ${{#files[@]}} -gt 1 ]
+	then
+		echo -e " \n \nCase 2+ files : ${{files[@]}} \n"
+		for f in ${{files[@]}}
+		do
+			base=$(basename $f .sra)
+			echo -e "$base \n"
+			echo -e " \tConverting $base.sra to $base.fastq... \n"
+			fastq-dump --outdir {params.results}$sam/ {input.datadir}$sam/$base.sra
+		done
+		echo -e " \tMerging ${{#files[@]}} together as $sam.fastq. \n"
+		echo -e " \tCmd: cat ${{files[@]}} > {input.datadir}$sam.fastq"
+		files=({params.results}$sam/*)
+		cat ${{files[@]}} > {params.results}$sam/$sam.fastq
+		rm ${{files[@]}}
+	else
+		echo -e " \n \nCase 1 file : ${{files[@]}} \n"
+		base=$(basename ${{files[0]}} .sra)
+		echo -e " \tConverting $base.sra to $base.fastq... \n"
+		fastq-dump --outdir {params.results}$sam {input.datadir}$sam/$base.sra
+		echo -e " \tMoving {input.datadir}$base.fastq to {params.results}$sam/$sam.fastq \n"
+		mv  {params.results}$sam/$base.fastq {params.results}$sam/$sam.fastq
+	fi
+done
+echo "Job done.") &> {log}
+"""
+
+
+
 if not (("dir" in config.keys()) and ("reads_source" in config["dir"].keys())):
     sys.exit("The parameter config['dir']['reads_source'] should be specified in the config file.")
 
@@ -34,41 +92,6 @@ rule sra_to_fastq:
             qsub = config["qsub"] \
                    + " -e " + config['dir']['samples'] + "{sample_dir}/{srr}_sra-conversion_qsub.err" \
                    + " -o " + config['dir']['samples'] + "{sample_dir}/{srr}_sra-conversion_qsub.out"
-    shell:"""
-(echo "SHELL: $SHELL"
-samples={params.samples}
-for sam in ${{samples[@]}}
-do
-    mkdir -p {params.results}$sam
-    echo -e "Reading $sam directory {input.datadir}$sam... \n"
-    files=({input.datadir}$sam/*)
-    if [ ${{#files[@]}} -gt 1 ]
-    then
-        echo -e " \n \nCase 2+ files : ${{files[@]}} \n"
-        for f in ${{files[@]}}
-        do
-            base=$(basename $f .sra)
-            echo -e "$base \n"
-            echo -e " \tConverting $base.sra to $base.fastq... \n"
-            fastq-dump --outdir {params.results}$sam/ {input.datadir}$sam/$base.sra
-        done
-        echo -e " \tMerging ${{#files[@]}} together as $sam.fastq. \n"
-        echo -e " \tCmd: cat ${{files[@]}} > {input.datadir}$sam.fastq"
-        files=({params.results}$sam/*)
-        cat ${{files[@]}} > {params.results}$sam/$sam.fastq
-        rm ${{files[@]}}
-    else
-        echo -e " \n \nCase 1 file : ${{files[@]}} \n"
-        base=$(basename ${{files[0]}} .sra)
-        echo -e " \tConverting $base.sra to $base.fastq... \n"
-        fastq-dump --outdir {params.results}$sam {input.datadir}$sam/$base.sra
-        echo -e " \tMoving {input.datadir}$base.fastq to {params.results}$sam/$sam.fastq \n"
-        mv  {params.results}$sam/$base.fastq {params.results}$sam/$sam.fastq
-    fi
-done
-echo "Job done.") &> {log}
-"""
-
 #        shell:"""
 #fastq-dump --outdir {params.outdir} {input.sra} 2> {log}
-#"""
+##"""
