@@ -81,11 +81,11 @@ add_pub_key:
 	for i in '$(PUB_KEY)'; do echo "PUB_KEY: $$i"; apt-key adv --recv-keys --keyserver keyserver.ubuntu.com $$i; done
 
 add_repos: 
-	@apt-get install --yes python-software-properties #installation de la commande "add-apt-repository"
-	@add-apt-repository ppa:x2go/stable --yes;
-	@apt-add-repository ppa:ubuntu-mate-dev/ppa --yes;
-	@apt-add-repository ppa:ubuntu-mate-dev/trusty-mate --yes;
-#	@add-apt-repository ppa:ravefinity-project/ppa --yes ;
+	@apt-get install --yes python-software-properties;\ #installation de la commande "add-apt-repository"
+	@add-apt-repository ppa:x2go/stable --yes;\
+	@apt-add-repository ppa:ubuntu-mate-dev/ppa --yes;\
+	@apt-add-repository ppa:ubuntu-mate-dev/trusty-mate --yes;\
+	@add-apt-repository ppa:ravefinity-project/ppa --yes ;\
 	@apt-get update --yes
 
 essential_packages:
@@ -103,7 +103,7 @@ desktop_and_x2go:
 	apt-get install -y --no-install-recommends ubuntu-mate-core ubuntu-mate-desktop; \
 	apt-get install -y mate-desktop-environment-extra; \
 	apt-get install -y mate-notification-daemon caja-gksu caja-open-terminal; \
-#	apt-get install -y ambiance-colors radiance-colors;
+	apt-get install -y ambiance-colors radiance-colors;
 
 R_installation:
 	echo "" >> /etc/apt/sources.list
@@ -300,7 +300,7 @@ igv_tools_install:
 	rm igvtools_$(IGVTOOLS_VER).zip;\
 	ln -s -f $(USR_BIN)/IGVTools/igvtools $(USR_BIN)/igvtools
 
-all_install: usr_bin add_repos add_pub_key essential_packages R_installation R_lib_install  python_install java9_install \
+all_install: usr_bin add_pub_key add_repos essential_packages R_installation R_lib_install  python_install java9_install \
 	samtools_install bedtools_install sratoolkit_install \
 	fastqc_install sickle_install \
 	bowtie_install bowtie2_install bwa_install \
