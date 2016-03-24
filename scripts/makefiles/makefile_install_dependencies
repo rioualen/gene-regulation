@@ -74,11 +74,10 @@ bashrc:
 	@echo 'source /etc/bash.bashrc' >> /etc/profile
 
 
-MKDIR_P = mkdir -p
 
-usr_dir:
-        ${MKDIR_P} $(USR_BIN)
 
+usr_bin:
+	mkdir $(USR_BIN)
 
 
 add_pub_key:
