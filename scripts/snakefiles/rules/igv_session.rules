@@ -1,0 +1,67 @@
+
+
+
+rule igv_session:
+#    input:
+    output: "{PEAKS_DIR}igv_session.xml"
+    run:
+
+        import pandas as pd
+        import numpy as np
+
+        filename = output[0]
+
+        file = open(filename, "w+")
+
+        file.write('<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n')
+        file.write('<Session genome="' + GENOME_FASTA[0] + '" hasGeneTrack="true" hasSequenceTrack="true" locus="all" path="' + filename + '" version="8">\n')
+
+# Resource files
+        file.write('    <Resources>\n')
+        for i in PEAKS:
+            file.write('        <Resource path="' + i + '"/>\n')
+        for i in GENOME_COVERAGE_GZ:
+            file.write('        <Resource path="' + i + '"/>\n')
+        file.write('        <Resource path="' + GENOME_ANNOTATIONS[0] + '"/>\n')
+        file.write('    </Resources>\n\n')
+
+# Genome annotation panel
+        file.write('    <Panel name="GeneAnnotPanel" height="60">\n')
+        file.write('        <Track id="' + GENOME_ANNOTATIONS[0] + '" name="sacCer3.gff3">\n')
+        file.write('            <DataRange/>\n')
+        file.write('        </Track>\n')
+        file.write('    </Panel>\n\n')
+
+# Genome coverage panel
+        file.write('    <Panel name="GenomeCovPanel" height="' + str(len(GENOME_COVERAGE_GZ)*60) + '">\n')
+        for bdg in GENOME_COVERAGE_GZ:
+            name = bdg.split(sep="_")[0]
+
+            tab = pd.read_table(bdg)
+            cov = tab.iloc[:,3]
+            max = int(np.percentile(cov, 99))
+
+            file.write('        <Track height="50" id="' + bdg + '" name="' + name + '">\n')
+            file.write('            <DataRange minimum="0" maximum="' + str(max) + '"/>\n')
+            file.write('        </Track>\n')
+        file.write('    </Panel>\n\n')
+
+# Peaks panel
+        file.write('    <Panel name="FeaturePanel" height="' + str(len(PEAKS)*60) + '">\n')
+        for bedfile in PEAKS:
+            name = bedfile.split(sep="_")[-1]
+            file.write('        <Track fontSize="12" id="' + bedfile + '" name="' + name + '">\n')
+            file.write('                <DataRange/>\n')
+            file.write('        </Track>\n')
+        file.write('    </Panel>\n\n')
+
+
+        file.write('    <PanelLayout/>\n')
+        file.write('    <HiddenAttributes>\n')
+        file.write('        <Attribute name="NAME"/>\n')
+        file.write('        <Attribute name="DATA FILE"/>\n')
+        file.write('        <Attribute name="DATA TYPE"/>\n')
+        file.write('    </HiddenAttributes>\n')
+        file.write('</Session>\n')
+
+        file.close()
