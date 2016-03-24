@@ -52,6 +52,7 @@ SAMTOOLS_VER=1.3
 SRATOOLKIT_VER=2.5.2
 SCIPY_VER=0.16.0
 SPP_VER=1.11
+SWEMBL_VER=3.3.1
 
 
 
@@ -84,32 +85,32 @@ add_repos:
 	@apt-get update --yes
 
 essential_packages:
-	@apt-get update
-	@apt-get -y install ssh rsync git graphviz
-	@apt-get -y install gedit-plugins								  # Basic packages that usually already come with u buntu install
-	@apt-get -y install zlibc zlib1g-dev										# Required by sickle, bamtools...
-	@apt-get -y install build-essential										 # Includes gcc compiler
-	@apt-get -y install libncurses5-dev libncursesw5-dev						# Required at least by samtools
-	@apt-get -y install libboost-dev						# might me required for spp, to be checked
+	apt-get update
+	apt-get -y install ssh rsync git graphviz
+	apt-get -y install gedit-plugins								  # Basic packages that usually already come with u buntu install
+	apt-get -y install zlibc zlib1g-dev										# Required by sickle, bamtools...
+	apt-get -y install build-essential										 # Includes gcc compiler
+	apt-get -y install libncurses5-dev libncursesw5-dev						# Required at least by samtools
+	apt-get -y install libboost-dev						# might me required for spp, to be checked
 	apt-get -y install gdebi								# required by rstudio install
 
 desktop_and_x2go:
 	apt-get install -y x2goserver; \
-	@apt-get install -y --no-install-recommends ubuntu-mate-core ubuntu-mate-desktop; \
-	@apt-get install -y mate-desktop-environment-extra; \
-	@apt-get install -y mate-notification-daemon caja-gksu caja-open-terminal; \
-	@apt-get install --yes ambiance-colors radiance-colors;
+	apt-get install -y --no-install-recommends ubuntu-mate-core ubuntu-mate-desktop; \
+	apt-get install -y mate-desktop-environment-extra; \
+	apt-get install -y mate-notification-daemon caja-gksu caja-open-terminal; \
+#	apt-get install -y ambiance-colors radiance-colors;
 
 R_installation:
-	@echo "" >> /etc/apt/sources.list
-	@echo "deb $(CRAN_MIRROR)/bin/linux/ubuntu $(UBUNTU_VER_NAME)/" >> /etc/apt/sources.list
-	@apt-get update
-	@apt-get -y install r-base r-base-dev libcurl4-openssl-dev libxml2-dev
-	@echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);" >> ~/.Rprofile
+	echo "" >> /etc/apt/sources.list
+	echo "deb $(CRAN_MIRROR)/bin/linux/ubuntu $(UBUNTU_VER_NAME)/" >> /etc/apt/sources.list
+	apt-get update
+	apt-get -y install r-base r-base-dev libcurl4-openssl-dev libxml2-dev
+	echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);" >> ~/.Rprofile
 
 
 R_lib_install: 
-	@Rscript -e "pack.list <- c($(CRAN_PACK_LIST)); \
+	Rscript -e "pack.list <- c($(CRAN_PACK_LIST)); \
 	pack <- pack.list[!(pack.list %in% installed.packages()[,'Package'])]; \
 	if(length(pack)) install.packages(pack); \
 	source('http://bioconductor.org/biocLite.R'); \
@@ -118,17 +119,18 @@ R_lib_install:
 	if(length(pack)) biocLite(pack)"
 
 Rstudio_install: 
-	@apt-get install -y libjpeg62
-	@wget --no-clobber https://download1.rstudio.org/rstudio-$(RSTUDIO_VER)-amd64.deb
-	@yes | PATH=/sbin:$$PATH  gdebi rstudio-$(RSTUDIO_VER)-amd64.deb
-	@rm -f rstudio-$(RSTUDIO_VER)-amd64.deb
+	apt-get install -y libjpeg62
+	wget --no-clobber https://download1.rstudio.org/rstudio-$(RSTUDIO_VER)-amd64.deb
+	yes | PATH=/sbin:$$PATH  gdebi rstudio-$(RSTUDIO_VER)-amd64.deb
+	rm -f rstudio-$(RSTUDIO_VER)-amd64.deb
 
 python_install: 
-	@apt-get -y install python-pip python-dev								   # ipython-notebook python-matplotlib 
-	@apt-get -y install python3-pip python3.4-dev							   # ipython3-notebook python3-matplotlib
-	@pip3 install "rpy2<$(RPY2_VER)"
-	@pip3 install snakemake docutils pandas
-	@pip3 install pyyaml
+	sudo apt-get -y install python-pip python-dev								   # ipython-notebook python-matplotlib 
+	sudo apt-get -y install python3-pip python3.4-dev							   # ipython3-notebook python3-matplotlib
+	sudo pip3 install "rpy2<$(RPY2_VER)"
+	sudo pip3 install "numpy==$(NUMPY_VER)"
+	sudo pip3 install snakemake docutils pandas
+	sudo pip3 install pyyaml
 
 
 java9_install:
@@ -243,6 +245,21 @@ spp_install:
 	mv spp_$(SPP_VER).tar.gz $(USR_BIN);\
 	cd $(USR_BIN);\
 	R CMD INSTALL spp_$(SPP_VER).tar.gz; \
+
+macs2_install:
+	sudo pip install MACS2;
+
+swembl_install:
+	cd $(USR_BIN);\
+	wget "http://www.ebi.ac.uk/~swilder/SWEMBL/SWEMBL.$(SWEMBL_VER).tar.bz2"; \
+	bunzip2 -f SWEMBL.$(SWEMBL_VER).tar.bz2;\
+	tar xvf SWEMBL.$(SWEMBL_VER).tar;\
+	rm SWEMBL.$(SWEMBL_VER).tar;\
+	cd SWEMBL.$(SWEMBL_VER); \
+	make ;\
+#	make install;\
+#	rm -rf samtools*
+
 
 homer_install:
 	@wget "http://homer.salk.edu/homer/configureHomer.pl"; \
