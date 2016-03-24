@@ -6,7 +6,7 @@ export LC_ALL=C
 export LANG=C
 
 
-.PHONY: add_repos essential_packages R_installation R_lib_install python_install \
+.PHONY: usr_bin add_repos essential_packages R_installation R_lib_install python_install \
 	samtools_install bedtools_install \
 	fastqc_install sickle_install sratoolkit_install \
 	bowtie_install bowtie2_install bwa_install \
@@ -72,6 +72,14 @@ bashrc:
 	@echo 'PATH=$$PATH:'$(USR_BIN) >> ~/.bashrc
 	@echo "" >> /etc/profile
 	@echo 'source /etc/bash.bashrc' >> /etc/profile
+
+
+MKDIR_P = mkdir -p
+
+usr_dir:
+        ${MKDIR_P} $(USR_BIN)
+
+
 
 add_pub_key:
 	for i in '$(PUB_KEY)'; do echo "PUB_KEY: $$i"; apt-key adv --recv-keys --keyserver keyserver.ubuntu.com $$i; done
@@ -296,7 +304,7 @@ igv_tools_install:
 	rm igvtools_$(IGVTOOLS_VER).zip;\
 	ln -s $(USR_BIN)/IGVTools/igvtools $(USR_BIN)/igvtools
 
-all_install: add_repos add_pub_key essential_packages R_installation R_lib_install  python_install java9_install \
+all_install: usr_bin add_repos add_pub_key essential_packages R_installation R_lib_install  python_install java9_install \
 	samtools_install bedtools_install sratoolkit_install \
 	fastqc_install sickle_install \
 	bowtie_install bowtie2_install bwa_install \
