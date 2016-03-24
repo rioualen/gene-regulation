@@ -75,7 +75,7 @@ bashrc:
 
 
 usr_bin:
-	mkdir $(USR_BIN)
+	mkdir -p $(USR_BIN)
 
 add_pub_key:
 	for i in '$(PUB_KEY)'; do echo "PUB_KEY: $$i"; apt-key adv --recv-keys --keyserver keyserver.ubuntu.com $$i; done
