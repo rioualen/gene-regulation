@@ -83,7 +83,7 @@ include: os.path.join(RULES, "getfasta.rules")
 include: os.path.join(RULES, "get_chrom_sizes.rules")
 include: os.path.join(RULES, "gzip.rules")
 include: os.path.join(RULES, "homer.rules")
-include: os.path.join(RULES, "import_fastq.rules")
+#include: os.path.join(RULES, "import_fastq.rules")
 include: os.path.join(RULES, "igv_session.rules")
 include: os.path.join(RULES, "macs2.rules")
 include: os.path.join(RULES, "macs14.rules")
@@ -92,6 +92,7 @@ include: os.path.join(RULES, "sickle_se.rules")
 include: os.path.join(RULES, "spp.rules")
 include: os.path.join(RULES, "swembl.rules")
 include: os.path.join(RULES, "sam_to_bam.rules")
+include: os.path.join(RULES, "sra_to_fastq.rules")
 
 ruleorder: bam_by_pos > sam_to_bam
 ruleorder: bam_by_name > sam_to_bam
