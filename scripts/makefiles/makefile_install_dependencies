@@ -74,11 +74,8 @@ bashrc:
 	@echo 'source /etc/bash.bashrc' >> /etc/profile
 
 
-
-
 usr_bin:
 	mkdir $(USR_BIN)
-
 
 add_pub_key:
 	for i in '$(PUB_KEY)'; do echo "PUB_KEY: $$i"; apt-key adv --recv-keys --keyserver keyserver.ubuntu.com $$i; done
@@ -158,19 +155,19 @@ java9_install:
 # ----------------------------------------------------------------
 
 samtools_install:
-	cd $(USR_BIN)
-	wget --no-clobber http://sourceforge.net/projects/samtools/files/samtools/$(SAMTOOLS_VER)/samtools-$(SAMTOOLS_VER).tar.bz2
-	bunzip2 -f samtools-$(SAMTOOLS_VER).tar.bz2
-	tar xvf samtools-$(SAMTOOLS_VER).tar
+	cd $(USR_BIN);\
+	wget --no-clobber http://sourceforge.net/projects/samtools/files/samtools/$(SAMTOOLS_VER)/samtools-$(SAMTOOLS_VER).tar.bz2;\
+	bunzip2 -f samtools-$(SAMTOOLS_VER).tar.bz2;\
+	tar xvf samtools-$(SAMTOOLS_VER).tar;\
 	cd samtools-$(SAMTOOLS_VER); \
 	make ;\
 	make install;\
 	rm -rf samtools*
 
 bedtools_install:
-	cd $(USR_BIN)
-	wget --no-clobber https://github.com/arq5x/bedtools2/releases/download/v$(BEDTOOLS_VER)/bedtools-$(BEDTOOLS_VER).tar.gz
-	tar xvfz bedtools-$(BEDTOOLS_VER).tar.gz
+	cd $(USR_BIN);\
+	wget --no-clobber https://github.com/arq5x/bedtools2/releases/download/v$(BEDTOOLS_VER)/bedtools-$(BEDTOOLS_VER).tar.gz;\
+	tar xvfz bedtools-$(BEDTOOLS_VER).tar.gz;\
 	cd bedtools2; \
 	make ;\
 	make install;\
@@ -218,7 +215,7 @@ bowtie_install:
 	cd $(USR_BIN); \
 	unzip bowtie-$(BOWTIE1_VER)-linux-x86_64.zip;\
 	rm bowtie-$(BOWTIE1_VER)-linux-x86_64.zip;\
-	mv bowtie-$(BOWTIE1_VER)/bowtie* /usr/local/bin
+	mv bowtie-$(BOWTIE1_VER)/bowtie* /usr/local/bin;\
 	rm -rf bowtie-$(BOWTIE1_VER)
 
 bowtie2_install:
@@ -243,9 +240,9 @@ bwa_install:
 
 macs1_install:
 	@wget --no-clobber https://github.com/downloads/taoliu/MACS/MACS-$(MACS_VER)-1.tar.gz
-	@tar xvfz MACS-$(MACS_VER)-1.tar.gz 
-	@cd MACS-$(MACS_VER); python setup.py install
-	@rm -Rf MACS-$(MACS_VER)*
+	@tar xvfz MACS-$(MACS1_VER)-1.tar.gz 
+	@cd MACS-$(MACS1_VER); python setup.py install
+	@rm -Rf MACS-$(MACS1_VER)*
 
 spp_install:
 	@wget http://compbio.med.harvard.edu/Supplements/ChIP-seq/spp_$(SPP_VER).tar.gz
