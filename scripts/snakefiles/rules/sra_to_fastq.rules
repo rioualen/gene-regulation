@@ -17,7 +17,7 @@ rule sra_to_fastq:
 	log: "{results}/{sample}/{sample}_sra-conversion.log"
 	benchmark: "{results}/{sample}/{sample}_sra-conversion_benchmark.json"
 	params: qsub = config["qsub"] + " -q short -e {sample}_sra-conversion_qsub.err -o {sample}_sra-conversion_qsub.out",  \
-		results = config['dir']['results'], \
+		results = config['dir']['samples'], \
 		samples = "{sample}"
 	shell:"""
 (echo "SHELL: $SHELL"
@@ -47,7 +47,7 @@ do
 		base=$(basename ${{files[0]}} .sra)
 		echo -e " \tConverting $base.sra to $base.fastq... \n"
 		fastq-dump --outdir {params.results}$sam {input.datadir}$sam/$base.sra
-		echo -e " \tMoving {input.datadir}$base.fastq to {params.results}$sam/$sam.fastq \n"
+		echo -e " \tMoving {params.results}$sam/$base.fastq to {params.results}$sam/$sam.fastq \n"
 		mv  {params.results}$sam/$base.fastq {params.results}$sam/$sam.fastq
 	fi
 done
