@@ -304,6 +304,6 @@ all_install: usr_bin add_pub_key add_repos essential_packages R_installation R_l
 	samtools_install bedtools_install sratoolkit_install \
 	fastqc_install sickle_install \
 	bowtie_install bowtie2_install bwa_install \
-	macs1_install spp_install \
+	macs1_install spp_install macs2_install \
 	igv_install igv_tools_install desktop_and_x2go
 
