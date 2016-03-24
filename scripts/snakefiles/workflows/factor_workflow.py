@@ -62,7 +62,7 @@ PYTHON = os.path.join(FG_LIB, "scripts/python_lib")
 
 include: os.path.join(PYTHON, "util.py")
 
-#include: os.path.join(RULES, "annotation_download.rules")
+include: os.path.join(RULES, "annotation_download.rules")
 include: os.path.join(RULES, "bam_by_name.rules")
 include: os.path.join(RULES, "bam_by_pos.rules")
 include: os.path.join(RULES, "bam_to_bed.rules")
@@ -77,14 +77,14 @@ include: os.path.join(RULES, "bwa_se.rules")
 include: os.path.join(RULES, "count_reads.rules")
 include: os.path.join(RULES, "fastqc.rules")
 include: os.path.join(RULES, "flowcharts.rules")
-#include: os.path.join(RULES, "genome_coverage_bedgraph.rules")
+include: os.path.join(RULES, "genome_coverage_bedgraph.rules")
 include: os.path.join(RULES, "genome_download.rules")
 include: os.path.join(RULES, "getfasta.rules")
 include: os.path.join(RULES, "get_chrom_sizes.rules")
 include: os.path.join(RULES, "gzip.rules")
 include: os.path.join(RULES, "homer.rules")
-#include: os.path.join(RULES, "import_fastq.rules")
-#include: os.path.join(RULES, "igv_session.rules")
+include: os.path.join(RULES, "import_fastq.rules")
+include: os.path.join(RULES, "igv_session.rules")
 include: os.path.join(RULES, "macs2.rules")
 include: os.path.join(RULES, "macs14.rules")
 include: os.path.join(RULES, "peak_motifs.rules")
@@ -220,7 +220,7 @@ SORTED_READS_BED = expand(SAMPLE_DIR + "{alignment}_sorted_pos.bed", alignment=A
 PEAKCALLER=[
 #    "homer-fdr" + config["homer"]["fdr"] + "_peaks", 
     "macs2-qval" + config["macs2"]["qval"], 
-    "swembl-R" + config["swembl"]["R"],
+#    "swembl-R" + config["swembl"]["R"],
     "macs14-pval" + config["macs14"]["pval"],
     "spp-fdr" + config["spp"]["fdr"],
     "bPeaks_allGenome"
@@ -255,7 +255,7 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: GRAPHICS, BAM_STATS, PEAKS, QC#, GENOME_COVERAGE_GZ, GENOME_ANNOTATIONS#PEAK_MOTIFS#, CHROM_SIZES, PEAKS, TDFRAW_QC, MAPPING, PEAKS, IMPORT, INDEX, PEAKS, 
+	input: GRAPHICS, BAM_STATS, PEAKS, QC, GENOME_COVERAGE_GZ, GENOME_ANNOTATIONS, VISU#PEAK_MOTIFS#, CHROM_SIZES, PEAKS, TDFRAW_QC, MAPPING, PEAKS, IMPORT, INDEX, PEAKS, 
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
