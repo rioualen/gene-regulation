@@ -179,8 +179,8 @@ sratoolkit_install:
 	cd $(USR_BIN); \
 	tar xvzf sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz; \
 	rm sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz; \
-	ln -s sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin/fastq-dump fastq-dump; \
-	ln -s sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin/prefetch prefetch
+	ln -s -f sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin/fastq-dump fastq-dump; \
+	ln -s -f sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin/prefetch prefetch
 
 
 # ----------------------------------------------------------------
@@ -195,7 +195,7 @@ fastqc_install:
 	unzip -o fastqc_v$(FASTQC_VER).zip; \
 	rm fastqc_v$(FASTQC_VER).zip; \
 	chmod +x FastQC/fastqc; \
-	ln -s FastQC/fastqc fastqc; \
+	ln -s -f FastQC/fastqc fastqc; \
 
 sickle_install: 
 	@git clone https://github.com/najoshi/sickle.git; \
@@ -290,7 +290,7 @@ igv_install:
 	unzip IGV_$(IGV_VER).zip;\
 	rm  IGV_$(IGV_VER).zip;\
 	cd IGV_$(IGV_VER);\
-	ln -s $(USR_BIN)/IGV_$(IGV_VER)/igv.sh $(USR_BIN)/igv
+	ln -s -f $(USR_BIN)/IGV_$(IGV_VER)/igv.sh $(USR_BIN)/igv
 
 igv_tools_install:
 	wget --no-clobber http://data.broadinstitute.org/igv/projects/downloads/igvtools_$(IGVTOOLS_VER).zip ;\
@@ -298,7 +298,7 @@ igv_tools_install:
 	cd $(USR_BIN); \
 	unzip igvtools_$(IGVTOOLS_VER).zip;\
 	rm igvtools_$(IGVTOOLS_VER).zip;\
-	ln -s $(USR_BIN)/IGVTools/igvtools $(USR_BIN)/igvtools
+	ln -s -f $(USR_BIN)/IGVTools/igvtools $(USR_BIN)/igvtools
 
 all_install: usr_bin add_repos add_pub_key essential_packages R_installation R_lib_install  python_install java9_install \
 	samtools_install bedtools_install sratoolkit_install \
