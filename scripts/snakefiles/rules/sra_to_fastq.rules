@@ -1,4 +1,4 @@
-rule import_sra_to_fastq:
+rule sra_to_fastq:
 	"""Converts SRA files in fastq format with SRA toolkit. 
 	
 	TODO locally in workflow: 
