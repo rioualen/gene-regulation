@@ -296,14 +296,10 @@ igv_tools_install:
 	rm igvtools_$(IGVTOOLS_VER).zip;\
 	ln -s $(USR_BIN)/IGVTools/igvtools $(USR_BIN)/igvtools
 
-all_install: igv_install igv_tools_install
-
-#add_repos desktop_and_x2go
-
-#add_repos add_pub_key essential_packages R_installation R_lib_install  python_install java9_install \
-#	samtools_install bedtools_install sratoolkit_install \
-#	fastqc_install sickle_install \
-#	bowtie_install bowtie2_install bwa_install \
-#	macs1_install spp_install 
-
+all_install: add_repos add_pub_key essential_packages R_installation R_lib_install  python_install java9_install \
+	samtools_install bedtools_install sratoolkit_install \
+	fastqc_install sickle_install \
+	bowtie_install bowtie2_install bwa_install \
+	macs1_install spp_install \
+	igv_install igv_tools_install desktop_and_x2go
 
