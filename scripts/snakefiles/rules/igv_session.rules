@@ -1,9 +1,11 @@
 
-
+if not "version" in config["genome"].keys():
+    sys.exit("Genome version must be defined in the config file")
 
 rule igv_session:
 #    input:
     output: "{PEAKS_DIR}igv_session.xml"
+    params: config["genome"]["version"]
     run:
 
         import pandas as pd
@@ -27,7 +29,7 @@ rule igv_session:
 
 # Genome annotation panel
         file.write('    <Panel name="GeneAnnotPanel" height="60">\n')
-        file.write('        <Track id="' + GENOME_ANNOTATIONS[0] + '" name="sacCer3.gff3">\n')
+        file.write('        <Track id="' + GENOME_ANNOTATIONS[0] + '" name="' + params[0] + '"  color="0,204,255" fontSize="12" >\n') ## name
         file.write('            <DataRange/>\n')
         file.write('        </Track>\n')
         file.write('    </Panel>\n\n')
@@ -35,13 +37,14 @@ rule igv_session:
 # Genome coverage panel
         file.write('    <Panel name="GenomeCovPanel" height="' + str(len(GENOME_COVERAGE_GZ)*60) + '">\n')
         for bdg in GENOME_COVERAGE_GZ:
-            name = bdg.split(sep="_")[0]
+            name = bdg.split(sep="/")[-1]
+            name = name.split(sep="_")[0]
 
             tab = pd.read_table(bdg)
             cov = tab.iloc[:,3]
             max = int(np.percentile(cov, 99))
 
-            file.write('        <Track height="50" id="' + bdg + '" name="' + name + '">\n')
+            file.write('        <Track height="50" autoscale="true" id="' + bdg + '" name="' + name + '" color="204,204,204" fontSize="12">\n')
             file.write('            <DataRange minimum="0" maximum="' + str(max) + '"/>\n')
             file.write('        </Track>\n')
         file.write('    </Panel>\n\n')
@@ -50,7 +53,9 @@ rule igv_session:
         file.write('    <Panel name="FeaturePanel" height="' + str(len(PEAKS)*60) + '">\n')
         for bedfile in PEAKS:
             name = bedfile.split(sep="_")[-1]
-            file.write('        <Track fontSize="12" id="' + bedfile + '" name="' + name + '">\n')
+            name = os.path.splitext(name)[0]
+
+            file.write('        <Track id="' + bedfile + '" name="' + name + '" color="0,204,0" fontSize="12">\n')
             file.write('                <DataRange/>\n')
             file.write('        </Track>\n')
         file.write('    </Panel>\n\n')
