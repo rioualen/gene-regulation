@@ -239,7 +239,7 @@ bwa_install:
 # ----------------------------------------------------------------
 
 macs1_install:
-	@wget --no-clobber https://github.com/downloads/taoliu/MACS/MACS-$(MACS_VER)-1.tar.gz
+	@wget --no-clobber https://github.com/downloads/taoliu/MACS/MACS-$(MACS1_VER)-1.tar.gz
 	@tar xvfz MACS-$(MACS1_VER)-1.tar.gz 
 	@cd MACS-$(MACS1_VER); python setup.py install
 	@rm -Rf MACS-$(MACS1_VER)*
