@@ -40,7 +40,7 @@ import datetime
 import pandas as pd
 
 ## Config
-configfile: "examples/GSE20870/GSE20870.yml"
+configfile: "examples/GSE20870/GSE20870_VM.yml"
 
 #================================================================#
 #                    Check mandatory parameters
