@@ -33,9 +33,6 @@ Contributors:
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
-#if not "r_libs" in config["dir"].keys():
-#    sys.exit("The r_libs directory must be defined in the config file")
-
 if not "bPeaks" in config.keys():
     config["bPeaks"] = {}
 
@@ -64,7 +61,7 @@ if not "samples" in config["dir"].keys():
 if not "peaks" in config["dir"].keys():
     config["dir"]["peaks"] = config["dir"]["results"]
 
-suffix = "bPeaks_allGenome"                                                     # check consistency with the list of peak-callers in the workflow file / make it more standard 
+suffix = "bPeaks-log" + config["bPeaks"]["log2FC"]                                                     # check consistency with the list of peak-callers in the workflow file / make it more standard 
 
 
 rule bPeaks:
@@ -76,7 +73,6 @@ rule bPeaks:
     params:
         outdir = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix, \
         name = "{treatment}_vs_{control}{preprocess}", \
-#        r_libs=config["dir"]["r_libs"], \
         IPcoeff = config["bPeaks"]["IPcoeff"], \
         controlCoeff = config["bPeaks"]["controlCoeff"], \
         log2FC = config["bPeaks"]["log2FC"], \
@@ -103,6 +99,10 @@ rule bPeaks:
         bPeaksAnalysis(IPdata = seqResult$IPdata, controlData = seqResult$controlData, 
         IPcoeff={params.IPcoeff}, controlCoeff={params.controlCoeff}, log2FC={params.log2FC}, averageQuantiles={params.averageQuantiles}, windowSize={params.windowSize}, windowOverlap={params.windowOverlap}, 
         peakDrawing = FALSE, resultName="{params.name}")
+
+        print("{params.outdir}{params.name}_bPeaks_allGenome.bed")
+        print("{params.outdir}/{params.name}_bPeaks-log{params.log2FC}.bed")
+        file.rename("{params.outdir}/{params.name}_bPeaks_allGenome.bed", "{params.outdir}/{params.name}_bPeaks-log{params.log2FC}.bed")
 
         sink()
 
