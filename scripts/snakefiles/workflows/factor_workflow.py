@@ -222,7 +222,7 @@ SORTED_READS_BED = expand(SAMPLE_DIR + "{alignment}_sorted_pos.bed", alignment=A
 ##TODO check if params are defined; if not, set them.
 PEAKCALLER=[
 #    "homer-fdr" + config["homer"]["fdr"] + "_peaks", 
-#    "macs2-qval" + config["macs2"]["qval"], 
+    "macs2-qval" + config["macs2"]["qval"], 
 #    "swembl-R" + config["swembl"]["R"],
     "macs14-pval" + config["macs14"]["pval"],
     "spp-fdr" + config["spp"]["fdr"],
