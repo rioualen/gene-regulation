@@ -137,10 +137,10 @@ Rstudio_install:
 	rm -f rstudio-$(RSTUDIO_VER)-amd64.deb
 
 python_install: 
-	sudo apt-get -y install python-pip python-dev								   # ipython-notebook python-matplotlib 
-	sudo apt-get -y install python3-pip python3.4-dev							   # ipython3-notebook python3-matplotlib
+	sudo apt-get -y install python-pip python-dev								    
+	sudo apt-get -y install python3-pip python3.4-dev
 	sudo pip3 install "rpy2<$(RPY2_VER)"
-	sudo pip3 install "numpy==$(NUMPY_VER)"
+	sudo pip3 install "numpy"
 	sudo pip3 install snakemake docutils pandas
 	sudo pip3 install pyyaml
 
