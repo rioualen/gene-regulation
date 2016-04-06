@@ -34,9 +34,9 @@ export LANG=C
 ## List targets
 MAKEFILE=scripts/makefiles/makefile_install_dependencies
 usage:
-	@echo "usage: make [-OPT='options'] target"
-	@echo "implemented targets"
-	@perl -ne 'if (/^([a-z]\S+):/){ print "\t$$1\n";  }' ${MAKEFILE}
+	echo "usage: make [-OPT='options'] target"
+	echo "implemented targets"
+	perl -ne 'if (/^([a-z]\S+):/){ print "\t$$1\n";  }' ${MAKEFILE}
 
 ##########################
 # Installation variables
@@ -106,35 +106,35 @@ add_pub_key:
 	for i in '$(PUB_KEY)'; do echo "PUB_KEY: $$i"; apt-key adv --recv-keys --keyserver keyserver.ubuntu.com $$i; done
 
 add_repos: 
-	@apt-get install --yes python-software-properties
-	@add-apt-repository ppa:x2go/stable --yes
-	@apt-add-repository ppa:ubuntu-mate-dev/ppa --yes
-	@apt-add-repository ppa:ubuntu-mate-dev/trusty-mate --yes
-	@add-apt-repository ppa:ravefinity-project/ppa --yes
-	@apt-get update --yes
+	sudo apt-get install --yes python-software-properties
+	sudo add-apt-repository ppa:x2go/stable --yes
+	sudo apt-add-repository ppa:ubuntu-mate-dev/ppa --yes
+	sudo apt-add-repository ppa:ubuntu-mate-dev/trusty-mate --yes
+	sudo add-apt-repository ppa:ravefinity-project/ppa --yes
+	sudo apt-get update --yes
 
 essential_packages:
-	apt-get update
-	apt-get -y install ssh rsync git graphviz
-	apt-get -y install gedit-plugins								  # Basic packages that usually already come with u buntu install
-	apt-get -y install zlibc zlib1g-dev										# Required by sickle, bamtools...
-	apt-get -y install build-essential										 # Includes gcc compiler
-	apt-get -y install libncurses5-dev libncursesw5-dev						# Required at least by samtools
-	apt-get -y install libboost-dev						# might me required for spp, to be checked
-	apt-get -y install gdebi								# required by rstudio install
+	sudo apt-get update
+	sudo apt-get -y install ssh rsync git graphviz gedit-plugins
+	sudo apt-get -y install gedit-plugins								  # Basic packages that usually already come with u buntu install
+	sudo apt-get -y install zlibc zlib1g-dev										# Required by sickle, bamtools...
+	sudo apt-get -y install build-essential										 # Includes gcc compiler
+	sudo apt-get -y install libncurses5-dev libncursesw5-dev						# Required at least by samtools
+	sudo apt-get -y install libboost-dev						# might me required for spp, to be checked
+	sudo apt-get -y install gdebi								# required by rstudio install
 
 desktop_and_x2go:
-	apt-get install -y x2goserver
-	apt-get install -y --no-install-recommends ubuntu-mate-core ubuntu-mate-desktop
-	apt-get install -y mate-desktop-environment-extra
-	apt-get install -y mate-notification-daemon caja-gksu caja-open-terminal
-	apt-get install -y ambiance-colors radiance-colors;
+	sudo apt-get install -y x2goserver
+	sudo apt-get install -y --no-install-recommends ubuntu-mate-core ubuntu-mate-desktop
+	sudo apt-get install -y mate-desktop-environment-extra
+	sudo apt-get install -y mate-notification-daemon caja-gksu caja-open-terminal
+	sudo apt-get install -y ambiance-colors radiance-colors;
 
 R_installation:
 	echo "" >> /etc/apt/sources.list
 	echo "deb $(CRAN_MIRROR)/bin/linux/ubuntu $(UBUNTU_VER_NAME)/" >> /etc/apt/sources.list
-	apt-get update
-	apt-get -y install r-base r-base-dev libcurl4-openssl-dev libxml2-dev
+	sudo apt-get update
+	sudo apt-get -y install r-base r-base-dev libcurl4-openssl-dev libxml2-dev
 	echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);" >> ~/.Rprofile
 
 
@@ -148,7 +148,7 @@ R_lib:
 	if(length(pack)) biocLite(pack)"
 
 Rstudio: 
-	apt-get install -y libjpeg62
+	sudo apt-get install -y libjpeg62
 	wget --no-clobber https://download1.rstudio.org/rstudio-$(RSTUDIO_VER)-amd64.deb
 	yes | PATH=/sbin:$$PATH  gdebi rstudio-$(RSTUDIO_VER)-amd64.deb
 	rm -f rstudio-$(RSTUDIO_VER)-amd64.deb
@@ -164,12 +164,12 @@ python:
 
 
 java9:
-	@echo debconf shared/accepted-oracle-license-v1-1 select true | debconf-set-selections
-	@echo debconf shared/accepted-oracle-license-v1-1 seen true | debconf-set-selections
-	add-apt-repository -y ppa:webupd8team/java
-	apt-get update
-	apt-get -y install oracle-java9-installer
-	apt-get install oracle-java9-set-default
+	echo debconf shared/accepted-oracle-license-v1-1 select true | debconf-set-selections
+	echo debconf shared/accepted-oracle-license-v1-1 seen true | debconf-set-selections
+	sudo add-apt-repository -y ppa:webupd8team/java
+	sudo apt-get update
+	sudo apt-get -y install oracle-java9-installer
+	sudo apt-get install oracle-java9-set-default
 
 
 # ================================================================
@@ -214,17 +214,17 @@ sratoolkit:
 # ----------------------------------------------------------------
 
 fastqc:
-#	apt-get -y install fastqc
+#	sudo apt-get -y install fastqc
 	wget --no-clobber http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v$(FASTQC_VER).zip;\
 	mv fastqc_v$(FASTQC_VER).zip $(USR_BIN); \
 	cd $(USR_BIN); \
 	unzip -o fastqc_v$(FASTQC_VER).zip; \
 	rm fastqc_v$(FASTQC_VER).zip; \
-	chmod +x FastQC/fastqc; \
+	sudo chmod +x FastQC/fastqc; \
 	ln -s -f FastQC/fastqc fastqc; \
 
 sickle: 
-	@git clone https://github.com/najoshi/sickle.git; \
+	git clone https://github.com/najoshi/sickle.git; \
 	cd sickle;\
 	make; \
 	mv sickle $(USR_BIN) ;\
@@ -245,7 +245,7 @@ bowtie:
 	rm -rf bowtie-$(BOWTIE1_VER)
 
 bowtie2:
-	@wget --no-clobber http://downloads.sourceforge.net/project/bowtie-bio/bowtie2/$(BOWTIE2_VER)/bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
+	wget --no-clobber http://downloads.sourceforge.net/project/bowtie-bio/bowtie2/$(BOWTIE2_VER)/bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
 	unzip bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
 	rm bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
 	cd bowtie2-$(BOWTIE2_VER);\
@@ -254,7 +254,7 @@ bowtie2:
 	rm -Rf bowtie2-$(BOWTIE2_VER)*
 
 bwa:
-	apt-get -y install bwa
+	sudo apt-get -y install bwa
 #	wget -nc https://sourceforge.net/projects/bio-bwa/files/bwa-$(BWA_VER).tar.bz2; \
 
 
@@ -291,29 +291,14 @@ swembl:
 
 
 
-#HOMER_PATH := ${USR_BIN}/HOMER/bin
-
-#PATH := ${PATH}:${HOMER_PATH}
-
-
 homer:
 	wget "http://homer.salk.edu/homer/configureHomer.pl"; \
 	mkdir $(USR_BIN)/HOMER; \
 	mv configureHomer.pl $(USR_BIN)/HOMER; \
 	cd $(USR_BIN)/HOMER; \
 	perl configureHomer.pl -install homer; \
+	echo 'export PATH='$(PATH):$(USR_BIN)/HOMER/bin >> $(NGS_BASHRC)
 
-
-#	echo ${HOMER_PATH}
-#	echo ${PATH}
-
-#	echo 'PATH=$$PATH:'$(USR_BIN)'/HOMER/bin' >> ~/.bashrc
-#	echo source $(HOME)/.bashrc
-##	PATH=$(USR_BIN)/HOMER/bin:$$PATH
-#	PATH_VAR=$(PATH_VAR):$(USR_BIN)/HOMER/bin; \
-#	echo "export PATH="$(PATH_VAR)
-
-#	@echo 'PATH=$$PATH:'$(USR_BIN) >> ~/.bashrc
 
 # ================================================================
 #		  Visualization
