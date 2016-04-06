@@ -1,17 +1,34 @@
-MAKEFILE=makefile_install_dependencies
-
-# The shell variables below will be available for 
-# recipe.
 export LC_ALL=C
 export LANG=C
 
+.PHONY:  \
+	usr_bin \
+	ngs_bashrc \
+	add_pub_key \
+	add_repos \
+	essential_packages \
+	R_installation \
+	R_lib \
+	python \
+	java9 \
+	samtools \
+	bedtools \
+	sratoolkit \
+	fastqc \
+	sickle \
+	bowtie \
+	bowtie2 \
+	bwa \
+	spp \
+	macs1 \
+	macs2 \
+	homer
+	swembl
+	igv \
+	igv_tools \
+	desktop_and_x2go \
+	Rstudio 
 
-.PHONY: usr_bin add_repos essential_packages R_installation R_lib python \
-	samtools bedtools \
-	fastqc sickle sratoolkit \
-	bowtie bowtie2 bwa \
-	macs1 homer macs2 swembl spp \
-	Rstudio igv igv_tools
 
 ################################################################
 ## List targets
@@ -25,12 +42,8 @@ usage:
 # Installation variables
 ##########################
 
-USR_BIN=$(HOME)/bin
-PATH_VAR=$(PATH)
-#export PATH=$(PATH):$(USR_BIN)
-#export PATH := $(USR_BIN):$(PATH)
-#SHELL := /bin/bash
-#export PATH := $(USR_BIN):$(PATH)
+USR_BIN=$(HOME)/bin/
+NGS_BASHRC=$(USR_BIN)ngs_bashrc
 
 UBUNTU_VER_NAME="trusty"
 CRAN_MIRROR="http://cran.univ-lyon1.fr"
@@ -68,22 +81,26 @@ SWEMBL_VER=3.3.1
 # ~/.bashrc config
 ##########################
 
-bashrc:
-	@echo "" >> /etc/bash.bashrc
-	@echo 'alias ls="ls --color"' >> /etc/bash.bashrc
-	@echo 'alias rm="rm -i"' >> /etc/bash.bashrc
-	@echo "" >> /etc/bash.bashrc
-	@echo "export LC_ALL=C" >> /etc/bash.bashrc
-	@echo "export LANG=C" >> /etc/bash.bashrc
-	@echo 'export force_color_prompt=yes' >> /etc/bash.bashrc
-	@echo 'export LC_COLLATE=C' >> /etc/bash.bashrc
-	@echo 'PATH=$$PATH:'$(USR_BIN) >> ~/.bashrc
-	@echo "" >> /etc/profile
-	@echo 'source /etc/bash.bashrc' >> /etc/profile
-
 
 usr_bin:
 	mkdir -p $(USR_BIN)
+
+ngs_bashrc:
+	touch $(NGS_BASHRC)
+	echo "" >> $(NGS_BASHRC)
+	echo 'alias ls="ls --color"' >> $(NGS_BASHRC)
+	echo 'alias rm="rm -i"' >> $(NGS_BASHRC)
+	echo "" >> $(NGS_BASHRC)
+	echo "export LC_ALL=C" >> $(NGS_BASHRC)
+	echo "export LANG=C" >> $(NGS_BASHRC)
+	echo 'export force_color_prompt=yes' >> $(NGS_BASHRC)
+	echo 'export LC_COLLATE=C' >> $(NGS_BASHRC)
+	echo "" >> $(NGS_BASHRC)
+	echo 'export PATH='$(PATH):$(USR_BIN) >> $(NGS_BASHRC)
+	echo "" >> $(NGS_BASHRC)
+#	echo 'source $(NGS_BASHRC)' >> /etc/profile
+
+
 
 add_pub_key:
 	for i in '$(PUB_KEY)'; do echo "PUB_KEY: $$i"; apt-key adv --recv-keys --keyserver keyserver.ubuntu.com $$i; done
