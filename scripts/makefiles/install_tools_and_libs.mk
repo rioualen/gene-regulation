@@ -1,3 +1,17 @@
+################################################################
+## This makefile installs bioinformatics tools for the analysis of NGS
+## data about gene regulation, together with the required libraries.
+##
+## It is conceived for Linux Ubuntu systems mlanaged by apt-get. The
+## targets can probably be adapted to other systems as well.
+##
+## By default, tools are installed in a user-custom directory
+## $$HOME/bin. This can be changed by modifying the USER_BIN
+## directory.
+##
+## Author: Claire Rioualen
+## Date: 2016
+
 export LC_ALL=C
 export LANG=C
 
@@ -32,7 +46,7 @@ export LANG=C
 
 ################################################################
 ## List targets
-MAKEFILE=scripts/makefiles/makefile_install_dependencies
+MAKEFILE=scripts/makefiles/install_tools_and_libs.mk
 usage:
 	echo "usage: make [-OPT='options'] target"
 	echo "implemented targets"
@@ -42,8 +56,13 @@ usage:
 # Installation variables
 ##########################
 
-USR_BIN=$(HOME)/bin/
-NGS_BASHRC=$(USR_BIN)ngs_bashrc
+## Directory where all the executables will be installed
+TARGET_BIN=$(HOME)/bin
+
+## Directory in which the source code will be downloaded and compiled when required
+APP_SOURCE_DIR=$(HOME)/app_sources
+
+NGS_BASHRC=$(TARGET_BIN)/ngs_bashrc
 PATH_NEW=$(PATH)
 
 UBUNTU_VER_NAME="trusty"
@@ -82,27 +101,31 @@ SWEMBL_VER=3.3.1
 # ~/.bashrc config
 ##########################
 
+## Create the bin directory
+create_bin:
+	@echo "Creating TARGET_BIN directory	${TARGET_BIN}"
+	mkdir -p $(TARGET_BIN)
+	@echo "	TARGET_BIN	${TARGET_BIN}"
 
-usr_bin:
-	mkdir -p $(USR_BIN)
-	PATH_NEW=$(PATH_NEW):$(USR_BIN)
-
-ngs_bashrc:
-	touch $(NGS_BASHRC)
-	echo "" >> $(NGS_BASHRC)
-	echo 'alias ls="ls --color"' >> $(NGS_BASHRC)
-	echo 'alias rm="rm -i"' >> $(NGS_BASHRC)
-	echo "" >> $(NGS_BASHRC)
-	echo "export LC_ALL=C" >> $(NGS_BASHRC)
-	echo "export LANG=C" >> $(NGS_BASHRC)
-	echo 'export force_color_prompt=yes' >> $(NGS_BASHRC)
-	echo 'export LC_COLLATE=C' >> $(NGS_BASHRC)
-	echo "" >> $(NGS_BASHRC)
-#	echo 'export PATH='$(PATH):$(USR_BIN) >> $(NGS_BASHRC)
+## Initialize a bashrc file, which will allow any user to load the
+## path and configuration at once.
+init_ngs_bashrc:
+	@echo "## NGS bashrc file" > $(NGS_BASHRC)
+	@echo 'alias ls="ls --color"' >> $(NGS_BASHRC)
+	@echo 'alias rm="rm -i"' >> $(NGS_BASHRC)
+	@echo "" >> $(NGS_BASHRC)
+	@echo "export LC_ALL=C" >> $(NGS_BASHRC)
+	@echo "export LANG=C" >> $(NGS_BASHRC)
+	@echo 'export force_color_prompt=yes' >> $(NGS_BASHRC)
+	@echo 'export LC_COLLATE=C' >> $(NGS_BASHRC)
+	@echo "" >> $(NGS_BASHRC)
+	@echo 'export PATH='$(PATH):$(TARGET_BIN) >> $(NGS_BASHRC)
 #	echo 'source $(NGS_BASHRC)' >> /etc/profile
 
+init: create_bin init_ngs_bashrc
 
 
+## ???
 add_pub_key:
 	for i in '$(PUB_KEY)'; do echo "PUB_KEY: $$i"; sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com $$i; done
 
@@ -180,8 +203,9 @@ java9:
 # File management tools
 # ----------------------------------------------------------------
 
+## Install samtools
 samtools:
-	cd $(USR_BIN);\
+	cd $(TARGET_BIN);\
 	wget --no-clobber http://sourceforge.net/projects/samtools/files/samtools/$(SAMTOOLS_VER)/samtools-$(SAMTOOLS_VER).tar.bz2;\
 	bunzip2 -f samtools-$(SAMTOOLS_VER).tar.bz2;\
 	tar xvf samtools-$(SAMTOOLS_VER).tar;\
@@ -192,7 +216,7 @@ samtools:
 	rm -rf samtools*
 
 bedtools:
-	cd $(USR_BIN);\
+	cd $(TARGET_BIN);\
 	wget --no-clobber https://github.com/arq5x/bedtools2/releases/download/v$(BEDTOOLS_VER)/bedtools-$(BEDTOOLS_VER).tar.gz;\
 	tar xvfz bedtools-$(BEDTOOLS_VER).tar.gz;\
 	rm bedtools-$(BEDTOOLS_VER).tar.gz;\
@@ -203,8 +227,8 @@ bedtools:
 
 sratoolkit:
 	wget -nc http://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/$(SRATOOLKIT_VER)/sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz
-	mv sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz $(USR_BIN)
-	cd $(USR_BIN); \
+	mv sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz $(TARGET_BIN)
+	cd $(TARGET_BIN); \
 	tar xvzf sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz; \
 	rm sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz; \
 	ln -s -f sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin/fastq-dump fastq-dump; \
@@ -218,8 +242,8 @@ sratoolkit:
 fastqc:
 #	sudo apt-get -y install fastqc
 	wget --no-clobber http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v$(FASTQC_VER).zip;\
-	mv fastqc_v$(FASTQC_VER).zip $(USR_BIN); \
-	cd $(USR_BIN); \
+	mv fastqc_v$(FASTQC_VER).zip $(TARGET_BIN); \
+	cd $(TARGET_BIN); \
 	unzip -o fastqc_v$(FASTQC_VER).zip; \
 	rm fastqc_v$(FASTQC_VER).zip; \
 	sudo chmod +x FastQC/fastqc; \
@@ -229,7 +253,7 @@ sickle:
 	git clone https://github.com/najoshi/sickle.git; \
 	cd sickle;\
 	make; \
-	mv sickle $(USR_BIN) ;\
+	mv sickle $(TARGET_BIN) ;\
 	cd ..;\
 	rm -Rf sickle
 
@@ -238,20 +262,20 @@ sickle:
 # ----------------------------------------------------------------
 
 bowtie: 
-	cd $(USR_BIN); \
+	cd $(TARGET_BIN); \
 	wget --no-clobber http://downloads.sourceforge.net/project/bowtie-bio/bowtie/$(BOWTIE1_VER)/bowtie-$(BOWTIE1_VER)-linux-x86_64.zip;\
 	unzip bowtie-$(BOWTIE1_VER)-linux-x86_64.zip;\
 	rm bowtie-$(BOWTIE1_VER)-linux-x86_64.zip; \
-#	echo 'export PATH='$(PATH):$(USR_BIN)bowtie-$(BOWTIE1_VER) >> $(NGS_BASHRC)
-	PATH_NEW=$(PATH_NEW):$(USR_BIN)bowtie-$(BOWTIE1_VER);\
+#	echo 'export PATH='$(PATH):$(TARGET_BIN)/bowtie-$(BOWTIE1_VER) >> $(NGS_BASHRC)
+	PATH_NEW=$(PATH_NEW):$(TARGET_BIN)/bowtie-$(BOWTIE1_VER);\
 
 bowtie2:
-	cd $(USR_BIN); \
+	cd $(TARGET_BIN); \
 	wget --no-clobber http://downloads.sourceforge.net/project/bowtie-bio/bowtie2/$(BOWTIE2_VER)/bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
 	unzip bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
 	rm bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
-#	echo 'export PATH='$(PATH):$(USR_BIN)bowtie2-$(BOWTIE2_VER) >> $(NGS_BASHRC)
-	PATH_NEW=$(PATH_NEW):$(USR_BIN)bowtie2-$(BOWTIE2_VER);\
+#	echo 'export PATH='$(PATH):$(TARGET_BIN)/bowtie2-$(BOWTIE2_VER) >> $(NGS_BASHRC)
+	PATH_NEW=$(PATH_NEW):$(TARGET_BIN)/bowtie2-$(BOWTIE2_VER);\
 
 bwa:
 	sudo apt-get -y install bwa
@@ -265,7 +289,7 @@ bwa:
 # ----------------------------------------------------------------
 
 macs1:
-	cd $(USR_BIN); \
+	cd $(TARGET_BIN); \
 	wget --no-clobber https://github.com/downloads/taoliu/MACS/MACS-$(MACS1_VER)-1.tar.gz; \
 	tar xvfz MACS-$(MACS1_VER)-1.tar.gz ; \
 	rm MACS-$(MACS1_VER)-1.tar.gz ; \
@@ -276,12 +300,12 @@ macs2:
 	sudo pip install MACS2;
 
 spp:
-	cd $(USR_BIN);\
+	cd $(TARGET_BIN);\
 	wget http://compbio.med.harvard.edu/Supplements/ChIP-seq/spp_$(SPP_VER).tar.gz;\
 	sudo R CMD INSTALL spp_$(SPP_VER).tar.gz; \
 
 swembl:
-	cd $(USR_BIN);\
+	cd $(TARGET_BIN);\
 	wget "http://www.ebi.ac.uk/~swilder/SWEMBL/SWEMBL.$(SWEMBL_VER).tar.bz2"; \
 	bunzip2 -f SWEMBL.$(SWEMBL_VER).tar.bz2;\
 	tar xvf SWEMBL.$(SWEMBL_VER).tar;\
@@ -292,12 +316,12 @@ swembl:
 
 homer:
 	wget "http://homer.salk.edu/homer/configureHomer.pl"; \
-	mkdir $(USR_BIN)/HOMER; \
-	mv configureHomer.pl $(USR_BIN)/HOMER; \
-	cd $(USR_BIN)/HOMER; \
+	mkdir $(TARGET_BIN)/HOMER; \
+	mv configureHomer.pl $(TARGET_BIN)/HOMER; \
+	cd $(TARGET_BIN)/HOMER; \
 	perl configureHomer.pl -install homer; \
-#	echo 'export PATH='$(PATH):$(USR_BIN)HOMER/bin >> $(NGS_BASHRC)
-	PATH_NEW=$(PATH_NEW):$(USR_BIN)HOMER/bin
+#	echo 'export PATH='$(PATH):$(TARGET_BIN)/HOMER/bin >> $(NGS_BASHRC)
+	PATH_NEW=$(PATH_NEW):$(TARGET_BIN)/HOMER/bin
 
 
 
@@ -306,19 +330,19 @@ homer:
 # ================================================================
 
 igv:
-	cd $(USR_BIN); \
+	cd $(TARGET_BIN); \
 	wget --no-clobber http://data.broadinstitute.org/igv/projects/downloads/IGV_$(IGV_VER).zip; \
 	unzip IGV_$(IGV_VER).zip;\
 	rm  IGV_$(IGV_VER).zip;\
-	ln -s -f $(USR_BIN)/IGV_$(IGV_VER)/igv.sh $(USR_BIN)/igv
+	ln -s -f $(TARGET_BIN)/IGV_$(IGV_VER)/igv.sh $(TARGET_BIN)/igv
 
 igv_tools:
 	wget --no-clobber http://data.broadinstitute.org/igv/projects/downloads/igvtools_$(IGVTOOLS_VER).zip ;\
-	mv igvtools_$(IGVTOOLS_VER).zip $(USR_BIN);\
-	cd $(USR_BIN); \
+	mv igvtools_$(IGVTOOLS_VER).zip $(TARGET_BIN);\
+	cd $(TARGET_BIN); \
 	unzip igvtools_$(IGVTOOLS_VER).zip;\
 	rm igvtools_$(IGVTOOLS_VER).zip;\
-	ln -s -f $(USR_BIN)/IGVTools/igvtools $(USR_BIN)/igvtools
+	ln -s -f $(TARGET_BIN)/IGVTools/igvtools $(TARGET_BIN)/igvtools
 
 edit_path:
 	echo 'export PATH='$(PATH_NEW) >> $(NGS_BASHRC)
