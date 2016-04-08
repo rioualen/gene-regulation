@@ -325,6 +325,7 @@ edit_path:
 
 all: \
 	usr_bin \
+	ngs_bashrc \
 	add_pub_key \
 	add_repos \
 	essential_packages \
@@ -345,5 +346,6 @@ all: \
 	macs2 \
 	igv \
 	igv_tools \
-	desktop_and_x2go
+	desktop_and_x2go \
+	edit_path
 
