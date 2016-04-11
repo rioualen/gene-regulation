@@ -196,7 +196,6 @@ samtools:
 	wget --no-clobber http://sourceforge.net/projects/samtools/files/samtools/$(SAMTOOLS_VER)/samtools-$(SAMTOOLS_VER).tar.bz2;\
 	bunzip2 -f samtools-$(SAMTOOLS_VER).tar.bz2;\
 	tar xvf samtools-$(SAMTOOLS_VER).tar;\
-	rm samtools-$(SAMTOOLS_VER).tar;\
 	cd samtools-$(SAMTOOLS_VER); \
 	make ;\
 	sudo make install;\
@@ -206,7 +205,6 @@ bedtools:
 	cd $(SOURCE_DIR);\
 	wget --no-clobber https://github.com/arq5x/bedtools2/releases/download/v$(BEDTOOLS_VER)/bedtools-$(BEDTOOLS_VER).tar.gz;\
 	tar xvfz bedtools-$(BEDTOOLS_VER).tar.gz;\
-	rm bedtools-$(BEDTOOLS_VER).tar.gz;\
 	cd bedtools2; \
 	make; \
 	sudo make install; \
@@ -215,9 +213,9 @@ bedtools:
 sratoolkit:
 	cd $(SOURCE_DIR); \
 	wget -nc http://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/$(SRATOOLKIT_VER)/sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz; \
-	tar xvzf sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz; \
-	rm sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz; \
-	cp sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin/* $(BIN_DIR)
+	tar xzf sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz; \
+	cp `find sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin -maxdepth 1 -executable -type l` $(BIN_DIR)
+#	cp sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin/* $(BIN_DIR)
 
 # ----------------------------------------------------------------
 # Quality assessment & trimming
@@ -227,10 +225,8 @@ fastqc:
 	cd $(SOURCE_DIR); \
 	wget --no-clobber http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v$(FASTQC_VER).zip;\
 	unzip -o fastqc_v$(FASTQC_VER).zip; \
-	rm fastqc_v$(FASTQC_VER).zip; \
-	cp FastQC/fastqc $(BIN_DIR); \
-#	sudo chmod +x FastQC/fastqc; \
-#	ln -s -f FastQC/fastqc fastqc; \
+	sudo chmod +x FastQC/fastqc; \
+	ln -s -f $(SOURCE_DIR)/FastQC/fastqc $(BIN_DIR)/fastqc; \
 
 sickle: 
 	cd $(SOURCE_DIR); \
@@ -248,7 +244,6 @@ bowtie:
 	cd $(SOURCE_DIR); \
 	wget --no-clobber http://downloads.sourceforge.net/project/bowtie-bio/bowtie/$(BOWTIE1_VER)/bowtie-$(BOWTIE1_VER)-linux-x86_64.zip;\
 	unzip bowtie-$(BOWTIE1_VER)-linux-x86_64.zip;\
-	rm bowtie-$(BOWTIE1_VER)-linux-x86_64.zip; \
 	cp `find bowtie-$(BOWTIE1_VER)/ -maxdepth 1 -executable -type f` $(BIN_DIR)
 #	echo 'export PATH='$(PATH):$(BIN_DIR)/bowtie-$(BOWTIE1_VER) >> $(NGS_BASHRC)
 #	PATH_NEW=$(PATH_NEW):$(BIN_DIR)/bowtie-$(BOWTIE1_VER);\
@@ -257,7 +252,6 @@ bowtie2:
 	cd $(SOURCE_DIR); \
 	wget --no-clobber http://downloads.sourceforge.net/project/bowtie-bio/bowtie2/$(BOWTIE2_VER)/bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
 	unzip bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
-	rm bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
 	cp `find bowtie2-$(BOWTIE2_VER)/ -maxdepth 1 -executable -type f` $(BIN_DIR)
 #	echo 'export PATH='$(PATH):$(BIN_DIR)/bowtie2-$(BOWTIE2_VER) >> $(NGS_BASHRC)
 #	PATH_NEW=$(PATH_NEW):$(BIN_DIR)/bowtie2-$(BOWTIE2_VER);\
@@ -277,7 +271,6 @@ macs1:
 	cd $(SOURCE_DIR); \
 	wget --no-clobber https://github.com/downloads/taoliu/MACS/MACS-$(MACS1_VER)-1.tar.gz; \
 	tar xvfz MACS-$(MACS1_VER)-1.tar.gz ; \
-	rm MACS-$(MACS1_VER)-1.tar.gz ; \
 	cd MACS-$(MACS1_VER); \
 	sudo python setup.py install
 
@@ -301,7 +294,8 @@ spp:
 #	make
 
 homer:
-	mkdir $(SOURCE_DIR)/homer && cd $_ ;\
+	mkdir $(SOURCE_DIR)/homer; \
+	cd $(SOURCE_DIR)/homer;\
 #	cd $(SOURCE_DIR);\
 	wget "http://homer.salk.edu/homer/configureHomer.pl"; \
 #	mkdir $(BIN_DIR)/HOMER; \
@@ -334,19 +328,15 @@ igv:
 	cd $(SOURCE_DIR); \
 	wget --no-clobber http://data.broadinstitute.org/igv/projects/downloads/IGV_$(IGV_VER).zip; \
 	unzip IGV_$(IGV_VER).zip;\
-	rm  IGV_$(IGV_VER).zip;\
-	cp $(SOURCE_DIR)/IGV_$(IGV_VER)/igv.sh $(BIN_DIR)
-#	ln -s -f $(BIN_DIR)/IGV_$(IGV_VER)/igv.sh $(BIN_DIR)/igv
+#	cp $(SOURCE_DIR)/IGV_$(IGV_VER)/igv.sh $(BIN_DIR)
+	ln -s -f $(SOURCE_DIR)/IGV_$(IGV_VER)/igv.sh $(BIN_DIR)/igv
 
 igv_tools:
 	cd $(SOURCE_DIR); \
 	wget --no-clobber http://data.broadinstitute.org/igv/projects/downloads/igvtools_$(IGVTOOLS_VER).zip ;\
-#	mv igvtools_$(IGVTOOLS_VER).zip $(BIN_DIR);\
-#	cd $(BIN_DIR); \
 	unzip igvtools_$(IGVTOOLS_VER).zip;\
-	rm igvtools_$(IGVTOOLS_VER).zip;\
-	cp $(SOURCE_DIR)/IGVTools/igvtools $(BIN_DIR)
-#	ln -s -f $(BIN_DIR)/IGVTools/igvtools $(BIN_DIR)/igvtools
+#	cp $(SOURCE_DIR)/IGVTools/igvtools $(BIN_DIR)
+	ln -s -f $(SOURCE_DIR)/IGVTools/igvtools $(BIN_DIR)/igvtools
 
 desktop_and_x2go:
 	sudo apt-get install -y x2goserver
