@@ -15,12 +15,13 @@
 export LC_ALL=C
 export LANG=C
 
-.PHONY:  \
-	usr_bin \
-	ngs_bashrc \
+.PHONY: \
+	create_bin \
+	init_ngs_bashrc \
+	init \
 	add_pub_key \
 	add_repos \
-	essential_packages \
+	add_packages \
 	R_installation \
 	R_lib \
 	python \
@@ -36,8 +37,8 @@ export LANG=C
 	spp \
 	macs1 \
 	macs2 \
-	homer
-	swembl
+	homer \
+	swembl \
 	igv \
 	igv_tools \
 	desktop_and_x2go \
@@ -52,30 +53,13 @@ usage:
 	echo "implemented targets"
 	perl -ne 'if (/^([a-z]\S+):/){ print "\t$$1\n";  }' ${MAKEFILE}
 
-##########################
-# Installation variables
-##########################
-
-## Directory where all the executables will be installed
-TARGET_BIN=$(HOME)/bin
-
-## Directory in which the source code will be downloaded and compiled when required
-APP_SOURCE_DIR=$(HOME)/app_sources
-
-NGS_BASHRC=$(TARGET_BIN)/ngs_bashrc
-PATH_NEW=$(PATH)
+## Tool & versions
 
 UBUNTU_VER_NAME="trusty"
 CRAN_MIRROR="http://cran.univ-lyon1.fr"
 CRAN_PACK_LIST='XML', 'bPeaks', 'caTools'
 BIOC_PACK_LIST='affy', 'biomaRt', 'Rsamtools'
-PUB_KEY=51716619E084DAB9 F7B8CEA6056E8E56   
-
-###########################
-# Tool versions
-###########################
-
-
+PUB_KEY=51716619E084DAB9 F7B8CEA6056E8E56
 
 BEDTOOLS_VER=2.24.0
 BOWTIE1_VER=1.1.1
@@ -95,17 +79,30 @@ SCIPY_VER=0.16.0
 SPP_VER=1.11
 SWEMBL_VER=3.3.1
 
+# ================================================================
+# General configuration
+# ================================================================
 
+# ----------------------------------------------------------------
+# bin & bashrc
+# ----------------------------------------------------------------
 
-##########################
-# ~/.bashrc config
-##########################
+## Directory where all the executables will be installed
+BIN_DIR=$(HOME)/bin
 
-## Create the bin directory
+## Directory in which the source code will be downloaded and compiled when required
+SOURCE_DIR=$(HOME)/app_sources
+
+NGS_BASHRC=$(BIN_DIR)/ngs_bashrc
+#PATH_NEW=$(PATH)
+
+## Create the bin & source directories
 create_bin:
-	@echo "Creating TARGET_BIN directory	${TARGET_BIN}"
-	mkdir -p $(TARGET_BIN)
-	@echo "	TARGET_BIN	${TARGET_BIN}"
+	@echo "Creating BIN_DIR and SOURCE_DIR directories"
+	mkdir -p $(BIN_DIR)
+	mkdir -p $(SOURCE_DIR)
+	@echo "	BIN_DIR	${BIN_DIR}"
+	@echo "	SOURCE_DIR	${SOURCE_DIR}"
 
 ## Initialize a bashrc file, which will allow any user to load the
 ## path and configuration at once.
@@ -119,11 +116,13 @@ init_ngs_bashrc:
 	@echo 'export force_color_prompt=yes' >> $(NGS_BASHRC)
 	@echo 'export LC_COLLATE=C' >> $(NGS_BASHRC)
 	@echo "" >> $(NGS_BASHRC)
-	@echo 'export PATH='$(PATH):$(TARGET_BIN) >> $(NGS_BASHRC)
-#	echo 'source $(NGS_BASHRC)' >> /etc/profile
+	@echo 'export PATH='$(PATH):$(BIN_DIR) >> $(NGS_BASHRC)
 
 init: create_bin init_ngs_bashrc
 
+# ----------------------------------------------------------------
+# Basic libraries: Ubuntu, R, python, java
+# ----------------------------------------------------------------
 
 ## ???
 add_pub_key:
@@ -137,29 +136,21 @@ add_repos:
 	sudo add-apt-repository ppa:ravefinity-project/ppa --yes
 	sudo apt-get update --yes
 
-essential_packages:
+add_packages:
 	sudo apt-get update
 	sudo apt-get -y install ssh rsync git graphviz gedit-plugins
 	sudo apt-get -y install gedit-plugins						
-	sudo apt-get -y install zlibc zlib1g-dev				# Required by sickle, bamtools...
-	sudo apt-get -y install build-essential						 # Includes gcc compiler
-	sudo apt-get -y install libncurses5-dev libncursesw5-dev		# Required at least by samtools
-	sudo apt-get -y install libboost-dev						# might me required for spp, to be checked
-	sudo apt-get -y install gdebi								# required by rstudio install
-
-desktop_and_x2go:
-	sudo apt-get install -y x2goserver
-	sudo apt-get install -y --no-install-recommends ubuntu-mate-core ubuntu-mate-desktop
-	sudo apt-get install -y mate-desktop-environment-extra
-	sudo apt-get install -y mate-notification-daemon caja-gksu caja-open-terminal
-	sudo apt-get install -y ambiance-colors radiance-colors;
+	sudo apt-get -y install zlibc zlib1g-dev									# Required by sickle, bamtools...
+	sudo apt-get -y install build-essential										# Includes gcc compiler
+	sudo apt-get -y install libncurses5-dev libncursesw5-dev					# Required at least by samtools
+	sudo apt-get -y install libboost-dev										# might me required for spp, to be checked
+	sudo apt-get -y install gdebi												# required by rstudio install
 
 R_installation:
 #	sudo echo "deb $(CRAN_MIRROR)/bin/linux/ubuntu $(UBUNTU_VER_NAME)/" >> /etc/apt/sources.list
 	sudo apt-get update
 	sudo apt-get -y install r-base r-base-dev libcurl4-openssl-dev libxml2-dev
 	echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);" >> ~/.Rprofile
-
 
 R_lib: 
 	sudo Rscript -e "pack.list <- c($(CRAN_PACK_LIST)); \
@@ -177,7 +168,7 @@ Rstudio:
 	rm -f rstudio-$(RSTUDIO_VER)-amd64.deb
 
 python: 
-	sudo apt-get -y install python-pip python-dev								    
+	sudo apt-get -y install python-pip python-dev									
 	sudo apt-get -y install python3-pip python3.4-dev
 	sudo pip3 install "rpy2<$(RPY2_VER)"
 	sudo pip3 install numpy
@@ -186,17 +177,13 @@ python:
 	sudo pip3 install pyyaml
 
 
-java9:
-	echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections
-	echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-selections
-	sudo add-apt-repository -y ppa:webupd8team/java
-	sudo apt-get update
-	sudo apt-get -y install oracle-java9-installer
-	sudo apt-get install oracle-java9-set-default
+ubuntu_packages: add_pub_key add_repos add_packages
+
+R: R_installation R_lib Rstudio
 
 
 # ================================================================
-#		  NGS
+# NGS
 # ================================================================
 
 # ----------------------------------------------------------------
@@ -205,7 +192,7 @@ java9:
 
 ## Install samtools
 samtools:
-	cd $(TARGET_BIN);\
+	cd $(SOURCE_DIR);\
 	wget --no-clobber http://sourceforge.net/projects/samtools/files/samtools/$(SAMTOOLS_VER)/samtools-$(SAMTOOLS_VER).tar.bz2;\
 	bunzip2 -f samtools-$(SAMTOOLS_VER).tar.bz2;\
 	tar xvf samtools-$(SAMTOOLS_VER).tar;\
@@ -213,69 +200,67 @@ samtools:
 	cd samtools-$(SAMTOOLS_VER); \
 	make ;\
 	sudo make install;\
-	rm -rf samtools*
+#	rm -rf samtools*
 
 bedtools:
-	cd $(TARGET_BIN);\
+	cd $(SOURCE_DIR);\
 	wget --no-clobber https://github.com/arq5x/bedtools2/releases/download/v$(BEDTOOLS_VER)/bedtools-$(BEDTOOLS_VER).tar.gz;\
 	tar xvfz bedtools-$(BEDTOOLS_VER).tar.gz;\
 	rm bedtools-$(BEDTOOLS_VER).tar.gz;\
 	cd bedtools2; \
-	make ;\
-	sudo make install;\
-	rm -rf bedtools*
+	make; \
+	sudo make install; \
+#	rm -rf bedtools*
 
 sratoolkit:
-	wget -nc http://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/$(SRATOOLKIT_VER)/sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz
-	mv sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz $(TARGET_BIN)
-	cd $(TARGET_BIN); \
+	cd $(SOURCE_DIR); \
+	wget -nc http://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/$(SRATOOLKIT_VER)/sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz; \
 	tar xvzf sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz; \
 	rm sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz; \
-	ln -s -f sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin/fastq-dump fastq-dump; \
-	ln -s -f sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin/prefetch prefetch
-
+	cp sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin/* $(BIN_DIR)
 
 # ----------------------------------------------------------------
 # Quality assessment & trimming
 # ----------------------------------------------------------------
 
 fastqc:
-#	sudo apt-get -y install fastqc
+	cd $(SOURCE_DIR); \
 	wget --no-clobber http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v$(FASTQC_VER).zip;\
-	mv fastqc_v$(FASTQC_VER).zip $(TARGET_BIN); \
-	cd $(TARGET_BIN); \
 	unzip -o fastqc_v$(FASTQC_VER).zip; \
 	rm fastqc_v$(FASTQC_VER).zip; \
-	sudo chmod +x FastQC/fastqc; \
-	ln -s -f FastQC/fastqc fastqc; \
+	cp FastQC/fastqc $(BIN_DIR); \
+#	sudo chmod +x FastQC/fastqc; \
+#	ln -s -f FastQC/fastqc fastqc; \
 
 sickle: 
+	cd $(SOURCE_DIR); \
 	git clone https://github.com/najoshi/sickle.git; \
 	cd sickle;\
 	make; \
-	mv sickle $(TARGET_BIN) ;\
-	cd ..;\
-	rm -Rf sickle
+	cp sickle $(BIN_DIR) ;\
+
 
 # ----------------------------------------------------------------
 # Mapping tools
 # ----------------------------------------------------------------
 
 bowtie: 
-	cd $(TARGET_BIN); \
+	cd $(SOURCE_DIR); \
 	wget --no-clobber http://downloads.sourceforge.net/project/bowtie-bio/bowtie/$(BOWTIE1_VER)/bowtie-$(BOWTIE1_VER)-linux-x86_64.zip;\
 	unzip bowtie-$(BOWTIE1_VER)-linux-x86_64.zip;\
 	rm bowtie-$(BOWTIE1_VER)-linux-x86_64.zip; \
-#	echo 'export PATH='$(PATH):$(TARGET_BIN)/bowtie-$(BOWTIE1_VER) >> $(NGS_BASHRC)
-	PATH_NEW=$(PATH_NEW):$(TARGET_BIN)/bowtie-$(BOWTIE1_VER);\
+	cp `find bowtie-$(BOWTIE1_VER)/ -maxdepth 1 -executable -type f` $(BIN_DIR)
+#	echo 'export PATH='$(PATH):$(BIN_DIR)/bowtie-$(BOWTIE1_VER) >> $(NGS_BASHRC)
+#	PATH_NEW=$(PATH_NEW):$(BIN_DIR)/bowtie-$(BOWTIE1_VER);\
 
 bowtie2:
-	cd $(TARGET_BIN); \
+	cd $(SOURCE_DIR); \
 	wget --no-clobber http://downloads.sourceforge.net/project/bowtie-bio/bowtie2/$(BOWTIE2_VER)/bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
 	unzip bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
 	rm bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
-#	echo 'export PATH='$(PATH):$(TARGET_BIN)/bowtie2-$(BOWTIE2_VER) >> $(NGS_BASHRC)
-	PATH_NEW=$(PATH_NEW):$(TARGET_BIN)/bowtie2-$(BOWTIE2_VER);\
+	cp `find bowtie2-$(BOWTIE2_VER)/ -maxdepth 1 -executable -type f` $(BIN_DIR)
+#	echo 'export PATH='$(PATH):$(BIN_DIR)/bowtie2-$(BOWTIE2_VER) >> $(NGS_BASHRC)
+#	PATH_NEW=$(PATH_NEW):$(BIN_DIR)/bowtie2-$(BOWTIE2_VER);\
 
 bwa:
 	sudo apt-get -y install bwa
@@ -289,7 +274,7 @@ bwa:
 # ----------------------------------------------------------------
 
 macs1:
-	cd $(TARGET_BIN); \
+	cd $(SOURCE_DIR); \
 	wget --no-clobber https://github.com/downloads/taoliu/MACS/MACS-$(MACS1_VER)-1.tar.gz; \
 	tar xvfz MACS-$(MACS1_VER)-1.tar.gz ; \
 	rm MACS-$(MACS1_VER)-1.tar.gz ; \
@@ -300,76 +285,92 @@ macs2:
 	sudo pip install MACS2;
 
 spp:
-	cd $(TARGET_BIN);\
+	cd $(SOURCE_DIR);\
 	wget http://compbio.med.harvard.edu/Supplements/ChIP-seq/spp_$(SPP_VER).tar.gz;\
 	sudo R CMD INSTALL spp_$(SPP_VER).tar.gz; \
 
-swembl:
-	cd $(TARGET_BIN);\
-	wget "http://www.ebi.ac.uk/~swilder/SWEMBL/SWEMBL.$(SWEMBL_VER).tar.bz2"; \
-	bunzip2 -f SWEMBL.$(SWEMBL_VER).tar.bz2;\
-	tar xvf SWEMBL.$(SWEMBL_VER).tar;\
-	rm SWEMBL.$(SWEMBL_VER).tar;\
-	chown -R ubuntu-user SWEMBL.$(SWEMBL_VER);\
-	cd SWEMBL.$(SWEMBL_VER);\
-	make
+## Currently not working -> see w/ S.Wilder, new version to come?
+#swembl:
+#	cd $(SOURCE_DIR);\
+#	wget "http://www.ebi.ac.uk/~swilder/SWEMBL/SWEMBL.$(SWEMBL_VER).tar.bz2"; \
+#	bunzip2 -f SWEMBL.$(SWEMBL_VER).tar.bz2;\
+#	tar xvf SWEMBL.$(SWEMBL_VER).tar;\
+#	rm SWEMBL.$(SWEMBL_VER).tar;\
+#	chown -R ubuntu-user SWEMBL.$(SWEMBL_VER);\
+#	cd SWEMBL.$(SWEMBL_VER);\
+#	make
 
 homer:
+	mkdir $(SOURCE_DIR)/homer && cd $_ ;\
+#	cd $(SOURCE_DIR);\
 	wget "http://homer.salk.edu/homer/configureHomer.pl"; \
-	mkdir $(TARGET_BIN)/HOMER; \
-	mv configureHomer.pl $(TARGET_BIN)/HOMER; \
-	cd $(TARGET_BIN)/HOMER; \
+#	mkdir $(BIN_DIR)/HOMER; \
+#	mv configureHomer.pl $(BIN_DIR)/HOMER; \
+#	cd $(BIN_DIR)/HOMER; \
 	perl configureHomer.pl -install homer; \
-#	echo 'export PATH='$(PATH):$(TARGET_BIN)/HOMER/bin >> $(NGS_BASHRC)
-	PATH_NEW=$(PATH_NEW):$(TARGET_BIN)/HOMER/bin
+	cp `find $(SOURCE_DIR)/homer/bin -maxdepth 1 -executable -type f` $(BIN_DIR)
+#	echo 'export PATH='$(PATH):$(BIN_DIR)/HOMER/bin >> $(NGS_BASHRC)
+#	PATH_NEW=$(PATH_NEW):$(BIN_DIR)/HOMER/bin
 
-
+ngs_tools: samtools bedtools sratoolkit \
+	fastqc sickle \
+	bowtie bowtie2 bwa \
+	macs1 macs2 spp homer
 
 # ================================================================
-#		  Visualization
+# Visualization
 # ================================================================
+
+java9:
+	echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections
+	echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-selections
+	sudo add-apt-repository -y ppa:webupd8team/java
+	sudo apt-get update
+	sudo apt-get -y install oracle-java9-installer
+	sudo apt-get install oracle-java9-set-default
+
 
 igv:
-	cd $(TARGET_BIN); \
+	cd $(SOURCE_DIR); \
 	wget --no-clobber http://data.broadinstitute.org/igv/projects/downloads/IGV_$(IGV_VER).zip; \
 	unzip IGV_$(IGV_VER).zip;\
 	rm  IGV_$(IGV_VER).zip;\
-	ln -s -f $(TARGET_BIN)/IGV_$(IGV_VER)/igv.sh $(TARGET_BIN)/igv
+	cp $(SOURCE_DIR)/IGV_$(IGV_VER)/igv.sh $(BIN_DIR)
+#	ln -s -f $(BIN_DIR)/IGV_$(IGV_VER)/igv.sh $(BIN_DIR)/igv
 
 igv_tools:
+	cd $(SOURCE_DIR); \
 	wget --no-clobber http://data.broadinstitute.org/igv/projects/downloads/igvtools_$(IGVTOOLS_VER).zip ;\
-	mv igvtools_$(IGVTOOLS_VER).zip $(TARGET_BIN);\
-	cd $(TARGET_BIN); \
+#	mv igvtools_$(IGVTOOLS_VER).zip $(BIN_DIR);\
+#	cd $(BIN_DIR); \
 	unzip igvtools_$(IGVTOOLS_VER).zip;\
 	rm igvtools_$(IGVTOOLS_VER).zip;\
-	ln -s -f $(TARGET_BIN)/IGVTools/igvtools $(TARGET_BIN)/igvtools
+	cp $(SOURCE_DIR)/IGVTools/igvtools $(BIN_DIR)
+#	ln -s -f $(BIN_DIR)/IGVTools/igvtools $(BIN_DIR)/igvtools
 
-edit_path:
-	echo 'export PATH='$(PATH_NEW) >> $(NGS_BASHRC)
+desktop_and_x2go:
+	sudo apt-get install -y x2goserver
+	sudo apt-get install -y --no-install-recommends ubuntu-mate-core ubuntu-mate-desktop
+	sudo apt-get install -y mate-desktop-environment-extra
+	sudo apt-get install -y mate-notification-daemon caja-gksu caja-open-terminal
+	sudo apt-get install -y ambiance-colors radiance-colors;
+
+visualization: java9 igv igv_tools desktop_and_x2go
+
+
+#edit_path:
+#	echo 'export PATH='$(PATH_NEW) >> $(NGS_BASHRC)
+
+
+# ================================================================
+# All targets
+# ================================================================
 
 all: \
-	usr_bin \
-	ngs_bashrc \
-	add_pub_key \
-	add_repos \
-	essential_packages \
-	R_installation \
-	R_lib \
+	init \
+	ubuntu_packages \
+	R \
 	python \
-	java9 \
-	samtools \
-	bedtools \
-	sratoolkit \
-	fastqc \
-	sickle \
-	bowtie \
-	bowtie2 \
-	bwa \
-	spp \
-	macs1 \
-	macs2 \
-	igv \
-	igv_tools \
-	desktop_and_x2go \
-	edit_path
+	ngs_tools \
+	visualization \
 
