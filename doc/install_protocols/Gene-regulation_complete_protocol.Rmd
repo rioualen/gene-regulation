@@ -3,12 +3,6 @@ title: 'Gene-regulation: running ChIP-seq workflows on virtual machines'
 author: "Claire Rioualen"
 date: "April 11, 2016"
 output:
-  pdf_document:
-    fig_caption: yes
-    highlight: zenburn
-    number_sections: yes
-    toc: yes
-    toc_depth: 5
   html_document:
     fig_caption: yes
     highlight: zenburn
@@ -16,7 +10,41 @@ output:
     theme: cerulean
     toc: yes
     toc_depth: 5
+  pdf_document:
+    fig_caption: yes
+    highlight: zenburn
+    number_sections: yes
+    toc: yes
+    toc_depth: 5
 ---
+
+  * [Creating a virtual machine (VM)](#creating-a-virtual-machine-vm)
+    * [Creating a VM on the IFB cloud](#creating-a-vm-on-the-ifb-cloud)
+      * [Requirements](#requirements)
+      * [Virtual disk creation](#virtual-disk-creation)
+      * [Creation of an instance](#creation-of-an-instance)
+      * [Connection to the device](#connection-to-the-device)
+    * [Creating a VM under VirtualBox software](#creating-a-vm-under-virtualbox-software)
+      * [Requirements](#requirements-1)
+      * [Creation of the virtual machine](#creation-of-the-virtual-machine)
+      * [Virtual Box configuration](#virtual-box-configuration)
+      * [VM configuration](#vm-configuration)
+      * [Operating system installation](#operating-system-installation)
+  * [Installing programs and dependencies](#installing-programs-and-dependencies)
+    * [Clone the gene-regulation repository](#clone-the-gene-regulation-repository)
+    * [Run makefile to install all required dependencies](#run-makefile-to-install-all-required-dependencies)
+  * [Executing snakemake workflows](#executing-snakemake-workflows)
+    * [Download source data](#download-source-data)
+      * [Virtual Box](#virtual-box)
+      * [IFB cloud](#ifb-cloud)
+    * [Execute workflow](#execute-workflow)
+  * [Visualizing results](#visualizing-results)
+    * [Installing and running the X2Go client (IFB cloud)](#installing-and-running-the-x2go-client-ifb-cloud)
+    * [Visualize results](#visualize-results)
+      * [FastQC](#fastqc)
+      * [IGV](#igv)
+  * [Export appliance (VBox VM)](#export-appliance-vbox-vm)
+
 
 > Note: this protocol was developed on a Unix computer, with the OS LMDE. The virtual machines are developed with the Ubuntu 14.04 OS. 
 
