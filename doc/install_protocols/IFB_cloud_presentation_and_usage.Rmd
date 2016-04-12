@@ -165,25 +165,4 @@ rsync -ruptvl ${localfile} root@192.54.201.177:/root/mydisk/
 
 ## Software installation
 
-Once you're connected to the VM through ssh, you can install any program just the way you would do it locally (see this [manual](install_snakemake_workflows.Rmd) for instance).
-
-
-## Documentation
-
-### RSAT suite  
-
-See [manual](install_rsat_ubuntu14.04.Rmd).
-
-### Snakemake workflows
-
-See [manual](install_snakemake_workflows.Rmd).
-
-
-### VBox export / IFB appliance submission 
-
-See [manual](export_appliance.Rmd). **(to be updated!)**
-
-
-
-
-
+Once you're connected to the VM through `ssh`, you can install any program just the way you would do it locally (see this [manual](install_snakemake_workflows.Rmd) for instance).

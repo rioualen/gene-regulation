@@ -1,16 +1,34 @@
 ---
-title: "Install & execute Snakemake workflows"
+title: "Manual install of programs and dependencies for the Snakemake workflows"
 author: "Claire Rioualen"
-date: "December 22, 2015"
+date: "April 11, 2016"
+output:
+  html_document:
+    fig_caption: yes
+    highlight: zenburn
+    number_sections: yes
+    theme: cerulean
+    toc: yes
+    toc_depth: 5
+  pdf_document:
+    fig_caption: yes
+    highlight: zenburn
+    number_sections: yes
+    toc: yes
+    toc_depth: 5
 ---
+
+**\*\*To be revised!\*\***
 
 This manual aims at helping you install the necessary programs and dependencies in order to have the snakemake workflows work.
 It was designed for Unix-running computers (Ubuntu, Debian).
 
-Keep in mind that, while most of these tools can be installed by simply issuing an `apt-get` command, this likely won't get you the latest versions to date. You might thus run into dependency issues. 
+In order to install all the tools at once, you can use the makefile provided in the distribution (see [complete protocol](Gene-regulation_complete_protocol.Rmd), part 2).
 
-To know more about the tools themselves, better check the [wiki](https://github.com/rioualen/gene-regulation/blob/master/doc/wiki-fg/). 
+To know more about the tools, you can check our [wiki](https://github.com/rioualen/gene-regulation/wiki/NGS-tools-&-software). 
 
+
+<!--
 Table of Contents
 =================
 
@@ -59,7 +77,7 @@ Table of Contents
     * [Data transfer/download](#data-transferdownload)
     * [Running the pipeline](#running-the-pipeline)
   * [VM export / submission](#vm-export--submission)
-
+-->
 <!--
 ### **TODO**
 
@@ -89,30 +107,6 @@ Table of Contents
 * check version dependencies and add --version to doc
 -->
     
-## Pre-requisites in case of virtual machine (VM) development
-
-### VM creation
-
-See one of these:
-
-* `IFB_cloud_VM_creation.Rmd`
-* `virtualbox_VM_creation.Rmd`
-
-### VM customization
-
-Make sure to provide the right amount of RAM and CPU, according to the amount of data, the tools you want to use, and what you actually have on your local installation.
-
-Regarding the size of the virtual disk, see `virtualbox_VM_creation.Rmd`.
-
-<!---
-Here we used these settings:
-
-* RAM: 40Go
-* HD: 120Go
-* CPU: 10
--->
-
-
 # General requirements 
 
 ## Generic tools
@@ -121,7 +115,10 @@ Here we used these settings:
 ```
 sudo apt-get install ssh
 ```
+
+<!--
 If you have followed one of the previous tutorials, you should have copied your ssh parameters onto your VM, and have an ssh public key like `~/.ssh/id_rsa.pub`. If not, you can generate keys using `ssh-keygen` (see manual [here](https://help.github.com/articles/generating-ssh-keys/)).
+-->
 
 ### rsync
 
@@ -157,11 +154,12 @@ sudo apt-get install libz-dev
 
 **TODO**
 
-## Create bin/ (opt)
+## Create bin/ and app_sources/ (opt) TODO
 
 While some programs will be installed completely automatically... some will not. Here we create a directory that will be used for manual installations. 
 ```
 mkdir $HOME/bin
+mkdir $HOME/app_sources
 ```
 You might then have to edit your `$PATH` manually (see next section).
 
@@ -249,7 +247,7 @@ Problems solved after rsat install (including loads of python packages)?
 -->
 
 
-## R (to be revised)
+## R
 
 **TODO**
 <!--

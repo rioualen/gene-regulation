@@ -1,17 +1,80 @@
 ---
-title: "Snakemake workflows on VBox machines"
+title: 'Gene-regulation: running ChIP-seq workflows on virtual machines'
 author: "Claire Rioualen"
-date: "April 7, 2016"
-output: html_document
+date: "April 11, 2016"
+output:
+  pdf_document:
+    fig_caption: yes
+    highlight: zenburn
+    number_sections: yes
+    toc: yes
+    toc_depth: 5
+  html_document:
+    fig_caption: yes
+    highlight: zenburn
+    number_sections: yes
+    theme: cerulean
+    toc: yes
+    toc_depth: 5
 ---
 
-# Executing Snakemake workflows on a Virtual Box virtual machine 
+> Note: this protocol was developed on a Unix computer, with the OS LMDE. The virtual machines are developed with the Ubuntu 14.04 OS. 
 
-------------------------------------------
+# Creating a virtual machine (VM)
 
-## Requirements
+## Creating a VM on the IFB cloud
 
-### Virtualbox software
+### Requirements
+
+**User account creation & configuration**
+
+* Using the IFB cloud facilities requires to have a user account. Register [here](https://cloud.france-bioinformatique.fr/accounts/register/). 
+
+* Once your account has been validated, you can [login](https://cloud.france-bioinformatique.fr/accounts/login/).
+
+* In order to be able to access your instances through SSH, you should register your SSH public key in your [account settings](https://cloud.france-bioinformatique.fr/cloud/profile/), through the dashboard.
+
+### Virtual disk creation
+
+Appliances usually have a limited amount of disk space (up to 10, 20Go). If the instance to be run necessitates disk space, you have to create a virtual disk (vDisk) prior to launching it. By default, the capacity of storage granted to a user is 250Go, which can be divided into as many vDisks as necessary. When instantiating an appliance, you can chose to attach one of these vDIsks to the virtual machine. You'll be able to access data on this disk through SSH. 
+
+1. Click *New vDisk* button.
+2. Enter a size (whole number equating to the amount of Go needed). 
+3. Name it.
+
+![](img/vdisk-x2go.png)
+
+<!--\includegraphics[width=250pt]{img/vdisk-x2go.png}-->
+
+
+### Creation of an instance
+
+1. Click *New Instance* button.
+2. Choose appliance "Ubuntu 14.04 IFB-X2GO-10GB" in the drop-down menu. 
+3. Name your VM.
+4. Choose the amount of CPU and RAM to grant the VM (up to 8 CPU, 32 GB RAM).
+5. Attach the vDisk.
+6. Click *Run*.
+
+![](img/ubuntu_x2go_create.png)
+
+7. After a few seconds, you may refresh the page until the newly created instance shows up on the dashboard. Clicking on the ssh mention in the *Access* column will give you the commands to access your virtual machine. 
+
+![](img/x2go_ssh.png)
+
+### Connection to the device
+
+1. Type the command in a terminal.
+
+```
+ssh -A -p 22 root@192.54.201.124
+```
+
+## Creating a VM under VirtualBox software
+
+### Requirements
+
+**Virtualbox software**
 
 We used VirtualBox 5.0.2, downloadable from [https://www.virtualbox.org/](https://www.virtualbox.org/) or to be installed manually:
 ```
@@ -22,7 +85,7 @@ VirtualBox extension pack can be requested (eg. for handling USB2.0, see 'errors
 wget http://download.virtualbox.org/virtualbox/5.0.2/Oracle_VM_VirtualBox_Extension_Pack-5.0.2.vbox-extpack
 ```
 
-### Base Ubuntu image 
+**Ubuntu image**
 
 In this tutorial we used Ubuntu 14.04.3, latest long-term supported version.
 ```
@@ -31,7 +94,7 @@ wget http://releases.ubuntu.com/14.04/ubuntu-14.04.3-desktop-amd64.iso
 ------------------------------------------
 
 
-## Creation of the virtual machine
+### Creation of the virtual machine
 
 1. Open VirtualBox
 
@@ -85,7 +148,7 @@ wget http://releases.ubuntu.com/14.04/ubuntu-14.04.3-desktop-amd64.iso
 At this stage, the VM has been created and needs to be configured before installing the operating system. 
 
 
-## Virtual Box configuration
+### Virtual Box configuration
 
 Before configuring the virtual machine, we need to tell VirtualBox how it will enable your local virtual machines to interact with their host (the operating system of the machine on which the VM is running).
 
@@ -108,24 +171,24 @@ Before configuring the virtual machine, we need to tell VirtualBox how it will e
           - *Lower Address Bound:* 192.168.56.101
           - *Upper Address Bound:* 192.168.56.254
 
-## Virtual Machine configuration
+### VM configuration
 
 In the VirtualBox main window, select the newly created virtual machine, and click on the **Settings** button. 
 
-### General 
+**General**
 
 For the desktop version of Ubuntu, it is convenient to enable copy-paste between the guest and the host.
 
 - Select the tab *Advanced*
 - Set *Shared clipboard* to *Bidirectional*
 
-### Storage
+**Storage**
 
 Click on the **Empty** disc icon in the storage tree. Select the disc icon on the right and fetch the downloaded `.iso` image(see **Requirements**).
 Click on *OK*.
 
 
-### Network
+**Network**
 
 VirtualBox offers many alternative ways to configure network communications between the virtual machine, the host machine, and the external network. 
 
@@ -140,34 +203,25 @@ We present here one possible way to configure your Virtual machine, but this sho
 In the VM settings, select tne *Network* tab. VirtualBox enables you to specify several adapters, each corresponding to one separate network access (e.g. using an ethernet card + wi-fi connection).
 
 - click on the tab *Adapter 1*,
-- check *Enable Network Adapter*
-- Attached to: *Host-only Adapter*
-- Name: *vboxnet0* (this network must have been created beforehand)
+    - check *Enable Network Adapter*
+    - Attached to: *Host-only Adapter*
+    - Name: *vboxnet0* (this network must have been created beforehand, see section 1.2.3)
 
-#### Additional networks
-
-
-**BEWARE!** If you activate this adaptor your VM will be visible from external computers in the same network as the host  machine.
-
-See information at: [https://www.virtualbox.org/manual/ch06.html#network_bridged](https://www.virtualbox.org/manual/ch06.html#network_bridged)
 
 - click on the tab *Adapter 2*,
+    - check *Enable Network Adapter*
+    - Attached to : *NAT*
+
+- click on the tab *Adapter 3*,
     - check *Enable Network Adapter*
     - Attached to : *Bridged Adapter*
     - Name: choose an option corresponding to the actual internet connection of the host machine (e.g. ethernet cable, Wi-Fi, ...).
 
-Note: you can also activate a third adapter, for example to support both an ethernet card (Adapter 2) and a Wi-Fi connection (Adapter 3). This is particularly interesting for laptop computers. 
-
-
-
-
 **You can now start the VM. **
 
-This can raise several errors, if so see dedicated section below. 
+<!-- This can raise several errors, if so see dedicated section below.  -->
 
-
-
-## Operating system installation
+### Operating system installation
 
 * Welcome 
     - check the language settings and click on *Install Ubuntu*.
@@ -201,53 +255,65 @@ Reboot again to see the new display.
 
 
 
-## Basic installation
+# Installing programs and dependencies
 
 Once in the virtual machine, you can install the required programs. 
 
-1. Clone the git sakemake repository and get inside.
+## Clone the `gene-regulation` repository
 
 ```
-sudo apt-get --yes install git
 git clone https://github.com/rioualen/gene-regulation.git
 cd gene-regulation
 ```
 
-2. Run makefile to install all required dependencies (this may take a while ~20mn?) & source ngs_bashrc (containing the `$PATH` for applications).
+## Run makefile to install all required dependencies 
+
+This may take a while (up to 30mn?) & source ngs_bashrc (containing the `$PATH` for applications).
 
 ```
-make -f scripts/makefiles/makefile_install_dependencies all
-source ~/bin/ngs_bashrc ## TODO
+make -f scripts/makefiles/install_tools_and_libs.mk all
+source ~/bin/ngs_bashrc
 ```
 
-## Run the workflow
 
-1. Download source data
+# Executing snakemake workflows
 
+
+
+
+## Download source data
+
+### Virtual Box
+
+Under VBox, you can enter the following commands:
 ```
 sudo mkdir -p /data/GSE20870/GSM521934 /data/GSE20870/GSM521935
 sudo chown -R ubuntu-user:ubuntu-user /data
+```
+```
 cd /data/GSE20870/GSM521934
 wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021358/SRR051929/SRR051929.sra
 cd /data/GSE20870/GSM521935
 wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra
 ```
 
-<!--
-```
-/data/
-    GSE20870/
-        GSM521934/
-            SRR051929.sra
-        GSM521935/
-            SRR051930.sra
-```
-```
-rsync -rtvplu /data/GSE20870 root@192.54.201.124:/data
-```
--->
+### IFB cloud
 
-2. Run the workflow.
+On the IFB cloud VM, the vDisk is automatically attached and mounted by default under `/root/mydisk`. 
+Here we create a symlink from our preferred location `/data` to the data directory `/root/mydisk/data`. 
+
+```
+mkdir -p /root/mydisk/data/GSE20870/GSM521934 /root/mydisk/data/GSE20870/GSM521935
+cd /root/mydisk/data/GSE20870/GSM521934
+wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021358/SRR051929/SRR051929.sra
+cd /root/mydisk/data/GSE20870/GSM521935
+wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra
+```
+```
+ln -s /root/mydisk/data /data
+```
+
+## Execute workflow
 
 ```
 cd ~/gene-regulation
@@ -258,131 +324,105 @@ Congratulations! You just executed this wonderful workflow:
 
 ![](img/rule.png)
 
-## Visualize the results
+# Visualizing results
 
-The Virtual Machine created here doesn't have a graphical interface, so we're gonna use a distant desktop to visualize the results from the host machine. 
+## Installing and running the X2Go client (IFB cloud)
 
-1. Install the x2go client and launch it from your **local computer**.
+
+The Virtual Machine created on the IFB cloud doesn't have a graphical interface, so we're gonna use a distant desktop to visualize the results from the host machine. 
+
+1. Install the x2go client and launch it from your local computer.
 
 ```
 sudo apt-get install x2goclient
+x2goclient
 ```
 
-
-2. Get the IP of your virtual machine.
-```
-ifconfig
-```
-
-
-2. Copy your ssh key to the authorized keys of the virtual machine.
+<!--2. Copy your ssh key to the authorized keys of the virtual machine. (**à revoir !!**)
 
 ```
 cat $HOME/.ssh/id_rsa.pub | ssh root@192.54.201.124 "cat >> .ssh/authorized_keys"
 ```
+-->
 
-3. Launch client.
-
-```
-x2goclient
-```
-
-4. Create a new session using the Mate desktop.
+2. Create a new session using the Mate desktop.
 
 ![](img/x2goclient_session_create.png)
 
-5. The session now appears on the right panel. Just click it to lauch it!
+3. The session now appears on the right panel. Just click it to lauch it!
 
 ![](img/x2go_launch_session.png)
 
-6. You should be now on the virtual desktop!
+4. You should be now on the virtual desktop! 
 
-![](img/mate.png)
+![](img/mate_term.png)
 
-7. You can visualize FastQC results using firefox.
+Note: you may need to change your keyboard settings 
+
+* Go to **System** > **Preferences** > **Keybords**
+* Click on tab **Layouts**
+* Add and/or remove desired keyboards
+
+## Visualize results
+
+### FastQC
+
+You can visualize the FastQC results using firefox or any other navigator. Fetch the `html` files located in the sample directories.
+
+* Before trimming:
+```
+firefox /data/results/GSE20870/samples/GSM521934/GSM521934_fastqc/GSM521934_fastqc.html
+firefox /data/results/GSE20870/samples/GSM521935/GSM521935_fastqc/GSM521935_fastqc.html
+```
+* After trimming:
+```
+firefox /data/results/GSE20870/samples/GSM521934/GSM521934_sickle-se-q20_fastqc/GSM521934_sickle-se-q20_fastqc.html
+firefox /data/results/GSE20870/samples/GSM521935/GSM521935_sickle-se-q20_fastqc/GSM521935_sickle-se-q20_fastqc.html
+```
+
 
 ![](img/fastqc.png)
 
-8. You can visualize the peaks by running IGV from the terminal.
+### IGV
 
+You can visualize the peaks by running IGV from the terminal. You may need to source your `ngs_bashrc` file first (in case you're using a distant desktop, or a new terminal). 
 ```
-PATH=$PATH:/root/bin
+source ~/bin/ngs_bashrc
 igv
 ```
-Click "File" > "Open session..." and chose the file `/root/mydisk/data/results/GSE20870/peaks/igv_session.xml`.
+
+* Click "File" > "Open session..." and chose the file `/data/results/GSE20870/peaks/igv_session.xml`.
+* You may need to adjust the panel sizes. 
 
 
 ![](img/igv.png)
 
 
+# Export appliance (VBox VM)
 
+The virtual machine created with VirtualBox can be exported and saved as an appliance.
 
+* Close the VM.
+* In VirtualBox, open *File* -> *Export Appliance ...*
 
+* Select the VM `gene-regulation`
+* *Next >*
 
+* Save as: gene-regulation-[YYMMDD].ova
+* Format: OVF 1.0
+*	Write Manifest File: check
+* *Next >*
 
+* Appliance Settings
 
+    * Name:           gene-regulation-[YYMMDD]	
+    *	Product:		    Regulatory Genomics Pipeline
+    *	Product-URL:	  -
+    *	Vendor:		      Claire Rioualen, Jacques van Helden
+    *	Version:		    YYYY-MM-DD
+    *	Description:	  Regulatory Genomics Pipeline using Snakemake, installed on an Ubuntu 14.04 Virtual Machine. 
+    *	License:		    Free of use for academic users, non-commercial and non-military usage. 
+  
+* *Export*
 
-
-
-
-# what to do with this ? 
-
-
-## Connection to VM through the host machine. ---> what to do here
-
-**In the VM terminal: **
-```
-sudo apt-get install --quiet --assume-yes ssh ## install ssh
-ifconfig ## get the IP
-```
-**In the host's terminal:**
-```
-ssh gene-regulation@192.168.56.101 ## access the VM by ssh using its IP address
-```
-**Note:** If you're running or have been running several virtual machines, you might encounter problems with the host's known keys
-when trying to connect to your VM via `ssh`, such as: 
-```
-WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!
-Add correct host key in $HOME/.ssh/known_hosts to get rid of this message.
-Offending ECDSA key in $HOME/.ssh/known_hosts:16
-  remove with: ssh-keygen -f "$HOME/.ssh/known_hosts" -R 192.168.56.101
-ECDSA host key for 192.168.56.101 has changed and you have requested strict checking.
-```
-In such case, just proceed with the recommended command, which will remove previous connection parameters for the IP address:
-```
-ssh-keygen -f "$HOME/.ssh/known_hosts" -R 192.168.56.101
-```
-Once you're connected to the VM via `ssh`, you can upload your ssh parameters with:
-```
-rsync -ruptvl gene-regulation@192.168.56.101:.ssh .
-ssh-agent > ~/agent
-source ~/agent
-ssh-add
-```
-
-
-## VirtualBox connection errors
-
-### When starting VirtualBox
-
-```
-Kernel driver not installed (rc=-1908)
-
-The VirtualBox Linux kernel driver (vboxdrv) is either not loaded or there is a permission problem with /dev/vboxdrv. Please reinstall the kernel module by executing
-
-'/etc/init.d/vboxdrv setup'
-
-as root. If it is available in your distribution, you should install the DKMS package first. This package keeps track of Linux kernel changes and recompiles the vboxdrv kernel module if necessary.
-
-```
-
-Proposed solution: type command in host terminal and then restart VBox. 
-```
-sudo /etc/init.d/vboxdrv setup
-```
-
-
-
-
-#
-#
+The appliance saved can be re-imported later on, on another computer if needed. 
