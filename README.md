@@ -47,9 +47,8 @@ to manage and customize the workflow.
 
 Here, we will show how to execute the [ChIP-seq workflow](https://github.com/rioualen/gene-regulation/blob/master/scripts/snakefiles/workflows/factor_workflow.py) `factor_workflow.py`.
 
-In the [example directory](https://github.com/rioualen/gene-regulation/blob/master/examples) you will find several case studies. We will use the `GSE20870` yeast study. It comes with three tab-delimited files: 
+In the [example directory](https://github.com/rioualen/gene-regulation/blob/master/examples) you will find several case studies. We will use the `GSE20870` yeast study. It comes with two tab-delimited files: 
 
-* `merge.tab` contains the information for merging lanes;
 * `samples.tab` contains a description of each samples;
 * `design.tab` contains the samples to be compared. 
 
@@ -110,7 +109,7 @@ snakemake -s scripts/snakefiles/workflows/factor_workflow.py
 
 The workflow generates a flowchart of the analysis:
 
-![alt text][factor]
+![alt text](doc/install_protocols/img/rule.png)
 
 
 # Purpose of this repository
@@ -131,38 +130,47 @@ different bioinformaticians involved in ChIP-seq and RNA-seq projects.
 
 # Pre-requisites
 
-In order to run the workflow as shown above, you should have the following programs installed:
+This repository contains a makefile to install all the tools and dependencies. 
+
+```
+make -f scripts/makefiles/install_tools_and_libs.mk all
+source ~/bin/ngs_bashrc
+```
+
+It includes:
 
 * R 3+
 * Python 3.3+
-* Snakemake 3.3+
-
+* Snakemake 3.4+
 * [SRA Toolkit](http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software)
 * [Sickle](https://github.com/najoshi/sickle)
+* BWA
+* Bowtie
 * [Bowtie 2](http://bowtie-bio.sourceforge.net/)
 * [SAMtools 1.3+](http://samtools.sourceforge.net/)
 * [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 * [bedtools](http://bedtools.readthedocs.org/)
 * [HOMER](http://homer.salk.edu/homer/index.html)
+* MACS 14
 * [MACS2](https://github.com/taoliu/MACS/)
 * [SWEMBL](http://www.ebi.ac.uk/~swilder/SWEMBL/)
-* [RSAT](http://rsat.eu/)
 
 
-
-See `doc/install_protocols/install_snakemake_workflows.Rmd` for a detailed manual on how to install programs and dependencies.
-A makefile will soon be available to perform the installation of dependencies.
+You can also check out this [detailed manual](`doc/install_protocols/Manual_installation_of_tools.Rmd`) on how to install programs and dependencies.
 
 # Documentation
 
-More documentation can be found in the `doc` directory. (under construction)
+More documentation can be found in the `doc` directory.
 
 It includes: 
 
-* Instructions for the installation of dependencies (to be refhreshed)
+* A tutorial to discover Snakemake
+* Instructions for the installation of dependencies (to be refreshed)
 * RSAT install guide (to be refreshed)
 * Instructions for building a virtual machine on the IFB cloud or under VirtualBox
-* Some wiki material
+
+
+Some general information about NGS can be found in the **Wiki** section. 
 
 
 
@@ -174,5 +182,3 @@ It includes:
 # References 
 
 1. Köster, Johannes and Rahmann, Sven. "Snakemake - A scalable bioinformatics workflow engine". Bioinformatics 2012.
-
-[factor]: https://github.com/rioualen/gene-regulation/blob/master/examples/chip-seq_factor.png
