@@ -64,6 +64,7 @@ Here, we analyse raw samples (\*.sra) located in the `/data` directory:
             SRR051930.sra
 ```
 Raw data is downloadable from the GEO platform. The automatic downloading is soon to be integrated in the workflow. 
+You can also check out [this section](https://github.com/rioualen/gene-regulation/blob/master/doc/install_protocols/Gene-regulation_complete_protocol.Rmd#download-source-data) of the full tutorial of the gene-regulation repository. 
 
 The reference genome will be automatically downloaded in the `/data/genome` directory:
 
