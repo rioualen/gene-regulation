@@ -130,10 +130,7 @@ rule bam_sorted:
     run:
         R("""
         library(Rsamtools)
-        library(tools)
-
         sortBam("{input}", "{output}")
-        file.rename("{output}.bam", file_path_sans_ext("{output}.bam"))
         """)
 ```
 
@@ -173,10 +170,7 @@ rule bam_sorted:
     run:
         R("""
         library(Rsamtools)
-        library(tools)
-
         sortBam("{input}", "{output}")
-        file.rename("{output}.bam", file_path_sans_ext("{output}.bam"))
         """)
 ```
 
