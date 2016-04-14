@@ -28,7 +28,9 @@ Generation Sequencing data related to gene regulation: ChIP-seq,
 RNA-seq, and related technologies. 
 
 We have chosen to use the [Snakemake workflow management system](https://bitbucket.org/snakemake/snakemake/wiki/Home)[1] 
-in order to build reproducible and flexible NGS analysis pielines.
+in order to build reproducible and flexible NGS analysis pipelines.
+
+A full tutorial can be found in the doc section, including the creation of a virtual machine, the installation of the tools and the execution of the workflows: `doc/install_protocols/Gene-regulation_complete_protocol.Rmd`.
 
 # Snakemake workflows
 
