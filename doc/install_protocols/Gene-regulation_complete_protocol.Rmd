@@ -454,3 +454,11 @@ The virtual machine created with VirtualBox can be exported and saved as an appl
 * *Export*
 
 The appliance saved can be re-imported later on, on another computer if needed. 
+
+# Import appliance (VBox VM)
+
+TODO
+
+Be careful with renaming ova files...
+
+Todo test export/import on different vbox versions (4, 5)
