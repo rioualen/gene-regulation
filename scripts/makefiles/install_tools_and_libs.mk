@@ -64,7 +64,6 @@ PUB_KEY=51716619E084DAB9 F7B8CEA6056E8E56
 BEDTOOLS_VER=2.24.0
 BOWTIE1_VER=1.1.1
 BOWTIE2_VER=2.2.6
-#BWA_VER=0.7.10
 FASTQC_VER=0.11.5
 IGV_VER=2.3.59
 IGVTOOLS_VER=2.3.57
@@ -94,7 +93,6 @@ BIN_DIR=$(HOME)/bin
 SOURCE_DIR=$(HOME)/app_sources
 
 NGS_BASHRC=$(BIN_DIR)/ngs_bashrc
-#PATH_NEW=$(PATH)
 
 ## Create the bin & source directories
 create_bin:
@@ -168,7 +166,7 @@ Rstudio:
 	rm -f rstudio-$(RSTUDIO_VER)-amd64.deb
 
 python: 
-	sudo apt-get -y install python-pip python-dev									
+	sudo apt-get -y install python-pip python-dev
 	sudo apt-get -y install python3-pip python3.4-dev
 	sudo pip3 install "rpy2<$(RPY2_VER)"
 	sudo pip3 install numpy
@@ -199,7 +197,6 @@ samtools:
 	cd samtools-$(SAMTOOLS_VER); \
 	make ;\
 	sudo make install;\
-#	rm -rf samtools*
 
 bedtools:
 	cd $(SOURCE_DIR);\
@@ -208,14 +205,12 @@ bedtools:
 	cd bedtools2; \
 	make; \
 	sudo make install; \
-#	rm -rf bedtools*
 
 sratoolkit:
 	cd $(SOURCE_DIR); \
 	wget -nc http://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/$(SRATOOLKIT_VER)/sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz; \
 	tar xzf sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz; \
 	cp `find sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin -maxdepth 1 -executable -type l` $(BIN_DIR)
-#	cp sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin/* $(BIN_DIR)
 
 # ----------------------------------------------------------------
 # Quality assessment & trimming
@@ -245,22 +240,15 @@ bowtie:
 	wget --no-clobber http://downloads.sourceforge.net/project/bowtie-bio/bowtie/$(BOWTIE1_VER)/bowtie-$(BOWTIE1_VER)-linux-x86_64.zip;\
 	unzip bowtie-$(BOWTIE1_VER)-linux-x86_64.zip;\
 	cp `find bowtie-$(BOWTIE1_VER)/ -maxdepth 1 -executable -type f` $(BIN_DIR)
-#	echo 'export PATH='$(PATH):$(BIN_DIR)/bowtie-$(BOWTIE1_VER) >> $(NGS_BASHRC)
-#	PATH_NEW=$(PATH_NEW):$(BIN_DIR)/bowtie-$(BOWTIE1_VER);\
 
 bowtie2:
 	cd $(SOURCE_DIR); \
 	wget --no-clobber http://downloads.sourceforge.net/project/bowtie-bio/bowtie2/$(BOWTIE2_VER)/bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
 	unzip bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
 	cp `find bowtie2-$(BOWTIE2_VER)/ -maxdepth 1 -executable -type f` $(BIN_DIR)
-#	echo 'export PATH='$(PATH):$(BIN_DIR)/bowtie2-$(BOWTIE2_VER) >> $(NGS_BASHRC)
-#	PATH_NEW=$(PATH_NEW):$(BIN_DIR)/bowtie2-$(BOWTIE2_VER);\
-
 bwa:
 	sudo apt-get -y install bwa
 #	wget -nc https://sourceforge.net/projects/bio-bwa/files/bwa-$(BWA_VER).tar.bz2; \
-
-
 
 
 # ----------------------------------------------------------------
@@ -296,20 +284,16 @@ spp:
 homer:
 	mkdir $(SOURCE_DIR)/homer; \
 	cd $(SOURCE_DIR)/homer;\
-#	cd $(SOURCE_DIR);\
 	wget "http://homer.salk.edu/homer/configureHomer.pl"; \
-#	mkdir $(BIN_DIR)/HOMER; \
-#	mv configureHomer.pl $(BIN_DIR)/HOMER; \
-#	cd $(BIN_DIR)/HOMER; \
 	perl configureHomer.pl -install homer; \
 	cp `find $(SOURCE_DIR)/homer/bin -maxdepth 1 -executable -type f` $(BIN_DIR)
-#	echo 'export PATH='$(PATH):$(BIN_DIR)/HOMER/bin >> $(NGS_BASHRC)
-#	PATH_NEW=$(PATH_NEW):$(BIN_DIR)/HOMER/bin
+
 
 ngs_tools: samtools bedtools sratoolkit \
 	fastqc sickle \
 	bowtie bowtie2 bwa \
 	macs1 macs2 spp homer
+
 
 # ================================================================
 # Visualization
@@ -328,14 +312,12 @@ igv:
 	cd $(SOURCE_DIR); \
 	wget --no-clobber http://data.broadinstitute.org/igv/projects/downloads/IGV_$(IGV_VER).zip; \
 	unzip IGV_$(IGV_VER).zip;\
-#	cp $(SOURCE_DIR)/IGV_$(IGV_VER)/igv.sh $(BIN_DIR)
 	ln -s -f $(SOURCE_DIR)/IGV_$(IGV_VER)/igv.sh $(BIN_DIR)/igv
 
 igv_tools:
 	cd $(SOURCE_DIR); \
 	wget --no-clobber http://data.broadinstitute.org/igv/projects/downloads/igvtools_$(IGVTOOLS_VER).zip ;\
 	unzip igvtools_$(IGVTOOLS_VER).zip;\
-#	cp $(SOURCE_DIR)/IGVTools/igvtools $(BIN_DIR)
 	ln -s -f $(SOURCE_DIR)/IGVTools/igvtools $(BIN_DIR)/igvtools
 
 desktop_and_x2go:
@@ -346,10 +328,6 @@ desktop_and_x2go:
 	sudo apt-get install -y ambiance-colors radiance-colors;
 
 visualization: java9 igv igv_tools desktop_and_x2go
-
-
-#edit_path:
-#	echo 'export PATH='$(PATH_NEW) >> $(NGS_BASHRC)
 
 
 # ================================================================
