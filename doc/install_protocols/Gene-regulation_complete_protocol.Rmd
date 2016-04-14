@@ -18,32 +18,32 @@ output:
     toc_depth: 5
 ---
 
-  * [Creating a virtual machine (VM)](#creating-a-virtual-machine-vm)
-    * [Creating a VM on the IFB cloud](#creating-a-vm-on-the-ifb-cloud)
-      * [Requirements](#requirements)
-      * [Virtual disk creation](#virtual-disk-creation)
-      * [Creation of an instance](#creation-of-an-instance)
-      * [Connection to the device](#connection-to-the-device)
-    * [Creating a VM under VirtualBox software](#creating-a-vm-under-virtualbox-software)
-      * [Requirements](#requirements-1)
-      * [Creation of the virtual machine](#creation-of-the-virtual-machine)
-      * [Virtual Box configuration](#virtual-box-configuration)
-      * [VM configuration](#vm-configuration)
-      * [Operating system installation](#operating-system-installation)
-  * [Installing programs and dependencies](#installing-programs-and-dependencies)
-    * [Clone the gene-regulation repository](#clone-the-gene-regulation-repository)
-    * [Run makefile to install all required dependencies](#run-makefile-to-install-all-required-dependencies)
-  * [Executing snakemake workflows](#executing-snakemake-workflows)
-    * [Download source data](#download-source-data)
-      * [Virtual Box](#virtual-box)
-      * [IFB cloud](#ifb-cloud)
-    * [Execute workflow](#execute-workflow)
-  * [Visualizing results](#visualizing-results)
-    * [Installing and running the X2Go client (IFB cloud)](#installing-and-running-the-x2go-client-ifb-cloud)
-    * [Visualize results](#visualize-results)
-      * [FastQC](#fastqc)
-      * [IGV](#igv)
-  * [Export appliance (VBox VM)](#export-appliance-vbox-vm)
+  * [1. Creating a virtual machine (VM)](#creating-a-virtual-machine-vm)
+    * [1.1 Creating a VM on the IFB cloud](#creating-a-vm-on-the-ifb-cloud)
+        * [Requirements](#requirements)
+        * [Virtual disk creation](#virtual-disk-creation)
+        * [Creation of an instance](#creation-of-an-instance)
+        * [Connection to the device](#connection-to-the-device)
+    * [1.2 Creating a VM under VirtualBox software](#creating-a-vm-under-virtualbox-software)
+        * [Requirements](#requirements-1)
+        * [Virtual Box configuration](#virtual-box-configuration)
+        * [Creation of the virtual machine](#creation-of-the-virtual-machine)
+        * [VM configuration](#vm-configuration)
+        * [Operating system installation](#operating-system-installation)
+  * [2. Installing programs and dependencies](#installing-programs-and-dependencies)
+    * [2.1 Clone the gene-regulation repository](#clone-the-gene-regulation-repository)
+    * [2.2 Run makefile to install all required dependencies](#run-makefile-to-install-all-required-dependencies)
+  * [3. Executing snakemake workflows](#executing-snakemake-workflows)
+    * [3.1 Download source data](#download-source-data)
+        * [Virtual Box VM](#virtual-box)
+        * [IFB cloud VM](#ifb-cloud)
+    * [3.2 Execute workflow](#execute-workflow)
+  * [4. Visualizing results](#visualizing-results)
+    * [4.1 Installing and running the X2Go client (IFB VM)](#installing-and-running-the-x2go-client-ifb-cloud)
+    * [4.2 Visualize results](#visualize-results)
+        * [FastQC](#fastqc)
+        * [IGV](#igv)
+  * [5. Export appliance (VBox VM)](#export-appliance-vbox-vm)
 
 
 > Note: this protocol was developed on a Unix computer, with the OS LMDE. The virtual machines are developed with the Ubuntu 14.04 OS. 
@@ -121,7 +121,29 @@ wget http://releases.ubuntu.com/14.04/ubuntu-14.04.3-desktop-amd64.iso
 ```
 ------------------------------------------
 
+### Virtual Box configuration
 
+Before configuring the virtual machine, we need to tell VirtualBox how it will enable your local virtual machines to interact with their host (the operating system of the machine on which the VM is running).
+
+1. Open *VirtualBox > File > Preferences...*
+
+2. Open the tab *Network* > *Host-only Networks*
+     - click on the "+" icon
+     - this creates a network vboxnet0. Select this network, click on the screw driver icon (*edit host-only network*), and set the following options:
+
+      - *Adapter* tab
+          - IPv4 Address: 192.168.56.1
+          - IPv4 Network Mask: 255.255.255.0
+          - IPv6 Adress: blank
+          - IPv6 Network Mask Length: 0
+
+      - *DHCP Server* tab
+          - Check *Enable Server*
+          - *Server Address:* 192.168.56.100
+          - *Server Mask:* 255.255.255.0
+          - *Lower Address Bound:* 192.168.56.101
+          - *Upper Address Bound:* 192.168.56.254
+          
 ### Creation of the virtual machine
 
 1. Open VirtualBox
@@ -175,29 +197,6 @@ wget http://releases.ubuntu.com/14.04/ubuntu-14.04.3-desktop-amd64.iso
 
 At this stage, the VM has been created and needs to be configured before installing the operating system. 
 
-
-### Virtual Box configuration
-
-Before configuring the virtual machine, we need to tell VirtualBox how it will enable your local virtual machines to interact with their host (the operating system of the machine on which the VM is running).
-
-1. Open *VirtualBox > File > Preferences...*
-
-2. Open the tab *Network* > *Host-only Networks*
-     - click on the "+" icon
-     - this creates a network vboxnet0. Select this network, click on the screw driver icon (*edit host-only network*), and set the following options:
-
-      - *Adapter* tab
-          - IPv4 Address: 192.168.56.1
-          - IPv4 Network Mask: 255.255.255.0
-          - IPv6 Adress: blank
-          - IPv6 Network Mask Length: 0
-
-      - *DHCP Server* tab
-          - Check *Enable Server*
-          - *Server Address:* 192.168.56.100
-          - *Server Mask:* 255.255.255.0
-          - *Lower Address Bound:* 192.168.56.101
-          - *Upper Address Bound:* 192.168.56.254
 
 ### VM configuration
 
