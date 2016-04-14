@@ -3,7 +3,6 @@ title: "Getting your hands on Snakemake"
 author: "Claire Rioualen"
 date: "April 13, 2016"
 output: ioslides_presentation
-    fig_caption: yes
 ---
 
 ## Introduction
