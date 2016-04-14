@@ -216,7 +216,7 @@ rule sam_to_bam:
     log: "{file}.log"
     benchmark: "{file}.json"
     shell: "(samtools view -bS --threads {params.threads} {input} > {output}) > {log}"
-    ```
+```
     
 ```{python, eval=FALSE}
 # file: bam_sorted.rules
