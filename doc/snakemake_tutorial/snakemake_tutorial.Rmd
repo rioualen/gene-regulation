@@ -242,7 +242,7 @@ snakemake -s workflow6/workflow6.py --dag | dot -Tpng -o d.png
 snakemake -s workflow6/workflow6.py --rulegraph | dot -Tpng -o r.png
 ```
 
-![](img/dag.png) ![](img/rulegraph.png) 
+![Direct Acyclic Graph (DAG)](img/dag.png) ![Rulegraph](img/rulegraph.png) 
 
 ## More on snakemake...
 
