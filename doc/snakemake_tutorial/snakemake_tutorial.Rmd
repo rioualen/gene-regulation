@@ -16,7 +16,8 @@ output: ioslides_presentation
 ### Installation
 
 ```{shell}
-pip3 install snakemake
+sudo apt-get install python3-pip
+sudo pip3 install snakemake
 ```
 
 ### Download & exercise
