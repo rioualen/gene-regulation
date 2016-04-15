@@ -8,14 +8,8 @@
 
 .snakemake/
 Rsession/
-data/
-genomes/
-results/
-logs/
-
 .Rproj.user
 #*
 \#*
 .\#*
-doc/wiki-fg/howto_edit_wiki-fg.html
 .Rhistory
