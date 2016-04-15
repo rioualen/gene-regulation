@@ -138,7 +138,7 @@ add_packages:
 	sudo apt-get update
 	sudo apt-get -y install ssh rsync git graphviz gedit-plugins
 	sudo apt-get -y install gedit-plugins						
-	sudo apt-get -y install zlibc zlib1g-dev									# Required by sickle, bamtools...
+	sudo apt-get -y install zlibc zlib1g-dev									# Required by sickle, bamtools, samtools...
 	sudo apt-get -y install build-essential										# Includes gcc compiler
 	sudo apt-get -y install libncurses5-dev libncursesw5-dev					# Required at least by samtools
 	sudo apt-get -y install libboost-dev										# might me required for spp, to be checked
