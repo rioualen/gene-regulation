@@ -6,7 +6,7 @@ output: ioslides_presentation
 ---
 
 
-## Introduction {.smaller}
+## Introduction 
 
 ### Concepts
 
@@ -25,7 +25,7 @@ sudo pip3 install snakemake
 
 This tutorial was developed assuming a unix-like architecture (Ubuntu 14.04).
 
-## Downloads for practical exercises {.smaller}
+## Downloads for practical exercises 
 
 ### Ubuntu libraries
 
@@ -47,7 +47,7 @@ git clone https://github.com/rioualen/gene-regulation.git
 cd gene-regulation/doc/snakemake_tutorial
 ```
 
-## Downloads for practical exercises {.smaller}
+## Downloads for practical exercises 
 
 ### Samtools
 
@@ -67,7 +67,7 @@ source("http://bioconductor.org/biocLite.R")
 biocLite("Rsamtools")
 ```
 
-## Workflow 1: Rules and targets {.smaller}
+## Workflow 1: Rules and targets 
 
 - Only the first **rule** is executed by default
 - Rule `all` defines the **target**
@@ -90,7 +90,7 @@ snakemake -s workflow1/workflow1.py
 ```
 
 
-## Workflow 2: Introducing wildcards {.smaller}
+## Workflow 2: Introducing wildcards 
 
 - **Wildcards** can replace variables
 - Workflow applies to list of files or samples
@@ -114,7 +114,7 @@ In the terminal:
 snakemake -s workflow2/workflow2.py
 ```
 
-## Workflow 3: Keywords {.smaller}
+## Workflow 3: Keywords 
 
 - Rules can use a variety of **keywords**
 - An exhaustive list can be found [here](https://bitbucket.org/snakemake/snakemake/wiki/Documentation#markdown-header-grammar)
@@ -140,7 +140,7 @@ In the terminal:
 snakemake -s workflow3/workflow3.py
 ```
 
-## Workflow 4: Combining rules {.smaller}
+## Workflow 4: Combining rules 
 
 - Dependencies are handled implicitly, by matching filenames
 - Commands can be executed by keywords `run` or `shell`
@@ -178,7 +178,7 @@ In the terminal:
 snakemake -s workflow4/workflow4.py
 ```
 
-## Workflow 5: Configuration file {.smaller}
+## Workflow 5: Configuration file 
 
 - Can be in `json` or in `yml` format
 - Acessible through the global variable **config**
@@ -226,7 +226,7 @@ In the terminal:
 snakemake -s workflow5/workflow5.py
 ```
 
-## Workflow 6: Separated files {.smaller}
+## Workflow 6: Separated files 
 
 - The keyword `include` is used to import rules
 
@@ -274,7 +274,7 @@ In the terminal:
 snakemake -s workflow6/workflow6.py
 ```
 
-## Bonus: generating flowcharts {.smaller}
+## Bonus: generating flowcharts 
 
 ```{shell}
 snakemake -s workflow6/workflow6.py --dag | dot -Tpng -o d.png
@@ -283,7 +283,7 @@ snakemake -s workflow6/workflow6.py --rulegraph | dot -Tpng -o r.png
 
 ![Direct Acyclic Graph (DAG)](img/dag.png) ![Rulegraph](img/rulegraph.png) 
 
-## More on snakemake... {.smaller}
+## More on snakemake... 
 
 ### Documentation
 
