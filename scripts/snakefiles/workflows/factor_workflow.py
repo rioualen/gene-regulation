@@ -43,9 +43,6 @@ import pandas as pd
 ## Config
 configfile: "examples/GSE20870/GSE20870.yml"
 
-## Starting point
-print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-
 # Define verbosity
 if not ("verbosity" in config.keys()):
     config["verbosity"] = 0
@@ -57,6 +54,7 @@ verbosity = int(config["verbosity"])
 
 if not ("dir" in config.keys()) & ("fg_lib" in config["dir"].keys()) :
     sys.exit("The parameter config['dir']['fg_lib'] should be specified in the config file.")
+
 FG_LIB = os.path.abspath(config["dir"]["fg_lib"])
 RULES = os.path.join(FG_LIB, "scripts/snakefiles/rules")
 PYTHON = os.path.join(FG_LIB, "scripts/python_lib")
@@ -154,10 +152,9 @@ IMPORT = expand(SAMPLE_DIR + "{samples}/{samples}.fastq", samples=SAMPLE_IDS)
 # Genome
 GENOME = config["genome"]["version"]
 GENOME_DIR = config["dir"]["genomes"] + config["genome"]["version"]
-GENOME_DIR = config["dir"]["genomes"] + config["genome"]["version"]
 
-GENOME_FASTA = expand(config["dir"]["genomes"] + config["genome"]["version"] + "/" + config["genome"]["version"] + ".fa")
-GENOME_ANNOTATIONS = expand(config["dir"]["genomes"] + config["genome"]["version"] + "/" + config["genome"]["version"] + ".gff3")
+GENOME_FASTA = expand(GENOME_DIR + "/" + GENOME + ".fa")
+GENOME_ANNOTATIONS = expand(GENOME_DIR + "/" + GENOME + ".gff3")
 
 ### Graphics & reports
 GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
@@ -188,10 +185,10 @@ QC = RAW_QC + TRIM_QC
 #----------------------------------------------------------------#
 
 
-ALIGNER=["bwa"]
+ALIGNER=["bowtie2"]
 ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER, trimmer=TRIMMER)
 
-INDEX = expand(config["dir"]["genomes"] + config["genome"]["version"] + "/{aligner}/" + config["genome"]["version"] + ".fa", aligner=ALIGNER)
+INDEX = expand(GENOME_DIR + "/{aligner}/" + GENOME + ".fa", aligner=ALIGNER)
 
 MAPPING = expand("{alignment}.sam", alignment=ALIGNMENT)
 
