@@ -80,7 +80,7 @@
     fdr: "0.01"                                                                 # optional (def: 0.001)
 
   spp: 
-    fdr: "0.01"                                                                # optional (def: 0.01)
+    fdr: "0.01"                                                                 # optional (def: 0.01)
 
   bPeaks: 
     IPcoeff: "2"                                                                # optional (def: 2)
@@ -90,10 +90,10 @@
     windowSize: "50"                                                            # optional (def: 150)
     windowOverlap: "40"                                                         # optional (def: 50)
 
-#  peak-motifs: 
-#    tasks: "all"                                                                                                   # optional (def: "all", incl. purge,seqlen,composition,ref_motifs,disco,meme,chipmunk,merge_words,motifs_vs_ref,motifs_vs_db,timelog,synthesis) (what about collect_motifs,motifs_vs_motifs,archive,small_summary,scan ?...)
-#    max_seq_len: "0"                                                                                               # default ? curr not used
-#    motif_db: "Yeastract tf $RSAT/public_html/motif_databases/Yeastract/yeastract_20150629.tf "                     # required: name format db_file
-#    disco: "oligos,positions,dyads"                                                                                # default ? oligos|dyads|positions|local_words|merged_words|meme|chipmunk
+  peak-motifs: 
+    tasks: "all"                                                                                                   # optional (def: "all", incl. purge,seqlen,composition,ref_motifs,disco,meme,chipmunk,merge_words,motifs_vs_ref,motifs_vs_db,timelog,synthesis) (what about collect_motifs,motifs_vs_motifs,archive,small_summary,scan ?...)
+    max_seq_len: "0"                                                                                               # default ? curr not used
+    motif_db: "Yeastract tf $RSAT/public_html/motif_databases/Yeastract/yeastract_20150629.tf "                     # required: name format db_file
+    disco: "oligos,positions,dyads"                                                                                # default ? oligos|dyads|positions|local_words|merged_words|meme|chipmunk
 
 
