@@ -43,6 +43,8 @@ import pandas as pd
 ## Config
 configfile: "examples/GSE20870/GSE20870.yml"
 
+## Starting point
+print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
 # Define verbosity
 if not ("verbosity" in config.keys()):
