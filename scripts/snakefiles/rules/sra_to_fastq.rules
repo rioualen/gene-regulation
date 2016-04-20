@@ -29,25 +29,25 @@ do
 	files=({input.datadir}$sam/*)
 	if [ ${{#files[@]}} -gt 1 ]
 	then
-		echo " \n \nCase 2+ files : ${{files[@]}}"
+		echo "Case 2+ files : ${{files[@]}}"
 		for f in ${{files[@]}}
 		do
 			base=$(basename $f .sra)
 			echo "$base"
-			echo " \tConverting $base.sra to $base.fastq..."
+			echo "Converting $base.sra to $base.fastq..."
 			fastq-dump --outdir {params.results}$sam/ {input.datadir}$sam/$base.sra
 		done
-		echo " \tMerging ${{#files[@]}} together as $sam.fastq."
-		echo " \tCmd: cat ${{files[@]}} > {input.datadir}$sam.fastq"
+		echo "Merging ${{#files[@]}} together as $sam.fastq."
+		echo "Cmd: cat ${{files[@]}} > {input.datadir}$sam.fastq"
 		files=({params.results}$sam/*)
 		cat ${{files[@]}} > {params.results}$sam/$sam.fastq
 		rm ${{files[@]}}
 	else
-		echo " \n \nCase 1 file : ${{files[@]}}"
+		echo "Case 1 file : ${{files[@]}}"
 		base=$(basename ${{files[0]}} .sra)
-		echo " \tConverting $base.sra to $base.fastq..."
+		echo "Converting $base.sra to $base.fastq..."
 		fastq-dump --outdir {params.results}$sam {input.datadir}$sam/$base.sra
-		echo " \tMoving {params.results}$sam/$base.fastq to {params.results}$sam/$sam.fastq"
+		echo "Moving {params.results}$sam/$base.fastq to {params.results}$sam/$sam.fastq"
 		mv  {params.results}$sam/$base.fastq {params.results}$sam/$sam.fastq
 	fi
 done
