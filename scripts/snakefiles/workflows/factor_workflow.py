@@ -153,6 +153,9 @@ IMPORT = expand(SAMPLE_DIR + "{samples}/{samples}.fastq", samples=SAMPLE_IDS)
 GENOME = config["genome"]["version"]
 GENOME_DIR = config["dir"]["genomes"] + config["genome"]["version"]
 
+if not os.path.exists(GENOME_DIR):
+    os.makedirs(GENOME_DIR)
+
 GENOME_FASTA = expand(GENOME_DIR + "/" + GENOME + ".fa")
 GENOME_ANNOTATIONS = expand(GENOME_DIR + "/" + GENOME + ".gff3")
 
