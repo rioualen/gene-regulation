@@ -25,13 +25,14 @@
     snakefile: "scripts/snakefiles/workflows/factor_workflow.py"                # required for flowcharts generation; maybe this should be revised
 
   dir:
-    reads_source: "/data/GSE20870/"                                             # required: dir containing raw data organized in sub directories named after the samples
+    reads_source: "/data/source/GSE20870/"                                             # required: dir containing raw data organized in sub directories named after the samples
     genomes: "/data/genomes/"                                                   # required: where to store genomes
     results: "/data/results/GSE20870/"                                          # required: dir for all result files that are produced by the pipeline
     fg_lib: "."                                                                 # required: location of the snakemake library
 
     samples: "/data/results/GSE20870/samples/"                                  # optional: will hold sample treatment (trimming, alignment, QC...).    If not mentioned, will be config["dir"]["results"]
     peaks: "/data/results/GSE20870/peaks/"                                      # optional: will hold comparison data (peak-calling, motifs search...). If not mentioned, will be config["dir"]["results"]
+    logs: "/data/results/GSE20870/logs/"                                        # optional: will hold all log files. If not mentioned, will be config["dir"]["results"]
     reports: "/data/results/GSE20870/"                                          # optional: will hold reports and graphics.                             If not mentioned, will be config["dir"]["results"]
 
   reports: 
