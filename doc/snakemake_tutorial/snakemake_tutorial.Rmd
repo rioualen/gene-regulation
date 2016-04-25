@@ -2,7 +2,7 @@
 title: "Getting your hands on Snakemake"
 author: "Claire Rioualen"
 date: "April 13, 2016"
-output: ioslides_presentation
+output: slidy_presentation
 ---
 
 
@@ -273,6 +273,44 @@ In the terminal:
 ```{shell}
 snakemake -s workflow6/workflow6.py
 ```
+
+## Workflow 7: The keyword Ruleorder todo
+
+<!--
+- ...
+
+```{python, eval=FALSE}
+# file: workflow4.py
+from snakemake.utils import R
+
+SAMPLES = ["GSM521934", "GSM521935"]
+
+rule all:
+    input: expand("{sample}_sorted.bam", sample = SAMPLES)
+
+rule sam_to_bam:
+    input: "{file}.sam"
+    output: "{file}.bam"
+    params: threads = 2
+    log: "{file}.log"
+    benchmark: "{file}.json"
+    shell: "(samtools view -bS --threads {params.threads} {input} > {output}) > {log}"
+
+rule bam_sorted:
+    input: "{file}.bam"
+    output: "{file}_sorted.bam"
+    run:
+        R("""
+        library(Rsamtools)
+        sortBam("{input}", "{output}")
+        """)
+```
+-->
+
+## Workflow 8: Combining wildcards with zip
+
+## Workflow 9: Combining wildcards selectively
+
 
 ## Bonus: generating flowcharts 
 
