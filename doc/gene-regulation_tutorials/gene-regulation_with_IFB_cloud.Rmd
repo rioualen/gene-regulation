@@ -1,5 +1,5 @@
 ---
-title: 'Gene-regulation: running ChIP-seq workflows on virtual machines'
+title: 'Running the gene-regulation pipelines on a virtual machine on the IFB cloud'
 author: "Claire Rioualen"
 date: "April 11, 2016"
 output:
@@ -18,7 +18,10 @@ output:
     toc_depth: 5
 ---
 
-> Note: this protocol was developed on a Unix computer, with the OS LMDE. The virtual machines are developed with the Ubuntu 14.04 OS. 
+> Notes: 
+> This protocol was developed on a Unix computer, with the OS LMDE. 
+> The virtual machines are developed with the Ubuntu 14.04 OS. 
+> The protocol is based on gene-regulation v1.0
 
 # Creating a virtual machine (VM)
 
@@ -74,17 +77,14 @@ ssh -A -p 22 root@192.54.201.124
 
 Once in the virtual machine, you can install the required programs. 
 
-## Clone the `gene-regulation` repository
+## Get the `gene-regulation` repository
 
 ```
-git clone https://github.com/rioualen/gene-regulation.git
-cd gene-regulation
+wget https://github.com/rioualen/gene-regulation/archive/v1.0.tar.gz
+tar zvxf v1.0.tar.gz
 ```
 
-You may need to install `git` beforehand:
-```
-sudo apt-get --yes install git
-```
+
 
 ## Run makefile to install all required dependencies 
 
@@ -103,21 +103,6 @@ source ~/bin/ngs_bashrc
 
 ## Download source data
 
-### Virtual Box
-
-Under VBox, you can enter the following commands:
-```
-sudo mkdir -p /data/GSE20870/GSM521934 /data/GSE20870/GSM521935
-sudo chown -R ubuntu-user:ubuntu-user /data
-```
-```
-cd /data/GSE20870/GSM521934
-wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021358/SRR051929/SRR051929.sra
-cd /data/GSE20870/GSM521935
-wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra
-```
-
-### IFB cloud
 
 On the IFB cloud VM, the vDisk is automatically attached and mounted by default under `/root/mydisk`. 
 Here we create a symlink from our preferred location `/data` to the data directory `/root/mydisk/data`. 
@@ -201,7 +186,7 @@ firefox /data/results/GSE20870/samples/GSM521935/GSM521935_sickle-se-q20_fastqc/
 ```
 
 
-![](../../img/fastqc.png)
+![](../../img/x2go_fastqc.png)
 
 ### IGV
 
@@ -216,41 +201,3 @@ igv
 
 
 ![](../../img/igv.png)
-
-
-# Export appliance (VBox VM)
-
-The virtual machine created with VirtualBox can be exported and saved as an appliance.
-
-* Close the VM.
-* In VirtualBox, open *File* -> *Export Appliance ...*
-
-* Select the VM `gene-regulation`
-* *Next >*
-
-* Save as: gene-regulation-[YYMMDD].ova
-* Format: OVF 1.0
-*	Write Manifest File: check
-* *Next >*
-
-* Appliance Settings
-
-    * Name:           gene-regulation-[YYMMDD]	
-    *	Product:		    Regulatory Genomics Pipeline
-    *	Product-URL:	  -
-    *	Vendor:		      Claire Rioualen, Jacques van Helden
-    *	Version:		    YYYY-MM-DD
-    *	Description:	  Regulatory Genomics Pipeline using Snakemake, installed on an Ubuntu 14.04 Virtual Machine. 
-    *	License:		    Free of use for academic users, non-commercial and non-military usage. 
-  
-* *Export*
-
-The appliance saved can be re-imported later on, on another computer if needed. 
-
-# Import appliance (VBox VM)
-
-TODO
-
-Be careful with renaming ova files...
-
-Todo test export/import on different vbox versions (4, 5)

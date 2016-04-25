@@ -1,38 +1,82 @@
 ---
-title: "Running the gene-regulation pipeline with Docker"
+title: "Running the gene-regulation pipelines with Docker"
 author: "Claire Rioualen"
 date: "April 25, 2016"
-output: html_document
+output:
+  html_document:
+    fig_caption: yes
+    highlight: zenburn
+    number_sections: yes
+    theme: cerulean
+    toc: yes
+    toc_depth: 5
+  pdf_document:
+    fig_caption: yes
+    highlight: zenburn
+    number_sections: yes
+    toc: yes
+    toc_depth: 5
 ---
 
-## Installer docker (et docker io ?)
+> Note: this is a first draft. 
 
-## Télécharger les données sur l'hôte et créer un répertoire pour les résultats
+# Get started with Docker!
 
-sudo mkdir -p /data/GSE20870/GSM521934 /data/GSE20870/GSM521935
+## Create a Docker account
 
-cd /data/GSE20870/GSM521934
+Instructions[here](https://docs.docker.com/linux/step_five/).
+
+## Install Docker on your local host
+
+Instructions for a linux install can be found [here](https://docs.docker.com/linux/), along with mac and windows instructions. 
+
+You can test whether it works properly:
+
+```
+docker run hello-world
+```
+
+<!--
+Run the following command:
+```
+sudo apt-get --yes install docker
+```
+--> 
+
+## Create shared repositories and download source data
+
+You can enter the following commands directly, or chose your own location. 
+
+```
+sudo mkdir -p /data/source/GSE20870/GSM521934 /data/source/GSE20870/GSM521935
+sudo mkdir -p /data/results/GSE20870
+```
+```
+cd /data/source/GSE20870/GSM521934
 wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021358/SRR051929/SRR051929.sra
-cd /data/GSE20870/GSM521935
+cd /data/source/GSE20870/GSM521935
 wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra
-
-mkdir /data/results/GSE20870
-
-## Récupérer et lancer le Docker en partageant les dossiers data et results (-v /path/on/host/:/path/on/docker:)
-
-docker pull rioualen/gene-regulation:0.3
-docker run -v /data/results/GSE20870/:/data/results/GSE20870/ -v /data/GSE20870/:/data/GSE20870/ -it rioualen/gene-regulation:0.3 /bin/bash
-
-## Dans le Docker, lancer le pipeline
-
-source ~/bin/ngs_bashrc
-snakemake -s scripts/snakefiles/workflows/factor_workflow.py
+```
 
 
--> le ngs_bashrc est voué à disparaître
+
+## Fetch the Docker image and run it with shared folders
+
+```
+docker pull rioualen/gene-regulation:1.0
+docker run -v /data/results/GSE20870/:/data/results/GSE20870/ -v /data/GSE20870/:/data/GSE20870/ -it rioualen/gene-regulation:1.0 /bin/bash
+```
+
+You can share as many folders as desired, using this syntax: `-v /path/on/host/:/path/on/docker/`.
 
 
-# JVH
+## Execute the pipeline
+
+snakemake -s scripts/snakefiles/workflows/factor_workflow.py -p
+
+
+<!--
+# JVH / Mac
 
 ## Quick tour
 
@@ -152,3 +196,5 @@ Entry point /bin/bash
 
 
 2. Il faut ajouter le bashrc dans le /etc du docker.
+
+-->

@@ -18,7 +18,10 @@ output:
     toc_depth: 5
 ---
 
-> Note: this protocol was developed on a Unix computer, with the OS LMDE. The virtual machines are developed with the Ubuntu 14.04 OS. 
+> Notes: 
+> This protocol was developed on a Unix computer, with the OS LMDE. 
+> The virtual machines are developed with the Ubuntu 14.04 OS. 
+> The protocol is based on gene-regulation v1.0
 
 # Creating a virtual machine (VM)
 
@@ -216,16 +219,12 @@ Reboot again to see the new display.
 
 Once in the virtual machine, you can install the required programs. 
 
-## Clone the `gene-regulation` repository
+## Get the `gene-regulation` repository
 
 ```
-git clone https://github.com/rioualen/gene-regulation.git
-cd gene-regulation
-```
-
-You may need to install `git` beforehand:
-```
-sudo apt-get --yes install git
+wget https://github.com/rioualen/gene-regulation/archive/v1.0.tar.gz
+tar zvxf v1.0.tar.gz
+cd gene-regulation-1.0
 ```
 
 ## Run makefile to install all required dependencies 
@@ -234,17 +233,15 @@ This may take a while (up to 30mn?) & source the `.bashrc` (it's been updated wi
 
 ```
 make -f scripts/makefiles/install_tools_and_libs.mk all
-source ~/bin/ngs_bashrc
+source ~/.bashrc
 ```
 
 
-# Executing snakemake workflows
+# Executing snakemake workflow example
 
 ## Download source data
 
-### Virtual Box
-
-Under VBox, you can enter the following commands:
+You can enter the following commands:
 ```
 sudo mkdir -p /data/source/GSE20870/GSM521934 /data/source/GSE20870/GSM521935
 sudo chown -R ubuntu-user:ubuntu-user /data
@@ -256,26 +253,10 @@ cd /data/source/GSE20870/GSM521935
 wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra
 ```
 
-### IFB cloud
-
-On the IFB cloud VM, the vDisk is automatically attached and mounted by default under `/root/mydisk`. 
-Here we create a symlink from our preferred location `/data` to the data directory `/root/mydisk/data`. 
-
-```
-mkdir -p /root/mydisk/data/GSE20870/GSM521934 /root/mydisk/data/GSE20870/GSM521935
-cd /root/mydisk/data/GSE20870/GSM521934
-wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021358/SRR051929/SRR051929.sra
-cd /root/mydisk/data/GSE20870/GSM521935
-wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra
-```
-```
-ln -s /root/mydisk/data /data
-```
-
 ## Execute workflow
 
 ```
-cd ~/gene-regulation
+cd ~/gene-regulation-1.0
 snakemake -p -s scripts/snakefiles/workflows/factor_workflow.py
 ```
 
@@ -285,46 +266,7 @@ Congratulations! You just executed this wonderful workflow:
 
 # Visualizing results
 
-## Installing and running the X2Go client (IFB cloud)
-
-
-The Virtual Machine created on the IFB cloud doesn't have a graphical interface, so we're gonna use a distant desktop to visualize the results from the host machine. 
-
-1. Install the x2go client and launch it from your local computer.
-
-```
-sudo apt-get install x2goclient
-x2goclient
-```
-
-<!--2. Copy your ssh key to the authorized keys of the virtual machine. (**à revoir !!**)
-
-```
-cat $HOME/.ssh/id_rsa.pub | ssh root@192.54.201.124 "cat >> .ssh/authorized_keys"
-```
--->
-
-2. Create a new session using the Mate desktop.
-
-![](../../img/x2goclient_session_create.png)
-
-3. The session now appears on the right panel. Just click it to lauch it!
-
-![](../../img/x2go_launch_session.png)
-
-4. You should be now on the virtual desktop! 
-
-![](../../img/mate_term.png)
-
-Note: you may need to change your keyboard settings 
-
-* Go to **System** > **Preferences** > **Keybords**
-* Click on tab **Layouts**
-* Add and/or remove desired keyboards
-
-## Visualize results
-
-### FastQC
+## FastQC
 
 You can visualize the FastQC results using firefox or any other navigator. Fetch the `html` files located in the sample directories.
 
@@ -340,13 +282,12 @@ firefox /data/results/GSE20870/samples/GSM521935/GSM521935_sickle-se-q20_fastqc/
 ```
 
 
-![](../../img/fastqc.png)
+![](../../img/vbox_fastqc.png)
 
-### IGV
+## IGV
 
-You can visualize the peaks by running IGV from the terminal. You may need to source your `ngs_bashrc` file first (in case you're using a distant desktop, or a new terminal). 
+You can visualize the peaks by running IGV from the terminal. 
 ```
-source ~/bin/ngs_bashrc
 igv
 ```
 
@@ -357,7 +298,7 @@ igv
 ![](../../img/igv.png)
 
 
-# Export appliance (VBox VM)
+# Export appliance (todo)
 
 The virtual machine created with VirtualBox can be exported and saved as an appliance.
 
@@ -386,9 +327,7 @@ The virtual machine created with VirtualBox can be exported and saved as an appl
 
 The appliance saved can be re-imported later on, on another computer if needed. 
 
-# Import appliance (VBox VM)
-
-TODO
+# Import appliance (todo)
 
 Be careful with renaming ova files...
 
