@@ -92,7 +92,7 @@ BIN_DIR=$(HOME)/bin
 ## Directory in which the source code will be downloaded and compiled when required
 SOURCE_DIR=$(HOME)/app_sources
 
-NGS_BASHRC=$(BIN_DIR)/ngs_bashrc
+BASHRC=$(HOME)/.bashrc
 
 ## Create the bin & source directories
 create_bin:
@@ -105,16 +105,16 @@ create_bin:
 ## Initialize a bashrc file, which will allow any user to load the
 ## path and configuration at once.
 init_ngs_bashrc:
-	@echo "## NGS bashrc file" > $(NGS_BASHRC)
-	@echo 'alias ls="ls --color"' >> $(NGS_BASHRC)
-	@echo 'alias rm="rm -i"' >> $(NGS_BASHRC)
-	@echo "" >> $(NGS_BASHRC)
-	@echo "export LC_ALL=C" >> $(NGS_BASHRC)
-	@echo "export LANG=C" >> $(NGS_BASHRC)
-	@echo 'export force_color_prompt=yes' >> $(NGS_BASHRC)
-	@echo 'export LC_COLLATE=C' >> $(NGS_BASHRC)
-	@echo "" >> $(NGS_BASHRC)
-	@echo 'export PATH='$(PATH):$(BIN_DIR) >> $(NGS_BASHRC)
+	@echo "## NGS bashrc file" > $(BASHRC)
+	@echo 'alias ls="ls --color"' >> $(BASHRC)
+	@echo 'alias rm="rm -i"' >> $(BASHRC)
+	@echo "" >> $(BASHRC)
+	@echo "export LC_ALL=C" >> $(BASHRC)
+	@echo "export LANG=C" >> $(BASHRC)
+	@echo 'export force_color_prompt=yes' >> $(BASHRC)
+	@echo 'export LC_COLLATE=C' >> $(BASHRC)
+	@echo "" >> $(BASHRC)
+	@echo 'export PATH='$(PATH):$(BIN_DIR) >> $(BASHRC)
 
 init: create_bin init_ngs_bashrc
 
@@ -127,7 +127,7 @@ add_pub_key:
 	for i in '$(PUB_KEY)'; do echo "PUB_KEY: $$i"; sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com $$i; done
 
 add_repos: 
-	sudo apt-get install --yes python-software-properties
+#	sudo apt-get install --yes python-software-properties
 	sudo add-apt-repository ppa:x2go/stable --yes
 	sudo apt-add-repository ppa:ubuntu-mate-dev/ppa --yes
 	sudo apt-add-repository ppa:ubuntu-mate-dev/trusty-mate --yes
