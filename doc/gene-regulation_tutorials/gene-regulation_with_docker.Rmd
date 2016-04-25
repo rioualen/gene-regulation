@@ -72,8 +72,9 @@ You can share as many folders as desired, using this syntax: `-v /path/on/host/:
 
 ## Execute the pipeline
 
+```
 snakemake -s scripts/snakefiles/workflows/factor_workflow.py -p
-
+```
 
 <!--
 # JVH / Mac
