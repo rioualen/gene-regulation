@@ -18,24 +18,41 @@ output:
     toc_depth: 5
 ---
 
-> Note: this is a first draft. 
+> Note: this is a first draft. Tested in Ubuntu 14.04 64bits version.
 
 # Get started with Docker!
 
 ## Create a Docker account
 
-Instructions[here](https://docs.docker.com/linux/step_five/).
+Instructions [here](https://docs.docker.com/linux/step_five/).
 
 ## Install Docker on your local host
 
 Instructions for a linux install can be found [here](https://docs.docker.com/linux/), along with mac and windows instructions. 
 
-You can test whether it works properly:
+You can also install it on Ubuntu 14.04 (64bits) typing the following:
+
+```
+#sudo apt-get update
+sudo apt-get -y install docker.io
+sudo usermod -aG docker ubuntu-user
+```
+You should now log out and in again from your Ubuntu session. 
+
+<!--sudo service docker start-->
+
+You can test whether docker works properly:
 
 ```
 docker run hello-world
 ```
 
+![](../../img/docker_hello.png)
+
+NB: it seems qwerty keyboard keeps popping up after docker install. Switch back to azerty:
+```
+setxkbmap fr
+```
 <!--
 Run the following command:
 ```
@@ -64,7 +81,7 @@ wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX0
 
 ```
 docker pull rioualen/gene-regulation:1.0
-docker run -v /data/results/GSE20870/:/data/results/GSE20870/ -v /data/GSE20870/:/data/GSE20870/ -it rioualen/gene-regulation:1.0 /bin/bash
+docker run -v /data/results/GSE20870/:/data/results/GSE20870/ -v /data/source/GSE20870/:/data/source/GSE20870/ -it rioualen/gene-regulation:1.0 /bin/bash
 ```
 
 You can share as many folders as desired, using this syntax: `-v /path/on/host/:/path/on/docker/`.
