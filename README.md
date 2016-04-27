@@ -93,7 +93,7 @@ snakemake -s scripts/snakefiles/workflows/factor_workflow.py -p
 
 The workflow generates a flowchart of the analysis:
 
-![alt text](img/rule.png)
+![alt text](https://github.com/rioualen/gene-regulation/blob/master/img/rule.png)
 
 
 # Purpose of this repository
