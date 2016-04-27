@@ -37,7 +37,7 @@ Table of Contents
 
 # IFB cloud utilities
 
-![](img/ifb-logo.png)
+![](../../img/ifb-logo.png)
 
 The French Bioinformatics Institute (IFB) cloud provides users with a number of bioinformatics facilities, under the form of ready-to-use *appliances*. A cloud appliance is a template or a virtual machine (VM) built with a bundle of scientific or utility software components that are already configured. Several appliances are dedicated to special fields of bioinformatics, such as proteomics, genomics... Some of them come with an HTML interface, such as Galaxy or RSAT.
 
@@ -61,7 +61,7 @@ The official website is still under development. However, here are a few useful 
 
 * In order to be able to access your instances through SSH, you should register your SSH public key in your [account settings](https://cloud.france-bioinformatique.fr/cloud/profile/), through the dashboard.
 
-![](img/dashboard.png)
+![](../../img/dashboard.png)
 
 # Using an existing appliance
 
@@ -73,7 +73,7 @@ Appliances usually have a limited amount of disk space (up 10, 20Go). If the ins
 2. Enter a size (whole number equating to the amount of Go needed). 
 3. Name it.
 
-![](img/create_vDisk.png)
+![](../../img/create_vDisk.png)
 
 ## Creation of an instance
 
@@ -84,11 +84,11 @@ Appliances usually have a limited amount of disk space (up 10, 20Go). If the ins
 5. Attach the vDisk.
 6. Click *Run*.
 
-![](img/create_instance.png)
+![](../../img/create_instance.png)
 
 7. After a few seconds, you may refresh the page until the newly created instance shows up on the dashboard. Clicking on the ssh mention in the *Access* column will give you the commands to access your virtual machine. 
 
-![](img/ssh.png)
+![](../../img/ssh.png)
 
 8. If the appliance has an HTTP interface, a link will also be provided in the *Access* column. 
 
@@ -106,11 +106,11 @@ Creating your own appliance can be as simple as instantiating an existing one.
 6. Attach the vDisk.
 7. Click *Run*.
 
-![](img/create_appliance.png)
+![](../../img/create_appliance.png)
 
 8. Refresh the page. Your instance should appear in orange because of the creation mode you selected. You can now click on the **ssh** column to see the ssh parameters. It should look like this:
 
-![](img/ubuntu_create.png)
+![](../../img/ubuntu_create.png)
 
 9. Connect to your VM by commandline.
 ```
