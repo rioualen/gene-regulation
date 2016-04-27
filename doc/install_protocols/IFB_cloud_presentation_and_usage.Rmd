@@ -28,11 +28,6 @@ Table of Contents
       * [Transfers](#transfers)
   * [Then...](#then)
     * [Software installation](#software-installation)
-    * [Documentation](#documentation)
-      * [RSAT suite](#rsat-suite)
-      * [Snakemake workflows](#snakemake-workflows)
-      * [VBox export / IFB appliance submission](#vbox-export--ifb-appliance-submission)
-
 
 
 # IFB cloud utilities
@@ -67,7 +62,7 @@ The official website is still under development. However, here are a few useful 
 
 ## Virtual disk creation
 
-Appliances usually have a limited amount of disk space (up 10, 20Go). If the instance to be run necessitates disk space, you have to create a virtual disk (vDisk) prior to launching it. By default, the capacity of storage granted to a user is 250Go, which can be divided into as many vDisks as necessary. When instantiating an appliance, you can chose to attach one of these vDIsks to the virtual machine. You'll be able to access data on this disk through SSH. 
+Appliances usually have a limited amount of disk space (up to 10, 20Go). If the instance to be run necessitates disk space, you have to create a virtual disk (vDisk) prior to launching it. By default, the capacity of storage granted to a user is 250Go, which can be divided into as many vDisks as necessary. When instantiating an appliance, you can chose to attach one of these vDisks to the virtual machine. You'll be able to access data on this disk through SSH. 
 
 1. Click *New vDisk* button.
 2. Enter a size (whole number equating to the amount of Go needed). 
@@ -148,7 +143,7 @@ By default, if a vDisk has been attached to the VM, it is mounted under `/root/m
 
 ### Transfers
 
-You can transfer data from your local computer to the VM using commands provided under *Access* > shh:
+You can transfer data from your local computer to the VM using commands provided under *Access* > ssh:
 ```
 scp -P 22 ${localfile} root@192.54.201.111:
 sftp -oPort=22 root@192.54.201.111
@@ -165,4 +160,4 @@ rsync -ruptvl ${localfile} root@192.54.201.177:/root/mydisk/
 
 ## Software installation
 
-Once you're connected to the VM through `ssh`, you can install any program just the way you would do it locally (see this [manual](install_snakemake_workflows.Rmd) for instance).
+Once you're connected to the VM through `ssh`, you can install any program just the way you would do it locally (see tutorials in [this directory](https://github.com/rioualen/gene-regulation/tree/master/doc/install_protocols) for instance).
