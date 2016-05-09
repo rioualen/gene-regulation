@@ -1,0 +1,7 @@
+---
+  samples: "GSM521934 GSM521935" 
+
+  outdir: "results/"
+
+  samtools:
+    threads: "2"

@@ -1,0 +1,12 @@
+rule bam_sorted:
+    input: "{file}.bam"
+    output: "{file}_sorted.bam"
+    run:
+        R("""
+        library(Rsamtools)
+        library(tools)
+
+        sortBam("{input}", "{output}")
+        file.rename("{output}.bam", file_path_sans_ext("{output}.bam"))
+        """)
+

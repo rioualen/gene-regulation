@@ -1,0 +1,203 @@
+---
+title: 'Running the gene-regulation pipelines on a virtual machine on the IFB cloud'
+author: "Claire Rioualen"
+date: "April 11, 2016"
+output:
+  html_document:
+    fig_caption: yes
+    highlight: zenburn
+    number_sections: yes
+    theme: cerulean
+    toc: yes
+    toc_depth: 5
+  pdf_document:
+    fig_caption: yes
+    highlight: zenburn
+    number_sections: yes
+    toc: yes
+    toc_depth: 5
+---
+
+> Notes: 
+> This protocol was developed on a Unix computer, with the OS LMDE. 
+> The virtual machines are developed with the Ubuntu 14.04 OS. 
+> The protocol is based on gene-regulation v1.0
+
+# Creating a virtual machine (VM)
+
+## Creating a VM on the IFB cloud
+
+### Requirements
+
+**User account creation & configuration**
+
+* Using the IFB cloud facilities requires to have a user account. Register [here](https://cloud.france-bioinformatique.fr/accounts/register/). 
+
+* Once your account has been validated, you can [login](https://cloud.france-bioinformatique.fr/accounts/login/).
+
+* In order to be able to access your instances through SSH, you should register your SSH public key in your [account settings](https://cloud.france-bioinformatique.fr/cloud/profile/), through the dashboard.
+
+### Virtual disk creation
+
+Appliances usually have a limited amount of disk space (up to 10, 20Go). If the instance to be run necessitates disk space, you have to create a virtual disk (vDisk) prior to launching it. By default, the capacity of storage granted to a user is 250Go, which can be divided into as many vDisks as necessary. When instantiating an appliance, you can chose to attach one of these vDIsks to the virtual machine. You'll be able to access data on this disk through SSH. 
+
+1. Click *New vDisk* button.
+2. Enter a size (whole number equating to the amount of Go needed). 
+3. Name it.
+
+![](../../img/vdisk-x2go.png)
+
+<!--\includegraphics[width=250pt]{img/vdisk-x2go.png}-->
+
+
+### Creation of an instance
+
+1. Click *New Instance* button.
+2. Choose appliance "Ubuntu 14.04 IFB-X2GO-10GB" in the drop-down menu. 
+3. Name your VM.
+4. Choose the amount of CPU and RAM to grant the VM (up to 8 CPU, 32 GB RAM).
+5. Attach the vDisk.
+6. Click *Run*.
+
+![](../../img/ubuntu_x2go_create.png)
+
+7. After a few seconds, you may refresh the page until the newly created instance shows up on the dashboard. Clicking on the ssh mention in the *Access* column will give you the commands to access your virtual machine. 
+
+![](../../img/x2go_ssh.png)
+
+### Connection to the device
+
+1. Type the command in a terminal.
+
+```
+ssh -A -p 22 root@192.54.201.124
+```
+
+# Installing programs and dependencies
+
+Once in the virtual machine, you can install the required programs. 
+
+## Get the `gene-regulation` repository
+
+```
+wget https://github.com/rioualen/gene-regulation/archive/v1.0.tar.gz
+tar zvxf v1.0.tar.gz
+```
+
+
+
+## Run makefile to install all required dependencies 
+
+This may take a while (up to 30mn?) & source ngs_bashrc (containing the `$PATH` for applications).
+
+```
+make -f scripts/makefiles/install_tools_and_libs.mk all
+source ~/bin/ngs_bashrc
+```
+
+
+# Executing snakemake workflows
+
+
+
+
+## Download source data
+
+
+On the IFB cloud VM, the vDisk is automatically attached and mounted by default under `/root/mydisk`. 
+Here we create a symlink from our preferred location `/data` to the data directory `/root/mydisk/data`. 
+
+```
+mkdir -p /root/mydisk/data/GSE20870/GSM521934 /root/mydisk/data/GSE20870/GSM521935
+cd /root/mydisk/data/GSE20870/GSM521934
+wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021358/SRR051929/SRR051929.sra
+cd /root/mydisk/data/GSE20870/GSM521935
+wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra
+```
+```
+ln -s /root/mydisk/data /data
+```
+
+## Execute workflow
+
+```
+cd ~/gene-regulation
+snakemake -p -s scripts/snakefiles/workflows/factor_workflow.py
+```
+
+Congratulations! You just executed this wonderful workflow:
+
+![](../../img/rule.png)
+
+# Visualizing results
+
+## Installing and running the X2Go client (IFB cloud)
+
+
+The Virtual Machine created on the IFB cloud doesn't have a graphical interface, so we're gonna use a distant desktop to visualize the results from the host machine. 
+
+1. Install the x2go client and launch it from your local computer.
+
+```
+sudo apt-get install x2goclient
+x2goclient
+```
+
+<!--2. Copy your ssh key to the authorized keys of the virtual machine. (**à revoir !!**)
+
+```
+cat $HOME/.ssh/id_rsa.pub | ssh root@192.54.201.124 "cat >> .ssh/authorized_keys"
+```
+-->
+
+2. Create a new session using the Mate desktop.
+
+![](../../img/x2goclient_session_create.png)
+
+3. The session now appears on the right panel. Just click it to lauch it!
+
+![](../../img/x2go_launch_session.png)
+
+4. You should be now on the virtual desktop! 
+
+![](../../img/mate_term.png)
+
+Note: you may need to change your keyboard settings 
+
+* Go to **System** > **Preferences** > **Keybords**
+* Click on tab **Layouts**
+* Add and/or remove desired keyboards
+
+## Visualize results
+
+### FastQC
+
+You can visualize the FastQC results using firefox or any other navigator. Fetch the `html` files located in the sample directories.
+
+* Before trimming:
+```
+firefox /data/results/GSE20870/samples/GSM521934/GSM521934_fastqc/GSM521934_fastqc.html
+firefox /data/results/GSE20870/samples/GSM521935/GSM521935_fastqc/GSM521935_fastqc.html
+```
+* After trimming:
+```
+firefox /data/results/GSE20870/samples/GSM521934/GSM521934_sickle-se-q20_fastqc/GSM521934_sickle-se-q20_fastqc.html
+firefox /data/results/GSE20870/samples/GSM521935/GSM521935_sickle-se-q20_fastqc/GSM521935_sickle-se-q20_fastqc.html
+```
+
+
+![](../../img/x2go_fastqc.png)
+
+### IGV
+
+You can visualize the peaks by running IGV from the terminal. You may need to source your `ngs_bashrc` file first (in case you're using a distant desktop, or a new terminal). 
+```
+source ~/bin/ngs_bashrc
+igv
+```
+
+* Click "File" > "Open session..." and chose the file `/data/results/GSE20870/peaks/igv_session.xml`.
+* You may need to adjust the panel sizes. 
+
+
+![](../../img/igv.png)
