@@ -4,11 +4,18 @@ of transcription factors.
 
 This workflow performs the following treatments: 
 
- - read mapping
+ - convert short read archive files (.sra) into fastq format
+ - read quality control with fastQC
+ - download the reference genome
+ - index the genome for either bowtie or BWA
+ - read mapping with either bowtie or BWA
  - peak-calling with alternate peak-calling programs
-( - motif discovery)
 
-The details are specified in a yaml-formatted configuration file.
+In development:
+ - motif discovery
+ - scanning of peak sequences to predict binding sites from the discovered motifs
+
+Parameters are specified in a yaml-formatted configuration file.
 
 Usage:
     snakemake -p -s scripts/snakefiles/workflows/factor_workflow.py 
