@@ -166,3 +166,8 @@ Some general information about NGS can be found in the **Wiki** section.
 # References 
 
 1. Köster, Johannes and Rahmann, Sven. "Snakemake - A scalable bioinformatics workflow engine". Bioinformatics 2012.
+<<<<<<< HEAD
+
+[factor]: https://github.com/rioualen/gene-regulation/blob/master/examples/chip-seq_factor.png
+=======
+>>>>>>> afd0f1bdb5ba65889f387fa9de0270d15080c1ee
