@@ -80,8 +80,9 @@ Once in the virtual machine, you can install the required programs.
 ## Get the `gene-regulation` repository
 
 ```
-wget https://github.com/rioualen/gene-regulation/archive/v1.0.tar.gz
-tar zvxf v1.0.tar.gz
+wget https://github.com/rioualen/gene-regulation/archive/1.0.tar.gz
+tar zvxf 1.0.tar.gz
+cd gene-regulation-1.0
 ```
 
 

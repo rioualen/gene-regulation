@@ -19,7 +19,7 @@ output:
 ---
 
 > Notes: 
-> This protocol was developed on a Unix computer, with the OS LMDE. 
+> This protocol was developed on a Unix computer, with the OS LMDE and a 64-bit architecture.
 > The virtual machines are developed with the Ubuntu 14.04 OS. 
 > The protocol is based on gene-regulation v1.0
 
@@ -222,8 +222,8 @@ Once in the virtual machine, you can install the required programs.
 ## Get the `gene-regulation` repository
 
 ```
-wget https://github.com/rioualen/gene-regulation/archive/v1.0.tar.gz
-tar zvxf v1.0.tar.gz
+wget https://github.com/rioualen/gene-regulation/archive/1.0.tar.gz
+tar zvxf 1.0.tar.gz
 cd gene-regulation-1.0
 ```
 
