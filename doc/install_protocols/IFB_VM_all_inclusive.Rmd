@@ -42,10 +42,10 @@ Appliances usually have a limited amount of disk space (up to 10, 20Go). If the 
 
 ## Connection to the device
 
-1. Type the command in a terminal.
+1. Type the command in a terminal, replacing [Ip.of.your.VM] by the IP address of your virtual machine.
 
 ```
-ssh -A -p 22 root@192.54.201.124
+ssh -A -p 22 root@[IP.of.your.VM]
 ```
 
 ## Basic installation
