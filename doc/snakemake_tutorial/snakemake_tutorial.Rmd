@@ -2,7 +2,7 @@
 title: "Getting your hands on Snakemake"
 author: "Claire Rioualen"
 date: "April 13, 2016"
-output: slidy_presentation
+output: pdf_document
 ---
 
 
@@ -42,9 +42,9 @@ sudo pip3 install pyyaml                                    # Config management 
 ### Tuto material
 
 ```{shell}
-sudo apt-get -y install git
-git clone https://github.com/rioualen/gene-regulation.git
-cd gene-regulation/doc/snakemake_tutorial
+wget https://github.com/rioualen/gene-regulation/archive/1.0.tar.gz
+tar xvzf 1.0.tar.gz
+cd gene-regulation-1.0/doc/snakemake_tutorial
 ```
 
 ## Downloads for practical exercises 
