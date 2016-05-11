@@ -1,5 +1,18 @@
 """Rules to count the number of reads in NGS files with different
-formats
+formats.
+
+Author: Jacques.van-Helden@univ-amu.fr
+
+To do: 
+
+- split in one file per rule
+- rename the rules to avoir ambiguity with the read counts per gene used in RNA-seq data
+
+readnb_from_fastq
+readnb_from_bam
+readnb_from_sam
+featnb_from_bed
+
 """
 rule count_reads_fastq:
     """Count number of reads in a fastq-formatted file (unaligned reads)."""

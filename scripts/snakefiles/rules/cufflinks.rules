@@ -1,4 +1,7 @@
-"""Annotate a genome based on RNA-seq data
+"""Annotate a genome (infer transcript regions) based on RNA-seq data.
+
+Author: Jacques.van-Helden@univ-amu.fr
+
 """
 
 
