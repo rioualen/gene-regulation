@@ -249,6 +249,17 @@ bwa:
 	sudo apt-get -y install bwa
 #	wget -nc https://sourceforge.net/projects/bio-bwa/files/bwa-$(BWA_VER).tar.bz2; \
 
+## TODO testing subread ##
+SUBREAD_VER=1.5.0
+subread:
+	cd $(SOURCE_DIR); \
+	wget https://sourceforge.net/projects/subread/files/subread-$(SUBREAD_VER)/subread-$(SUBREAD_VER)-source.tar.gz; \
+	tar zxvf subread-$(SUBREAD_VER)-source.tar.gz; \
+	cd subread-$(SUBREAD_VER)-source/src; \
+	make -f Makefile.Linux; \
+	cd ../bin; \
+	cp `find * -executable -type f` $(BIN_DIR)
+
 
 # ----------------------------------------------------------------
 # Peak analysis
