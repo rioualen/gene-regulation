@@ -1,6 +1,13 @@
 ---
 title: "Running the gene-regulation pipelines with VirtualBox"
 author: "Claire Rioualen"
+date: "May 12th, 2016"
+---
+
+<!-- 
+---
+title: "Running the gene-regulation pipelines with VirtualBox"
+author: "Claire Rioualen"
 date: "April 25, 2016"
 output:
   html_document:
@@ -17,6 +24,7 @@ output:
     toc: yes
     toc_depth: 5
 ---
+-->
 
 > Notes: 
 > This protocol was developed on a Unix computer, with the OS LMDE and a 64-bit architecture.
@@ -217,7 +225,7 @@ Reboot again to see the new display.
 
 # Installing programs and dependencies
 
-Once in the virtual machine, you can install the required programs. 
+Once in the virtual machine, you can install the required programs from a terminal. 
 
 ## Get the `gene-regulation` repository
 
@@ -302,7 +310,7 @@ igv
 
 The virtual machine created with VirtualBox can be exported and saved as an appliance.
 
-* Close the VM.
+* Shut down the VM.
 * In VirtualBox, open *File* -> *Export Appliance ...*
 
 * Select the VM `gene-regulation`
@@ -329,6 +337,15 @@ The appliance saved can be re-imported later on, on another computer if needed.
 
 # Import appliance (todo)
 
+In VirtualBox, click menu File > Import appliance > fetch OVA file. 
+
+Note: there is apparently a bug with the export of VMs under VirtualBox 5.0. If you get this error when launching the imported file:
+
+> A new node couldn't be inserted because one with the same name exists. (VERR_CFGM_NODE_EXISTS).
+
+There is a workaround: go to the imported VM settings, to the USB tab, and untick "enable USB Controller". You should now be able to start the VM. 
+<!--
 Be careful with renaming ova files...
 
 Todo test export/import on different vbox versions (4, 5)
+-->
