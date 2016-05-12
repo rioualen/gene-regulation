@@ -1,0 +1,8 @@
+rule dot_to_png:
+    input: "{graph}.dot"
+    output: "{graph}.png"
+    log: "{graph}_dot_to_png.log"
+    shell: """
+dot -Tpng -o {output} {input} &> {log}
+"""
+

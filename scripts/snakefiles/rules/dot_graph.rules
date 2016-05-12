@@ -1,0 +1,24 @@
+if not "files" in config.keys():
+    config["files"] = {}
+
+if not "snakefile" in config["files"].keys():
+    config["files"]["snakefile"] = workflow.snakefile;
+
+if not "configfile" in config["files"].keys():
+    config["files"]["configfile"] = workflow.configfile;
+
+if not "results" in config["dir"].keys():
+    sys.exit("The parameter dir results must be defined in the config file")
+
+if not "reports" in config["dir"].keys():
+    config["dir"]["reports"] = config["dir"]["results"];
+
+rule dot_graph:
+    output: config["dir"]["reports"] + "{graph}.dot"
+    params: snakefile = config["files"]["snakefile"], configfile = config["files"]["configfile"]
+    log: config["dir"]["reports"] + "{graph}_dot.log"
+    shell: """
+(snakemake -s {params.snakefile}  --configfile  {params.configfile} --{wildcards.graph} > {output}
+sed -n '/digraph/,$p' <{output} > tmp
+mv tmp {output}) &> {log}
+"""
