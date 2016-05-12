@@ -2,6 +2,8 @@
 title: "Running the gene-regulation pipelines with Docker"
 author: "Claire Rioualen"
 date: "April 25, 2016"
+---
+<!--
 output:
   html_document:
     fig_caption: yes
@@ -17,6 +19,15 @@ output:
     toc: yes
     toc_depth: 5
 ---
+-->
+
+- [Get started with Docker!](#get-started-with-docker)
+      - [Create a Docker account](#create-a-docker-account)
+      - [Install Docker on your local host](#install-docker-on-your-local-host)
+      - [Create shared repositories and download source data](#create-shared-repositories-and-download-source-data)
+      - [Fetch the Docker image and run it with shared folders](#fetch-the-docker-image-and-run-it-with-shared-folders)
+      - [Execute the pipeline](#execute-the-pipeline)
+- [JVH / Mac](#jvh--mac)
 
 > Note: this is a first draft. Tested in Ubuntu 14.04 64bits version.
 

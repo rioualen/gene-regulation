@@ -26,6 +26,24 @@ output:
 ---
 --> 
 
+- [1. Using the Gene-regulation appliance](#1-using-the-gene-regulation-appliance)
+    - [1.1 Requirements](#11-requirements)
+    - [1.2 Virtual disk creation](#12-virtual-disk-creation)
+    - [1.3 Creation of an instance](#13-creation-of-an-instance)
+    - [1.4 Connection to the device](#14-connection-to-the-device)
+    - [1.5 Download source data](#15-download-source-data)
+    - [1.6 Execute workflow](#16-execute-workflow)
+- [2. Visualizing results](#2-visualizing-results)
+    - [2.1 Install and run the X2Go client on your host computer](#21-install-and-run-the-x2go-client-on-your-host-computer)
+    - [2.2 Visualize results](#22-visualize-results)
+        - [FastQC](#fastqc)
+        - [IGV](#igv)
+- [3. Create your own Gene-regulation appliance](#3-create-your-own-gene-regulation-appliance)
+    - [Creation of an instance](#creation-of-an-instance)
+    - [Installing programs and dependencies](#installing-programs-and-dependencies)
+    - [Get the `gene-regulation` repository](#get-the-gene-regulation-repository)
+    - [Run makefile to install the dependencies](#run-makefile-to-install-the-dependencies)
+    
 > Notes: 
 > This protocol was developed on a Unix computer, with the OS LMDE. 
 > The virtual machines are developed with the Ubuntu 14.04 OS. 

@@ -26,6 +26,25 @@ output:
 ---
 -->
 
+- [Creating a virtual machine (VM)](#creating-a-virtual-machine-vm)
+    - [Creating a VM under VirtualBox software](#creating-a-vm-under-virtualbox-software)
+        - [Requirements](#requirements)
+        - [Virtual Box configuration](#virtual-box-configuration)
+        - [Creation of the virtual machine](#creation-of-the-virtual-machine)
+        - [VM configuration](#vm-configuration)
+        - [Operating system installation](#operating-system-installation)
+- [Installing programs and dependencies](#installing-programs-and-dependencies)
+    - [Get the `gene-regulation` repository](#get-the-gene-regulation-repository)
+    - [Run makefile to install all required dependencies](#run-makefile-to-install-all-required-dependencies)
+- [Executing snakemake workflow example](#executing-snakemake-workflow-example)
+    - [Download source data](#download-source-data)
+    - [Execute workflow](#execute-workflow)
+- [Visualizing results](#visualizing-results)
+    - [FastQC](#fastqc)
+    - [IGV](#igv)
+- [Export appliance (todo)](#export-appliance-todo)
+- [Import appliance (todo)](#import-appliance-todo)
+
 > Notes: 
 > This protocol was developed on a Unix computer, with the OS LMDE and a 64-bit architecture.
 > The virtual machines are developed with the Ubuntu 14.04 OS. 
@@ -50,9 +69,9 @@ wget http://download.virtualbox.org/virtualbox/5.0.2/Oracle_VM_VirtualBox_Extens
 
 **Ubuntu image**
 
-In this tutorial we used Ubuntu 14.04.3, latest long-term supported version.
+In this tutorial we used Ubuntu 14.04.4, latest long-term supported version.
 ```
-wget http://releases.ubuntu.com/14.04/ubuntu-14.04.3-desktop-amd64.iso
+wget http://releases.ubuntu.com/14.04/ubuntu-14.04.4-desktop-amd64.iso
 ```
 ------------------------------------------
 
