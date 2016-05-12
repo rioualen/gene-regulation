@@ -1,0 +1,70 @@
+"""Converts SRA files in fastq format with SRA toolkit. 
+
+Required parameters:
+    config['qsub']
+    config['dir']['reads_source']
+
+Optional parameters:
+    config['fastq_dump']['options']
+
+Usage example :
+    IMPORT = expand(RESULTS_DIR + "{samples}/{samples}.fastq", samples=SAMPLE_IDS) 
+
+Contributors: 
+    Claire Rioualen
+"""
+
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "reads_source" in config["dir"].keys():
+    sys.exit("Source directory containing sra files must be defined in the config file")
+
+rule sra_to_fastq_split:
+    input: datadir = config["dir"]["reads_source"]
+    output:
+        forward = "{results}/{sample}/{sample}_1.fastq", \
+        reverse = "{results}/{sample}/{sample}_2.fastq"
+    log: "{results}/{sample}/{sample}_sra-conversion.log"
+    benchmark: "{results}/{sample}/{sample}_sra-conversion_benchmark.json"
+    params: qsub = config["qsub"] + " -q short -e {sample}_sra-conversion_qsub.err -o {sample}_sra-conversion_qsub.out",  \
+#        results = config['dir']['samples'], \
+        samples = "{sample}"
+    shell:"""
+(echo "SHELL: $SHELL"
+samples={params.samples}
+for sam in ${{samples[@]}}
+do
+    mkdir -p {wildcards.results}$sam
+    echo "Reading $sam directory {input.datadir}$sam..."
+    files=({input.datadir}$sam/*)
+    if [ ${{#files[@]}} -gt 1 ]
+    then
+        echo "TODO!"
+#        echo "Case 2+ files : ${{files[@]}}"
+#        for f in ${{files[@]}}
+#        do
+#            base=$(basename $f .sra)
+#            echo "$base"
+#            echo "Converting $base.sra to $base.fastq..."
+#            fastq-dump --outdir {wildcards.results}$sam/ -I --split-files {input.datadir}$sam/$base.sra
+#        done
+#        echo "Merging ${{#files[@]}} together as $sam.fastq."
+#        echo "Cmd: cat ${{files[@]}} > {input.datadir}$sam.fastq"
+#        files=({wildcards.results}$sam/*)
+#        cat ${{files[@]}} > {wildcards.results}$sam/$sam.fastq
+#        rm ${{files[@]}}
+    else
+        echo "Case 1 file : ${{files[@]}}"
+        base=$(basename ${{files[0]}} .sra)
+        echo "Converting $base.sra to $base.fastq..."
+        fastq-dump --outdir {wildcards.results}$sam -I --split-files {input.datadir}$sam/$base.sra
+        echo "Moving {wildcards.results}$sam/$base"_1".fastq and {wildcards.results}$sam/$base"_2".fastq to {wildcards.results}$sam/$sam"_1".fastq and {wildcards.results}$sam/$sam"_2".fastq"
+        mv  {wildcards.results}$sam/$base"_1".fastq {wildcards.results}$sam/$sam"_1".fastq
+        mv  {wildcards.results}$sam/$base"_2".fastq {wildcards.results}$sam/$sam"_2".fastq
+    fi
+done
+echo "Job done.") &> {log}
+
+"""
