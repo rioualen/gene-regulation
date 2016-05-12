@@ -23,6 +23,7 @@
     samples: "gene-regulation/examples/ChIP-seq_GSE41187/samples.tab"                         # required: has to contain at least sample ids
     design: "gene-regulation/examples/ChIP-seq_GSE41187/design.tab"                                      # required: has to contain at least ids of pairs of samples to be compared
     snakefile: "gene-regulation/scripts/snakefiles/workflows/rna-seq_workflow_pe.py"                # required for flowcharts generation; maybe this should be revised
+    configfile: "gene-regulation/examples/ChIP-seq_GSE41187/ChIP-seq_GSE41187.yml"                # required for flowcharts generation; maybe this should be revised
 
   dir:
     reads_source: "data/ChIP-seq_GSE41187/"                                             # required: dir containing raw data organized in sub directories named after the samples
@@ -32,7 +33,7 @@
 
     samples: "results/ChIP-seq_GSE41187/samples/"                                  # optional: will hold sample treatment (trimming, alignment, QC...).    If not mentioned, will be config["dir"]["results"]
     peaks: "results/ChIP-seq_GSE41187/peaks/"                                      # optional: will hold the results of differential expression analysis. If not mentioned, will be config["dir"]["results"]
-    reports: "results/ChIP-seq_GSE41187/"                                          # optional: will hold reports and graphics.                             If not mentioned, will be config["dir"]["results"]
+    reports: "results/ChIP-seq_GSE41187/reports/"                                          # optional: will hold reports and graphics.                             If not mentioned, will be config["dir"]["results"]
 
   reports: 
 #    dag: "results/ChIP-seq_GSE41187/sample_flowchart"    # Prefix of the "dag" file exported by snakemake (different extensions will be added: .dot, .pdf, .png)
