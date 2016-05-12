@@ -46,7 +46,8 @@ import datetime
 import pandas as pd
 
 ## Config
-configfile: "examples/RNA-seq_Ecoli_FNR_GSE41190/RNA-seq_Ecoli_FNR_GSE41190.yml"
+#configfile: "gene-regulation/examples/RNA-seq_GSE41190/RNA-seq_GSE41190.yml"
+
 
 # Define verbosity
 if not ("verbosity" in config.keys()):
@@ -57,8 +58,8 @@ verbosity = int(config["verbosity"])
 #                         Includes                               #
 #================================================================#
 
-if not ("dir" in config.keys()) & ("fg_lib" in config["dir"].keys()) :
-    sys.exit("The parameter config['dir']['fg_lib'] should be specified in the config file.")
+if not ("dir" in config.keys()):
+    sys.exit("The parameter config['dir'] and config['dir']['fg_lib'] should be specified in the config file.")
 
 FG_LIB = os.path.abspath(config["dir"]["fg_lib"])
 RULES = os.path.join(FG_LIB, "scripts/snakefiles/rules")
@@ -71,31 +72,19 @@ include: os.path.join(RULES, "bam_by_name.rules")
 include: os.path.join(RULES, "bam_by_pos.rules")
 include: os.path.join(RULES, "bam_to_bed.rules")
 include: os.path.join(RULES, "bam_stats.rules")
-include: os.path.join(RULES, "bowtie_index.rules")
-include: os.path.join(RULES, "bowtie_se.rules")
 include: os.path.join(RULES, "bowtie2_index.rules")
-include: os.path.join(RULES, "bowtie2_se.rules")
-include: os.path.join(RULES, "bPeaks.rules")
-include: os.path.join(RULES, "bwa_index.rules")
-include: os.path.join(RULES, "bwa_se.rules")
+include: os.path.join(RULES, "bowtie2_pe.rules")
 include: os.path.join(RULES, "count_reads.rules")
+include: os.path.join(RULES, "dot_graph.rules")
+include: os.path.join(RULES, "dot_to_png.rules")
 include: os.path.join(RULES, "fastqc.rules")
-include: os.path.join(RULES, "flowcharts.rules")
-include: os.path.join(RULES, "genome_coverage_bedgraph.rules")
-include: os.path.join(RULES, "genome_download.rules")
-include: os.path.join(RULES, "getfasta.rules")
 include: os.path.join(RULES, "get_chrom_sizes.rules")
-include: os.path.join(RULES, "gzip.rules")
-include: os.path.join(RULES, "homer.rules")
-include: os.path.join(RULES, "igv_session.rules")
-include: os.path.join(RULES, "macs2.rules")
-include: os.path.join(RULES, "macs14.rules")
-include: os.path.join(RULES, "peak_motifs.rules")
-include: os.path.join(RULES, "sickle_se.rules")
-include: os.path.join(RULES, "spp.rules")
-include: os.path.join(RULES, "swembl.rules")
+include: os.path.join(RULES, "sickle_pe.rules")
 include: os.path.join(RULES, "sam_to_bam.rules")
 include: os.path.join(RULES, "sra_to_fastq.rules")
+include: os.path.join(RULES, "sra_to_fastq_split.rules")
+include: os.path.join(RULES, "subread_index.rules")
+include: os.path.join(RULES, "subread_pe.rules")
 
 ruleorder: bam_by_pos > sam_to_bam
 
@@ -112,8 +101,8 @@ SAMPLE_IDS = SAMPLES.iloc[:,0]
 
 ## Design
 DESIGN = read_table(config["files"]["design"])
-TREATMENT = DESIGN['treatment']
-CONTROL = DESIGN['control']
+#TREATMENT = DESIGN['treatment']
+#CONTROL = DESIGN['control']
 
 ## Data & results dir
 
@@ -138,12 +127,12 @@ else:
 if not os.path.exists(SAMPLE_DIR):
     os.makedirs(SAMPLE_DIR)
 
-if not ("peaks" in config["dir"].keys()):
-    PEAKS_DIR = config["dir"]["results"]
+if not ("reports" in config["dir"].keys()):
+    REPORTS_DIR = config["dir"]["results"]
 else:
-    PEAKS_DIR = config["dir"]["peaks"]
-if not os.path.exists(PEAKS_DIR):
-    os.makedirs(PEAKS_DIR)
+    REPORTS_DIR = config["dir"]["reports"]
+if not os.path.exists(REPORTS_DIR):
+    os.makedirs(REPORTS_DIR)
 
 
 #================================================================#
@@ -151,10 +140,10 @@ if not os.path.exists(PEAKS_DIR):
 #================================================================#
 
 ## Data import 
+IMPORT = expand(SAMPLE_DIR + "{samples}/{samples}_{strand}.fastq", samples=SAMPLE_IDS, strand=["1","2"])
 
-IMPORT = expand(SAMPLE_DIR + "{samples}/{samples}.fastq", samples=SAMPLE_IDS)
 
-# Genome
+## Genome
 GENOME = config["genome"]["version"]
 GENOME_DIR = config["dir"]["genomes"] + config["genome"]["version"]
 
@@ -164,26 +153,27 @@ if not os.path.exists(GENOME_DIR):
 GENOME_FASTA = expand(GENOME_DIR + "/" + GENOME + ".fa")
 GENOME_ANNOTATIONS = expand(GENOME_DIR + "/" + GENOME + ".gff3")
 
-### Graphics & reports
-GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
+## Graphics & reports
+#print("some stuff")
+GRAPHICS = expand(REPORTS_DIR + "{graph}.png", graph=["dag", "rulegraph"])
 
-
+#print("some other stuff")
 #----------------------------------------------------------------#
 # Quality control
 #----------------------------------------------------------------#
 
-RAW_QC = expand(SAMPLE_DIR + "{samples}/{samples}_fastqc/{samples}_fastqc.html", samples=SAMPLE_IDS)
+RAW_QC = expand(SAMPLE_DIR + "{samples}/{samples}_{strand}_fastqc/{samples}_{strand}_fastqc.html", samples=SAMPLE_IDS, strand=["1", "2"])
 
 
 #----------------------------------------------------------------#
 # Trimming
 #----------------------------------------------------------------#
 
-TRIMMER="sickle-se-q" + config["sickle"]["threshold"]
-TRIMMING=expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}", samples=SAMPLE_IDS, trimmer=TRIMMER)
-TRIM = expand(SAMPLE_DIR + "{trimming}.fastq", trimming=TRIMMING)
+TRIMMER="sickle-pe-q" + config["sickle"]["threshold"]
+TRIMMING=expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}_{strand}", samples=SAMPLE_IDS, trimmer=TRIMMER, strand=["1", "2"])
+TRIM = expand("{trimming}.fastq", trimming=TRIMMING)
 
-TRIM_QC = expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}_fastqc/{samples}_{trimmer}_fastqc.html", samples=SAMPLE_IDS, trimmer=TRIMMER)
+TRIM_QC = expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}_{strand}_fastqc/{samples}_{trimmer}_{strand}_fastqc.html", samples=SAMPLE_IDS, trimmer=TRIMMER, strand=["1", "2"])
 
 QC = RAW_QC + TRIM_QC
 
@@ -193,7 +183,7 @@ QC = RAW_QC + TRIM_QC
 #----------------------------------------------------------------#
 
 
-ALIGNER=["bowtie2"]
+ALIGNER=["bowtie2", "subread"]
 ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER, trimmer=TRIMMER)
 
 INDEX = expand(GENOME_DIR + "/{aligner}/" + GENOME + ".fa", aligner=ALIGNER)
@@ -202,48 +192,20 @@ MAPPING = expand("{alignment}.sam", alignment=ALIGNMENT)
 
 BAM_STATS = expand("{alignment}_bam_stats.txt", alignment=ALIGNMENT)
 
-GENOME_COVERAGE = expand("{alignment}.bedgraph", alignment=ALIGNMENT)
-GENOME_COVERAGE_GZ = expand("{alignment}.bedgraph.gz", alignment=ALIGNMENT)
+#GENOME_COVERAGE = expand("{alignment}.bedgraph", alignment=ALIGNMENT)
+#GENOME_COVERAGE_GZ = expand("{alignment}.bedgraph.gz", alignment=ALIGNMENT)
 
 
 # Sort mapped reads
 
-SORTED_READS_BED = expand(SAMPLE_DIR + "{alignment}_sorted_pos.bed", alignment=ALIGNMENT)
+#SORTED_READS_BED = expand(SAMPLE_DIR + "{alignment}_sorted_pos.bed", alignment=ALIGNMENT)
 
 
-# ----------------------------------------------------------------
-# Peak-calling
-# ----------------------------------------------------------------
+## ----------------------------------------------------------------
+## Visualization
+## ----------------------------------------------------------------
 
-PEAKCALLER=[
-    "homer-fdr" + config["homer"]["fdr"] + "_peaks", 
-    "macs2-qval" + config["macs2"]["qval"], 
-#    "swembl-R" + config["swembl"]["R"],
-    "macs14-pval" + config["macs14"]["pval"],
-    "spp-fdr" + config["spp"]["fdr"],
-    "bPeaks-log" + config["bPeaks"]["log2FC"]
-]
-
-PEAKCALLING=expand(expand(PEAKS_DIR + "{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER, trimmer=TRIMMER)
-
-PEAKS = expand("{peakcalling}.bed", peakcalling=PEAKCALLING)
-
-# ----------------------------------------------------------------
-# Peak analysis
-# ----------------------------------------------------------------
-
-
-MOTIFS=expand(expand("{treat}_vs_{control}/{{peakcaller}}/peak-motifs/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}_peak-motifs_synthesis", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER, trimmer=TRIMMER)
-
-
-GET_FASTA = expand(PEAKS_DIR + "{peakcalling}.fasta", peakcalling=PEAKCALLING)
-PEAK_MOTIFS = expand(PEAKS_DIR + "{motifs}.html", motifs=MOTIFS)
-
-# ----------------------------------------------------------------
-# Visualization
-# ----------------------------------------------------------------
-
-VISU = expand(PEAKS_DIR + "igv_session.xml")
+#VISU = expand(PEAKS_DIR + "igv_session.xml")
 
 #================================================================#
 #                        Rule all                                #
@@ -253,8 +215,10 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: IMPORT #,  RAW_QC, GRAPHICS, BAM_STATS, PEAKS, QC, GENOME_COVERAGE_GZ, GENOME_ANNOTATIONS, VISU
+	input: IMPORT, QC, GRAPHICS, TRIM, INDEX, MAPPING, BAM_STATS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
+#print("some more stuff")
 
+#sed -n '/digraph/,$p' <rulegraph.dot
