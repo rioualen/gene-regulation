@@ -509,6 +509,7 @@ rnaseq.volcanoPlot <- function(deg.table,
                                effect.size.col = "log2FC",
                                control.type = "p.value",
                                ...) {
+  stop("NOT IMPLEMENTED YET, ASK Jacques.van-Helden@univ-amu.fr")
   volcanoPlot()
 }
 
@@ -520,7 +521,7 @@ calc.stats.per.sample <- function(sample.descriptions,
   verbose("Computing statistics per sample", 2)
   
   stats.per.sample <- cbind(  
-    sample.desc[names(all.counts), ],
+    sample.desc[names(count.table), ],
     data.frame(
       "zeros" = apply(all.counts == 0, 2, sum, na.rm=TRUE), ## Number of genes with 0 counts
       "detected" = apply(all.counts > 0, 2, sum, na.rm=TRUE), ## Number of genes counted at least once
@@ -608,7 +609,11 @@ count.boxplot <- function(count.table,
 ## Draw a heatmap with the inter-sample correlation matrix.
 count.correl.heatmap <- function(count.table, 
                                  main="Correlation between raw counts",
-                                 plot.file=NULL) {
+                                 plot.file=NULL,
+                                 log.transform=FALSE, # Perform a log transformation of the values before plotting
+                                 epsilon=0.01, # Add an epsilon to zero values before log transformation, in order to -Inf values
+                                 ...
+                                 ) {
   
   ## Define a color palette for heatmaps. I like this Red-Blue palette because 
   ## - it suggests a subjective feeling of warm (high correlation)/cold (low correlation)
@@ -619,6 +624,11 @@ count.correl.heatmap <- function(count.table,
   ## Adapt boxplot size to the number of samples and label sizes
   margin <- max(nchar(names(count.table)))/3+5
 
+  if (log.transform) {
+    range(count.table)
+    count.table[count.table==0] <- epsilon
+    count.table <- log10(count.table)
+  }
   count.cor <- as.matrix(cor(count.table))
   
   ## Sample-wise library sizes
@@ -627,12 +637,19 @@ count.correl.heatmap <- function(count.table,
     pdf(file=plot.file, width=8, height=boxplot.height)
   }
   
-  hm <- heatmap.2(count.cor,  scale="none", trace="none", 
+  hm <- heatmap.2(count.cor,  scale="none", trace="none", breaks=seq(-1,1,length.out = 101),
                   main=main, margins=c(margin,margin),
-                  col=cols.heatmap) #, breaks=seq(-1,1,2/length(cols.heatmap)))
+                  col=cols.heatmap, 
+                  cellnote = signif(digits=2, count.cor),
+                  ...
+                  )
+  
+
   if (!is.null(plot.file)) {
     silence <- dev.off()
   }
+
+  return(count.cor)  
 }
 
 ## Generate a set of plots displaying some sample-wise statistics

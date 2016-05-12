@@ -3,22 +3,48 @@ title: "Help for the interpretation of RNA-seq differential analysis reports"
 author: "Jacques van Helden"
 date: '`r Sys.Date()`'
 output:
-  word_document: default
-  pdf_document:
-    fig_caption: yes
-    highlight: zenburn
-    toc: yes
-    toc_depth: 3
   html_document:
     fig_caption: yes
     highlight: zenburn
     theme: cerulean
     toc: yes
-    toc_depth: 3
+    toc_depth: 4
+    toc_float: yes
+  pdf_document:
+    fig_caption: yes
+    highlight: zenburn
+    toc: yes
+    toc_depth: 4
+  word_document:
+    fig_caption: yes
+    highlight: zenburn
+    toc: yes
+    toc_depth: 4
 ---
 
 
+* * * * * *
+
+
+## Abbreviations
+
+We summarize hereby the acronym. A more detailed explanatin comes in the next sections. 
+
+| Abbreviation | Description | 
+|--------------|-------------|
+| CPM | Counts per million reads |
+| logCPM | log10-transformed CPM |
+| p-value | risk of false positive for a given gene or feature |
+| e-value | expected number of false positives |
+| FPR | False Positive Risk, equivalent to the p-value |
+| FDR | False Discovery Risk |
+| padj | Adjusted p-value (=FDR) |
+| DEG | Differentially expressed genes |
+| FC | Fold-change |
+| log2FC | log2-transformed fold-change |
+
 * * * * * 
+
 ## Sample-wise rescaling of counts per gene
 
 It is important to take into account the between-library (betwen-sample) differences in sequencing depth. Indeed, a typical differential analysis requires to compare counts per genes obtained from sequencing libraries sequenced with varying number of reads. In some cases, the total number of reads per library can show wide fluctuations between samples (factor 2 to 10) for different reasons (e.g. quality of the DNA library).
@@ -124,3 +150,130 @@ Note that the concept of confidence interval is not relevant for such data types
 
 For RNA-seq data, the interest of this representation is to highlight some genes associated with very high numbers of reads (circles on the right side of the confidence intervals).
 
+* * * ** * * 
+
+## Count correlations between samples
+
+We compute a matrix of sample-to-sample correlation based on the log10-transformed counts per gene. The advantage of using log10-transformed count is that the log transformation has a normalizing effect on the data, and in particular it reduces the impact of outliers (we often find a handful of genes having several million counts each). 
+
+The correlation matrix is displayed as a heatmap, with a blue-to-red color scale. By definition, the diagonal values are all 1, since they represent the correlation between each sample and itself. Samples are clustered according to their mutual correlations. 
+
+Note that correlation heatmaps are built from all the genes, irrespective of their up- or down-regulation status. They thus reflect the global similarity between samples/conditions, and should be used to check the consistency between replicates or to detect transcriptome-wide changes (e.g. very different culture conditions, or perturbation affecting the transcription as a whole). The specific transcriptional effects are better reflected in the result tables of differential expression analyses. 
+
+* * * * * * *
+
+## Between-replicate reproducibility
+
+For each condition, the report include scatter plots showing between-replicate comparisons of the log10-transformed counts. These plots give a general perception of the reproducibility, and highlight the outlier genes (genes associated with millions of counts).
+
+The negative value correspond to the zero counts, which have beed replaced by a small epsilon  ($\epsilon=0.01$) to enable their display on logarithmic graphs or their log transformation.
+
+* * * * * * *
+
+## Differential analysis 
+
+The script runs separately two alternative tools to detect differentially expressed genes: *DESeq2* and *edgeR*. These two programs use related statistical test (based on the negative binomial test) but different methods for the data normalization, so that they report different lists of differentially expressed genes. 
+
+Both programs compute a p-value based on the negative binomial test, and perform multiple testing corrections. We use the **adjusted p-value** (**padj**). 
+
+For a same level of significance
+
+
+### Fold-changes
+
+The fold-changes are computed on library-wise normalized counts. Since DESeq2 and edgeR use different normalizing methods, these two programs report different fold-changes for the same gene. These differences are highlighted in the Fold-change comparison plot included in the report. 
+
+
+### Column contents for the differential expression tables
+
+The complete result table contains a large number of columns, since it collects the statistics (p-value, e-value, FDR, fold-change) from each of these two programs, and adds some columns for the integrated scores. Column labels indicate the program + statistics (e.g. edger.padj, DESeq2.padj, \ldots). We also compute some summary statistics by averaging the scores returned by edgeR and DESeq2, respectively. For example, the mean.FC is the mean of fold-change values returned by DESeq2 and edgeR. 
+
+1. **gene_ID**: gene identifier
+
+2. **log2FC**:   logarithm of the fold change, computed in base 2 (bits). The logarithmic transformation presents the advantage of returning symmetrical values for up-regulation (positive numbers) and down-regulation (negative numbers). 
+
+**Beware**,the log-fold change is computed on normalized counts (rescaled to take into account the respective library sizes). Different programs are using different normalization methods, and can thus report different fold-changes for the same gene. 
+
+3. **logCPM**:   logarithm of the  CPM (**counts per million reads**). Gives an idea about the mean expression value per gene, averaged over all replicates of the two conditions. 
+
+4. **PValue**:  The **p-value** is the probability to observe an effect (difference between counts) as large as the one observed by chance, under the null hypothesis, i.e. in a situation where the gene would not be specifically regulated. This corresponds to the first type error risk, which corresponds to the false positive risk (FPR): the risk to consider something as significant whereas it is not. 
+
+**Beware: correction for multiple testing.** In transcriptome analysis, the p-value represents the risk of false positive taken for each individual tested gene. For example, if $N=10.000$ genes are analysed, a p-value threshold of $\alpha=0.01$ is expected to return $N = 0.01 \cdot 10.000 = 100$ false positives.  This **nominal p-value** should thus be corrected to compensate the effects of multiple testing. The result table includes two corrections for multiple testing: **e-value** and **FDR** (see below). 
+
+5. **Evalue**:    **Expected number of false positives**. Since a differential analysis consists in testing the significance for several thousands of genes, a given risk of false positive will be taken iteratively (once per gene). The **e-value** indicates the *expected number of false positives*. The e-value is computed as the product between the p-value and the number of tests: $E = P \cdot N$.  For example, if we obtain a nominal p-value of $P=1.6e-3$ for a given gene in a transcriptome analysis with $N=5,263$ genes, the corresponding e-value is $E = P \cdot N = 1.6e-3 \cdot 5263 = 8.4$. In this case, the E-value of 8.4 is higher than 1, indicating that this level of p-value should not be considered. We recommended to consider as significant the genes having an e-value lower than 1. 
+
+6. **padj**:  **adjusted p-value**. Several methods exist to adjust the p-value (i.e. to fix the problem of multiple testing metionned above). DESeq2 and edgeR both use the False Discovery Rate (FDR) to estimate of the adjusted p-value. The **False Discovery Rate** (**FDR**) is the proportion of false positives expected *among the genes declared significant*. The FDR differs from the e-value, since the e-value is a number of false positives (which can be either smaller or higher than 1), whereas FDR is a proportion, which is by definition comprised between 0 and 1. The FDR indicates the reliability of the set of genes declared positive in a particular analysis. For instance, if one sets the threshold on FRD to $\alpha_{FDR} = 0.05$, and the analysis returns 50 significant genes, we should expect that $5\%$ of these $50$ are false positives, i.e. 2.5. Some programs call "adjusted p-value"
+
+7. **pval_rank**: Rank of the genes sorted by increasing p-value (by decreasing significance). The smallest p-values correspond to the most significant genes. 
+
+8. **Sign**:    Sign of the regulation. 1 = up-regulated, -1 = down-regulated.
+
+7. **FDR_0.05**  Flag indicating whether each gene passes (1) or not (0) the threshold on FDR.
+
+8. **Evalue_1**   Flag indicating whether each gene passes the threshold on E-value (more stringent).
+
+9. **FC_[threshold]** Flag indicating whether each gene passes the user-specified threshold on fold-change. 
+
+10. **DEG** Flag indicating whether each gene is **differentially expressed**. A gene is said differentially expressed if it passes all the user-specified thresholds (FDR, e-value, fold-change). 
+
+### How to choose a significance threshold?
+
+In the classical theory of statistical testing, one chooses a prior threshold on the risk of false positive (e.g. $\alpha = 0.05$) and the test is declared positive if its p-value is below that threshold. 
+
+In high-throughput transcriptome analyses (microarrays, NGS, ...), we are systematically running several thousands of statistical tests in parallel, since each feature (gene) is evaluated to know whether it is or not differentially expressed. For example, with the Bacteria *Escherichia coli* a single differential expression analysis involves $4497$ tests (one per gene). This kind of situation is called **multiple testing**. 
+
+In such situations, the risk of false positive is challenged for each tested feature. This, with a classical threshold of significance ($\alpha = 0.05$) the risk is multiplied by the number of tests ($N=4497$ for *E.coli*).
+
+We can thus compute the **expected number of false positives**, also called **e-value**, as the product between the p-value and the number of tests. 
+
+$$E = P \cdot N = 0.05 * 4497 = 224.85$$
+
+This means that if we would consider significant each gene having a p-value $< 0.05$, we would accept 225 false positives for each analysis. This number is of course unacceptable, so one needs to apply **multiple testing corrections**. 
+
+
+### Multiple testing corrections
+
+#### Expected number of false positives (E-value)
+
+This is the simplest multiple testing correction, as discussed above ($$E = P * N$$). Importantly, the e-value is not a "corrected p-value", because p-values are by definition comprized between 0 and 1, whereas the e-value is a number that can take values superior to 1.
+
+#### False Discovery Rate (FDR)
+
+The **False Discovery Rate** (**FDR**) is the rate of false positives **among the genes declared positivve**. For example, if an analysis reports 100 positive genes with a threshold of $0.05$ on the FDR, we can expect 5 of them to be false positives. 
+
+This strongly differs from the non-adjusted p-value, which applies to the number of features tested, and not only to those reported positive. 
+
+This multiple testing correction is called **FDR** in edgeR result tables, and **padj** (for "adjusted p-value") in DESeq2. 
+
+### Figures of differential expression
+
+#### Volcano plots
+
+We summarize the results of differential analysis with **volcano plots**. 
+
+A volcano plot indicates the relationship between the effect size and the statistical significance. 
+
+On the RNA-seq volcano plots, 
+
+- the effect (abcsissa) is measured by the base-2 logarithm of the fold-change (log2FC). 
+- the statistical significance (ordinate) is the inverse of the log10-transformed false discovery rate: $-log_{10}(FDR)$. The highest points correspond to the most significant genes. 
+
+A priori it would be tempting to consider most significant genes are also likely to be the most robust to sampling fluctuations.  However, this is not trivial, because, when one deals with a very small number of replicates (as is usually the case with RNA-seq transcriptomics), a gene might be declared highly significant because it has a very high number of counts in a particular sample. A proper evaluation of robustness would require to dispose of a sufficient number of samples to enable resampling (comparing the significance obtained with different subsets of the samples). 
+
+Are declared positive the genes that pass both thresholds on fold change (blue vertical lines) and significance (dotted red horizontal line).
+
+**Down-regualted** genes  (in condition 1 relative to condition 2) appear in the topleft corner, **up-regulated** genes in the topright corner.
+
+#### Comparisons between edgeR and DESeq2
+
+The report includes two separate volcano plots for edgeR and DESeq2, respectively. 
+
+In addition, we generate 3 figures comparing the results of edgeR and DESeq2:
+
+1. **Fold-change comparison**
+
+2. **FDR comparison**
+
+3. **Venn diagram**
+
+* * * * * * 
