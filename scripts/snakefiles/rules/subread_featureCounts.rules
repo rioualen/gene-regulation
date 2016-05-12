@@ -1,0 +1,36 @@
+"""featureCounts from the subread toolkit. 
+
+Required parameters:
+    config["qsub"]
+
+Usage: 
+
+Authors: 
+    Claire Rioualen
+"""
+
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+# Define paths
+genome_gff3 = config["dir"]["genomes"] + config["genome"]["version"] + "/" + config["genome"]["version"] + ".gff3"
+
+
+rule subread_featureCounts:
+    input: 
+        bam = "{reads}_sorted_pos.bam", \
+        gff3 = genome_gff3
+    output: "{reads}_featureCounts.tab"
+    params:
+        qsub = config["qsub"]\
+            + " -e {reads}_featureCounts_qsub.err"\
+            + " -o {reads}_featureCounts_qsub.out"
+    log: "{reads}_featureCounts.log"
+    benchmark: "{reads}_bam_stats_benchmark.json"
+    shell:"(featureCounts -a {input.gff3} -o {output} {input.bam} ) &> {log}"
+
+
+
+#Usage: featureCounts [options] -a <annotation_file> -o <output_file> input_file1 [input_file2] ... 
+

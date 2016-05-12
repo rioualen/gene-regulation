@@ -85,6 +85,7 @@ include: os.path.join(RULES, "sra_to_fastq.rules")
 include: os.path.join(RULES, "sra_to_fastq_split.rules")
 include: os.path.join(RULES, "subread_index.rules")
 include: os.path.join(RULES, "subread_pe.rules")
+include: os.path.join(RULES, "subread_featureCounts.rules")
 
 ruleorder: bam_by_pos > sam_to_bam
 
@@ -192,6 +193,11 @@ MAPPING = expand("{alignment}.sam", alignment=ALIGNMENT)
 
 BAM_STATS = expand("{alignment}_bam_stats.txt", alignment=ALIGNMENT)
 
+SORTED_BAM = expand("{alignment}_sorted_pos.bam", alignment=ALIGNMENT)
+
+FEATURE_COUNTS = expand("{alignment}_featureCounts.tab", alignment=ALIGNMENT)
+
+
 #GENOME_COVERAGE = expand("{alignment}.bedgraph", alignment=ALIGNMENT)
 #GENOME_COVERAGE_GZ = expand("{alignment}.bedgraph.gz", alignment=ALIGNMENT)
 
@@ -215,7 +221,7 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: IMPORT, QC, GRAPHICS, TRIM, INDEX, MAPPING, BAM_STATS
+	input: IMPORT, QC, GRAPHICS, TRIM, INDEX, MAPPING, BAM_STATS, SORTED_BAM, FEATURE_COUNTS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
