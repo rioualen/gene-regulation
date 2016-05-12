@@ -47,13 +47,13 @@ import sys
 import datetime
 import pandas as pd
 
-## Config
-configfile: "examples/GSE20870/GSE20870.yml"
+### Config
+#configfile: "examples/GSE20870/GSE20870.yml"
 
-# Define verbosity
-if not ("verbosity" in config.keys()):
-    config["verbosity"] = 0
-verbosity = int(config["verbosity"])
+## Define verbosity
+#if not ("verbosity" in config.keys()):
+#    config["verbosity"] = 0
+#verbosity = int(config["verbosity"])
 
 #================================================================#
 #                         Includes                               #
@@ -82,7 +82,9 @@ include: os.path.join(RULES, "bwa_index.rules")
 include: os.path.join(RULES, "bwa_se.rules")
 include: os.path.join(RULES, "count_reads.rules")
 include: os.path.join(RULES, "fastqc.rules")
-include: os.path.join(RULES, "flowcharts.rules")
+#include: os.path.join(RULES, "flowcharts.rules")
+include: os.path.join(RULES, "dot_graph.rules")
+include: os.path.join(RULES, "dot_to_png.rules")
 include: os.path.join(RULES, "genome_coverage_bedgraph.rules")
 include: os.path.join(RULES, "genome_download.rules")
 include: os.path.join(RULES, "getfasta.rules")
@@ -167,7 +169,8 @@ GENOME_FASTA = expand(GENOME_DIR + "/" + GENOME + ".fa")
 GENOME_ANNOTATIONS = expand(GENOME_DIR + "/" + GENOME + ".gff3")
 
 ### Graphics & reports
-GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
+#GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
+GRAPHICS = expand(RESULTS_DIR + "{graph}.png", graph=["dag", "rulegraph"])
 
 
 #----------------------------------------------------------------#
@@ -181,6 +184,7 @@ RAW_QC = expand(SAMPLE_DIR + "{samples}/{samples}_fastqc/{samples}_fastqc.html",
 # Trimming
 #----------------------------------------------------------------#
 
+## TODO test weird bug
 TRIMMER="sickle-se-q" + config["sickle"]["threshold"]
 TRIMMING=expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}", samples=SAMPLE_IDS, trimmer=TRIMMER)
 TRIM = expand(SAMPLE_DIR + "{trimming}.fastq", trimming=TRIMMING)
@@ -218,12 +222,12 @@ SORTED_READS_BED = expand(SAMPLE_DIR + "{alignment}_sorted_pos.bed", alignment=A
 # ----------------------------------------------------------------
 
 PEAKCALLER=[
-    "homer-fdr" + config["homer"]["fdr"] + "_peaks", 
+    "homer-fdr" + config["homer"]["fdr"], 
     "macs2-qval" + config["macs2"]["qval"], 
 #    "swembl-R" + config["swembl"]["R"],
     "macs14-pval" + config["macs14"]["pval"],
     "spp-fdr" + config["spp"]["fdr"],
-    "bPeaks-log" + config["bPeaks"]["log2FC"]
+#    "bPeaks-log" + config["bPeaks"]["log2FC"]
 ]
 
 PEAKCALLING=expand(expand(PEAKS_DIR + "{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER, trimmer=TRIMMER)
