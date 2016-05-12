@@ -1,0 +1,134 @@
+"""Rule for the creation of Bowtie 2 index. Has to be done only once.  The
+output file is used to test whether the index already exists
+when aligning.
+
+Required parameters:
+    config["qsub"]
+    config["dir"]["genomes"]
+    config["genome"]["version"]
+Optional parameters:
+
+Usage example:
+    ALIGNER=["bowtie2", "subread"]
+    INDEX = expand(config["dir"]["genomes"] + config["genome"]["version"] + "/{aligner}/" + config["genome"]["version"] + ".fa", aligner=ALIGNER)
+
+Contributors: 
+    Claire Rioualen
+"""
+
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "version" in config["genome"].keys():
+    sys.exit("Genome version must be defined in the config file")
+
+if not "genomes" in config["dir"].keys():
+    sys.exit("Genome dir must be defined in the 'dir' section of the config file")
+
+# Define paths
+genome_version = config["genome"]["version"]
+genome_dir = config["dir"]["genomes"] + genome_version + "/"
+genome_file = genome_dir + genome_version + ".fa"
+subread_dir = genome_dir + "subread/"
+subread_index = subread_dir + genome_version + ".fa"
+
+
+rule subread_index:
+    input: genome_file
+    output: subread_index
+    params:
+        dir = subread_dir, \
+        version = genome_version, \
+        qsub = config["qsub"] \
+          + " -e " + subread_dir + "index_qsub.err" \
+          + " -o " + subread_dir + "index_qsub.out"
+    log: subread_index + ".log"
+    benchmark: subread_index + "_benchmark.json"
+    shell: """
+(mkdir -p {params.dir}
+cp {input} {params.dir}
+subread-buildindex -o {params.dir}{params.version}  {params.dir}{params.version}.fa) &> {log}
+"""
+
+#subread-buildindex -o {params.version}  {input}
+
+#subread-buildindex -o Ecoli_K12 genome/Ecoli_K12/Ecoli_K12.fa
+
+
+#rule subread_buildindex:
+#    """Build an index of the genome, which is required before alignig the
+#reads with subread-align.
+#"""
+#    input: reference_genome = config["genome"]["fasta"]
+#    output: files=config["subread"]["index"] + ".files", \
+#        benchmark=config["subread"]["index"] + "_buildindex_benchmark.json"
+#    params: reference_index = config["subread"]["index"], \
+#        qsub = config["qsub"] \
+#            + " -e " + config["subread"]["index"] + "_buildindex_qsub.err " \
+#            + " -o " + config["subread"]["index"] + "_buildindex_qsub.out"
+#    log: config["subread"]["index"] + "_buildindex_log.txt"
+#    benchmark: config["subread"]["index"] + "_buildindex_benchmark.json"
+#    shell: "subread-buildindex -o {params.reference_index}  {input.reference_genome} &> {log}"
+
+
+
+#"""Align each sample with the R-package subread.
+
+#   To align each sample on the reference genome the R-package subread
+#   first needs to build a index with the function builindex(). The
+#   alignment is then executed with the function align(), which calls
+#   the tool read mapping tool Subread.  
+
+#   Reference: Liao Y, Smyth GK and Shi W (2013). The Subread aligner:
+#   fast, accurate and scalable read mapping by seed-and-vote.  Nucleic
+#   Acids Research, 41(10):e108
+
+#"""
+
+## Raise an error and exit if a required parameter is missing.
+## Set optional params to defaults values in case they're not defined in config file.
+
+#if not "subread" in config.keys():
+#    sys.exit("The subread parameters should be specified in the config file.")
+
+#if not (("genome" in config.keys()) and ("fasta" in config["genome"].keys())):
+#    sys.exit("The parameter config['genome']['fasta'] should be specified in the config file.")
+
+#if not "index" in config["subread"].keys():
+#    sys.exit("The parameter config['subread']['index'] should be specified in the config file.")
+
+#if not "seq_type" in config["subread"].keys():
+#    sys.exit("The parameter config['subread']['seq_type'] should be specified in the config file.")
+
+
+## Defne default parameters if not specified in the config file
+#if not "max_mismatches" in config["subread"].keys():
+#    config["subread"]["max_mismatches"] = "3"
+
+#if not "threads" in config["subread"].keys():
+#    config["subread"]["threads"] = "1"
+
+#if not "align_options" in config["subread"].keys():
+#    config["subread"]["align_options"] = ""
+
+#if not "other_options" in config["subread"].keys():
+#    config["subread"]["other_options"] = ""
+
+
+#rule subread_buildindex:
+#    """Build an index of the genome, which is required before alignig the
+#reads with subread-align.
+#"""
+#    input: reference_genome = config["genome"]["fasta"]
+#    output: files=config["subread"]["index"] + ".files", \
+#        benchmark=config["subread"]["index"] + "_buildindex_benchmark.json"
+#    params: reference_index = config["subread"]["index"], \
+#        qsub = config["qsub"] \
+#            + " -e " + config["subread"]["index"] + "_buildindex_qsub.err " \
+#            + " -o " + config["subread"]["index"] + "_buildindex_qsub.out"
+#    log: config["subread"]["index"] + "_buildindex_log.txt"
+#    benchmark: config["subread"]["index"] + "_buildindex_benchmark.json"
+#    shell: "subread-buildindex -o {params.reference_index}  {input.reference_genome} &> {log}"
+
+

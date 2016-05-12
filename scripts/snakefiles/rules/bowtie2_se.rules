@@ -50,8 +50,6 @@ genome_file = genome_dir + genome_version + ".fa"
 bowtie2_dir = genome_dir + "bowtie2/"
 bowtie2_index = bowtie2_dir + genome_version + ".fa"
 
-
-
 rule bowtie2_se:
     input:
         reads = "{reads}.fastq", \
@@ -64,7 +62,7 @@ rule bowtie2_se:
         qsub = config["qsub"] \
           + " -e " + "{reads}_bowtie2_qsub.err" \
           + " -o " + "{reads}_bowtie2_qsub.out"
-    log: "{reads}_bowtie2.log"
-    benchmark: "{reads}_bowtie2_benchmark.json"
+    log: "{reads}_bowtie2_se.log"
+    benchmark: "{reads}_bowtie2_se_benchmark.json"
     shell: "bowtie2 -x {input.index} -U {input.reads} -S {output.sam} --threads {params.threads} --phred33 -N {params.max_mismatches} 2> {log}"
 
