@@ -149,6 +149,14 @@ else:
 if not os.path.exists(PEAKS_DIR):
     os.makedirs(PEAKS_DIR)
 
+if not ("reports" in config["dir"].keys()):
+    REPORTS_DIR = config["dir"]["results"]
+else:
+    REPORTS_DIR = config["dir"]["reports"]
+if not os.path.exists(REPORTS_DIR):
+    os.makedirs(REPORTS_DIR)
+
+
 
 #================================================================#
 #                         Workflow                               #
@@ -170,7 +178,7 @@ GENOME_ANNOTATIONS = expand(GENOME_DIR + "/" + GENOME + ".gff3")
 
 ### Graphics & reports
 #GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
-GRAPHICS = expand(RESULTS_DIR + "{graph}.png", graph=["dag", "rulegraph"])
+GRAPHICS = expand(REPORTS_DIR + "{graph}.png", graph=["dag", "rulegraph"])
 
 
 #----------------------------------------------------------------#
