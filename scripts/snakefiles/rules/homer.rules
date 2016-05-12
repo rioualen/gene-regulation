@@ -59,7 +59,7 @@ if not "samples" in config["dir"].keys():
 if not "peaks" in config["dir"].keys():
     config["dir"]["peaks"] = config["dir"]["results"]
 
-suffix = "homer-fdr" + config["homer"]["fdr"] + "_peaks"
+suffix = "homer-fdr" + config["homer"]["fdr"] #+ "_peaks"
 
 rule homer:
     input:
