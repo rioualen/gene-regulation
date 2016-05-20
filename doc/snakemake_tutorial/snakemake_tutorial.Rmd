@@ -2,32 +2,49 @@
 title: "Getting your hands on Snakemake"
 author: "Claire Rioualen"
 date: "April 13, 2016"
-output: pdf_document
+output:
+  html_document:
+    fig_caption: yes
+    highlight: zenburn
+    number_sections: yes
+    theme: cerulean
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+  pdf_document:
+    fig_caption: yes
+    highlight: zenburn
+    number_sections: yes
+    toc: yes
+    toc_depth: 4
+  word_document:
+    toc: yes
+    toc_depth: 4
 ---
 
 
-## Introduction 
+# Introduction 
 
-### Concepts
+## Snakemake concepts
 
-- Inspired by GNU Make: system of rules & targets
-- A rule is the recipe for a target
-- Rules are combined by matching their inputs and outputs
+- Inspired by GNU Make: system of **rules** & **targets**
+- A rule is the *recipe* for a target
+- Rules are combined by *matching their inputs and outputs*
 
-### Installation
+## Installation
 
 ```{shell}
 sudo apt-get -y install python3-pip
 sudo pip3 install snakemake
 ```
 
-### Disclaimer
+# Disclaimer
 
 This tutorial was developed assuming a unix-like architecture (Ubuntu 14.04).
 
-## Downloads for practical exercises 
+# Downloads for practical exercises 
 
-### Ubuntu libraries
+## Ubuntu libraries
 
 ```{shell}
 sudo apt-get -y install zlib1g-dev                          # samtools (1-6)
@@ -39,7 +56,7 @@ sudo pip3 install "rpy2<2.5.6"                              # Rsamtools (4-6)
 sudo pip3 install pyyaml                                    # Config management (5-6)
 ```
 
-### Tuto material
+## Tuto material
 
 ```{shell}
 wget https://github.com/rioualen/gene-regulation/archive/1.0.tar.gz
@@ -47,9 +64,7 @@ tar xvzf 1.0.tar.gz
 cd gene-regulation-1.0/doc/snakemake_tutorial
 ```
 
-## Downloads for practical exercises 
-
-### Samtools
+## Samtools
 
 ```{shell}
 wget -nc http://sourceforge.net/projects/samtools/files/samtools/1.3/samtools-1.3.tar.bz2
@@ -60,12 +75,14 @@ make
 sudo make install
 ```
 
-### Rsamtools
+## Rsamtools
 
 ```{r eval=FALSE}
 source("http://bioconductor.org/biocLite.R")
 biocLite("Rsamtools")
 ```
+
+# Demo workflows
 
 ## Workflow 1: Rules and targets 
 
@@ -312,7 +329,7 @@ rule bam_sorted:
 ## Workflow 9: Combining wildcards selectively
 
 
-## Bonus: generating flowcharts 
+# Bonus: generating flowcharts 
 
 ```{shell}
 snakemake -s workflow6/workflow6.py --dag | dot -Tpng -o d.png
@@ -321,9 +338,9 @@ snakemake -s workflow6/workflow6.py --rulegraph | dot -Tpng -o r.png
 
 ![Direct Acyclic Graph (DAG)](img/dag.png) ![Rulegraph](img/rulegraph.png) 
 
-## More on snakemake... 
+# More on snakemake... 
 
-### Documentation
+## Documentation
 
 * [Manual](https://bitbucket.org/snakemake/snakemake/wiki/Documentation)
 * [FAQ](https://bitbucket.org/snakemake/snakemake/wiki/FAQ)
@@ -331,13 +348,13 @@ snakemake -s workflow6/workflow6.py --rulegraph | dot -Tpng -o r.png
 
 <!--[![Snakemake](https://img.shields.io/badge/snakemake-≥3.5.2-brightgreen.svg?style=flat-square)](http://snakemake.bitbucket.org)-->
 
-### Installation
+## Installation
 
 ```{shell}
 apt-get install python3-pip
 pip3 install snakemake
 ```
 
-### Reference
+## Reference
 
 Köster, Johannes and Rahmann, Sven. "Snakemake - A scalable bioinformatics workflow engine". Bioinformatics 2012.
