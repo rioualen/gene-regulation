@@ -64,7 +64,7 @@ rule macs14:
         peaks_bed = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + ".bed"
     params:
         outdir = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix, \
-        name = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix, \
+        name = "{treatment}_vs_{control}{preprocess}_" + suffix, \
         pval = config["macs14"]["pval"], \
         keep_dup = config["macs14"]["keep_dup"], \
         mfold = config["macs14"]["mfold"], \
@@ -78,7 +78,9 @@ rule macs14:
     benchmark: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_benchmark.json"
     shell: """
 (mkdir -p {params.outdir}
+#cd {params.outdir}
 macs14 -t {input.treatment} -c {input.control} -f BED -g {params.genome_size} -m {params.mfold} --pvalue {params.pval} --keep-dup {params.keep_dup} -n {params.name} --bw {params.bandwidth} {params.other_options}
-mv {params.name}_peaks.bed {params.name}.bed ) &> {log}
+mv {params.name}_peaks.bed {params.name}.bed ;
+mv {params.name}* {params.outdir} ) &> {log}
 """
 
