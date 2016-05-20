@@ -1,8 +1,9 @@
-"""Check the quality of a file named {dataset}.fastq, containing
-fastq-formatted raw reads using the program fastQC (quality
-control).  You can add any wanted parameters in the "other
-options" of the config file.  The results are put into a folder
-named '{dataset}_fastqc'.
+"""Check the quality of thre reads in a fastq file ({reads}.fastq)
+using the program fastQC (quality control). Results are stored in
+folder named '{reads}_fastqc'.
+
+Custom parameters specified in the configuration file with the
+option config["fastqc"]["other options"] will be passed to fastQC. 
 
 Required parameters:
     config['qsub']
@@ -10,11 +11,8 @@ Required parameters:
 Optional parameters:
     config['fastqc']['other_options']
 
-Usage:
-
-
 Authors: 
-    Claire Rioualen, Lucie Khamvongsa, Jacques van Helden
+    Claire Rioualen, Lucie Khamvongsa & Jacques van Helden
 """
 
 # Set parameters
