@@ -46,8 +46,9 @@ rule bowtie2_index:
     log: bowtie2_index + ".log"
     benchmark: bowtie2_index + "_benchmark.json"
     shell: """
-(mkdir -p {params.dir}
+mkdir -p {params.dir}
 cp {input} {params.dir}
-bowtie2-build  {params.dir}{params.version}.fa  {params.dir}{params.version}.fa) &> {log}
+#cd {params.dir}
+bowtie2-build  {params.dir}{params.version}.fa  {params.dir}{params.version}.fa &> {log}
 """
 
