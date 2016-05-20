@@ -119,9 +119,9 @@ ln -s ~/mydisk/GSE20870_analysis ~/data
 ```
 -->
 
-You can use your preferred locations by updating the workflow configuration file located in `gene-regulation/examples/GSE20870/GSE20870.yml`. 
+Note: the commands above can be adapted to download the data in any other directory. You then need to update the workflow configuration file `gene-regulation/examples/GSE20870/GSE20870.yml`. 
 
-## 1.6 Execute workflow
+## 1.6 Run the workflow
 
 ```
 cd  ~/mydisk/GSE20870_analysis/
