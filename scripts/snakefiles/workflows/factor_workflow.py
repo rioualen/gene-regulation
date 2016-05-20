@@ -1,21 +1,14 @@
-"""Generic work flow for the analysis of ChIP-seq data for the binding
+"""Generic work< flow for the analysis of ChIP-seq data for the binding
 of transcription factors.
 
 
 This workflow performs the following treatments: 
 
- - convert short read archive files (.sra) into fastq format
- - read quality control with fastQC
- - download the reference genome
- - index the genome for either bowtie or BWA
- - read mapping with either bowtie or BWA
+ - read mapping
  - peak-calling with alternate peak-calling programs
+( - motif discovery)
 
-In development:
- - motif discovery
- - scanning of peak sequences to predict binding sites from the discovered motifs
-
-Parameters are specified in a yaml-formatted configuration file.
+The details are specified in a yaml-formatted configuration file.
 
 Usage:
     snakemake -p -s scripts/snakefiles/workflows/factor_workflow.py 
@@ -47,13 +40,14 @@ import sys
 import datetime
 import pandas as pd
 
-### Config
+## Config
 #configfile: "examples/GSE20870/GSE20870.yml"
 
-## Define verbosity
-#if not ("verbosity" in config.keys()):
-#    config["verbosity"] = 0
-#verbosity = int(config["verbosity"])
+
+# Define verbosity
+if not ("verbosity" in config.keys()):
+    config["verbosity"] = 0
+verbosity = int(config["verbosity"])
 
 #================================================================#
 #                         Includes                               #
@@ -62,9 +56,23 @@ import pandas as pd
 if not ("dir" in config.keys()) & ("fg_lib" in config["dir"].keys()) :
     sys.exit("The parameter config['dir']['fg_lib'] should be specified in the config file.")
 
+if not ("dir" in config.keys()) & ("base" in config["dir"].keys()) :
+    sys.exit("The parameter config['dir']['base'] should be specified in the config file.")
+    
+workdir: config["dir"]["base"] # Local Root directory for the project. Should be adapted for porting.
+
+# Define verbosity
 FG_LIB = os.path.abspath(config["dir"]["fg_lib"])
+#FG_LIB = os.path.join(config["dir"]["fg_lib"])
 RULES = os.path.join(FG_LIB, "scripts/snakefiles/rules")
 PYTHON = os.path.join(FG_LIB, "scripts/python_lib")
+
+if (verbosity >= 2):
+    print("PWD: " + os.getcwd())
+    print("FG_LIB: " + FG_LIB)
+    print("RULES: " + RULES)
+    print("PYTHON: " + PYTHON)
+    print("Python util lib: " + os.path.join(PYTHON, "util.py"))
 
 include: os.path.join(PYTHON, "util.py")
 
@@ -77,14 +85,12 @@ include: os.path.join(RULES, "bowtie_index.rules")
 include: os.path.join(RULES, "bowtie_se.rules")
 include: os.path.join(RULES, "bowtie2_index.rules")
 include: os.path.join(RULES, "bowtie2_se.rules")
-include: os.path.join(RULES, "bPeaks.rules")
+#include: os.path.join(RULES, "bPeaks.rules")
 include: os.path.join(RULES, "bwa_index.rules")
 include: os.path.join(RULES, "bwa_se.rules")
 include: os.path.join(RULES, "count_reads.rules")
 include: os.path.join(RULES, "fastqc.rules")
-#include: os.path.join(RULES, "flowcharts.rules")
-include: os.path.join(RULES, "dot_graph.rules")
-include: os.path.join(RULES, "dot_to_png.rules")
+include: os.path.join(RULES, "flowcharts.rules")
 include: os.path.join(RULES, "genome_coverage_bedgraph.rules")
 include: os.path.join(RULES, "genome_download.rules")
 include: os.path.join(RULES, "getfasta.rules")
@@ -149,14 +155,6 @@ else:
 if not os.path.exists(PEAKS_DIR):
     os.makedirs(PEAKS_DIR)
 
-if not ("reports" in config["dir"].keys()):
-    REPORTS_DIR = config["dir"]["results"]
-else:
-    REPORTS_DIR = config["dir"]["reports"]
-if not os.path.exists(REPORTS_DIR):
-    os.makedirs(REPORTS_DIR)
-
-
 
 #================================================================#
 #                         Workflow                               #
@@ -177,8 +175,7 @@ GENOME_FASTA = expand(GENOME_DIR + "/" + GENOME + ".fa")
 GENOME_ANNOTATIONS = expand(GENOME_DIR + "/" + GENOME + ".gff3")
 
 ### Graphics & reports
-#GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
-GRAPHICS = expand(REPORTS_DIR + "{graph}.png", graph=["dag", "rulegraph"])
+GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
 
 
 #----------------------------------------------------------------#
@@ -192,7 +189,6 @@ RAW_QC = expand(SAMPLE_DIR + "{samples}/{samples}_fastqc/{samples}_fastqc.html",
 # Trimming
 #----------------------------------------------------------------#
 
-## TODO test weird bug
 TRIMMER="sickle-se-q" + config["sickle"]["threshold"]
 TRIMMING=expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}", samples=SAMPLE_IDS, trimmer=TRIMMER)
 TRIM = expand(SAMPLE_DIR + "{trimming}.fastq", trimming=TRIMMING)
@@ -230,11 +226,11 @@ SORTED_READS_BED = expand(SAMPLE_DIR + "{alignment}_sorted_pos.bed", alignment=A
 # ----------------------------------------------------------------
 
 PEAKCALLER=[
-    "homer-fdr" + config["homer"]["fdr"], 
+    "homer-fdr" + config["homer"]["fdr"] + "_peaks", 
     "macs2-qval" + config["macs2"]["qval"], 
 #    "swembl-R" + config["swembl"]["R"],
     "macs14-pval" + config["macs14"]["pval"],
-    "spp-fdr" + config["spp"]["fdr"],
+    "spp-fdr" + config["spp"]["fdr"]#,
 #    "bPeaks-log" + config["bPeaks"]["log2FC"]
 ]
 
@@ -267,7 +263,7 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: GRAPHICS, BAM_STATS, PEAKS, QC, GENOME_COVERAGE_GZ, GENOME_ANNOTATIONS, VISU
+	input: BAM_STATS, PEAKS, QC, GENOME_COVERAGE_GZ, GENOME_ANNOTATIONS, VISU#, GRAPHICS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
