@@ -226,11 +226,11 @@ SORTED_READS_BED = expand(SAMPLE_DIR + "{alignment}_sorted_pos.bed", alignment=A
 # ----------------------------------------------------------------
 
 PEAKCALLER=[
-    "homer-fdr" + config["homer"]["fdr"] + "_peaks", 
+#    "homer-fdr" + config["homer"]["fdr"] + "_peaks", 
     "macs2-qval" + config["macs2"]["qval"], 
 #    "swembl-R" + config["swembl"]["R"],
-    "macs14-pval" + config["macs14"]["pval"],
-    "spp-fdr" + config["spp"]["fdr"]#,
+#    "macs14-pval" + config["macs14"]["pval"],
+#    "spp-fdr" + config["spp"]["fdr"]#,
 #    "bPeaks-log" + config["bPeaks"]["log2FC"]
 ]
 
@@ -263,7 +263,7 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: BAM_STATS, PEAKS, QC, GENOME_COVERAGE_GZ, GENOME_ANNOTATIONS, VISU#, GRAPHICS
+	input: BAM_STATS, PEAKS, GENOME_COVERAGE_GZ, GENOME_ANNOTATIONS, VISU#, QC#, GRAPHICS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
