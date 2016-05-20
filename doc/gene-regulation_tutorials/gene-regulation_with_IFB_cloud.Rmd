@@ -2,13 +2,6 @@
 title: 'Running the gene-regulation pipelines on a virtual machine on the IFB cloud'
 author: "Claire Rioualen"
 date: "May 12th, 2016"
----
-
-<!--
----
-title: 'Running the gene-regulation pipelines on a virtual machine on the IFB cloud'
-author: "Claire Rioualen"
-date: "April 11, 2016"
 output:
   html_document:
     fig_caption: yes
@@ -16,16 +9,20 @@ output:
     number_sections: yes
     theme: cerulean
     toc: yes
-    toc_depth: 5
+    toc_depth: 4
+    toc_float: yes
   pdf_document:
     fig_caption: yes
     highlight: zenburn
     number_sections: yes
     toc: yes
-    toc_depth: 5
+    toc_depth: 4
+  word_document:
+    toc: yes
+    toc_depth: 4
 ---
---> 
 
+<!--
 - [1. Using the Gene-regulation appliance](#1-using-the-gene-regulation-appliance)
     - [1.1 Requirements](#11-requirements)
     - [1.2 Virtual disk creation](#12-virtual-disk-creation)
@@ -43,7 +40,8 @@ output:
     - [Installing programs and dependencies](#installing-programs-and-dependencies)
     - [Get the `gene-regulation` repository](#get-the-gene-regulation-repository)
     - [Run makefile to install the dependencies](#run-makefile-to-install-the-dependencies)
-    
+-->
+
 > Notes: 
 > This protocol was developed on a Unix computer, with the OS LMDE. 
 > The virtual machines are developed with the Ubuntu 14.04 OS. 
@@ -67,7 +65,7 @@ Appliances usually have a limited amount of disk space (up to 10, 20Go). If the 
 
 1. Click *New vDisk* button.
 2. Enter a size (whole number equating to the amount of Go needed). 
-3. Name it.
+3. Name it (e.g. `GSE20870-10Gb`, the ID of the Gene Expression Omnibus series that will be stored on the virtual drive).
 
 ![](../../img/vdisk-x2go.png)
 
@@ -98,26 +96,37 @@ ssh -A -p 22 root@192.54.201.124
 
 ## 1.5 Download source data
 
-On the IFB cloud VM, the vDisk is automatically attached and mounted by default under `/root/mydisk`. 
-Here we create a symlink from our preferred location `/data` to the data directory `/root/mydisk/data`. 
+On the IFB cloud VM, the vDisk is automatically attached and mounted by default under `/root/mydisk`, with a link from your home folder `~/mydisk`. 
+
+Here we create a folder to store the source data files and download them .
 
 ```
-mkdir -p /root/mydisk/data/source/GSE20870/GSM521934 /root/mydisk/data/source/GSE20870/GSM521935
-cd /root/mydisk/data/source/GSE20870/GSM521934
-wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021358/SRR051929/SRR051929.sra
-cd /root/mydisk/data/source/GSE20870/GSM521935
-wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra
+## Download input reads
+mkdir -p ~/mydisk/GSE20870_analysis/source/GSE20870/GSM521934 
+wget -v --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021358/SRR051929/SRR051929.sra -P ~/mydisk/GSE20870_analysis/source/GSE20870/GSM521934/
+
+## Download ChIP-seq reads
+mkdir -p ~/mydisk/GSE20870_analysis/source/GSE20870/GSM521935
+wget -v --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra -P ~/mydisk/GSE20870_analysis/source/GSE20870/GSM521935/
 ```
+
+
+<!--
+For convenience, we create a symlink from our preferred location `/data` to the data directory `~/mydisk/GSE20870_analysis`. 
+
 ```
-ln -s /root/mydisk/data /data
+ln -s ~/mydisk/GSE20870_analysis ~/data
 ```
-You can use your preferred locations by updating the workflow configuration file located in `gene-regulation-1.0/examples/GSE20870/GSE20870.yml`. 
+-->
+
+You can use your preferred locations by updating the workflow configuration file located in `gene-regulation/examples/GSE20870/GSE20870.yml`. 
 
 ## 1.6 Execute workflow
 
 ```
-cd ~/gene-regulation
-snakemake -p -s scripts/snakefiles/workflows/factor_workflow.py
+cd  ~/mydisk/GSE20870_analysis/
+ln -s ~/gene-regulation-1.0 ./gene-regulation
+snakemake -p -s gene-regulation/scripts/snakefiles/workflows/factor_workflow.py --configfile gene-regulation/examples/GSE20870/GSE20870.yml
 ```
 
 Using 4CPU & 8Go of RAM, the workflow took about 12mn to complete. 
