@@ -11,14 +11,22 @@ This workflow performs the following treatments:
 The details are specified in a yaml-formatted configuration file.
 
 Usage:
-    snakemake -p -s scripts/snakefiles/workflows/factor_workflow.py 
 
-    snakemake -p  -c "qsub {params.qsub}" -j 12 \
-        -s scripts/snakefiles/workflows/factor_workflow.py \
+1. Run in command line mode
+
+    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/factor_workflow.py 
         --configfile path/to/specific/config_file.yml \
         [targets]
 
-Flowcharts:
+2. Send tasks to qsub job scheduler
+
+    snakemake -p -c "qsub {params.qsub}" -j 12 \
+        -s gene-regulation/scripts/snakefiles/workflows/factor_workflow.py \
+        --configfile path/to/specific/config_file.yml \
+        [targets]
+
+3. Generate flowcharts:
+
     snakemake -p -s scripts/snakefiles/workflows/factor_workflow.py \
         --configfile path/to/specific/config_file.yml \
         --force flowcharts
@@ -228,10 +236,10 @@ SORTED_READS_BED = expand(SAMPLE_DIR + "{alignment}_sorted_pos.bed", alignment=A
 PEAKCALLER=[
 #    "homer-fdr" + config["homer"]["fdr"] + "_peaks", 
     "macs2-qval" + config["macs2"]["qval"], 
-#    "swembl-R" + config["swembl"]["R"],
-#    "macs14-pval" + config["macs14"]["pval"],
-#    "spp-fdr" + config["spp"]["fdr"]#,
-#    "bPeaks-log" + config["bPeaks"]["log2FC"]
+    "swembl-R" + config["swembl"]["R"],
+    "macs14-pval" + config["macs14"]["pval"],
+#    "spp-fdr" + config["spp"]["fdr"],
+#    "bPeaks-log" + config["bPeaks"]["log2FC"],
 ]
 
 PEAKCALLING=expand(expand(PEAKS_DIR + "{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER, trimmer=TRIMMER)
@@ -263,8 +271,6 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: BAM_STATS, PEAKS, GENOME_COVERAGE_GZ, GENOME_ANNOTATIONS, VISU#, QC#, GRAPHICS
+	input: BAM_STATS, PEAKS, GENOME_COVERAGE_GZ, GENOME_ANNOTATIONS, VISU#, GRAPHICS#, QC
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
-
-
