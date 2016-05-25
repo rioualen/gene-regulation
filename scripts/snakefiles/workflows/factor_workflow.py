@@ -61,8 +61,8 @@ verbosity = int(config["verbosity"])
 #                         Includes                               #
 #================================================================#
 
-if not ("dir" in config.keys()) & ("fg_lib" in config["dir"].keys()) :
-    sys.exit("The parameter config['dir']['fg_lib'] should be specified in the config file.")
+if not ("dir" in config.keys()) & ("gene_regulation" in config["dir"].keys()) :
+    sys.exit("The parameter config['dir']['gene_regulation'] should be specified in the config file.")
 
 if not ("dir" in config.keys()) & ("base" in config["dir"].keys()) :
     sys.exit("The parameter config['dir']['base'] should be specified in the config file.")
@@ -70,8 +70,7 @@ if not ("dir" in config.keys()) & ("base" in config["dir"].keys()) :
 workdir: config["dir"]["base"] # Local Root directory for the project. Should be adapted for porting.
 
 # Define verbosity
-FG_LIB = os.path.abspath(config["dir"]["fg_lib"])
-#FG_LIB = os.path.join(config["dir"]["fg_lib"])
+FG_LIB = os.path.abspath(config["dir"]["gene_regulation"])
 RULES = os.path.join(FG_LIB, "scripts/snakefiles/rules")
 PYTHON = os.path.join(FG_LIB, "scripts/python_lib")
 
@@ -93,12 +92,13 @@ include: os.path.join(RULES, "bowtie_index.rules")
 include: os.path.join(RULES, "bowtie_se.rules")
 include: os.path.join(RULES, "bowtie2_index.rules")
 include: os.path.join(RULES, "bowtie2_se.rules")
-#include: os.path.join(RULES, "bPeaks.rules")
+include: os.path.join(RULES, "bPeaks.rules")
 include: os.path.join(RULES, "bwa_index.rules")
 include: os.path.join(RULES, "bwa_se.rules")
 include: os.path.join(RULES, "count_reads.rules")
+include: os.path.join(RULES, "dot_graph.rules")
+include: os.path.join(RULES, "dot_to_image.rules")
 include: os.path.join(RULES, "fastqc.rules")
-include: os.path.join(RULES, "flowcharts.rules")
 include: os.path.join(RULES, "genome_coverage_bedgraph.rules")
 include: os.path.join(RULES, "genome_download.rules")
 include: os.path.join(RULES, "getfasta.rules")
@@ -108,7 +108,7 @@ include: os.path.join(RULES, "homer.rules")
 include: os.path.join(RULES, "igv_session.rules")
 include: os.path.join(RULES, "macs2.rules")
 include: os.path.join(RULES, "macs14.rules")
-include: os.path.join(RULES, "peak_motifs.rules")
+#include: os.path.join(RULES, "peak_motifs.rules")
 include: os.path.join(RULES, "sickle_se.rules")
 include: os.path.join(RULES, "spp.rules")
 include: os.path.join(RULES, "swembl.rules")
@@ -125,11 +125,11 @@ ruleorder: bam_by_pos > sam_to_bam
 READS = config["dir"]["reads_source"]
 
 # Samples
-SAMPLES = read_table(config["files"]["samples"])
+SAMPLES = read_table(config["metadata"]["samples"])
 SAMPLE_IDS = SAMPLES.iloc[:,0]
 
 ## Design
-DESIGN = read_table(config["files"]["design"])
+DESIGN = read_table(config["metadata"]["design"])
 TREATMENT = DESIGN['treatment']
 CONTROL = DESIGN['control']
 
@@ -163,6 +163,14 @@ else:
 if not os.path.exists(PEAKS_DIR):
     os.makedirs(PEAKS_DIR)
 
+if not ("reports" in config["dir"].keys()):
+    REPORTS_DIR = config["dir"]["results"]
+else:
+    REPORTS_DIR = config["dir"]["reports"]
+if not os.path.exists(REPORTS_DIR):
+    os.makedirs(REPORTS_DIR)
+
+
 
 #================================================================#
 #                         Workflow                               #
@@ -174,7 +182,7 @@ IMPORT = expand(SAMPLE_DIR + "{samples}/{samples}.fastq", samples=SAMPLE_IDS)
 
 # Genome
 GENOME = config["genome"]["version"]
-GENOME_DIR = config["dir"]["genomes"] + config["genome"]["version"]
+GENOME_DIR = config["dir"]["genome"] + config["genome"]["version"]
 
 if not os.path.exists(GENOME_DIR):
     os.makedirs(GENOME_DIR)
@@ -183,7 +191,9 @@ GENOME_FASTA = expand(GENOME_DIR + "/" + GENOME + ".fa")
 GENOME_ANNOTATIONS = expand(GENOME_DIR + "/" + GENOME + ".gff3")
 
 ### Graphics & reports
-GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
+#GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
+GRAPHICS = expand(REPORTS_DIR + "{graph}.{ext}", graph=["dag", "rulegraph"], ext=["png", "pdf"])
+
 
 
 #----------------------------------------------------------------#
@@ -234,11 +244,11 @@ SORTED_READS_BED = expand(SAMPLE_DIR + "{alignment}_sorted_pos.bed", alignment=A
 # ----------------------------------------------------------------
 
 PEAKCALLER=[
-#    "homer-fdr" + config["homer"]["fdr"] + "_peaks", 
+    "homer-fdr" + config["homer"]["fdr"],
     "macs2-qval" + config["macs2"]["qval"], 
-    "swembl-R" + config["swembl"]["R"],
+#    "swembl-R" + config["swembl"]["R"],
     "macs14-pval" + config["macs14"]["pval"],
-#    "spp-fdr" + config["spp"]["fdr"],
+    "spp-fdr" + config["spp"]["fdr"],
 #    "bPeaks-log" + config["bPeaks"]["log2FC"],
 ]
 
@@ -271,6 +281,6 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: BAM_STATS, PEAKS, GENOME_COVERAGE_GZ, GENOME_ANNOTATIONS, VISU#, GRAPHICS#, QC
+	input: BAM_STATS, PEAKS, GENOME_COVERAGE_GZ, GENOME_ANNOTATIONS, VISU, GRAPHICS, QC
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
