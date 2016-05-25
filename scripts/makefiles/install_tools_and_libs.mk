@@ -275,7 +275,7 @@ subread:
 ## to test macs 1.4.3
 macs1:
 	cd $(SOURCE_DIR); \
-	wget --no-clobber https://pyp.python.org/packages/86/da/1e57f6e130b732160d87d96f2cc1771b9de24ce16522a4f73a8528166b87/MACS-1.4.3.tar.gz; \
+	wget --no-clobber https://pypi.python.org/packages/86/da/1e57f6e130b732160d87d96f2cc1771b9de24ce16522a4f73a8528166b87/MACS-1.4.3.tar.gz; \
 	tar xvzf MACS-1.4.3.tar.gz; \
 	cd MACS-1.4.3; \
 	sudo python setup.py install
