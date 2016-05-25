@@ -36,33 +36,33 @@ rule sra_to_fastq_split:
 samples={params.samples}
 for sam in ${{samples[@]}}
 do
-    mkdir -p {wildcards.results}$sam
+    mkdir -p {wildcards.results}/$sam
     echo "Reading $sam directory {input.datadir}$sam..."
     files=({input.datadir}$sam/*)
     if [ ${{#files[@]}} -gt 1 ]
     then
-        echo "TODO!"
+        echo "TODO"
 #        echo "Case 2+ files : ${{files[@]}}"
 #        for f in ${{files[@]}}
 #        do
 #            base=$(basename $f .sra)
 #            echo "$base"
 #            echo "Converting $base.sra to $base.fastq..."
-#            fastq-dump --outdir {wildcards.results}$sam/ -I --split-files {input.datadir}$sam/$base.sra
+#            fastq-dump --outdir {wildcards.results}/$sam/ -I --split-files {input.datadir}$sam/$base.sra
 #        done
 #        echo "Merging ${{#files[@]}} together as $sam.fastq."
 #        echo "Cmd: cat ${{files[@]}} > {input.datadir}$sam.fastq"
-#        files=({wildcards.results}$sam/*)
-#        cat ${{files[@]}} > {wildcards.results}$sam/$sam.fastq
+#        files=({wildcards.results}/$sam/*)
+#        cat ${{files[@]}} > {wildcards.results}/$sam/$sam.fastq
 #        rm ${{files[@]}}
     else
         echo "Case 1 file : ${{files[@]}}"
         base=$(basename ${{files[0]}} .sra)
         echo "Converting $base.sra to $base.fastq..."
-        fastq-dump --outdir {wildcards.results}$sam -I --split-files {input.datadir}$sam/$base.sra
-        echo "Moving {wildcards.results}$sam/$base"_1".fastq and {wildcards.results}$sam/$base"_2".fastq to {wildcards.results}$sam/$sam"_1".fastq and {wildcards.results}$sam/$sam"_2".fastq"
-        mv  {wildcards.results}$sam/$base"_1".fastq {wildcards.results}$sam/$sam"_1".fastq
-        mv  {wildcards.results}$sam/$base"_2".fastq {wildcards.results}$sam/$sam"_2".fastq
+        fastq-dump --outdir {wildcards.results}/$sam -I --split-files {input.datadir}$sam/$base.sra
+        echo "Moving {wildcards.results}/$sam/$base"_1".fastq and {wildcards.results}/$sam/$base"_2".fastq to {wildcards.results}/$sam/$sam"_1".fastq and {wildcards.results}/$sam/$sam"_2".fastq"
+        mv  {wildcards.results}/$sam/$base"_1".fastq {wildcards.results}/$sam/$sam"_1".fastq
+        mv  {wildcards.results}/$sam/$base"_2".fastq {wildcards.results}/$sam/$sam"_2".fastq
     fi
 done
 echo "Job done.") &> {log}
