@@ -250,35 +250,35 @@ bwa:
 #	wget -nc https://sourceforge.net/projects/bio-bwa/files/bwa-$(BWA_VER).tar.bz2; \
 
 ### TODO testing subread ##
-#SUBREAD_VER=1.5.0
-#subread:
-#	cd $(SOURCE_DIR); \
-#	wget https://sourceforge.net/projects/subread/files/subread-$(SUBREAD_VER)/subread-$(SUBREAD_VER)-source.tar.gz; \
-#	tar zxvf subread-$(SUBREAD_VER)-source.tar.gz; \
-#	cd subread-$(SUBREAD_VER)-source/src; \
-#	make -f Makefile.Linux; \
-#	cd ../bin; \
-#	cp `find * -executable -type f` $(BIN_DIR)
+SUBREAD_VER=1.5.0
+subread:
+	cd $(SOURCE_DIR); \
+	wget https://sourceforge.net/projects/subread/files/subread-$(SUBREAD_VER)/subread-$(SUBREAD_VER)-source.tar.gz; \
+	tar zxvf subread-$(SUBREAD_VER)-source.tar.gz; \
+	cd subread-$(SUBREAD_VER)-source/src; \
+	make -f Makefile.Linux; \
+	cd ../bin; \
+	cp `find * -executable -type f` $(BIN_DIR)
 
 
 # ----------------------------------------------------------------
 # Peak analysis
 # ----------------------------------------------------------------
 
-macs1:
-	cd $(SOURCE_DIR); \
-	wget --no-clobber https://github.com/downloads/taoliu/MACS/MACS-$(MACS1_VER)-1.tar.gz; \
-	tar xvfz MACS-$(MACS1_VER)-1.tar.gz ; \
-	cd MACS-$(MACS1_VER); \
-	sudo python setup.py install
+#macs1:
+#	cd $(SOURCE_DIR); \
+#	wget --no-clobber https://github.com/downloads/taoliu/MACS/MACS-$(MACS1_VER)-1.tar.gz; \
+#	tar xvfz MACS-$(MACS1_VER)-1.tar.gz ; \
+#	cd MACS-$(MACS1_VER); \
+#	sudo python setup.py install
 
 ## to test macs 1.4.3
-
-#	cd $(SOURCE_DIR); \
-#	wget --no-clobber https://pyp.python.org/packages/86/da/1e57f6e130b732160d87d96f2cc1771b9de24ce16522a4f73a8528166b87/MACS-1.4.3.tar.gz; \
-#	tar xvzf MACS-1.4.3.tar.gz; \
-#	cd MACS-1.4.3; \
-#	sudo python setup.py install
+macs1:
+	cd $(SOURCE_DIR); \
+	wget --no-clobber https://pyp.python.org/packages/86/da/1e57f6e130b732160d87d96f2cc1771b9de24ce16522a4f73a8528166b87/MACS-1.4.3.tar.gz; \
+	tar xvzf MACS-1.4.3.tar.gz; \
+	cd MACS-1.4.3; \
+	sudo python setup.py install
 
 
 macs2:
@@ -310,7 +310,7 @@ homer:
 
 ngs_tools: samtools bedtools sratoolkit \
 	fastqc sickle \
-	bowtie bowtie2 bwa \
+	bowtie bowtie2 bwa subread \
 	macs1 macs2 spp homer
 
 
