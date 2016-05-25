@@ -11,7 +11,7 @@ Optional parameters:
 Usage example:
     ALIGNER=["bowtie", "bowtie2", "bwa"]
     ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)
-    INDEX = expand(config["dir"]["genomes"] + config["genome"]["version"] + "/{aligner}/" + config["genome"]["version"] + ".fa", aligner=ALIGNER)
+    INDEX = expand(config["dir"]["genome"] + config["genome"]["version"] + "/{aligner}/" + config["genome"]["version"] + ".fa", aligner=ALIGNER)
     MAPPING = expand("{alignment}.sam", alignment=ALIGNMENT)
 
 
@@ -27,12 +27,12 @@ if not "qsub" in config.keys():
 if not "version" in config["genome"].keys():
     sys.exit("Genome version must be defined in the config file")
 
-if not "genomes" in config["dir"].keys():
+if not "genome" in config["dir"].keys():
     sys.exit("Genome dir must be defined in the 'dir' section of the config file")
 
 # Define paths
 genome_version = config["genome"]["version"]
-genome_dir = config["dir"]["genomes"] + genome_version + "/"
+genome_dir = config["dir"]["genome"] + genome_version + "/"
 genome_file = genome_dir + genome_version + ".fa"
 bwa_dir = genome_dir + "bwa/"
 bwa_index = bwa_dir + genome_version + ".fa"

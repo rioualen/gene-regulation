@@ -13,12 +13,12 @@ if not "qsub" in config.keys():
 if not "version" in config["genome"].keys():
     sys.exit("Genome version must be defined in the config file")
 
-if not "genomes" in config["dir"].keys():
+if not "genome" in config["dir"].keys():
     sys.exit("Genome dir must be defined in the 'dir' section of the config file")
 
 # Define paths
 genome_version = config["genome"]["version"]
-genome_dir = config["dir"]["genomes"] + genome_version + "/"
+genome_dir = config["dir"]["genome"] + genome_version + "/"
 genome_file = genome_dir + genome_version + ".fa"
 bowtie_dir = genome_dir + "bowtie/"
 bowtie_index = bowtie_dir + genome_version + ".fa"

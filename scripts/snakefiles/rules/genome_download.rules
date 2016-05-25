@@ -7,9 +7,9 @@ Usage example:
 
 Required parameters:
     config["qsub"]
-    config["dir"]["genomes"]
+    config["dir"]["genome"]
     config["genome"]["version"]
-    config["genome"]["url"]
+    config["genome"]["fasta_url"]
 
 Optional parameters:
 
@@ -24,15 +24,15 @@ if not "qsub" in config.keys():
 if not "version" in config["genome"].keys():
     sys.exit("Genome version must be defined in the config file")
 
-if not "genomes" in config["dir"].keys():
+if not "genome" in config["dir"].keys():
     sys.exit("Genome dir must be defined in the dir section of the config file")
 
-if not "url" in config["genome"].keys():
-    sys.exit("The parameter genome url must be defined in the config file")
+if not "fasta_url" in config["genome"].keys():
+    sys.exit("The parameter genome fasta_url must be defined in the config file")
 
 # Define paths
 genome_version = config["genome"]["version"]
-genome_dir = config["dir"]["genomes"] + genome_version + "/"
+genome_dir = config["dir"]["genome"] + genome_version + "/"
 genome_file = genome_dir + genome_version + ".fa"
 
 rule genome_download:
@@ -41,7 +41,7 @@ rule genome_download:
     log: genome_file + ".log"
     benchmark: genome_file + "_benchmark.json"
     params:
-        url = config["genome"]["url"], \
+        url = config["genome"]["fasta_url"], \
         dir = genome_dir, \
         version = genome_version, \
         qsub = config["qsub"] \

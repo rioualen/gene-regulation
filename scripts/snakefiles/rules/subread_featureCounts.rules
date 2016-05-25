@@ -14,7 +14,7 @@ if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
 # Define paths
-genome_gff3 = config["dir"]["genomes"] + config["genome"]["version"] + "/" + config["genome"]["version"] + ".gff3"
+genome_gff3 = config["dir"]["genome"] + config["genome"]["version"] + "/" + config["genome"]["version"] + ".gff3"
 
 
 rule subread_featureCounts:

@@ -4,13 +4,13 @@ when aligning.
 
 Required parameters:
     config["qsub"]
-    config["dir"]["genomes"]
+    config["dir"]["genome"]
     config["genome"]["version"]
 Optional parameters:
 
 Usage example:
     ALIGNER=["bowtie2", "bwa"]
-    INDEX = expand(config["dir"]["genomes"] + config["genome"]["version"] + "/{aligner}/" + config["genome"]["version"] + ".fa", aligner=ALIGNER)
+    INDEX = expand(config["dir"]["genome"] + config["genome"]["version"] + "/{aligner}/" + config["genome"]["version"] + ".fa", aligner=ALIGNER)
 
 Contributors: 
     Claire Rioualen
@@ -23,12 +23,12 @@ if not "qsub" in config.keys():
 if not "version" in config["genome"].keys():
     sys.exit("Genome version must be defined in the config file")
 
-if not "genomes" in config["dir"].keys():
+if not "genome" in config["dir"].keys():
     sys.exit("Genome dir must be defined in the 'dir' section of the config file")
 
 # Define paths
 genome_version = config["genome"]["version"]
-genome_dir = config["dir"]["genomes"] + genome_version + "/"
+genome_dir = config["dir"]["genome"] + genome_version + "/"
 genome_file = genome_dir + genome_version + ".fa"
 bowtie2_dir = genome_dir + "bowtie2/"
 bowtie2_index = bowtie2_dir + genome_version + ".fa"

@@ -1,4 +1,17 @@
-"""To all: rename to fetch-sequences.rules?"""
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "version" in config["genome"].keys():
+    sys.exit("Genome version must be defined in the config file")
+
+if not "genome" in config["dir"].keys():
+    sys.exit("Genome dir must be defined in the dir section of the config file")
+
+# Define paths
+genome_version = config["genome"]["version"]
+genome_dir = config["dir"]["genome"] + genome_version + "/"
+genome_file = genome_dir + genome_version + ".fa"
 
 rule getfasta:
 	"""get fasta from bed file.
@@ -14,7 +27,7 @@ rule getfasta:
 	output: "{regions}.fasta"
 	log: "{regions}_getfasta.log"
 	benchmark: "{regions}_getfasta_benchmark.json"
-	params: genome = config["genome"]["fasta"], \
+	params: genome = genome_file, \
                 qsub = config["qsub"] + " -e {regions}_getfasta_qsub.err -o {regions}_getfasta_qsub.out"
 	shell:"""bedtools getfasta -fi {params.genome} -bed {input} -fo {output} 2> {log}"""
 

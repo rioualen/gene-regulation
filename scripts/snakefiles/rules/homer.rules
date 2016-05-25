@@ -28,8 +28,12 @@ Usage example:
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
-if not "fasta" in config["genome"].keys():
-    sys.exit("The parameter genome fasta must be defined in the config file")
+if not "version" in config["genome"].keys():
+    sys.exit("Genome version must be defined in the config file")
+
+if not "genome" in config["dir"].keys():
+    sys.exit("Genome dir must be defined in the dir section of the config file")
+
 
 if not "size" in config["genome"].keys():
     sys.exit("The parameter genome size must be defined in the config file")
@@ -59,7 +63,9 @@ if not "samples" in config["dir"].keys():
 if not "peaks" in config["dir"].keys():
     config["dir"]["peaks"] = config["dir"]["results"]
 
-suffix = "homer-fdr" + config["homer"]["fdr"] #+ "_peaks"
+suffix = "homer-fdr" + config["homer"]["fdr"]
+
+genome_file = config["dir"]["genome"] + config["genome"]["version"] + "/" + config["genome"]["version"] + ".fa"
 
 rule homer:
     input:
@@ -69,7 +75,7 @@ rule homer:
     params:    # name="{treatment}_vs_{control}_homer", \
         treatment_tag=config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_tag", \
         control_tag=config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{control}_tag", \
-        genome=config['genome']['fasta'], \
+        genome=genome_file, \
         style=config["homer"]["style"], \
         L = config["homer"]["L"], \
         P = config["homer"]["P"], \
