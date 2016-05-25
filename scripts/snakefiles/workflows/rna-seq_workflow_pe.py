@@ -58,17 +58,16 @@ verbosity = int(config["verbosity"])
 #                         Includes                               #
 #================================================================#
 
-if not ("dir" in config.keys()):
-    sys.exit("The parameter config['dir'] and config['dir']['fg_lib'] should be specified in the config file.")
+if not ("base" in config["dir"].keys()):
+    sys.exit("The parameter 'dir base' should be specified in the config file.")
 
-FG_LIB = os.path.abspath(config["dir"]["fg_lib"])
+FG_LIB = os.path.abspath(config["dir"]["gene_regulation"])
 RULES = os.path.join(FG_LIB, "scripts/snakefiles/rules")
 PYTHON = os.path.join(FG_LIB, "scripts/python_lib")
 
 include: os.path.join(PYTHON, "util.py")
 
 include: os.path.join(RULES, "annotation_download.rules")
-include: os.path.join(RULES, "bam_by_name.rules")
 include: os.path.join(RULES, "bam_by_pos.rules")
 include: os.path.join(RULES, "bam_to_bed.rules")
 include: os.path.join(RULES, "bam_stats.rules")
@@ -76,8 +75,9 @@ include: os.path.join(RULES, "bowtie2_index.rules")
 include: os.path.join(RULES, "bowtie2_pe.rules")
 include: os.path.join(RULES, "count_reads.rules")
 include: os.path.join(RULES, "dot_graph.rules")
-include: os.path.join(RULES, "dot_to_png.rules")
+include: os.path.join(RULES, "dot_to_image.rules")
 include: os.path.join(RULES, "fastqc.rules")
+include: os.path.join(RULES, "genome_download.rules")
 include: os.path.join(RULES, "get_chrom_sizes.rules")
 include: os.path.join(RULES, "sickle_pe.rules")
 include: os.path.join(RULES, "sam_to_bam.rules")
@@ -97,11 +97,11 @@ ruleorder: bam_by_pos > sam_to_bam
 READS = config["dir"]["reads_source"]
 
 # Samples
-SAMPLES = read_table(config["files"]["samples"])
+SAMPLES = read_table(config["metadata"]["samples"])
 SAMPLE_IDS = SAMPLES.iloc[:,0]
 
 ## Design
-DESIGN = read_table(config["files"]["design"])
+DESIGN = read_table(config["metadata"]["design"])
 #TREATMENT = DESIGN['treatment']
 #CONTROL = DESIGN['control']
 
@@ -118,22 +118,22 @@ if not ("results" in config["dir"].keys()):
     sys.exit("The parameter config['dir']['results'] should be specified in the config file.")
 
 RESULTS_DIR = config["dir"]["results"]
-if not os.path.exists(RESULTS_DIR):
-    os.makedirs(RESULTS_DIR)
+#if not os.path.exists(RESULTS_DIR):
+#    os.makedirs(RESULTS_DIR)
 
 if not ("samples" in config["dir"].keys()):
     SAMPLE_DIR = config["dir"]["results"]
 else:
     SAMPLE_DIR = config["dir"]["samples"]
-if not os.path.exists(SAMPLE_DIR):
-    os.makedirs(SAMPLE_DIR)
+#if not os.path.exists(SAMPLE_DIR):
+#    os.makedirs(SAMPLE_DIR)
 
 if not ("reports" in config["dir"].keys()):
     REPORTS_DIR = config["dir"]["results"]
 else:
     REPORTS_DIR = config["dir"]["reports"]
-if not os.path.exists(REPORTS_DIR):
-    os.makedirs(REPORTS_DIR)
+#if not os.path.exists(REPORTS_DIR):
+#    os.makedirs(REPORTS_DIR)
 
 
 #================================================================#
@@ -146,7 +146,7 @@ IMPORT = expand(SAMPLE_DIR + "{samples}/{samples}_{strand}.fastq", samples=SAMPL
 
 ## Genome
 GENOME = config["genome"]["version"]
-GENOME_DIR = config["dir"]["genomes"] + config["genome"]["version"]
+GENOME_DIR = config["dir"]["genome"] + config["genome"]["version"]
 
 if not os.path.exists(GENOME_DIR):
     os.makedirs(GENOME_DIR)
@@ -155,10 +155,8 @@ GENOME_FASTA = expand(GENOME_DIR + "/" + GENOME + ".fa")
 GENOME_ANNOTATIONS = expand(GENOME_DIR + "/" + GENOME + ".gff3")
 
 ## Graphics & reports
-#print("some stuff")
 GRAPHICS = expand(REPORTS_DIR + "{graph}.png", graph=["dag", "rulegraph"])
 
-#print("some other stuff")
 #----------------------------------------------------------------#
 # Quality control
 #----------------------------------------------------------------#
@@ -201,12 +199,6 @@ FEATURE_COUNTS = expand("{alignment}_featureCounts.tab", alignment=ALIGNMENT)
 #GENOME_COVERAGE = expand("{alignment}.bedgraph", alignment=ALIGNMENT)
 #GENOME_COVERAGE_GZ = expand("{alignment}.bedgraph.gz", alignment=ALIGNMENT)
 
-
-# Sort mapped reads
-
-#SORTED_READS_BED = expand(SAMPLE_DIR + "{alignment}_sorted_pos.bed", alignment=ALIGNMENT)
-
-
 ## ----------------------------------------------------------------
 ## Visualization
 ## ----------------------------------------------------------------
@@ -225,7 +217,5 @@ rule all:
 #	input: IMPORT, QC, GRAPHICS, TRIM, INDEX, MAPPING, BAM_STATS, SORTED_BAM, FEATURE_COUNTS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
-
-#print("some more stuff")
 
 #sed -n '/digraph/,$p' <rulegraph.dot
