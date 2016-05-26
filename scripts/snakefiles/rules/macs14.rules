@@ -79,8 +79,9 @@ rule macs14:
     shell: """
 (mkdir -p {params.outdir}
 #cd {params.outdir}
-macs14 -t {input.treatment} -c {input.control} -f BED -g {params.genome_size} -m {params.mfold} --pvalue {params.pval} --keep-dup {params.keep_dup} -n {params.name} --bw {params.bandwidth} {params.other_options}
-mv {params.name}_peaks.bed {params.name}.bed ;
-mv {params.name}* {params.outdir} ) &> {log}
+macs -t {input.treatment} -c {input.control} -f BED -g {params.genome_size} -m {params.mfold} --pvalue {params.pval} --keep-dup {params.keep_dup} --outdir {params.outdir} -n {params.name} --bw {params.bandwidth} {params.other_options}
+mv {params.outdir}/{params.name}_peaks.bed {params.outdir}/{params.name}.bed ;
+#mv {params.name}* {params.outdir} 
+) &> {log}
 """
 
