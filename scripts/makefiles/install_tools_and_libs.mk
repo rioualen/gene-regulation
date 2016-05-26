@@ -76,6 +76,7 @@ SAMTOOLS_VER=1.3
 SRATOOLKIT_VER=2.5.2
 SCIPY_VER=0.16.0
 SPP_VER=1.11
+SUBREAD_VER=1.5.0
 SWEMBL_VER=3.3.1
 
 # ================================================================
@@ -249,8 +250,7 @@ bwa:
 	sudo apt-get -y install bwa
 #	wget -nc https://sourceforge.net/projects/bio-bwa/files/bwa-$(BWA_VER).tar.bz2; \
 
-### TODO testing subread ##
-SUBREAD_VER=1.5.0
+
 subread:
 	cd $(SOURCE_DIR); \
 	wget https://sourceforge.net/projects/subread/files/subread-$(SUBREAD_VER)/subread-$(SUBREAD_VER)-source.tar.gz; \
@@ -272,7 +272,6 @@ subread:
 #	cd MACS-$(MACS1_VER); \
 #	sudo python setup.py install
 
-## to test macs 1.4.3
 macs1:
 	cd $(SOURCE_DIR); \
 	wget --no-clobber https://pypi.python.org/packages/86/da/1e57f6e130b732160d87d96f2cc1771b9de24ce16522a4f73a8528166b87/MACS-1.4.3.tar.gz; \
