@@ -9,58 +9,89 @@
    fast, accurate and scalable read mapping by seed-and-vote.  Nucleic
    Acids Research, 41(10):e108
 
+Required parameters:
+    config["genome"]["version"]
+    config["qsub"]
+    config["subread"]["seq_type"]
+
+Optional parameters:
+    config["subread"]["dir"]
+    config["subread"]["threads"]
+    config["subread"]["max_mismatches"]
+
+Usage example:
+    ALIGNER=["subread"]
+    ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)             ## todo
+    SUBREAD_INDEX = expand(config["dir"]["genome"] + "{genome}/subread/{genome}.fa.1.bt2", genome=GENOME)     ## todo
+    MAPPING = expand("{alignment}.sam", alignment=ALIGNMENT)
+
+Contributors: 
+    Claire Rioualen
 """
 
-# Raise an error and exit if a required parameter is missing.
-# Set optional params to defaults values in case they're not defined in config file.
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "version" in config["genome"].keys():
+    sys.exit("Genome version must be defined in the config file")
+
+#if not "seq_type" in config["subread"].keys():
+#    sys.exit("The param subread/seqtype must be defined in the config file")
+
+if not "genome" in config["dir"].keys():
+    sys.exit("Genome dir must be defined in the dir section of the config file")
 
 if not "subread" in config.keys():
-    sys.exit("The subread parameters should be specified in the config file.")
-
-if not (("genome" in config.keys()) and ("fasta" in config["genome"].keys())):
-    sys.exit("The parameter config['genome']['fasta'] should be specified in the config file.")
-
-if not "index" in config["subread"].keys():
-    sys.exit("The parameter config['subread']['index'] should be specified in the config file.")
-
-if not "seq_type" in config["subread"].keys():
-    sys.exit("The parameter config['subread']['seq_type'] should be specified in the config file.")
-
-
-# Defne default parameters if not specified in the config file
-if not "max_mismatches" in config["subread"].keys():
-    config["subread"]["max_mismatches"] = "3"
+    config["subread"] = {}
 
 if not "threads" in config["subread"].keys():
     config["subread"]["threads"] = "1"
 
-if not "align_options" in config["subread"].keys():
-    config["subread"]["align_options"] = ""
+if not "max_mismatches" in config["subread"].keys():
+    config["subread"]["max_mismatches"] = "3"
 
-if not "other_options" in config["subread"].keys():
-    config["subread"]["other_options"] = ""
+# Define paths
+if not "samples" in config["dir"].keys():
+    config["dir"]["samples"] = config["dir"]["results"]
+
+genome_version = config["genome"]["version"]
+genome_dir = config["dir"]["genome"] + genome_version + "/"
+genome_file = genome_dir + genome_version + ".fa"
+subread_dir = genome_dir + "subread/"
+subread_index = subread_dir + genome_version
 
 
-
-rule subread_align_se:
-     """Align single-read reads onto a reference genome with the
-	tool subread-align.
-
-        Before running the alignment, an index of the genome sequence
-        has to be built with the tool Rsubread::buildindex.
-"""
-     input: index_files = config["subread"]["index"] + ".files", \
-        reads = config["dir"]["fastq"] + "{reads}.fastq"
-     output: bam = config["dir"]["mapped_reads"] + "{reads}_subread-align_se.bam", \
-        benchmark = config["dir"]["mapped_reads"] + "{reads}_subread-align_se_benchmark.json"
-     log: config["dir"]["mapped_reads"] + "{reads}_subread-align_se.log"
-     benchmark: config["dir"]["mapped_reads"] + "{reads}_subread-align_se_benchmark.json"
-     params: subread_index = config["subread"]["index"], \
-        seq_type = config["subread"]["seq_type"], \
+rule subread_se:
+    input:
+        reads = "{reads}.fastq", \
+        fa = subread_index + ".fa"
+    output:
+        sam = "{reads}_subread.sam"
+    params:
+        index = subread_index, \
         max_mismatches = config["subread"]["max_mismatches"], \
         threads = config["subread"]["threads"], \
-        qsub=config["qsub"] + " -e " + config["dir"]["mapped_reads"] + "{reads}_bowtie_qsub.err " \
-            + " -o " + config["dir"]["mapped_reads"] + "{reads}_bowtie_qsub.out", \
-        align_options = config["subread"]["align_options"]
-     shell: "subread-align -i {params.subread_index} -r {input.reads} -t {params.seq_type} -T {params.threads} -M {params.max_mismatches} {params.align_options} -o {output.bam} 2> {log}"
+#        seq_type = config["subread"]["seq_type"], \
+        qsub = config["qsub"] \
+          + " -e " + "{reads}_subread_pe_qsub.err" \
+          + " -o " + "{reads}_subread_pe_qsub.out"
+    log: "{reads}_subread_pe.log"
+    benchmark: "{reads}_subread_pe_benchmark.json"
+    shell: "subread-align -i {params.index} -r {input.reads} -t 1 -T {params.threads} -M {params.max_mismatches} -o {output.sam} 2> {log}"
+
+#     input: index_files = config["subread"]["index"] + ".files", \
+#        reads = config["dir"]["fastq"] + "{reads}.fastq"
+#     output: bam = config["dir"]["mapped_reads"] + "{reads}_subread-align_se.bam", \
+#        benchmark = config["dir"]["mapped_reads"] + "{reads}_subread-align_se_benchmark.json"
+#     log: config["dir"]["mapped_reads"] + "{reads}_subread-align_se.log"
+#     benchmark: config["dir"]["mapped_reads"] + "{reads}_subread-align_se_benchmark.json"
+#     params: subread_index = config["subread"]["index"], \
+#        seq_type = config["subread"]["seq_type"], \
+#        max_mismatches = config["subread"]["max_mismatches"], \
+#        threads = config["subread"]["threads"], \
+#        qsub=config["qsub"] + " -e " + config["dir"]["mapped_reads"] + "{reads}_bowtie_qsub.err " \
+#            + " -o " + config["dir"]["mapped_reads"] + "{reads}_bowtie_qsub.out", \
+#        align_options = config["subread"]["align_options"]
+
 

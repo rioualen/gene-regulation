@@ -1,20 +1,28 @@
-"""Read mapping for single end data using Bowtie2. 
-Requires the indexing to have previously been done (using the
-rule bowtie2_index).
+"""Align each sample with the R-package subread.
+
+   To align each sample on the reference genome the R-package subread
+   first needs to build a index with the function builindex(). The
+   alignment is then executed with the function align(), which calls
+   the tool read mapping tool Subread.  
+
+   Reference: Liao Y, Smyth GK and Shi W (2013). The Subread aligner:
+   fast, accurate and scalable read mapping by seed-and-vote.  Nucleic
+   Acids Research, 41(10):e108
 
 Required parameters:
     config["genome"]["version"]
     config["qsub"]
-    config["bowtie2"]["max_mismatches"]
+
 
 Optional parameters:
-    config["bowtie2"]["dir"]
-    config["bowtie2"]["threads"]
+    config["subread"]["dir"]
+    config["subread"]["threads"]
+    config["subread"]["max_mismatches"]
 
 Usage example:
-    ALIGNER=["bowtie2"]
+    ALIGNER=["subread"]
     ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)             ## todo
-    BOWTIE2_INDEX = expand(config["dir"]["genome"] + "{genome}/Bowtie2Index/{genome}.fa.1.bt2", genome=GENOME)     ## todo
+    SUBREAD_INDEX = expand(config["dir"]["genome"] + "{genome}/subread/{genome}.fa.1.bt2", genome=GENOME)     ## todo
     MAPPING = expand("{alignment}.sam", alignment=ALIGNMENT)
 
 Contributors: 
