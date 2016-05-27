@@ -14,13 +14,13 @@ if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
 # Define paths
-genome_gff3 = config["dir"]["genome"] + config["genome"]["version"] + "/" + config["genome"]["version"] + ".gff3"
+genome_gtf = config["dir"]["genome"] + config["genome"]["version"] + "/" + config["genome"]["version"] + ".gtf"
 
 
 rule subread_featureCounts:
     input: 
         bam = "{reads}_sorted_pos.bam", \
-        gff3 = genome_gff3
+        gtf = genome_gtf
     output: "{reads}_featureCounts.tab"
     params:
         qsub = config["qsub"]\
@@ -28,7 +28,7 @@ rule subread_featureCounts:
             + " -o {reads}_featureCounts_qsub.out"
     log: "{reads}_featureCounts.log"
     benchmark: "{reads}_bam_stats_benchmark.json"
-    shell:"(featureCounts -a {input.gff3} -o {output} {input.bam} ) &> {log}"
+    shell:"(featureCounts -a {input.gtf} -o {output} {input.bam} ) &> {log}"
 
 
 
