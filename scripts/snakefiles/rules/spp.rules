@@ -114,6 +114,14 @@ rule spp:
         write.narrowpeak.binding(bp,"{output.peaks_narrowPeak}")
 
         bed <- read.table("{output.peaks_narrowPeak}")
+
+        # replace neg values with 0
+        for(i in 1:nrow(bed)){{
+            if(bed[i,2] < 0){{
+                bed[i,2] <- 0
+            }}
+        }}
+
         write.table(bed, "{output.peaks_bed}", row.names=FALSE, col.names=FALSE, sep="\t", quote=FALSE)
 
         sink()
