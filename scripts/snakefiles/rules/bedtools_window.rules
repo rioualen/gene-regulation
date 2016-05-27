@@ -1,0 +1,28 @@
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "version" in config["genome"].keys():
+    sys.exit("Genome version must be defined in the config file")
+
+if not "genome" in config["dir"].keys():
+    sys.exit("Genome dir must be defined in the dir section of the config file")
+
+# Define paths
+genome_version = config["genome"]["version"]
+genome_dir = config["dir"]["genome"] + genome_version + "/"
+gff3_file = genome_dir + genome_version + ".gff3"
+
+rule bedtools_window:
+	input: bed = "{regions}.bed", gff3 = gff3_file
+	output: "{regions}_window.gff3"
+	log: "{regions}_window.log"
+	benchmark: "{regions}_window_benchmark.json"
+	params: qsub = config["qsub"] + " -e {regions}_window_qsub.err -o {regions}_window_qsub.out"
+	shell:"""bedtools window -a {input.bed} -b {input.gff3} > {output}"""
+
+
+#bedtools window [OPTIONS] [-a|-abam] -b <BED/GFF/VCF>
+
+#bedtools window -bed -a peaks.bed -b Ecoli_K12.gff3 > out.bed
+

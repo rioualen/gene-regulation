@@ -1,0 +1,15 @@
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+
+rule bedtools_multiinter:
+	input: bed = PEAKS
+	output: "{dir}multiinter.tab"
+	log: "{dir}multiinter.log"
+	benchmark: "{dir}multiinter_benchmark.json"
+	params: qsub = config["qsub"] + " -e {dir}multiinter_qsub.err -o {dir}multiinter_qsub.out"
+	shell:"""bedtools multiinter -i {input} > {output}"""
+
+#compare-features -v 1 -return stats -iformat bed -files authors_macs2.bed swembl_R0.05_x1.bed swembl_R0.05_x1.2.bed swembl_R0.02_x1.2.bed swembl_R0.01_x1.2.bed > compare-features.txt
+#bedtools multiinter -i  peaks.bed peaks2.bed > multi-intersect-bed.txt
