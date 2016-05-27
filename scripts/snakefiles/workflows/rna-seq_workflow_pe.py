@@ -73,6 +73,8 @@ include: os.path.join(RULES, "bam_to_bed.rules")
 include: os.path.join(RULES, "bam_stats.rules")
 include: os.path.join(RULES, "bowtie2_index.rules")
 include: os.path.join(RULES, "bowtie2_pe.rules")
+include: os.path.join(RULES, "bowtie_index.rules")
+include: os.path.join(RULES, "bowtie_pe.rules")
 include: os.path.join(RULES, "count_reads.rules")
 include: os.path.join(RULES, "dot_graph.rules")
 include: os.path.join(RULES, "dot_to_image.rules")
@@ -152,7 +154,7 @@ if not os.path.exists(GENOME_DIR):
     os.makedirs(GENOME_DIR)
 
 GENOME_FASTA = expand(GENOME_DIR + "/" + GENOME + ".fa")
-GENOME_ANNOTATIONS = expand(GENOME_DIR + "/" + GENOME + ".gff3")
+GENOME_ANNOTATIONS = expand(GENOME_DIR + "/" + GENOME + ".{ext}", ext=["gff3", "gtf"])
 
 ## Graphics & reports
 GRAPHICS = expand(REPORTS_DIR + "{graph}.png", graph=["dag", "rulegraph"])
@@ -182,7 +184,7 @@ QC = RAW_QC + TRIM_QC
 #----------------------------------------------------------------#
 
 
-ALIGNER=["bowtie2", "subread"]
+ALIGNER=["bowtie2", "subread", "bowtie"]
 ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER, trimmer=TRIMMER)
 
 INDEX = expand(GENOME_DIR + "/{aligner}/" + GENOME + ".fa", aligner=ALIGNER)
@@ -213,7 +215,7 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: QC, GRAPHICS, FEATURE_COUNTS
+	input: QC, GRAPHICS, GENOME_ANNOTATIONS, FEATURE_COUNTS
 #	input: IMPORT, QC, GRAPHICS, TRIM, INDEX, MAPPING, BAM_STATS, SORTED_BAM, FEATURE_COUNTS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
