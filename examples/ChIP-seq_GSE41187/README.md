@@ -9,12 +9,11 @@ Reference: Myers KS, Yan H, Ong IM, Chung D et al. Genome-scale analysis of esch
 GEO series: [GSE41187](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE41187)
 
 <!--
-mkdir -p /data/source/ChIP-seq_GSE41187/GSM1010224 /data/source/ChIP-seq_GSE41187/GSM1010219 
-cd /data/source/ChIP-seq_GSE41187/GSM1010224
-wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX189%2FSRX189778/SRR576938/SRR576938.sra
-cd /data/source/ChIP-seq_GSE41187/GSM1010219
-wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX189%2FSRX189773/SRR576933/SRR576933.sra
-cd ~/Desktop/workspace
+mkdir -p ~/mydisk/GSM41187_ChIP-seq/source/GSM1010224 ~/mydisk/GSM41187_ChIP-seq/source/GSM1010219 
+cd ~/mydisk/GSM41187_ChIP-seq/source/GSM1010224
+wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX189%2FSRX189778/SRR576938/SRR576938.sra
+cd ~/mydisk/GSM41187_ChIP-seq/source/GSM1010219
+wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX189%2FSRX189773/SRR576933/SRR576933.sra
 -->
 
 ## File organisation
