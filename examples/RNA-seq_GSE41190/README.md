@@ -9,21 +9,21 @@ Reference: Myers KS, Yan H, Ong IM, Chung D et al. Genome-scale analysis of esch
 GEO series: [GSE41190](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE41190)
 
 <!--
-mkdir -p /data/source/RNA-seq_GSE41190/GSM1010244 /data/source/RNA-seq_GSE41190/GSM1010246 /data/source/RNA-seq_GSE41190/GSM1010245 /data/source/RNA-seq_GSE41190/GSM1010247
-cd /data/source/RNA-seq_GSE41190/GSM1010244
-wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX059%2FSRX059774/SRR191809/SRR191809.sra
-cd /data/source/RNA-seq_GSE41190/GSM1010246
-wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX059%2FSRX059767/SRR191812/SRR191812.sra
-cd /data/source/RNA-seq_GSE41190/GSM1010245
-wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX059%2FSRX059768/SRR191805/SRR191805.sra
-cd /data/source/RNA-seq_GSE41190/GSM1010247
-wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX116%2FSRX116381/SRR400301/SRR400301.sra
+mkdir -p ~/mydisk/GSM41190_RNA-seq/source/GSM1010244 ~/mydisk/GSM41190_RNA-seq/source/GSM1010246 ~/mydisk/GSM41190_RNA-seq/source/GSM1010245 ~/mydisk/GSM41190_RNA-seq/source/GSM1010247
+cd ~/mydisk/GSM41190_RNA-seq/source/GSM1010244
+wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX059%2FSRX059774/SRR191809/SRR191809.sra
+cd ~/mydisk/GSM41190_RNA-seq/source/GSM1010246
+wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX059%2FSRX059767/SRR191812/SRR191812.sra
+cd ~/mydisk/GSM41190_RNA-seq/source/GSM1010245
+wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX059%2FSRX059768/SRR191805/SRR191805.sra
+cd ~/mydisk/GSM41190_RNA-seq/source/GSM1010247
+wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX116%2FSRX116381/SRR400301/SRR400301.sra
 -->
 
 ## File organisation
 
 The short reads were downloaded from SRA ftp site using the links in the Excel file samples.xlsx. In this dataset, there is a single run per sample, and thus a single sra file per GSM ID. 
 
-Short read files (.sra) are stored in sample-specific folders named data/source/[GSM_ID].
+Short read files (.sra) are stored in sample-specific folders named ~/mydisk/GSM41190_RNA-seq/source/[GSM_ID].
 
 
