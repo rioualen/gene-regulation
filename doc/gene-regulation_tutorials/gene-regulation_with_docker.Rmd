@@ -73,16 +73,17 @@ sudo apt-get --yes install docker
 
 ## Create shared repositories and download source data
 
-You can enter the following commands directly. 
+In order to execute the study case GSE20870, you should enter the following commands:  
 
 ```
-sudo mkdir -p /data/source/GSE20870/GSM521934 /data/source/GSE20870/GSM521935
-sudo mkdir -p /data/results/GSE20870
+mkdir GSE20870_analysis
+mkdir data/GSM521934 data/GSM521935
+mkdir results/GSE20870
 ```
 ```
-cd /data/source/GSE20870/GSM521934
+cd data/GSM521934
 wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021358/SRR051929/SRR051929.sra
-cd /data/source/GSE20870/GSM521935
+cd data/GSM521935
 wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra
 ```
 You can also choose another path and then create symlinks.
@@ -90,9 +91,8 @@ You can also choose another path and then create symlinks.
 ## Fetch the Docker image and run it with shared folders
 
 ```
-cd ~
 docker pull rioualen/gene-regulation:1.0
-docker run -v /data/results/GSE20870/:/data/results/GSE20870/ -v /data/source/GSE20870/:/data/source/GSE20870/ -it rioualen/gene-regulation:1.0 /bin/bash
+docker run -v GSE20870_analysis/:GSE20870_analysis -it rioualen/gene-regulation:1.0 /bin/bash
 ```
 
 You can share as many folders as desired, using this syntax: `-v /path/on/host/:/path/on/docker/`.
@@ -101,7 +101,7 @@ You can share as many folders as desired, using this syntax: `-v /path/on/host/:
 ## Execute the pipeline
 
 ```
-snakemake -s scripts/snakefiles/workflows/factor_workflow.py -p
+snakemake -p -s gene-regulation/scripts/snakefiles/workflows/factor_workflow.py --configfile gene-regulation/examples/GSE20870/GSE20870.yml
 ```
 
 <!--
