@@ -48,7 +48,7 @@ rule bowtie_index:
     shell: """
 mkdir -p {params.dir}
 cp {input} {params.dir}
-cd {params.dir}
+#cd {params.dir}
 bowtie-build  {params.dir}{params.version}.fa  {params.dir}{params.version}.fa &> {log}
 """
 
