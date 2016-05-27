@@ -88,6 +88,10 @@ include: os.path.join(RULES, "bam_by_name.rules")
 include: os.path.join(RULES, "bam_by_pos.rules")
 include: os.path.join(RULES, "bam_to_bed.rules")
 include: os.path.join(RULES, "bam_stats.rules")
+include: os.path.join(RULES, "bedtools_closest.rules")
+include: os.path.join(RULES, "bedtools_intersect.rules")
+#include: os.path.join(RULES, "bedtools_multiinter.rules")
+include: os.path.join(RULES, "bedtools_window.rules")
 include: os.path.join(RULES, "bowtie_index.rules")
 include: os.path.join(RULES, "bowtie_se.rules")
 include: os.path.join(RULES, "bowtie2_index.rules")
@@ -108,9 +112,11 @@ include: os.path.join(RULES, "homer.rules")
 include: os.path.join(RULES, "igv_session.rules")
 include: os.path.join(RULES, "macs2.rules")
 include: os.path.join(RULES, "macs14.rules")
-#include: os.path.join(RULES, "peak_motifs.rules")
+include: os.path.join(RULES, "peak_motifs.rules")
 include: os.path.join(RULES, "sickle_se.rules")
 include: os.path.join(RULES, "spp.rules")
+include: os.path.join(RULES, "subread_index.rules")
+include: os.path.join(RULES, "subread_se.rules")
 include: os.path.join(RULES, "swembl.rules")
 include: os.path.join(RULES, "sam_to_bam.rules")
 include: os.path.join(RULES, "sra_to_fastq.rules")
@@ -190,22 +196,16 @@ if not os.path.exists(GENOME_DIR):
 GENOME_FASTA = expand(GENOME_DIR + "/" + GENOME + ".fa")
 GENOME_ANNOTATIONS = expand(GENOME_DIR + "/" + GENOME + ".gff3")
 
-### Graphics & reports
-#GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
-GRAPHICS = expand(REPORTS_DIR + "{graph}.{ext}", graph=["dag", "rulegraph"], ext=["png", "pdf"])
-
-
-
-#----------------------------------------------------------------#
+#----------------------------------------------------------------
 # Quality control
-#----------------------------------------------------------------#
+#----------------------------------------------------------------
 
 RAW_QC = expand(SAMPLE_DIR + "{samples}/{samples}_fastqc/{samples}_fastqc.html", samples=SAMPLE_IDS)
 
 
-#----------------------------------------------------------------#
+#----------------------------------------------------------------
 # Trimming
-#----------------------------------------------------------------#
+#----------------------------------------------------------------
 
 TRIMMER="sickle-se-q" + config["sickle"]["threshold"]
 TRIMMING=expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}", samples=SAMPLE_IDS, trimmer=TRIMMER)
@@ -216,12 +216,12 @@ TRIM_QC = expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}_fastqc/{samples}_{t
 QC = RAW_QC + TRIM_QC
 
 
-#----------------------------------------------------------------#
+#----------------------------------------------------------------
 # Alignment
-#----------------------------------------------------------------#
+#----------------------------------------------------------------
 
 
-ALIGNER=["bowtie2"]
+ALIGNER=["bowtie2", "subread"]
 ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER, trimmer=TRIMMER)
 
 INDEX = expand(GENOME_DIR + "/{aligner}/" + GENOME + ".fa", aligner=ALIGNER)
@@ -236,7 +236,7 @@ GENOME_COVERAGE_GZ = expand("{alignment}.bedgraph.gz", alignment=ALIGNMENT)
 
 # Sort mapped reads
 
-SORTED_READS_BED = expand(SAMPLE_DIR + "{alignment}_sorted_pos.bed", alignment=ALIGNMENT)
+#SORTED_READS_BED = expand("{alignment}_sorted_pos.bed", alignment=ALIGNMENT)
 
 
 # ----------------------------------------------------------------
@@ -257,9 +257,11 @@ PEAKCALLING=expand(expand(PEAKS_DIR + "{treat}_vs_{control}/{{peakcaller}}/{trea
 PEAKS = expand("{peakcalling}.bed", peakcalling=PEAKCALLING)
 
 # ----------------------------------------------------------------
-# Peak analysis
+# Peak annotation
 # ----------------------------------------------------------------
 
+GENE_ANNOT = ["closest", "intersect", "window"]
+PEAKS_TO_GENES = expand("{peakcalling}_{gene_annotation}.gff3", peakcalling=PEAKCALLING, gene_annotation=GENE_ANNOT)
 
 MOTIFS=expand(expand("{treat}_vs_{control}/{{peakcaller}}/peak-motifs/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}_peak-motifs_synthesis", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER, trimmer=TRIMMER)
 
@@ -268,10 +270,16 @@ GET_FASTA = expand(PEAKS_DIR + "{peakcalling}.fasta", peakcalling=PEAKCALLING)
 PEAK_MOTIFS = expand(PEAKS_DIR + "{motifs}.html", motifs=MOTIFS)
 
 # ----------------------------------------------------------------
-# Visualization
+# Reports
 # ----------------------------------------------------------------
 
-VISU = expand(PEAKS_DIR + "igv_session.xml")
+
+GRAPHICS = expand(REPORTS_DIR + "{graph}.{ext}", graph=["dag", "rulegraph"], ext=["png", "pdf"])
+
+
+## Following not yet properly implemented
+#IGV = expand(REPORTS_DIR + "igv_session.xml")
+#BED_INTER = expand(REPORTS_DIR + "multiinter.tab")
 
 #================================================================#
 #                        Rule all                                #
@@ -281,6 +289,6 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: BAM_STATS, PEAKS, GENOME_COVERAGE_GZ, GENOME_ANNOTATIONS, VISU, GRAPHICS, QC
+	input: BAM_STATS, GENOME_COVERAGE_GZ, GRAPHICS, QC, PEAKS_TO_GENES, PEAK_MOTIFS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
