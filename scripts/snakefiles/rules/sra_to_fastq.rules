@@ -23,10 +23,10 @@ if not "reads_source" in config["dir"].keys():
 
 rule sra_to_fastq:
     input: datadir = config['dir']['reads_source']
-    output: "{results}/{sample}/{sample}.fastq"
-    log: "{results}/{sample}/{sample}_sra-conversion.log"
-    benchmark: "{results}/{sample}/{sample}_sra-conversion_benchmark.json"
-    params: qsub = config["qsub"] + " -q short -e {sample}_sra-conversion_qsub.err -o {sample}_sra-conversion_qsub.out",  \
+    output: "{sample_dir}/{sample}.fastq"
+    log: "{sample_dir}/{sample}_sra-conversion.log"
+    benchmark: "{sample_dir}/{sample}_sra-conversion_benchmark.json"
+    params: qsub = config["qsub"] + " -q short -e {sample_dir}/{sample}_sra-conversion_qsub.err -o {sample_dir}/{sample}_sra-conversion_qsub.out",  \
         results = config['dir']['samples'], \
         samples = "{sample}"
     shell:"""
