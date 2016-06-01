@@ -1,4 +1,4 @@
-"""Generic work flow for the analysis of ChIP-seq data for the binding
+"""Generic work< flow for the analysis of ChIP-seq data for the binding
 of transcription factors.
 
 
@@ -6,22 +6,31 @@ This workflow performs the following treatments:
 
  - read mapping
  - peak-calling with alternate peak-calling programs
- - motif discovery
+( - motif discovery)
 
 The details are specified in a yaml-formatted configuration file.
 
-Usage: 
-    snakemake -p  -c "qsub {params.qsub}" -j 12 \
-        -s scripts/snakefiles/workflows/factor_workflow.py \
+Usage:
+
+1. Run in command line mode
+
+    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/factor_workflow.py 
         --configfile path/to/specific/config_file.yml \
         [targets]
 
-Flowcharts:
+2. Send tasks to qsub job scheduler
+
+    snakemake -p -c "qsub {params.qsub}" -j 12 \
+        -s gene-regulation/scripts/snakefiles/workflows/factor_workflow.py \
+        --configfile path/to/specific/config_file.yml \
+        [targets]
+
+3. Generate flowcharts:
+
     snakemake -p -s scripts/snakefiles/workflows/factor_workflow.py \
         --configfile path/to/specific/config_file.yml \
         --force flowcharts
 
-Reference genome:	-
 Sequencing type: 	single end
 
 Author: 		Claire Rioualen, Jacques van Helden
@@ -40,11 +49,8 @@ import datetime
 import pandas as pd
 
 ## Config
-configfile: "examples/GSE20870/GSE20870.yml"
+#configfile: "examples/GSE20870/GSE20870.yml"
 
-#================================================================#
-#                    Check mandatory parameters
-#================================================================#
 
 # Define verbosity
 if not ("verbosity" in config.keys()):
@@ -54,11 +60,26 @@ verbosity = int(config["verbosity"])
 #================================================================#
 #                         Includes                               #
 #================================================================#
-if not ("dir" in config.keys()) & ("fg_lib" in config["dir"].keys()) :
-    sys.exit("The parameter config['dir']['fg_lib'] should be specified in the config file.")
-FG_LIB = os.path.abspath(config["dir"]["fg_lib"])
+
+if not ("dir" in config.keys()) & ("gene_regulation" in config["dir"].keys()) :
+    sys.exit("The parameter config['dir']['gene_regulation'] should be specified in the config file.")
+
+if not ("dir" in config.keys()) & ("base" in config["dir"].keys()) :
+    sys.exit("The parameter config['dir']['base'] should be specified in the config file.")
+    
+workdir: config["dir"]["base"] # Local Root directory for the project. Should be adapted for porting.
+
+# Define verbosity
+FG_LIB = os.path.abspath(config["dir"]["gene_regulation"])
 RULES = os.path.join(FG_LIB, "scripts/snakefiles/rules")
 PYTHON = os.path.join(FG_LIB, "scripts/python_lib")
+
+if (verbosity >= 2):
+    print("PWD: " + os.getcwd())
+    print("FG_LIB: " + FG_LIB)
+    print("RULES: " + RULES)
+    print("PYTHON: " + PYTHON)
+    print("Python util lib: " + os.path.join(PYTHON, "util.py"))
 
 include: os.path.join(PYTHON, "util.py")
 
@@ -67,6 +88,10 @@ include: os.path.join(RULES, "bam_by_name.rules")
 include: os.path.join(RULES, "bam_by_pos.rules")
 include: os.path.join(RULES, "bam_to_bed.rules")
 include: os.path.join(RULES, "bam_stats.rules")
+include: os.path.join(RULES, "bedtools_closest.rules")
+include: os.path.join(RULES, "bedtools_intersect.rules")
+#include: os.path.join(RULES, "bedtools_multiinter.rules")
+include: os.path.join(RULES, "bedtools_window.rules")
 include: os.path.join(RULES, "bowtie_index.rules")
 include: os.path.join(RULES, "bowtie_se.rules")
 include: os.path.join(RULES, "bowtie2_index.rules")
@@ -75,28 +100,29 @@ include: os.path.join(RULES, "bPeaks.rules")
 include: os.path.join(RULES, "bwa_index.rules")
 include: os.path.join(RULES, "bwa_se.rules")
 include: os.path.join(RULES, "count_reads.rules")
+include: os.path.join(RULES, "dot_graph.rules")
+include: os.path.join(RULES, "dot_to_image.rules")
 include: os.path.join(RULES, "fastqc.rules")
-include: os.path.join(RULES, "flowcharts.rules")
 include: os.path.join(RULES, "genome_coverage_bedgraph.rules")
 include: os.path.join(RULES, "genome_download.rules")
 include: os.path.join(RULES, "getfasta.rules")
 include: os.path.join(RULES, "get_chrom_sizes.rules")
 include: os.path.join(RULES, "gzip.rules")
 include: os.path.join(RULES, "homer.rules")
-#include: os.path.join(RULES, "import_fastq.rules")
 include: os.path.join(RULES, "igv_session.rules")
 include: os.path.join(RULES, "macs2.rules")
 include: os.path.join(RULES, "macs14.rules")
 include: os.path.join(RULES, "peak_motifs.rules")
 include: os.path.join(RULES, "sickle_se.rules")
 include: os.path.join(RULES, "spp.rules")
+include: os.path.join(RULES, "subread_index.rules")
+include: os.path.join(RULES, "subread_se.rules")
 include: os.path.join(RULES, "swembl.rules")
 include: os.path.join(RULES, "sam_to_bam.rules")
 include: os.path.join(RULES, "sra_to_fastq.rules")
 
 ruleorder: bam_by_pos > sam_to_bam
-ruleorder: bam_by_name > sam_to_bam
-#ruleorder: import_fastq > sickle_se 
+
 #================================================================#
 #                      Data & wildcards                          #
 #================================================================#
@@ -105,11 +131,11 @@ ruleorder: bam_by_name > sam_to_bam
 READS = config["dir"]["reads_source"]
 
 # Samples
-SAMPLES = read_table(config["files"]["samples"])
+SAMPLES = read_table(config["metadata"]["samples"])
 SAMPLE_IDS = SAMPLES.iloc[:,0]
 
 ## Design
-DESIGN = read_table(config["files"]["design"])
+DESIGN = read_table(config["metadata"]["design"])
 TREATMENT = DESIGN['treatment']
 CONTROL = DESIGN['control']
 
@@ -143,6 +169,14 @@ else:
 if not os.path.exists(PEAKS_DIR):
     os.makedirs(PEAKS_DIR)
 
+if not ("reports" in config["dir"].keys()):
+    REPORTS_DIR = config["dir"]["results"]
+else:
+    REPORTS_DIR = config["dir"]["reports"]
+if not os.path.exists(REPORTS_DIR):
+    os.makedirs(REPORTS_DIR)
+
+
 
 #================================================================#
 #                         Workflow                               #
@@ -154,44 +188,43 @@ IMPORT = expand(SAMPLE_DIR + "{samples}/{samples}.fastq", samples=SAMPLE_IDS)
 
 # Genome
 GENOME = config["genome"]["version"]
-GENOME_DIR = config["dir"]["genomes"] + config["genome"]["version"]
-GENOME_DIR = config["dir"]["genomes"] + config["genome"]["version"]
+GENOME_DIR = config["dir"]["genome"] + config["genome"]["version"]
 
-GENOME_FASTA = expand(config["dir"]["genomes"] + config["genome"]["version"] + "/" + config["genome"]["version"] + ".fa")
-GENOME_ANNOTATIONS = expand(config["dir"]["genomes"] + config["genome"]["version"] + "/" + config["genome"]["version"] + ".gff3")
+if not os.path.exists(GENOME_DIR):
+    os.makedirs(GENOME_DIR)
 
-### Graphics & reports
-GRAPHICS = expand(RESULTS_DIR + "dag.pdf")
-#REPORT = expand(RESULTS_DIR + "report.html")
+GENOME_FASTA = expand(GENOME_DIR + "/" + GENOME + ".fa")
+GENOME_ANNOTATIONS = expand(GENOME_DIR + "/" + GENOME + ".gff3")
 
-#----------------------------------------------------------------#
+#----------------------------------------------------------------
 # Quality control
-#----------------------------------------------------------------#
+#----------------------------------------------------------------
 
 RAW_QC = expand(SAMPLE_DIR + "{samples}/{samples}_fastqc/{samples}_fastqc.html", samples=SAMPLE_IDS)
 
 
-#----------------------------------------------------------------#
+#----------------------------------------------------------------
 # Trimming
-#----------------------------------------------------------------#
+#----------------------------------------------------------------
 
 TRIMMER="sickle-se-q" + config["sickle"]["threshold"]
 TRIMMING=expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}", samples=SAMPLE_IDS, trimmer=TRIMMER)
 TRIM = expand(SAMPLE_DIR + "{trimming}.fastq", trimming=TRIMMING)
 
 TRIM_QC = expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}_fastqc/{samples}_{trimmer}_fastqc.html", samples=SAMPLE_IDS, trimmer=TRIMMER)
+
 QC = RAW_QC + TRIM_QC
 
 
-#----------------------------------------------------------------#
+#----------------------------------------------------------------
 # Alignment
-#----------------------------------------------------------------#
+#----------------------------------------------------------------
 
 
-ALIGNER=["bwa"]
+ALIGNER=["bowtie2", "subread"]
 ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER, trimmer=TRIMMER)
 
-INDEX = expand(config["dir"]["genomes"] + config["genome"]["version"] + "/{aligner}/" + config["genome"]["version"] + ".fa", aligner=ALIGNER)
+INDEX = expand(GENOME_DIR + "/{aligner}/" + GENOME + ".fa", aligner=ALIGNER)
 
 MAPPING = expand("{alignment}.sam", alignment=ALIGNMENT)
 
@@ -201,32 +234,22 @@ GENOME_COVERAGE = expand("{alignment}.bedgraph", alignment=ALIGNMENT)
 GENOME_COVERAGE_GZ = expand("{alignment}.bedgraph.gz", alignment=ALIGNMENT)
 
 
-
 # Sort mapped reads
 
-## Why not work ?
-SORTED_BY_POS = expand(SAMPLE_DIR + "{alignment}_sorted_pos.bam", alignment=ALIGNMENT)
-SORTED_BY_NAME = expand(SAMPLE_DIR + "{alignment}_sorted_name.bam", alignment=ALIGNMENT)
-#BAM_READNB = expand(RESULTS_DIR + "{alignment}_sorted_pos_bam_readnb.txt", alignment=ALIGNMENT)
-SORTED_READS_BED = expand(SAMPLE_DIR + "{alignment}_sorted_pos.bed", alignment=ALIGNMENT)
-#BED_FEAT_COUNT = expand(RESULTS_DIR + "{alignment}_sorted_pos_bed_nb.txt", alignment=ALIGNMENT)
+#SORTED_READS_BED = expand("{alignment}_sorted_pos.bed", alignment=ALIGNMENT)
 
-
-#TDF = expand(RESULTS_DIR + "{alignment}_sorted_pos.tdf", alignment=ALIGNMENT)
 
 # ----------------------------------------------------------------
 # Peak-calling
 # ----------------------------------------------------------------
 
-
-##TODO check if params are defined; if not, set them.
 PEAKCALLER=[
-#    "homer-fdr" + config["homer"]["fdr"] + "_peaks", 
+    "homer-fdr" + config["homer"]["fdr"],
     "macs2-qval" + config["macs2"]["qval"], 
 #    "swembl-R" + config["swembl"]["R"],
     "macs14-pval" + config["macs14"]["pval"],
     "spp-fdr" + config["spp"]["fdr"],
-    "bPeaks-log" + config["bPeaks"]["log2FC"]
+#    "bPeaks-log" + config["bPeaks"]["log2FC"],
 ]
 
 PEAKCALLING=expand(expand(PEAKS_DIR + "{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER, trimmer=TRIMMER)
@@ -234,9 +257,11 @@ PEAKCALLING=expand(expand(PEAKS_DIR + "{treat}_vs_{control}/{{peakcaller}}/{trea
 PEAKS = expand("{peakcalling}.bed", peakcalling=PEAKCALLING)
 
 # ----------------------------------------------------------------
-# Peak analysis
+# Peak annotation
 # ----------------------------------------------------------------
 
+GENE_ANNOT = ["closest", "intersect", "window"]
+PEAKS_TO_GENES = expand("{peakcalling}_{gene_annotation}.gff3", peakcalling=PEAKCALLING, gene_annotation=GENE_ANNOT)
 
 MOTIFS=expand(expand("{treat}_vs_{control}/{{peakcaller}}/peak-motifs/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}_peak-motifs_synthesis", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER, trimmer=TRIMMER)
 
@@ -245,10 +270,16 @@ GET_FASTA = expand(PEAKS_DIR + "{peakcalling}.fasta", peakcalling=PEAKCALLING)
 PEAK_MOTIFS = expand(PEAKS_DIR + "{motifs}.html", motifs=MOTIFS)
 
 # ----------------------------------------------------------------
-# Visualization
+# Reports
 # ----------------------------------------------------------------
 
-VISU = expand(PEAKS_DIR + "igv_session.xml")
+
+GRAPHICS = expand(REPORTS_DIR + "{graph}.{ext}", graph=["dag", "rulegraph"], ext=["png", "pdf"])
+
+
+## Following not yet properly implemented
+#IGV = expand(REPORTS_DIR + "igv_session.xml")
+#BED_INTER = expand(REPORTS_DIR + "multiinter.tab")
 
 #================================================================#
 #                        Rule all                                #
@@ -258,62 +289,6 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: GRAPHICS, BAM_STATS, PEAKS, QC, GENOME_COVERAGE_GZ, GENOME_ANNOTATIONS, VISU#PEAK_MOTIFS#, CHROM_SIZES, PEAKS, TDFRAW_QC, MAPPING, PEAKS, IMPORT, INDEX, PEAKS, 
+	input: BAM_STATS, GENOME_COVERAGE_GZ, GRAPHICS, QC, PEAKS_TO_GENES, PEAK_MOTIFS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
-
-#================================================================#
-#                        IGV stuff                               #
-#================================================================#
-
-#filename = PEAKS_DIR + "IGV_session.xml"
-
-#file = open(filename, "w")
-
-
-
-#file.write('<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n')
-#file.write('<Session genome="' + GENOME_FASTA[0] + '" hasGeneTrack="true" hasSequenceTrack="true" locus="all" path="' + filename + '" version="8">\n')
-
-#file.write('    <Resources>\n')
-#for i in PEAKS:
-#    file.write('        <Resource path="' + i + '"/>\n')
-#for i in GENOME_COVERAGE_GZ:
-#    file.write('        <Resource path="' + i + '"/>\n')
-#file.write('        <Resource path="' + GENOME_ANNOTATIONS[0] + '"/>\n')
-#file.write('    </Resources>\n\n')
-
-#file.write('    <Panel height="519" name="DataPanel" width="1901">\n')
-#for i in PEAKS:
-#    file.write('        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,153,255" colorScale="ContinuousColorScale;0.0;52.0;255,255,255;0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="12" id="' + i + '" renderer="BASIC_FEATURE" sortable="false" visible="true" windowFunction="count">\n')
-#    file.write('                <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="52.0" minimum="0.0" type="LINEAR"/>\n')
-#    file.write('        </Track>\n')
-#file.write('    </Panel>\n\n')
-
-
-#file.write('    <Panel height="259" name="AlignmentPanel" width="1901">\n')
-#for i in GENOME_COVERAGE_GZ:
-#    file.write('        <Track height="50" clazz="org.broad.igv.track.DataSourceTrack" color="113,35,30" displayMode="COLLAPSED" featureVisibilityWindow="-1" id="' + i + '" normalize="false" renderer="BAR_CHART" sortable="true" visible="true" windowFunction="max">\n')
-#    file.write('            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="200.0" minimum="0.0" type="LINEAR"/>\n')
-#    file.write('        </Track>\n')
-#file.write('    </Panel>\n\n')
-
-#file.write('    <Panel height="120" name="FeaturePanel" width="1901">\n')
-#file.write('        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" colorScale="ContinuousColorScale;0.0;235.0;255,255,255;0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/data/genomes/sacCer3/sacCer3.gff3" name="sacCer3.gff3" renderer="BASIC_FEATURE" sortable="false" visible="true" windowFunction="count">\n')
-#file.write('            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="235.0" minimum="0.0" type="LINEAR"/>\n')
-#file.write('        </Track>\n')
-#file.write('    </Panel>\n\n')
-
-
-#file.write('    <PanelLayout dividerFractions="0.332484076433121"/>\n')
-#file.write('    <HiddenAttributes>\n')
-#file.write('        <Attribute name="NAME"/>\n')
-#file.write('        <Attribute name="DATA FILE"/>\n')
-#file.write('        <Attribute name="DATA TYPE"/>\n')
-#file.write('    </HiddenAttributes>\n')
-#file.write('</Session>\n')
-
-
-
-
-#file.close()

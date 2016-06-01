@@ -58,13 +58,13 @@ suffix = "macs14-pval" + config["macs14"]["pval"]                    # check con
 
 rule macs14:
     input:
-        treatment = config["dir"]["samples"] + "{treatment}/{treatment}{preprocess}_sorted_pos.bed", \
-        control=config["dir"]["samples"] + "{control}/{control}{preprocess}_sorted_pos.bed"
+        treatment = config["dir"]["samples"] + "{treatment}/{treatment}{preprocess,.*}_sorted_pos.bed", \
+        control=config["dir"]["samples"] + "{control}/{control}{preprocess,.*}_sorted_pos.bed"
     output:
-        peaks_bed = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + ".bed"
+        peaks_bed = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".bed"
     params:
         outdir = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix, \
-        name = "{treatment}_vs_{control}{preprocess}_" + suffix, \
+        name = "{treatment}_vs_{control}{preprocess,.*}_" + suffix, \
         pval = config["macs14"]["pval"], \
         keep_dup = config["macs14"]["keep_dup"], \
         mfold = config["macs14"]["mfold"], \
@@ -72,14 +72,16 @@ rule macs14:
         other_options = config["macs14"]["other_options"], \
         genome_size = config["genome"]["size"], \
         qsub=config["qsub"] \
-          + " -e " + config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_qsub.err" \
-          + " -o " + config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_qsub.out"
-    log: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + ".log"
-    benchmark: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_benchmark.json"
+          + " -e " + config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.err" \
+          + " -o " + config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.out"
+    log: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".log"
+    benchmark: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_benchmark.json"
     shell: """
 (mkdir -p {params.outdir}
-cd {params.outdir}
-macs14 -t {input.treatment} -c {input.control} -f BED -g {params.genome_size} -m {params.mfold} --pvalue {params.pval} --keep-dup {params.keep_dup} -n {params.name} --bw {params.bandwidth} {params.other_options}
-mv {params.name}_peaks.bed {params.name}.bed ) &> {log}
+#cd {params.outdir}
+macs -t {input.treatment} -c {input.control} -f BED -g {params.genome_size} -m {params.mfold} --pvalue {params.pval} --keep-dup {params.keep_dup} --outdir {params.outdir} -n {params.name} --bw {params.bandwidth} {params.other_options}
+mv {params.outdir}/{params.name}_peaks.bed {params.outdir}/{params.name}.bed ;
+#mv {params.name}* {params.outdir} 
+) &> {log}
 """
 

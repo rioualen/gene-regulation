@@ -1,0 +1,31 @@
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "version" in config["genome"].keys():
+    sys.exit("Genome version must be defined in the config file")
+
+if not "genome" in config["dir"].keys():
+    sys.exit("Genome dir must be defined in the dir section of the config file")
+
+# Define paths
+genome_version = config["genome"]["version"]
+genome_dir = config["dir"]["genome"] + genome_version + "/"
+gff3_file = genome_dir + genome_version + ".gff3"
+
+rule bedtools_intersect:
+	input: bed = "{regions}.bed", gff3 = gff3_file
+	output: "{regions}_intersect.gff3"
+	log: "{regions}_intersect.log"
+	benchmark: "{regions}_intersect_benchmark.json"
+	params: qsub = config["qsub"] + " -e {regions}_intersect_qsub.err -o {regions}_intersect_qsub.out"
+	shell:"""bedtools intersect -wa -a {input.bed} -b {input.gff3} > {output}"""
+
+
+
+#bedtools intersect [OPTIONS] -a <FILE> \
+#                             -b <FILE1, FILE2, ..., FILEN>
+
+
+#bedtools intersect -wa -bed -a Ecoli_K12.gff3 -b peaks.bed > out.bed
+#bedtools intersect -wa -bed -a peaks.bed  -b Ecoli_K12.gff3 > out.bed

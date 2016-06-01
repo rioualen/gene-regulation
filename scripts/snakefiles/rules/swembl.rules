@@ -45,20 +45,20 @@ suffix = "swembl-R" + config["swembl"]["R"]                                     
 
 rule swembl:
     input:
-        treatment = config["dir"]["samples"] + "{treatment}/{treatment}{preprocess}_sorted_pos.bed", \
-        control=config["dir"]["samples"] + "{control}/{control}{preprocess}_sorted_pos.bed"
+        treatment = config["dir"]["samples"] + "{treatment}/{treatment}{preprocess,.*}_sorted_pos.bed", \
+        control=config["dir"]["samples"] + "{control}/{control}{preprocess,.*}_sorted_pos.bed"
     output:
-        peaks_swembl = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + ".swembl", \
-        peaks_bed = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + ".bed", \
+        peaks_swembl = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".swembl", \
+        peaks_bed = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".bed", \
 #        peak_len ="{result_dir}/{treatment}_vs_{control}/swembl-R{R}/{treatment}_vs_{control}_{aligner}_swembl-R{R}_peaklen.tab"
     params:
         R =  config["swembl"]["R"], \
         x = config["swembl"]["x"], \
         qsub = config["qsub"] \
-          + " -e " + config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_qsub.err" \
-          + " -o " + config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_qsub.out"
-    log: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + ".log"
-    benchmark: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_benchmark.json"
+          + " -e " + config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.err" \
+          + " -o " + config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.out"
+    log: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".log"
+    benchmark: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_benchmark.json"
     shell: """
 (SWEMBL -i {input.treatment} -r {input.control} -B -R {params.R} -x {params.x} -o {output.peaks_swembl}; \
 convert-features -from swembl -to bed -i {output.peaks_swembl} -o {output.peaks_bed}) &> {log}

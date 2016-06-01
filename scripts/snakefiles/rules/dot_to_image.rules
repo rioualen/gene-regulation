@@ -1,0 +1,8 @@
+rule dot_to_image:
+    input: "{graph}.dot"
+    output: "{graph}.{ext,(pdf|png)}"
+    log: "{graph}_dot_to_{ext}.log"
+    shell: """
+dot -T{wildcards.ext} -o {output} {input} &> {log}
+"""
+

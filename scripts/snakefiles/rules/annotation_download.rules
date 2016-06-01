@@ -7,9 +7,10 @@ Usage example:
 
 Required parameters:
     config["qsub"]
-    config["dir"]["genomes"]
+    config["dir"]["genome"]
     config["genome"]["version"]
-    config["genome"]["url"]
+    config["genome"]["gff3_url"]
+    config["genome"]["gtf_url"]
 
 Optional parameters:
 
@@ -24,36 +25,47 @@ if not "qsub" in config.keys():
 if not "version" in config["genome"].keys():
     sys.exit("Genome version must be defined in the config file")
 
-if not "genomes" in config["dir"].keys():
+if not "genome" in config["dir"].keys():
     sys.exit("Genome dir must be defined in the dir section of the config file")
 
-if not "url" in config["genome"].keys():
-    sys.exit("The parameter genome url must be defined in the config file")
+if not "gff3_url" in config["genome"].keys():
+    sys.exit("The parameter genome gff3_url must be defined in the config file")
+
+if not "gtf_url" in config["genome"].keys():
+    sys.exit("The parameter genome gtf_url must be defined in the config file")
 
 # Define paths
 genome_version = config["genome"]["version"]
-genome_dir = config["dir"]["genomes"] + genome_version + "/"
-genome_file = genome_dir + genome_version + ".gff3"
+genome_dir = config["dir"]["genome"] + genome_version + "/"
+gff3_file = genome_dir + genome_version + ".gff3"
+gtf_file = genome_dir + genome_version + ".gtf"
 
 rule annotation_download:
 #    input: "."
-    output: genome_file
-    log: genome_file + ".log"
-    benchmark: genome_file + "_benchmark.json"
+    output: gff3_file, gtf_file
+    log: genome_dir + "download_annot.log"
+    benchmark: genome_dir + "download_annot_benchmark.json"
     params:
-        gff = config["genome"]["gff"], \
+        gff3 = config["genome"]["gff3_url"], \
+        gtf = config["genome"]["gtf_url"], \
         dir = genome_dir, \
         version = genome_version, \
         qsub = config["qsub"] \
-          + " -e " + genome_dir + "download_gff_qsub.err" \
-          + " -o " + genome_dir + "download_gff_qsub.out"
+          + " -e " + genome_dir + "download_annot_qsub.err" \
+          + " -o " + genome_dir + "download_annot_qsub.out"
     shell:"""
 (cd {params.dir}
-wget {params.gff}
-filename=$(basename {params.gff})
+wget {params.gff3}
+filename=$(basename {params.gff3})
 echo $filename
 gunzip $filename
 fastaname=$(basename $filename .${{filename##*.}})
-mv $fastaname {params.version}.gff3) &> {log}
+mv $fastaname {params.version}.gff3
+wget {params.gtf}
+filename=$(basename {params.gtf})
+echo $filename
+gunzip $filename
+fastaname=$(basename $filename .${{filename##*.}})
+mv $fastaname {params.version}.gtf) &> {log}
 """
 

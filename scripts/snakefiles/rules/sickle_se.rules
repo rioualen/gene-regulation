@@ -21,7 +21,7 @@ if not "sickle" in config.keys():
     config["sickle"] = {}
 
 if not "threshold" in config["sickle"].keys():
-    config["sickle"]["threshold"] = 20
+    config["sickle"]["threshold"] = "20"
 
 if not "qual" in config["sickle"].keys():
     config["sickle"]["qual"] = "sanger"

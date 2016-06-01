@@ -18,10 +18,6 @@ Usage example:
 # Contributors: 
 #        Claire Rioualen, Lucie Khamvongsa
 
-# Params
-#if not "file" in config["genome"].keys():
-#    sys.exit("The parameter genome file must be defined in the config file")
-
 if not "peak-motifs" in config.keys():
     config["peak-motifs"] = {}
 
@@ -40,7 +36,6 @@ rule peak_motifs:
     output: "{caller_dir}/peak-motifs/{peaks}_peak-motifs_synthesis.html"
     params:
         bed_ctrl = "{caller_dir}/{peaks}.bed", \
-#        genome = config["genome"]["file"], \
         tasks = config['peak-motifs']['tasks'], \
         disco = config['peak-motifs']['disco'], \
         motif_db = config['peak-motifs']['motif_db'], \

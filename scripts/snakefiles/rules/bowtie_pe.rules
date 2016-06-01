@@ -1,0 +1,90 @@
+"""Read mapping for single end data using bowtie. 
+Requires the indexing to have previously been done (using the
+rule bowtie_index).
+
+Required parameters:
+    config["genome"]["version"]
+    config["qsub"]
+    config["bowtie"]["max_mismatches"]
+
+Optional parameters:
+    config["bowtie"]["dir"]
+    config["bowtie"]["threads"]
+
+Usage example:
+    ALIGNER=["bowtie"]
+    ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)             ## todo
+    bowtie_INDEX = expand(config["dir"]["genome"] + "{genome}/bowtieIndex/{genome}.fa.1.bt2", genome=GENOME)     ## todo
+    MAPPING = expand("{alignment}.sam", alignment=ALIGNMENT)
+
+Contributors: 
+    Claire Rioualen
+"""
+
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "version" in config["genome"].keys():
+    sys.exit("Genome version must be defined in the config file")
+
+if not "genome" in config["dir"].keys():
+    sys.exit("Genome dir must be defined in the dir section of the config file")
+
+if not "bowtie" in config.keys():
+    config["bowtie"] = {}
+
+if not "threads" in config["bowtie"].keys():
+    config["bowtie"]["threads"] = "1"
+
+if not "max_mismatches" in config["bowtie"].keys():
+    config["bowtie"]["max_mismatches"] = "0"
+
+# Define paths
+if not "samples" in config["dir"].keys():
+    config["dir"]["samples"] = config["dir"]["results"]
+
+genome_version = config["genome"]["version"]
+genome_dir = config["dir"]["genome"] + genome_version + "/"
+genome_file = genome_dir + genome_version + ".fa"
+bowtie_dir = genome_dir + "bowtie/"
+bowtie_index = bowtie_dir + genome_version + ".fa"
+
+rule bowtie_pe:
+    input:
+        forward = "{reads}_1.fastq", \
+        reverse = "{reads}_2.fastq", \
+        index = bowtie_index
+    output:
+        sam = "{reads}_bowtie.sam"
+    params:
+        max_mismatches = config["bowtie"]["max_mismatches"], \
+        threads = config["bowtie"]["threads"], \
+        qsub = config["qsub"] \
+          + " -e " + "{reads}_bowtie_pe_qsub.err" \
+          + " -o " + "{reads}_bowtie_pe_qsub.out"
+    log: "{reads}_bowtie_pe.log"
+    benchmark: "{reads}_bowtie_pe_benchmark.json"
+    shell: "bowtie -t -q -S -n {params.max_mismatches}  --phred33-quals {input.index} -1 {input.forward} -2 {input.reverse} {output.sam} 2> {log}"
+
+# param reads_iso ?
+# "bowtie -t -q -S -n {params.max_mismatches} -m {params.reads_iso} --phred33-quals {params.index} -1 {input.forward} -2 {input.reverse} {output.sam} > {output.summary} 2> {log}"
+
+
+
+## to be revised !
+#rule bowtie_pe:
+#    """Read mapping with bowtie version 1 (no gap) in paired end."""
+#    input: forward = "{reads_prefix}" + config["suffix"]["reads_fwd"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq", \
+#           reverse = "{reads_prefix}" + config["suffix"]["reads_rev"] + "_sickle_pe_q" + config["sickle"]["threshold"] + ".fastq", \
+#           index1 = config["bowtie"]["bowtie_index"] + ".1.ebwt"
+#    output: sam = "{reads_prefix}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe.sam", \
+#            summary =  "{reads_prefix}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe_summary.txt"
+#    log: "{reads_prefix}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe.log"
+#    benchmark: "{reads_prefix}_sickle_pe_q" + config["sickle"]["threshold"] + "_bowtie_pe_benchmark.json"
+#    params: max_mismatches = config["bowtie"]["max_mismatches"], \
+#            reads_iso = config["bowtie"]["reads_iso"], \
+#            index = config["bowtie"]["bowtie_index"], \
+#            qsub = config["qsub"] + " -e {reads_prefix}_bowtie_qsub.err -o {reads_prefix}_bowtie_qsub.out"
+#    shell: "bowtie -t -q -S -n {params.max_mismatches} -m {params.reads_iso} --phred33-quals {params.index}" \
+#           + " -1 {input.forward} -2 {input.reverse} {output.sam} > {output.summary} 2> {log}"

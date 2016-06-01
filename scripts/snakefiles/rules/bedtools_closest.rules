@@ -1,0 +1,28 @@
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "version" in config["genome"].keys():
+    sys.exit("Genome version must be defined in the config file")
+
+if not "genome" in config["dir"].keys():
+    sys.exit("Genome dir must be defined in the dir section of the config file")
+
+# Define paths
+genome_version = config["genome"]["version"]
+genome_dir = config["dir"]["genome"] + genome_version + "/"
+gff3_file = genome_dir + genome_version + ".gff3"
+
+rule bedtools_closest:
+	input: bed = "{regions}.bed", gff3 = gff3_file
+	output: "{regions}_closest.gff3"
+	log: "{regions}_closest.log"
+	benchmark: "{regions}_closest_benchmark.json"
+	params: qsub = config["qsub"] + " -e {regions}_closest_qsub.err -o {regions}_closest_qsub.out"
+	shell:"""bedtools closest -a {input.bed} -b {input.gff3} > {output}"""
+
+
+#bedtools closest [OPTIONS] -a <FILE> \
+#                           -b <FILE1, FILE2, ..., FILEN>
+
+#bedtools closest -a peaks.bed -b Ecoli_K12.gff3

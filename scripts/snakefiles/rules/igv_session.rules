@@ -4,7 +4,7 @@ if not "version" in config["genome"].keys():
 
 rule igv_session:
 #    input:
-    output: "{PEAKS_DIR}igv_session.xml"
+    output: "{dir}igv_session.xml"
     params: config["genome"]["version"]
     run:
 

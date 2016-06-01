@@ -1,0 +1,77 @@
+"""Align each sample with the R-package subread.
+
+   To align each sample on the reference genome the R-package subread
+   first needs to build a index with the function builindex(). The
+   alignment is then executed with the function align(), which calls
+   the tool read mapping tool Subread.  
+
+   Reference: Liao Y, Smyth GK and Shi W (2013). The Subread aligner:
+   fast, accurate and scalable read mapping by seed-and-vote.  Nucleic
+   Acids Research, 41(10):e108
+
+Required parameters:
+    config["genome"]["version"]
+    config["qsub"]
+
+
+Optional parameters:
+    config["subread"]["dir"]
+    config["subread"]["threads"]
+    config["subread"]["max_mismatches"]
+
+Usage example:
+    ALIGNER=["subread"]
+    ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)             ## todo
+    SUBREAD_INDEX = expand(config["dir"]["genome"] + "{genome}/subread/{genome}.fa.1.bt2", genome=GENOME)     ## todo
+    MAPPING = expand("{alignment}.sam", alignment=ALIGNMENT)
+
+Contributors: 
+    Claire Rioualen
+"""
+
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "version" in config["genome"].keys():
+    sys.exit("Genome version must be defined in the config file")
+
+if not "genome" in config["dir"].keys():
+    sys.exit("Genome dir must be defined in the dir section of the config file")
+
+if not "subread" in config.keys():
+    config["subread"] = {}
+
+if not "threads" in config["subread"].keys():
+    config["subread"]["threads"] = "1"
+
+if not "max_mismatches" in config["subread"].keys():
+    config["subread"]["max_mismatches"] = "3"
+
+# Define paths
+if not "samples" in config["dir"].keys():
+    config["dir"]["samples"] = config["dir"]["results"]
+
+genome_version = config["genome"]["version"]
+genome_dir = config["dir"]["genome"] + genome_version + "/"
+genome_file = genome_dir + genome_version + ".fa"
+subread_dir = genome_dir + "subread/"
+subread_index = subread_dir + genome_version
+
+rule subread_pe:
+    input:
+        forward = "{reads}_1.fastq", \
+        reverse = "{reads}_2.fastq", \
+        fa = subread_index + ".fa"
+    output:
+        sam = "{reads}_subread.sam"
+    params:
+        index = subread_index, \
+        max_mismatches = config["subread"]["max_mismatches"], \
+        threads = config["subread"]["threads"], \
+        qsub = config["qsub"] \
+          + " -e " + "{reads}_subread_pe_qsub.err" \
+          + " -o " + "{reads}_subread_pe_qsub.out"
+    log: "{reads}_subread_pe.log"
+    benchmark: "{reads}_subread_pe_benchmark.json"
+    shell: "subread-align -i {params.index} -r {input.forward} -R {input.reverse} -t 0 -T {params.threads} -M {params.max_mismatches} -o {output.sam} 2> {log}"

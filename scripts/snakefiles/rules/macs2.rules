@@ -66,15 +66,14 @@ suffix = "macs2-qval" + config["macs2"]["qval"]                                 
 
 rule macs2:
     input:
-        treatment = config["dir"]["samples"] + "{treatment}/{treatment}{preprocess}_sorted_pos.bed", \
-        control = config["dir"]["samples"] + "{control}/{control}{preprocess}_sorted_pos.bed"
+        treatment = config["dir"]["samples"] + "{treatment}/{treatment}{preprocess,.*}_sorted_pos.bed", \
+        control = config["dir"]["samples"] + "{control}/{control}{preprocess,.*}_sorted_pos.bed"
     output:
-        peaks = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_peaks." + config["macs2"]["type"] + "Peak", \
-        peaks_bed = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + ".bed", \
-#        peak_len = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_peaklen.tab"#, \
+        peaks = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_peaks." + config["macs2"]["type"] + "Peak", \
+        peaks_bed = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".bed"
     params:
         outdir = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix, \
-        name = "{treatment}_vs_{control}{preprocess}_" + suffix, \
+        name = "{treatment}_vs_{control}{preprocess,.*}_" + suffix, \
         qval = config["macs2"]["qval"], \
         keep_dup = config["macs2"]["keep_dup"], \
         band_width = config["macs2"]["band_width"], \
@@ -83,10 +82,10 @@ rule macs2:
         other_options = config["macs2"]["other_options"], \
         genome_size = config["genome"]["size"], \
         qsub=config["qsub"] \
-          + " -e " + config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_qsub.err" \
-          + " -o " + config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_qsub.out"
-    log: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + ".log"
-    benchmark: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess}_" + suffix + "_benchmark.json"
+          + " -e " + config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.err" \
+          + " -o " + config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.out"
+    log: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".log"
+    benchmark: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_benchmark.json"
     shell: """
 (macs2 \
 callpeak -t {input.treatment} -c {input.control} --gsize {params.genome_size} \

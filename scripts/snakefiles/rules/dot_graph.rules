@@ -1,0 +1,18 @@
+if not "configfile" in config["metadata"].keys():
+    sys.exit("The parameter ['metadata']['configfile'] must be defined in the config file")
+
+if not "results" in config["dir"].keys():
+    sys.exit("The parameter ['dir']['results'] must be defined in the config file")
+
+if not "reports" in config["dir"].keys():
+    config["dir"]["reports"] = config["dir"]["results"];
+
+rule dot_graph:
+    output: config["dir"]["reports"] + "{graph}.dot"
+    params: snakefile = workflow.snakefile, configfile = config["metadata"]["configfile"]
+    log: config["dir"]["reports"] + "{graph}_dot.log"
+    shell: """
+(snakemake -s {params.snakefile}  --configfile  {params.configfile} --{wildcards.graph} > {output}
+sed -n '/digraph/,$p' <{output} > tmp
+mv tmp {output}) &> {log}
+"""
