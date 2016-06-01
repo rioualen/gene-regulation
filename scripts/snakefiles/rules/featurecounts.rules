@@ -9,6 +9,9 @@
 
    Counting options can be specified in the yaml configuration file.
    
+Author: Jacques van Helden
+
+Example of parameters expected in the yaml file.
 
   genome:
     fasta: "genome/Glossina_morsitans/Glossina-morsitans-Yale_CONTIGS_GmorY1.fa"

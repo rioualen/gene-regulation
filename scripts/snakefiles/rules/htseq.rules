@@ -1,12 +1,15 @@
-""" Snakemake rules to produce a count matrix from a sorted alignment
+"""Snakemake rules to produce a count matrix from a sorted alignment
     file using htseq.
 
     IMPORTANT NOTE: there seems to be a problem with htseq and
     position-sorted bam files. This has been discussed on SesqAnswers:
     http://seqanswers.com/forums/showthread.php?t=41531
 
-    After some testing, we recommend to use subread featurecounts
-    (rules defined in file featurecounts.rules) rather than htseq.
+    After some testing, we recommend to use subread featureCounts
+    instad of HTSeq (rules defined in file featurecounts.rules) rather
+    than htseq.
+
+Authors: Justine Long and Jeanne Cheneby, revised by Jacques van Helden
 
 """
 rule htseq_count:

@@ -1,4 +1,13 @@
 import pandas as pd
+"""This script generates an R parameter file containing sample IDs,
+conditions, and the parameters for edgeR and DESeq2.
+
+
+Authors: Jeanne Cheneby and Justine Long, revised by Jacques van Helden
+
+Obsolete.
+
+"""
 
 def merge_count_files(count_files:list, sample_ids:list):
     """Read a list of tab-delimited files containing counts per genes
