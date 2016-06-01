@@ -285,7 +285,7 @@ macs2:
 
 spp:
 	cd $(SOURCE_DIR);\
-	wget http://compbio.med.harvard.edu/Supplements/ChIP-seq/spp_$(SPP_VER).tar.gz;\
+	wget -nc http://compbio.med.harvard.edu/Supplements/ChIP-seq/spp_$(SPP_VER).tar.gz;\
 	sudo R CMD INSTALL spp_$(SPP_VER).tar.gz; \
 
 ## Currently not working -> see w/ S.Wilder, new version to come?
@@ -298,11 +298,12 @@ spp:
 #	chown -R ubuntu-user SWEMBL.$(SWEMBL_VER);\
 #	cd SWEMBL.$(SWEMBL_VER);\
 #	make
+##gcc main.c IO.c calc.c stack.c summit.c refcalc.c wiggle.c overlap.c -o SWEMBL -lz -lm
 
 homer:
 	mkdir $(SOURCE_DIR)/homer; \
 	cd $(SOURCE_DIR)/homer;\
-	wget "http://homer.salk.edu/homer/configureHomer.pl"; \
+	wget -nc "http://homer.salk.edu/homer/configureHomer.pl"; \
 	perl configureHomer.pl -install homer; \
 	cp `find $(SOURCE_DIR)/homer/bin -maxdepth 1 -executable -type f` $(BIN_DIR)
 
@@ -338,6 +339,10 @@ igv_tools:
 	unzip igvtools_$(IGVTOOLS_VER).zip;\
 	ln -s -f $(SOURCE_DIR)/IGVTools/igvtools $(BIN_DIR)/igvtools
 
+visualization: java9 igv igv_tools
+
+
+## to be used only in non-graphical environment (eg IFB cloud VMs)
 desktop_and_x2go:
 	sudo apt-get install -y x2goserver
 	sudo apt-get install -y --no-install-recommends ubuntu-mate-core ubuntu-mate-desktop
@@ -345,7 +350,7 @@ desktop_and_x2go:
 	sudo apt-get install -y mate-notification-daemon caja-gksu caja-open-terminal
 	sudo apt-get install -y ambiance-colors radiance-colors;
 
-visualization: java9 igv igv_tools desktop_and_x2go
+
 
 
 # ================================================================
