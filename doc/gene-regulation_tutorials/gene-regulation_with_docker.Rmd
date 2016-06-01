@@ -1,7 +1,7 @@
 ---
 title: "Running the gene-regulation pipelines with Docker"
 author: "Claire Rioualen"
-date: "April 25, 2016"
+date: "May 31st, 2016"
 ---
 <!--
 output:
@@ -76,23 +76,21 @@ sudo apt-get --yes install docker
 In order to execute the study case GSE20870, you should enter the following commands:  
 
 ```
-mkdir GSE20870_analysis
-mkdir data/GSM521934 data/GSM521935
-mkdir results/GSE20870
+mkdir ~/GSE20870-analysis
+mkdir ~/GSE20870-analysis/data/GSM521934 ~/GSE20870-analysis/data/GSM521935
 ```
 ```
-cd data/GSM521934
-wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021358/SRR051929/SRR051929.sra
-cd data/GSM521935
-wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra
+cd ~/GSE20870-analysis/data/GSM521934
+wget -nc ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021358/SRR051929/SRR051929.sra
+cd ~/GSE20870-analysis/data/GSM521935
+wget -nc ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra
 ```
-You can also choose another path and then create symlinks.
 
 ## Fetch the Docker image and run it with shared folders
 
 ```
 docker pull rioualen/gene-regulation:1.0
-docker run -v GSE20870_analysis/:GSE20870_analysis -it rioualen/gene-regulation:1.0 /bin/bash
+docker run -v ~/GSE20870-analysis/:~/GSE20870-analysis -it rioualen/gene-regulation:2.0 /bin/bash
 ```
 
 You can share as many folders as desired, using this syntax: `-v /path/on/host/:/path/on/docker/`.

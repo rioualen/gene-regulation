@@ -1,8 +1,10 @@
 ---
-title: 'Running the gene-regulation pipelines on a virtual machine on the IFB cloud'
+title: "Running the gene-regulation pipelines on a virtual machine on the IFB cloud"
 author: "Claire Rioualen"
-date: "May 12th, 2016"
-output:
+date: "May 31st, 2016"
+output: html_document
+---
+<!--output:
   html_document:
     fig_caption: yes
     highlight: zenburn
@@ -21,8 +23,8 @@ output:
     toc: yes
     toc_depth: 4
 ---
+-->
 
-<!--
 - [1. Using the Gene-regulation appliance](#1-using-the-gene-regulation-appliance)
     - [1.1 Requirements](#11-requirements)
     - [1.2 Virtual disk creation](#12-virtual-disk-creation)
@@ -40,12 +42,12 @@ output:
     - [Installing programs and dependencies](#installing-programs-and-dependencies)
     - [Get the `gene-regulation` repository](#get-the-gene-regulation-repository)
     - [Run makefile to install the dependencies](#run-makefile-to-install-the-dependencies)
--->
+
 
 > Notes: 
 > This protocol was developed on a Unix computer, with the OS LMDE. 
 > The virtual machines are developed with the Ubuntu 14.04 OS. 
-> The protocol is based on gene-regulation v1.0
+> The protocol is based on gene-regulation v2.0
 
 # 1. Using the Gene-regulation appliance
 
@@ -75,13 +77,13 @@ Appliances usually have a limited amount of disk space (up to 10, 20Go). If the 
 ## 1.3 Creation of an instance
 
 1. Click *New Instance* button.
-2. Choose appliance "Ubuntu 14.04 IFB-X2GO-10GB" in the drop-down menu. TODO Change
+2. Choose appliance "Gene regulation 2.0" in the drop-down menu.
 3. Name your VM.
 4. Choose the amount of CPU and RAM to grant the VM (up to 8 CPU, 32 GB RAM).
 5. Attach the vDisk.
 6. Click *Run*.
 
-![](../../img/ubuntu_x2go_create.png)
+*add cap.*
 
 7. After a few seconds, you may refresh the page until the newly created instance shows up on the dashboard. Clicking on the ssh mention in the *Access* column will give you the commands to access your virtual machine. 
 
@@ -102,30 +104,22 @@ Here we create a folder to store the source data files and download them .
 
 ```
 ## Download input reads
-mkdir -p ~/mydisk/GSE20870_analysis/source/GSE20870/GSM521934 
-wget -v --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021358/SRR051929/SRR051929.sra -P ~/mydisk/GSE20870_analysis/source/GSE20870/GSM521934/
+mkdir -p ~/mydisk/GSE20870_analysis/data/GSM521934 
+wget -v --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021358/SRR051929/SRR051929.sra -P ~/mydisk/GSE20870_analysis/data/GSM521934/
 
 ## Download ChIP-seq reads
-mkdir -p ~/mydisk/GSE20870_analysis/source/GSE20870/GSM521935
-wget -v --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra -P ~/mydisk/GSE20870_analysis/source/GSE20870/GSM521935/
+mkdir -p ~/mydisk/GSE20870_analysis/data/GSM521935
+wget -v --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra -P ~/mydisk/GSE20870_analysis/data/GSM521935/
 ```
 
 
-<!--
-For convenience, we create a symlink from our preferred location `/data` to the data directory `~/mydisk/GSE20870_analysis`. 
-
-```
-ln -s ~/mydisk/GSE20870_analysis ~/data
-```
--->
-
-Note: the commands above can be adapted to download the data in any other directory. You then need to update the workflow configuration file `gene-regulation/examples/GSE20870/GSE20870.yml`. 
+Note: the commands above can be adapted to download the data in any other directory. You then need to update the workflow configuration file `gene-regulation/examples/GSE20870/GSE20870.yml`, or create symlinks in the analysis directory. 
 
 ## 1.6 Run the workflow
 
 ```
 cd  ~/mydisk/GSE20870_analysis/
-ln -s ~/gene-regulation-1.0 ./gene-regulation
+ln -s ~/gene-regulation-2.0 gene-regulation
 snakemake -p -s gene-regulation/scripts/snakefiles/workflows/factor_workflow.py --configfile gene-regulation/examples/GSE20870/GSE20870.yml
 ```
 
@@ -184,13 +178,13 @@ You can visualize the FastQC results using firefox or any other navigator. Fetch
 
 * Before trimming:
 ```
-firefox /data/results/GSE20870/samples/GSM521934/GSM521934_fastqc/GSM521934_fastqc.html
-firefox /data/results/GSE20870/samples/GSM521935/GSM521935_fastqc/GSM521935_fastqc.html
+firefox /root/mydisk/GSE20870-analysis/results/samples/GSM521934/GSM521934_fastqc/GSM521934_fastqc.html
+firefox /root/mydisk/GSE20870-analysis/results/samples/GSM521935/GSM521935_fastqc/GSM521935_fastqc.html
 ```
 * After trimming:
 ```
-firefox /data/results/GSE20870/samples/GSM521934/GSM521934_sickle-se-q20_fastqc/GSM521934_sickle-se-q20_fastqc.html
-firefox /data/results/GSE20870/samples/GSM521935/GSM521935_sickle-se-q20_fastqc/GSM521935_sickle-se-q20_fastqc.html
+firefox /root/mydisk/GSE20870-analysis/results/samples/GSM521934/GSM521934_sickle-se-q20_fastqc/GSM521934_sickle-se-q20_fastqc.html
+firefox /root/mydisk/GSE20870-analysis/results/samples/GSM521935/GSM521935_sickle-se-q20_fastqc/GSM521935_sickle-se-q20_fastqc.html
 ```
 
 
@@ -198,13 +192,17 @@ firefox /data/results/GSE20870/samples/GSM521935/GSM521935_sickle-se-q20_fastqc/
 
 ### IGV
 
-You can visualize the peaks by running IGV from the terminal. You may need to source the `~/.bashrc` first in order to update teh `$PATH`. 
+You can visualize the peaks by running IGV from the terminal. 
+
+<!--You may need to source the `~/.bashrc` first in order to update the `$PATH`. 
 ```
 source ~/.bashrc
+-->
+```
 igv
 ```
 
-* Click "File" > "Open session..." and chose the file `/data/results/GSE20870/peaks/igv_session.xml`.
+* Click "File" > "Open session..." and chose the file `/root/mydisk/GSE20870-analysis/reports/peaks/igv_session.xml`.
 * You may need to adjust the panel sizes. 
 
 
@@ -222,10 +220,14 @@ If you want to manipulate data, you should also create a vDisk following step 1.
 When creating a new instance choose a 10 Go Ubuntu appliance and check the "Create appliance" option:
 
 1. Click *New Instance* button.
+
 **2. Choose appliance "Ubuntu 14.04 IFB-X2GO-10GB" in the drop-down menu. **
+
 3. Name your VM.
 4. Choose the amount of CPU and RAM to grant the VM (up to 8 CPU, 32 GB RAM).
+
 **5. Check the box *Create appliance*.**
+
 6. Attach the vDisk.
 7. Click *Run*.
 
@@ -244,9 +246,8 @@ Once in the virtual machine, you can install the required programs.
 ## Get the `gene-regulation` repository
 
 ```
-wget https://github.com/rioualen/gene-regulation/archive/1.0.tar.gz
-tar zvxf 1.0.tar.gz
-cd gene-regulation-1.0
+wget https://github.com/rioualen/gene-regulation/archive/2.0.tar.gz
+tar zvxf 2.0.tar.gz
 ```
 
 
@@ -256,8 +257,14 @@ cd gene-regulation-1.0
 This may take a while (up to 30mn-1h) & source the `.bashrc` in order to update the `$PATH` accordingly.
 
 ```
-make -f scripts/makefiles/install_tools_and_libs.mk all
+make -f gene-regulation-2.0/scripts/makefiles/install_tools_and_libs.mk all
 source ~/.bashrc
+```
+
+If you want to install the x2go server on the VM for visualization purposes:
+
+```
+make -f gene-regulation-2.0/scripts/makefiles/install_tools_and_libs.mk desktop_and_x2go
 ```
 
 You should now be able to execute the example workflow by following steps 1.5 and 1.6.
