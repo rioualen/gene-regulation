@@ -31,7 +31,7 @@ rule fastqc:
     params:
         options = config["fastqc"]["other_options"], \
         outdir = "{reads}_fastqc/", \
-        qsub = config["qsub"]\
+        qsub = config["qsub"] \
             + " -e {reads}_fastqc/{sample}_fastqc_qsub.err"\
             + " -o {reads}_fastqc/{sample}_fastqc_qsub.out"
     log: "{reads}_fastqc/{sample}_fastqc.log"
