@@ -28,8 +28,9 @@ rule sra_to_fastq_split:
         reverse = "{results}/{sample}/{sample}_2.fastq"
     log: "{results}/{sample}/{sample}_sra-conversion.log"
     benchmark: "{results}/{sample}/{sample}_sra-conversion_benchmark.json"
-    params: qsub = config["qsub"] + " -q short -e {sample}_sra-conversion_qsub.err -o {sample}_sra-conversion_qsub.out",  \
-#        results = config['dir']['samples'], \
+    params: qsub = config["qsub"] \
+            + " -e {sample}_sra-conversion_qsub.err" \
+            + " -o {sample}_sra-conversion_qsub.out",  \
         samples = "{sample}"
     shell:"""
 (echo "SHELL: $SHELL"
