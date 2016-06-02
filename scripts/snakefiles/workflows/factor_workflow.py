@@ -48,10 +48,6 @@ import sys
 import datetime
 import pandas as pd
 
-## Config
-#configfile: "examples/GSE20870/GSE20870.yml"
-
-
 # Define verbosity
 if not ("verbosity" in config.keys()):
     config["verbosity"] = 0
@@ -260,8 +256,8 @@ PEAKS = expand("{peakcalling}.bed", peakcalling=PEAKCALLING)
 # Peak annotation
 # ----------------------------------------------------------------
 
-GENE_ANNOT = ["closest", "intersect", "window"]
-PEAKS_TO_GENES = expand("{peakcalling}_{gene_annotation}.gff3", peakcalling=PEAKCALLING, gene_annotation=GENE_ANNOT)
+GENE_ANNOT = ["intersect", "window"]#"closest"
+PEAKS_TO_GENES = expand("{peakcalling}_{gene_annotation}_annot.bed", peakcalling=PEAKCALLING, gene_annotation=GENE_ANNOT)
 
 MOTIFS=expand(expand("{treat}_vs_{control}/{{peakcaller}}/peak-motifs/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}_peak-motifs_synthesis", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER, trimmer=TRIMMER)
 
@@ -289,6 +285,6 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: BAM_STATS, GENOME_COVERAGE_GZ, GRAPHICS, QC, PEAKS_TO_GENES, PEAK_MOTIFS
+	input: BAM_STATS, GENOME_COVERAGE_GZ, GRAPHICS, QC, PEAKS_TO_GENES, PEAKS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"

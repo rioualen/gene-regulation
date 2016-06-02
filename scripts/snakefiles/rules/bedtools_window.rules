@@ -15,7 +15,7 @@ gff3_file = genome_dir + genome_version + ".gff3"
 
 rule bedtools_window:
 	input: bed = "{regions}.bed", gff3 = gff3_file
-	output: "{regions}_window.gff3"
+	output: "{regions}_window_annot.bed"
 	log: "{regions}_window.log"
 	benchmark: "{regions}_window_benchmark.json"
 	params: qsub = config["qsub"] + " -e {regions}_window_qsub.err -o {regions}_window_qsub.out"
