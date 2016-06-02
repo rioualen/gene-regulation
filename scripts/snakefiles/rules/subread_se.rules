@@ -74,10 +74,10 @@ rule subread_se:
         threads = config["subread"]["threads"], \
 #        seq_type = config["subread"]["seq_type"], \
         qsub = config["qsub"] \
-          + " -e " + "{reads}_subread_pe_qsub.err" \
-          + " -o " + "{reads}_subread_pe_qsub.out"
-    log: "{reads}_subread_pe.log"
-    benchmark: "{reads}_subread_pe_benchmark.json"
+          + " -e " + "{reads}_subread_se_qsub.err" \
+          + " -o " + "{reads}_subread_se_qsub.out"
+    log: "{reads}_subread_se.log"
+    benchmark: "{reads}_subread_se_benchmark.json"
     shell: "subread-align -i {params.index} -r {input.reads} -t 1 -T {params.threads} -M {params.max_mismatches} -o {output.sam} 2> {log}"
 
 #     input: index_files = config["subread"]["index"] + ".files", \
