@@ -7,7 +7,7 @@
     Optional parameters, if not provided, are automatically set to the default value provided with the given program.
 
   author: "Claire Rioualen & Jacques van Helden"
-  qsub: "" 
+  qsub: "-V -m a -d  ~/mydisk/GSM41190_RNA-seq/"  # qsub options, which should be adapted to the local configuration
   genome:
     organism: "Escherichia coli K12 MG1655"
     version: "Ecoli_K12"                                                          # required: has to match genome filenames and directories
