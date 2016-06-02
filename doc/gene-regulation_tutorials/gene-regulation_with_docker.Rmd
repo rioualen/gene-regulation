@@ -40,15 +40,16 @@ Instructions [here](https://docs.docker.com/linux/step_five/).
 ## Install Docker on your local host
 
 Instructions for a linux install can be found [here](https://docs.docker.com/linux/), along with mac and windows instructions. 
+A useful script is availalable [here](https://gist.github.com/bhgraham/ed9f8242dc610b1f38e5) for a debian install. 
 
 You can also install it on Ubuntu 14.04 (64bits) typing the following:
 
 ```
 #sudo apt-get update
 sudo apt-get -y install docker.io
-sudo usermod -aG docker ubuntu-user
+sudo usermod -aG docker <username>
 ```
-You should now log out and in again from your Ubuntu session. 
+You should now log out and in again from your Ubuntu session. This short procedure was tested in a virtual machine under VirtualBox (see corresponding tutorial).
 
 <!--sudo service docker start-->
 
@@ -84,8 +85,8 @@ cd $ANALYSIS_DIR
 mkdir data/GSM521934 
 wget -nc ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021358/SRR051929/SRR051929.sra -P data/GSM521934
 
-mkdir data/GSM521934
-wget -nc ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra -P data/GSM521934
+mkdir data/GSM521935
+wget -nc ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra -P data/GSM521935
 ```
 
 ## Fetch the Docker image and run it with shared folders
