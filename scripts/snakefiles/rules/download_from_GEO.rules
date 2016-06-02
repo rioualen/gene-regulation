@@ -21,6 +21,20 @@ rule download_sra:
 """
 
 
+## TODO ! download function
+
+## 1. Get SRR ids from GSE id
+
+library(GEOquery)
+gse <- getGEO('GSE20870') # retrieves a GEO list set for your SRA id.
+## see what is in there:
+show(gse)
+# There are 2 sets of samples for that ID
+##  what you want is table a with SRR to download and some sample information:
+## lets see what the first set contains:
+df <- as.data.frame(gse[[1]])
+write.csv(df, file="test.csv")
+head(df)
 
 
 

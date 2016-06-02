@@ -15,7 +15,7 @@ gff3_file = genome_dir + genome_version + ".gff3"
 
 rule bedtools_intersect:
 	input: bed = "{regions}.bed", gff3 = gff3_file
-	output: "{regions}_intersect.gff3"
+	output: "{regions}_intersect_annot.bed"
 	log: "{regions}_intersect.log"
 	benchmark: "{regions}_intersect_benchmark.json"
 	params: qsub = config["qsub"] + " -e {regions}_intersect_qsub.err -o {regions}_intersect_qsub.out"

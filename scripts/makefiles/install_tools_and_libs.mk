@@ -58,7 +58,7 @@ usage:
 UBUNTU_VER_NAME="trusty"
 CRAN_MIRROR="http://cran.univ-lyon1.fr"
 CRAN_PACK_LIST='XML', 'bPeaks', 'caTools'
-BIOC_PACK_LIST='affy', 'biomaRt', 'Rsamtools'
+BIOC_PACK_LIST='affy', 'biomaRt', 'Rsamtools', 'edgeR', 'DESqe2', 'GenomicFeatures'
 PUB_KEY=51716619E084DAB9 F7B8CEA6056E8E56
 
 BEDTOOLS_VER=2.24.0
@@ -105,7 +105,7 @@ create_bin:
 
 ## Initialize a bashrc file, which will allow any user to load the
 ## path and configuration at once.
-update__bashrc: create_bin
+update_bashrc:
 	@echo 'alias ls="ls --color"' >> $(BASHRC)
 	@echo 'alias rm="rm -i"' >> $(BASHRC)
 	@echo "" >> $(BASHRC)
@@ -216,12 +216,12 @@ sratoolkit:
 # Quality assessment & trimming
 # ----------------------------------------------------------------
 
-fastqc: create_bin
+fastqc:
 	cd $(SOURCE_DIR); \
 	wget --no-clobber http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v$(FASTQC_VER).zip;\
 	unzip -o fastqc_v$(FASTQC_VER).zip; \
 	chmod +x FastQC/fastqc; \
-	ln -s -f $(SOURCE_DIR)/FastQC/fastqc $(BIN_DIR)/
+	ln -s -f $(SOURCE_DIR)/FastQC/fastqc $(BIN_DIR)/fastqc
 
 sickle: 
 	cd $(SOURCE_DIR); \
@@ -229,6 +229,7 @@ sickle:
 	cd sickle;\
 	make; \
 	cp sickle $(BIN_DIR)
+
 
 # ----------------------------------------------------------------
 # Mapping tools
@@ -280,12 +281,12 @@ macs1:
 
 
 macs2:
-	sudo pip install MACS2;
+	sudo pip install MACS2
 
 spp:
 	cd $(SOURCE_DIR);\
 	wget -nc http://compbio.med.harvard.edu/Supplements/ChIP-seq/spp_$(SPP_VER).tar.gz;\
-	sudo R CMD INSTALL spp_$(SPP_VER).tar.gz; \
+	sudo R CMD INSTALL spp_$(SPP_VER).tar.gz
 
 ## Currently not working -> see w/ S.Wilder, new version to come?
 #swembl:
@@ -347,7 +348,7 @@ desktop_and_x2go:
 	sudo apt-get install -y --no-install-recommends ubuntu-mate-core ubuntu-mate-desktop
 	sudo apt-get install -y mate-desktop-environment-extra
 	sudo apt-get install -y mate-notification-daemon caja-gksu caja-open-terminal
-	sudo apt-get install -y ambiance-colors radiance-colors;
+	sudo apt-get install -y ambiance-colors radiance-colors
 
 
 
