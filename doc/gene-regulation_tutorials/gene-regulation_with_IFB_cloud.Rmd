@@ -104,12 +104,12 @@ Here we create a folder to store the source data files and download them .
 
 ```
 ## Download input reads
-mkdir -p ~/mydisk/GSE20870_analysis/data/GSM521934 
-wget -v --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021358/SRR051929/SRR051929.sra -P ~/mydisk/GSE20870_analysis/data/GSM521934/
+mkdir -p ~/mydisk/GSE20870-analysis/data/GSM521934 
+wget -v --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021358/SRR051929/SRR051929.sra -P ~/mydisk/GSE20870-analysis/data/GSM521934/
 
 ## Download ChIP-seq reads
-mkdir -p ~/mydisk/GSE20870_analysis/data/GSM521935
-wget -v --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra -P ~/mydisk/GSE20870_analysis/data/GSM521935/
+mkdir -p ~/mydisk/GSE20870-analysis/data/GSM521935
+wget -v --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra -P ~/mydisk/GSE20870-analysis/data/GSM521935/
 ```
 
 
@@ -118,7 +118,7 @@ Note: the commands above can be adapted to download the data in any other direct
 ## 1.6 Run the workflow
 
 ```
-cd  ~/mydisk/GSE20870_analysis/
+cd  ~/mydisk/GSE20870-analysis/
 ln -s ~/gene-regulation-2.0 gene-regulation
 snakemake -p -s gene-regulation/scripts/snakefiles/workflows/factor_workflow.py --configfile gene-regulation/examples/GSE20870/GSE20870.yml
 ```

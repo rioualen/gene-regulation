@@ -76,21 +76,23 @@ sudo apt-get --yes install docker
 In order to execute the study case GSE20870, you should enter the following commands:  
 
 ```
-mkdir ~/GSE20870-analysis
-mkdir ~/GSE20870-analysis/data/GSM521934 ~/GSE20870-analysis/data/GSM521935
+export ANALYSIS_DIR=~/GSE20870-analysis
+mkdir $ANALYSIS_DIR
+cd $ANALYSIS_DIR
 ```
 ```
-cd ~/GSE20870-analysis/data/GSM521934
-wget -nc ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021358/SRR051929/SRR051929.sra
-cd ~/GSE20870-analysis/data/GSM521935
-wget -nc ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra
+mkdir data/GSM521934 
+wget -nc ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021358/SRR051929/SRR051929.sra -P data/GSM521934
+
+mkdir data/GSM521934
+wget -nc ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra -P data/GSM521934
 ```
 
 ## Fetch the Docker image and run it with shared folders
 
 ```
-docker pull rioualen/gene-regulation:1.0
-docker run -v ~/GSE20870-analysis/:~/GSE20870-analysis -it rioualen/gene-regulation:2.0 /bin/bash
+docker pull rioualen/gene-regulation:2.0
+docker run -v $ANALYSIS_DIR:~/GSE20870-analysis -it rioualen/gene-regulation:2.0 /bin/bash
 ```
 
 You can share as many folders as desired, using this syntax: `-v /path/on/host/:/path/on/docker/`.
