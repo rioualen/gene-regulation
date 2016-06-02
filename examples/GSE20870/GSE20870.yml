@@ -7,7 +7,7 @@
     Optional parameters, if not provided, are automatically set to the default value provided with the given program.
 
   author: "Claire Rioualen"
-  qsub: "" 
+  qsub: "-V -m a -d  ~/mydisk/GSE20870_analysis/"  # qsub options, which should be adapted to the local configuration
   genome:
     organism: "Saccharomyces cerevisiae"
     size: "12500000"                                                            # required: if using macs2, macs14, homer...

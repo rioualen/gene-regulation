@@ -26,7 +26,7 @@ rule sra_to_fastq:
     output: "{results}/{sample}/{sample}.fastq"
     log: "{results}/{sample}/{sample}_sra-conversion.log"
     benchmark: "{results}/{sample}/{sample}_sra-conversion_benchmark.json"
-    params: qsub = config["qsub"] + " -q short -e {sample}_sra-conversion_qsub.err -o {sample}_sra-conversion_qsub.out",  \
+    params: qsub = config["qsub"] + " -q short -e {results}/{sample}/{sample}_sra-conversion_qsub.err -o {results}/{sample}/{sample}_sra-conversion_qsub.out",  \
         results = config['dir']['samples'], \
         samples = "{sample}"
     shell:"""

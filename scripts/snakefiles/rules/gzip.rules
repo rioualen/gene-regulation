@@ -10,5 +10,5 @@ rule gzip_one_file:
     log: "{file}_gzip.log"
     benchmark: "{file}_gzip_benchmark.json"
     params: qsub = config["qsub"] + " -e {file}_gzip_qsub.err -o {file}_gzip_qsub.out"
-    shell:"gzip {input} 2> {log} "
+    shell:"gzip -f {input} 2> {log} "
 

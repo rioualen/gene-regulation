@@ -105,7 +105,7 @@ create_bin:
 
 ## Initialize a bashrc file, which will allow any user to load the
 ## path and configuration at once.
-update_bashrc:
+update__bashrc: create_bin
 	@echo 'alias ls="ls --color"' >> $(BASHRC)
 	@echo 'alias rm="rm -i"' >> $(BASHRC)
 	@echo "" >> $(BASHRC)
@@ -196,7 +196,7 @@ samtools:
 	tar xvf samtools-$(SAMTOOLS_VER).tar;\
 	cd samtools-$(SAMTOOLS_VER); \
 	make ;\
-	sudo make install;\
+	sudo make install
 
 bedtools:
 	cd $(SOURCE_DIR);\
@@ -204,7 +204,7 @@ bedtools:
 	tar xvfz bedtools-$(BEDTOOLS_VER).tar.gz;\
 	cd bedtools2; \
 	make; \
-	sudo make install; \
+	sudo make install
 
 sratoolkit:
 	cd $(SOURCE_DIR); \
@@ -216,20 +216,19 @@ sratoolkit:
 # Quality assessment & trimming
 # ----------------------------------------------------------------
 
-fastqc:
+fastqc: create_bin
 	cd $(SOURCE_DIR); \
 	wget --no-clobber http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v$(FASTQC_VER).zip;\
 	unzip -o fastqc_v$(FASTQC_VER).zip; \
-	sudo chmod +x FastQC/fastqc; \
-	ln -s -f $(SOURCE_DIR)/FastQC/fastqc $(BIN_DIR)/fastqc; \
+	chmod +x FastQC/fastqc; \
+	ln -s -f $(SOURCE_DIR)/FastQC/fastqc $(BIN_DIR)/
 
 sickle: 
 	cd $(SOURCE_DIR); \
 	git clone https://github.com/najoshi/sickle.git; \
 	cd sickle;\
 	make; \
-	cp sickle $(BIN_DIR) ;\
-
+	cp sickle $(BIN_DIR)
 
 # ----------------------------------------------------------------
 # Mapping tools

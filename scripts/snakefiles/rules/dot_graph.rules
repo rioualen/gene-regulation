@@ -9,7 +9,10 @@ if not "reports" in config["dir"].keys():
 
 rule dot_graph:
     output: config["dir"]["reports"] + "{graph}.dot"
-    params: snakefile = workflow.snakefile, configfile = config["metadata"]["configfile"]
+    params: snakefile = workflow.snakefile, configfile = config["metadata"]["configfile"], \
+        qsub=config["qsub"] \
+          + " -e " + config["dir"]["reports"] + "{graph}_dot_qsub.err" \
+          + " -o " + config["dir"]["reports"] + "{graph}_dot_qsub.out"
     log: config["dir"]["reports"] + "{graph}_dot.log"
     shell: """
 (snakemake -s {params.snakefile}  --configfile  {params.configfile} --{wildcards.graph} > {output}
