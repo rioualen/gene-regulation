@@ -67,10 +67,3 @@ grep -v '^#' {output.peaks_swembl} \
 ) &> {log}
 """
 
-'''
-| perl -pe 's| {params.compa_name} SWEMBLBOUM|_SWEMBL|g' \
-convert-features -from swembl -to bed -i {output.peaks_swembl} -o {output.peaks_bed}) &> {log}
-# grep -v '^#' {output.peaks_swembl} |  awk -F'\t' '$$1 != "Region" || $$2 != "Start pos." {print $$1"\t"$$2"\t"$$3"\t{treatment}_vs_{control}SWEMBL\t"$$7"\t+"}' &> {log}
-# convert-features -from swembl -to bed -i {output.peaks_swembl} -o {output.peaks_bed}) &> {log}
-#sequence-lengths -i {output.peaks_bed} -in_format bed | classfreq -ci 10 -v 1 -o {output.peak_len}
-'''

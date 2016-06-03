@@ -127,7 +127,7 @@ It includes:
 * Bowtie
 * [Bowtie 2](http://bowtie-bio.sourceforge.net/)
 * [SAMtools 1.3+](http://samtools.sourceforge.net/)
-* [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
+* [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) (0.11.2+)
 * [bedtools](http://bedtools.readthedocs.org/)
 * [HOMER](http://homer.salk.edu/homer/index.html)
 * MACS 14 (1.4.3)
