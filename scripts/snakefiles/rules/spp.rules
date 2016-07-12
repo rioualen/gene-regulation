@@ -1,6 +1,6 @@
 """Peak-calling with SPP (R package).
     Input: bam
-    Output: narrowPeak format (bed-like format)
+    Output: narrowPeak + bed format
 
 Usage example: 
     PEAKCALLER= "spp-fdr" + config["spp"]["fdr"]
@@ -67,7 +67,7 @@ rule spp:
     log: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".log"
     benchmark: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_benchmark.json"
     run:
-        R("""sink("{log}")
+        R("""
 
         library(caTools)
         library(Rsamtools)
