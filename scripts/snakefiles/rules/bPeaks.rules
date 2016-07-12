@@ -89,7 +89,7 @@ rule bPeaks:
         
         library("bPeaks")
 
-        setwd("{params.outdir}")
+        setwd(".")
 
         system("genomeCoverageBed -ibam {input.control} -d > INPUT_genomeCoverage.txt")
         system("genomeCoverageBed -ibam {input.treatment} -d > IP_genomeCoverage.txt")
@@ -100,9 +100,7 @@ rule bPeaks:
         IPcoeff={params.IPcoeff}, controlCoeff={params.controlCoeff}, log2FC={params.log2FC}, averageQuantiles={params.averageQuantiles}, windowSize={params.windowSize}, windowOverlap={params.windowOverlap}, 
         peakDrawing = FALSE, resultName="{params.name}")
 
-        print("{params.outdir}{params.name}_bPeaks_allGenome.bed")
-        print("{params.outdir}/{params.name}_bPeaks-log{params.log2FC}.bed")
-        file.rename("{params.outdir}/{params.name}_bPeaks_allGenome.bed", "{params.outdir}/{params.name}_bPeaks-log{params.log2FC}.bed")
+        file.rename("{params.name}_bPeaks_allGenome.bed", "{params.outdir}/{params.name}_bPeaks-log{params.log2FC}.bed")
 
         sink()
 
