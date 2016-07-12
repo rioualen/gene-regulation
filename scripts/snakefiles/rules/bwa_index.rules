@@ -51,7 +51,7 @@ rule bwa_index:
     shell: """
 mkdir -p {params.dir}
 cp {input} {params.dir}
-cd {params.dir}
+#cd {params.dir}
 bwa index {params.dir}{params.version}.fa 2> {log}
 """
 
