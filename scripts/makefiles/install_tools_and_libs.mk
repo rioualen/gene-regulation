@@ -212,6 +212,15 @@ sratoolkit:
 	tar xzf sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz; \
 	cp `find sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin -maxdepth 1 -executable -type l` $(BIN_DIR)
 
+## todo
+#bedops
+#wget https://github.com/bedops/bedops/releases/download/v2.4.19/bedops_linux_x86_64-v2.4.19.tar.bz2
+#tar jxvf bedops_linux_x86_64-v2.4.19.tar.bz2
+#mkdir bedops
+#mv bin bedops
+#cp bedops/bin/* /usr/local/bin
+
+
 # ----------------------------------------------------------------
 # Quality assessment & trimming
 # ----------------------------------------------------------------
@@ -229,6 +238,9 @@ sickle:
 	cd sickle;\
 	make; \
 	cp sickle $(BIN_DIR)
+
+## todo or not todo
+# Trimmomatic
 
 
 # ----------------------------------------------------------------
