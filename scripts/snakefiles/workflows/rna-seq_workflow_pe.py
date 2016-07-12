@@ -11,7 +11,7 @@ Under construction:
  - index the genome for subread-align
  - read mapping with subread-align
  - count the reads per gene with subread featureCounts
- - detection of differentially expressed genes with DESeq2 and/or edgeR
+ - detection of differentially expressed genes with DESeq2 and/or edgeR (not yet)
 
 Parameters are specified in a yaml-formatted configuration file.
 
@@ -215,7 +215,7 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: QC, GRAPHICS, GENOME_ANNOTATIONS, FEATURE_COUNTS
+	input: QC, GRAPHICS, GENOME_ANNOTATIONS, FEATURE_COUNTS, BAM_STATS
 #	input: IMPORT, QC, GRAPHICS, TRIM, INDEX, MAPPING, BAM_STATS, SORTED_BAM, FEATURE_COUNTS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
