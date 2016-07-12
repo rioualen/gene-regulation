@@ -49,13 +49,13 @@
   macs2: 
     qval: "0.001"                                                               # optional (def: 0.05)
     keep_dup: "all"                                                             # optional (def: 1)
-    mfold_min: "2"                                                              # optional (def: 5)
+    mfold_min: "1"                                                              # optional (def: 5)
     mfold_max: "50"                                                             # optional (def: 50)
     other_options: "--call-summits"                                             # optional: can include --call-summits, --broad...
 
-#  swembl:
-#    R: "0.05"                                                                   # optional (def: 0)
-#    x: "1.2"                                                                    # optional (def: 1)
+  swembl:
+    R: "0.1"                                                                   # optional (def: 0)
+    x: "1.2"                                                                    # optional (def: 1)
 
   homer: 
     style: "factor"                                                             # optional (def: factor), can be: factor, histone, groseq, tss, dnase, super, mC (beware of output filenames)
@@ -65,15 +65,15 @@
     fdr: "0.01"                                                                 # optional (def: 0.001)
 
   spp: 
-    fdr: "0.01"                                                                 # optional (def: 0.01)
+    fdr: "0.05"                                                                 # optional (def: 0.01)
 
-#  bPeaks: 
-#    IPcoeff: "2"                                                                # optional (def: 2)
-#    controlCoeff: "4"                                                           # optional (def: 2)
-#    log2FC: "1"                                                                 # optional (def: 2)
-#    averageQuantiles: "0.8"                                                     # optional (def: 0.9)
-#    windowSize: "50"                                                            # optional (def: 150)
-#    windowOverlap: "40"                                                         # optional (def: 50)
+  bPeaks: 
+    IPcoeff: "1"                                                                # optional (def: 2)
+    controlCoeff: "2"                                                           # optional (def: 2)
+    log2FC: "1"                                                                 # optional (def: 2)
+    averageQuantiles: "0.8"                                                     # optional (def: 0.9)
+    windowSize: "50"                                                            # optional (def: 150)
+    windowOverlap: "40"                                                         # optional (def: 50)
 
   peak-motifs: 
     tasks: "all"                                                                                                   # optional (def: "all", incl. purge,seqlen,composition,ref_motifs,disco,meme,chipmunk,merge_words,motifs_vs_ref,motifs_vs_db,timelog,synthesis) (what about collect_motifs,motifs_vs_motifs,archive,small_summary,scan ?...)
