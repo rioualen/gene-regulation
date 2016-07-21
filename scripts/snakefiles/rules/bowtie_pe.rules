@@ -56,7 +56,8 @@ rule bowtie_pe:
         reverse = "{reads}_2.fastq", \
         index = bowtie_index
     output:
-        sam = "{reads}_bowtie.sam"
+        sam = "{reads}_bowtie.sam", \
+        bam = "{reads}_bowtie.bam"
     params:
         max_mismatches = config["bowtie"]["max_mismatches"], \
         threads = config["bowtie"]["threads"], \
@@ -65,7 +66,10 @@ rule bowtie_pe:
           + " -o " + "{reads}_bowtie_pe_qsub.out"
     log: "{reads}_bowtie_pe.log"
     benchmark: "{reads}_bowtie_pe_benchmark.json"
-    shell: "bowtie -t -q -S -n {params.max_mismatches}  --phred33-quals {input.index} -1 {input.forward} -2 {input.reverse} {output.sam} 2> {log}"
+    shell: """
+bowtie -t -q -S -n {params.max_mismatches}  --phred33-quals {input.index} -1 {input.forward} -2 {input.reverse} {output.sam} 2> {log}
+samtools view -b -S {output.sam} > {output.bam} 2> {log}
+"""
 
 # param reads_iso ?
 # "bowtie -t -q -S -n {params.max_mismatches} -m {params.reads_iso} --phred33-quals {params.index} -1 {input.forward} -2 {input.reverse} {output.sam} > {output.summary} 2> {log}"

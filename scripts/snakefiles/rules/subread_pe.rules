@@ -64,7 +64,8 @@ rule subread_pe:
         reverse = "{reads}_2.fastq", \
         fa = subread_index + ".fa"
     output:
-        sam = "{reads}_subread.sam"
+        sam = "{reads}_subread.sam", \
+        bam = "{reads}_subread.bam"
     params:
         index = subread_index, \
         max_mismatches = config["subread"]["max_mismatches"], \
@@ -74,4 +75,7 @@ rule subread_pe:
           + " -o " + "{reads}_subread_pe_qsub.out"
     log: "{reads}_subread_pe.log"
     benchmark: "{reads}_subread_pe_benchmark.json"
-    shell: "subread-align -i {params.index} -r {input.forward} -R {input.reverse} -t 0 -T {params.threads} -M {params.max_mismatches} -o {output.sam} 2> {log}"
+    shell: """
+subread-align -i {params.index} -r {input.forward} -R {input.reverse} -t 0 -T {params.threads} -M {params.max_mismatches} -o {output.sam} 2> {log}
+samtools view -b -S {output.sam} > {output.bam} 2> {log}
+"""
