@@ -42,16 +42,17 @@ rule merge_lanes:
     config["dir"]["fastq"]          base of the directory containing the fastq files
 
     """
-    input: config["files"]["lane_merging"]
-    output: config["dir"]["samples"] + "/lane_merging_benchmark.json"
-    log: config["dir"]["samples"] + "/lane_merging_log.txt"
-    benchmark: config["dir"]["samples"] + "/lane_merging_benchmark.json"
+    input: config["metadata"]["lane_merging"]
+#    output: config["dir"]["samples"] + "/lane_merging_benchmark.json"
+    output: touch(config["dir"]["samples"] + "merge_lanes.done")
+    log: config["dir"]["samples"] + "lane_merging.log"
+    benchmark: config["dir"]["samples"] + "lane_merging_benchmark.json"
     run:
         if (verbosity >= 0):
             print("Lane merging table:\t" + config["files"]["lane_merging"])
 
         # Read the lane merging table
-        lane_merging_table = read_table(config["files"]["lane_merging"], verbosity=verbosity)
+        lane_merging_table = read_table(config["metadata"]["lane_merging"], verbosity=verbosity)
         source_file = lane_merging_table['source_file']
         merged_file = lane_merging_table['merged_file']
 
