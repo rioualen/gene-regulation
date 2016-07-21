@@ -1,0 +1,99 @@
+"""Read mapping for single end data using Bowtie2. 
+Requires the indexing to have previously been done (using the
+rule bowtie2_index).
+
+Required parameters:
+    config["genome"]["version"]
+    config["qsub"]
+    config["bowtie2"]["max_mismatches"]
+
+Optional parameters:
+    config["tophat"]
+
+
+Usage example:
+    ALIGNER=["tophat"]
+    ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)
+    BOWTIE2_INDEX = expand(config["dir"]["genome"] + "{genome}/Bowtie2Index/{genome}.fa.1.bt2", genome=GENOME)
+    MAPPING = expand("{alignment}.bam", alignment=ALIGNMENT)
+
+Contributors: 
+    Claire Rioualen
+"""
+
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "version" in config["genome"].keys():
+    sys.exit("Genome version must be defined in the config file")
+
+if not "genome" in config["dir"].keys():
+    sys.exit("Genome dir must be defined in the dir section of the config file")
+
+if not "tophat" in config.keys():
+    config["tophat"] = {}
+
+if not "threads" in config["tophat"].keys():
+    config["tophat"]["threads"] = "1"
+
+if not "max_mismatches" in config["tophat"].keys():
+    config["tophat"]["max_mismatches"] = "2"
+
+## Define paths
+#if not "samples" in config["dir"].keys():
+#    config["dir"]["samples"] = config["dir"]["results"]
+
+genome_version = config["genome"]["version"]
+genome_dir = config["dir"]["genome"] + genome_version + "/"
+genome_file = genome_dir + genome_version + ".fa"
+bowtie2_dir = genome_dir + "bowtie2/"
+bowtie2_index = bowtie2_dir + genome_version + ".fa"
+
+rule tophat_se:
+    input:
+        reads = "{dir}/{reads}.fastq", \
+        index = bowtie2_index
+    output:
+        bam = "{dir}/{reads}_tophat.bam"
+    params:
+        outdir = "{dir}/tophat", \
+        max_mismatches = config["tophat"]["max_mismatches"], \
+        threads = config["tophat"]["threads"], \
+        qsub = config["qsub"] \
+          + " -e " + "{reads}_tophat_qsub.err" \
+          + " -o " + "{reads}_tophat_qsub.out"
+    log: "{dir}/{reads}_tophat_se.log"
+    benchmark: "{dir}/{reads}_tophat_se_benchmark.json"
+    shell: """
+tophat --num-threads {params.threads} --read-mismatches {params.max_mismatches} --output-dir {params.outdir} {input.index} {input.reads} 2> {log}
+mv {params.outdir}/accepted_hits.bam {output.bam} 2> {log}
+"""
+
+
+
+
+#rule tophat:
+#	input: "{exp}/FASTQ/{title}_m_t.fq"
+#	params: GTF, INDEX, ppn="nodes=1:ppn=2"
+#	threads: 2
+#	log: "{exp}/LOG/{title}_tophat.log"
+#	output: "{exp}/BAM/{title}.bam"
+#	message: """--- Mapping with tophat."""
+
+#	shell:  """
+#		/usr/bin/python /usr/local/bin/tophat   	\
+#			-o {wildcards.exp}/TOPHAT 		\
+#			-g 1 					\
+#			-G {params[0]} 				\
+#			-x 1 					\
+#			-p 2					\
+#			--no-novel-juncs		\
+#			--no-coverage-search                    \
+#			{params[1]} 				\
+#			{input} &> {log}
+
+#		cd {wildcards.exp}/TOPHAT
+#		mv accepted_hits.bam ../BAM/{wildcards.title}.bam
+#		"""
+
