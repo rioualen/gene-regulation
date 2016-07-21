@@ -52,19 +52,22 @@ bowtie2_index = bowtie2_dir + genome_version + ".fa"
 
 rule bowtie2_pe:
     input:
-        forward = "{reads}_1.fastq", \
-        reverse = "{reads}_2.fastq", \
+        forward = "{reads}_R1.fastq",
+        reverse = "{reads}_R2.fastq",
         index = bowtie2_index
     output:
-        sam = "{reads}_bowtie2.sam"
+        sam = "{reads}_bowtie2.sam",
+        bam = "{reads}_bowtie2.bam"
     params:
-        max_mismatches = config["bowtie2"]["max_mismatches"], \
-        threads = config["bowtie2"]["threads"], \
+        max_mismatches = config["bowtie2"]["max_mismatches"],
+        threads = config["bowtie2"]["threads"],
         qsub = config["qsub"] \
           + " -e " + "{reads}_bowtie2_pe_qsub.err" \
           + " -o " + "{reads}_bowtie2_pe_qsub.out"
     log: "{reads}_bowtie2_pe.log"
     benchmark: "{reads}_bowtie2_pe_benchmark.json"
-    shell: "bowtie2 -x {input.index} -1 {input.forward} -2 {input.reverse} -S {output.sam} --phred33 -N {params.max_mismatches} --threads {params.threads} 2> {log}"
+    shell: """
+bowtie2 -x {input.index} -1 {input.forward} -2 {input.reverse} -S {output.sam} --phred33 -N {params.max_mismatches} --threads {params.threads} 2> {log}
+samtools view -b -S {output.sam} > {output.bam} 2> {log}
+"""
 
-## todo delete threads param?  -t {params.threads}
