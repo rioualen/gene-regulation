@@ -55,7 +55,8 @@ rule bowtie2_se:
         reads = "{reads}.fastq", \
         index = bowtie2_index
     output:
-        sam = "{reads}_bowtie2.sam"
+        sam = "{reads}_bowtie2.sam", \
+        bam = "{reads}_bowtie2.bam"
     params:
         max_mismatches = config["bowtie2"]["max_mismatches"], \
         threads = config["bowtie2"]["threads"], \
@@ -64,5 +65,8 @@ rule bowtie2_se:
           + " -o " + "{reads}_bowtie2_qsub.out"
     log: "{reads}_bowtie2_se.log"
     benchmark: "{reads}_bowtie2_se_benchmark.json"
-    shell: "bowtie2 -x {input.index} -U {input.reads} -S {output.sam} --threads {params.threads} --phred33 -N {params.max_mismatches} 2> {log}"
+    shell: """
+bowtie2 -x {input.index} -U {input.reads} -S {output.sam} --threads {params.threads} --phred33 -N {params.max_mismatches} 2> {log}
+samtools view -b -S {output.sam} > {output.bam} 2> {log}
+"""
 
