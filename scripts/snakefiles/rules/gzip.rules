@@ -1,4 +1,4 @@
-rule gzip_one_file:
+rule gzip:
     """Compress a file with the gzip program. The rule is very simple, but
     is convenient to use in a workflow: it can be used to fix some
     dependencies on.gz extensions, and/or to send compression jobs to
