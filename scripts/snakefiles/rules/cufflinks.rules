@@ -1,28 +1,39 @@
 """Annotate a genome (infer transcript regions) based on RNA-seq data.
+Assemble transcripts from RNA-seq data and produce a file with
+    the location of detected transcripts.
 
 Author: Jacques.van-Helden@univ-amu.fr
 
+Contributor : Claire Rioualen
+
+TODO: doc + verifs
+
+Params:
+    threads
+    libtype
+    cuffmerge_dir
+    assembly_files
+    cuffmerge_transcripts
+
+    genome/gtf_url
+
+
 """
 
-
-if not (("genome" in config.keys()) and ("features_gtf" in config["genome"].keys())):
-    sys.exit("The parameter config['genome']['features_gtf'] should be specified in the config file.")
-
-if not (("cufflinks" in config.keys()) and ("libtype" in config["cufflinks"].keys())):
-    sys.exit("The parameter config['cufflinks']['libtype'] should be specified in the config file.")
-
-if not "threads" in config["cufflinks"].keys():
-    config["cufflinks"]["threads"] = "1"
+# Genome annotations
+genome_version = config["genome"]["version"]
+genome_dir = config["dir"]["genome"] + genome_version + "/"
+gtf_file = genome_dir + genome_version + ".gtf"
 
 
-rule cufflinks_assemble:
-    """Assemble transcripts from RNA-seq data and produce a file with
-    the location of detected transcripts.
 
-    """
-    input: bam = "{reads}.bam", gtf = config["genome"]["features_gtf"]
-    output: outdir="{reads}_CUFFLINKS", \
-        transcripts = "{reads}_CUFFLINKS/transcripts.gtf"
+rule cufflinks:
+    input:
+        bam = "{reads}_sorted_pos.bam", \
+        gtf = gtf_file
+    output:
+        outdir="{reads}_cufflinks", \
+        transcripts = "{reads}_cufflinks/transcripts.gtf"
     log:  "{reads}_cufflinks.log"
     benchmark:  "{reads}_cufflinks_benchmark.json"
     params: libtype = config["cufflinks"]["libtype"], \
