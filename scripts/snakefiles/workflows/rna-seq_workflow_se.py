@@ -16,7 +16,8 @@ Under construction:
 Parameters are specified in a yaml-formatted configuration file.
 
 Usage:
-    snakemake -p -s scripts/snakefiles/workflows/rna-seq_workflow_pe.py
+    snakemake -s gene-regulation/scripts/snakefiles/workflows/rna-seq_workflow_se.py \
+        --configfile gene-regulation/examples/RNA-seq_GSE71562/RNA-seq_GSE71562.yml -pn
 
     snakemake -p  -c "qsub {params.qsub}" -j 12 \
         -s scripts/snakefiles/workflows/rna-seq_workflow_pe.py \
@@ -42,8 +43,10 @@ Contact: 		Jacques.van-Helden@univ-amu.fr
 from snakemake.utils import R
 import os
 import sys
-import datetime
+from datetime import datetime
 import pandas as pd
+
+datetime.now().time()
 
 ## Config
 #configfile: "gene-regulation/examples/RNA-seq_GSE41190/RNA-seq_GSE41190.yml"
@@ -72,25 +75,29 @@ include: os.path.join(RULES, "bam_by_pos.rules")
 include: os.path.join(RULES, "bam_to_bed.rules")
 include: os.path.join(RULES, "bam_stats.rules")
 include: os.path.join(RULES, "bowtie2_index.rules")
-include: os.path.join(RULES, "bowtie2_se.rules")
+include: os.path.join(RULES, "bowtie2.rules")
 include: os.path.join(RULES, "bowtie_index.rules")
 include: os.path.join(RULES, "bowtie_se.rules")
 include: os.path.join(RULES, "bwa_index.rules")
 include: os.path.join(RULES, "bwa_se.rules")
 include: os.path.join(RULES, "count_reads.rules")
+include: os.path.join(RULES, "cufflinks.rules")
 include: os.path.join(RULES, "dot_graph.rules")
 include: os.path.join(RULES, "dot_to_image.rules")
 include: os.path.join(RULES, "fastqc.rules")
+include: os.path.join(RULES, "gzip.rules")
+include: os.path.join(RULES, "genome_coverage_bedgraph.rules")
 include: os.path.join(RULES, "genome_download.rules")
 include: os.path.join(RULES, "get_chrom_sizes.rules")
 include: os.path.join(RULES, "sickle_se.rules")
-include: os.path.join(RULES, "sam_to_bam.rules")
+#include: os.path.join(RULES, "sam_to_bam.rules")
 include: os.path.join(RULES, "sra_to_fastq.rules")
 include: os.path.join(RULES, "subread_index.rules")
 include: os.path.join(RULES, "subread_se.rules")
 include: os.path.join(RULES, "subread_featureCounts.rules")
+include: os.path.join(RULES, "tophat_se.rules")
 
-ruleorder: bam_by_pos > sam_to_bam
+#ruleorder: bam_by_pos > sam_to_bam
 
 #================================================================#
 #                      Data & wildcards                          #
@@ -185,22 +192,29 @@ QC = expand(SAMPLE_DIR + "{samples}/{samples}_fastqc/{samples}_fastqc.html", sam
 #----------------------------------------------------------------#
 
 
-ALIGNER=["bowtie2", "subread", "bowtie", "bwa"]
-ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)
-
+ALIGNER=["bowtie2"]#, "subread"]
 INDEX = expand(GENOME_DIR + "/{aligner}/" + GENOME + ".fa", aligner=ALIGNER)
 
-MAPPING = expand("{alignment}.sam", alignment=ALIGNMENT)
+#ALIGNER.append("tophat")
+
+ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)
+MAPPING = expand("{alignment}.bam", alignment=ALIGNMENT)
 
 BAM_STATS = expand("{alignment}_bam_stats.txt", alignment=ALIGNMENT)
 
-SORTED_BAM = expand("{alignment}_sorted_pos.bam", alignment=ALIGNMENT)
+#SORTED_BAM = expand("{alignment}_sorted_pos.bam", alignment=ALIGNMENT)
 
+#----------------------------------------------------------------#
+# RNA-seq analysis
+#----------------------------------------------------------------#
+
+
+INFER_TRANSCRIPTS = expand("{alignment}_cufflinks/transcripts.gtf", alignment=ALIGNMENT)
 FEATURE_COUNTS = expand("{alignment}_featureCounts.tab", alignment=ALIGNMENT)
 
 
-#GENOME_COVERAGE = expand("{alignment}.bedgraph", alignment=ALIGNMENT)
-#GENOME_COVERAGE_GZ = expand("{alignment}.bedgraph.gz", alignment=ALIGNMENT)
+
+GENOME_COVERAGE = expand("{alignment}.bedgraph.gz", alignment=ALIGNMENT)
 
 ## ----------------------------------------------------------------
 ## Visualization
@@ -216,7 +230,7 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: QC, GRAPHICS, GENOME_ANNOTATIONS, BAM_STATS, FEATURE_COUNTS
+	input: GRAPHICS, BAM_STATS, FEATURE_COUNTS, INFER_TRANSCRIPTS, GENOME_COVERAGE#QC
 #	input: IMPORT, QC, GRAPHICS, TRIM, INDEX, MAPPING, BAM_STATS, SORTED_BAM, FEATURE_COUNTS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
