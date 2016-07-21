@@ -272,6 +272,22 @@ subread:
 	cd ../bin; \
 	cp `find * -executable -type f` $(BIN_DIR)
 
+#star:
+#	wget -nc https://github.com/alexdobin/STAR/archive/2.5.2a.tar.gz
+#	tar xvzf 2.5.2a.tar.gz
+#	cd STAR-2.5.2a
+#	make STAR
+# todo $PATH
+
+
+#tophat2_install:
+#	@wget --no-clobber https://ccb.jhu.edu/software/tophat/downloads/tophat-$(TOPHAT_VER).Linux_x86_64.tar.gz;\
+#	tar xvfz tophat-$(TOPHAT_VER).Linux_x86_64.tar.gz;\
+#	cd tophat-$(TOPHAT_VER).Linux_x86_64; \
+#	rm -Rf AUTHORS LICENSE README intervaltree/ sortedcontainers/; \
+#	mv ./* /usr/local/bin;\
+#	cd ..; rm -Rf tophat-$(TOPHAT_VER).Linux_x86_64*
+
 
 # ----------------------------------------------------------------
 # Peak analysis
