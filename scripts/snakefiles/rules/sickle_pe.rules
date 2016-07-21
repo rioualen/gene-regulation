@@ -10,7 +10,7 @@ Usage:
 
 
 Authors:
-    Claire Rioualen, Lucie Khamvongsa
+    Claire Rioualen, Lucie Khamvongsa, Jacques van Helden
 """
 
 # Set defaults params in case they're not defined in config file
@@ -35,11 +35,11 @@ suffix = "sickle-pe-q" + config["sickle"]["threshold"]                          
 
 rule sickle_pe:
     input:
-        forward = "{reads}_1.fastq", \
-        reverse = "{reads}_2.fastq"
+        forward = "{reads}_R1.fastq", \
+        reverse = "{reads}_R2.fastq"
     output:
-        forward = "{reads}_" + suffix + "_1.fastq", \
-        reverse = "{reads}_" + suffix + "_2.fastq", \
+        forward = "{reads}_" + suffix + "_R1.fastq", \
+        reverse = "{reads}_" + suffix + "_R2.fastq", \
         single = "{reads}_" + suffix + ".fastq"
     params:
         threshold = config["sickle"]["threshold"], \
@@ -49,8 +49,6 @@ rule sickle_pe:
             + " -o "+ "{reads}_" + suffix + "_qsub.out"
     log: "{reads}_" + suffix + ".log"
     benchmark: "{reads}_" + suffix + "_benchmark.json"
-#    shell: "sickle se --fastq-file {input} --qual-type {params.qual_type} --output-file {output} &> {log}"
-#    shell: "sickle pe --pe-file1 {input.forward} --pe-file2 {input.reverse} --qual-type {params.qual_type} --qual-threshold {params.threshold} --output-pe1 {output.forward} --output-pe2 {output.reverse} --output-single {output.single} {params.options} > {output.summary} 2> {log}"
     shell: "sickle pe --pe-file1 {input.forward} --pe-file2 {input.reverse} --qual-type {params.qual_type} --qual-threshold {params.threshold} --output-pe1 {output.forward} --output-pe2 {output.reverse} --output-single {output.single} 2> {log}"
 
 
