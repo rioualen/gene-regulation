@@ -1,0 +1,64 @@
+"""Trim one a single end raw reads file with sickle.
+
+Required parameters:
+    config["qsub"]
+Optional parameters:
+    config["sickle"]["threshold"]
+    config["sickle"]["qual"]
+
+Usage:
+
+
+Authors:
+    Claire Rioualen, Lucie Khamvongsa
+"""
+
+# Set defaults params in case they're not defined in config file
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "sickle" in config.keys():
+    config["sickle"] = {}
+
+if not "threshold" in config["sickle"].keys():
+    config["sickle"]["threshold"] = "20"
+
+if not "qual" in config["sickle"].keys():
+    config["sickle"]["qual"] = "sanger"
+
+# Define paths
+if not "samples" in config["dir"].keys():
+    config["dir"]["samples"] = config["dir"]["results"]
+
+suffix = "sickle-q" + config["sickle"]["threshold"]
+
+# Define input files
+def sickle_inputs(wildcards):
+    if (seq_type == "pe"):
+        reads = expand("{file}_{strand}.fastq", strand=["R1", "R2"], file=wildcards.reads)
+    elif (seq_type == "se"):
+        reads = expand("{file}.fastq", file=wildcards.reads)
+    else:
+        sys.exit("Error: invalid sequencing type parameter. Must be 'se' or 'pe'")
+    return reads
+
+rule sickle:
+    input: reads = sickle_inputs
+    output:
+        forward = "{reads}_" + suffix + "_R1.fastq",
+        reverse = "{reads}_" + suffix + "_R2.fastq",
+        single = "{reads}_" + suffix + ".fastq"
+    params:
+        threshold = config["sickle"]["threshold"],
+        qual_type = config["sickle"]["qual"],
+        qsub = config['qsub'] \
+            + " -e "+ "{reads}_" + suffix + "_qsub.err" \
+            + " -o "+ "{reads}_" + suffix + "_qsub.out"
+    log: "{reads}_" + suffix + ".log"
+    benchmark: "{reads}_" + suffix + "_benchmark.json"
+    run:
+        if (seq_type == "pe"):
+            shell("sickle pe --pe-file1 " + input.reads[0] + " --pe-file2 " + input.reads[1] + " --qual-type {params.qual_type} --qual-threshold {params.threshold} --output-pe1 {output.forward} --output-pe2 {output.reverse} --output-single {output.single} 2> {log}")
+        elif (seq_type == "se"):
+            shell("sickle se --fastq-file {input} --qual-type {params.qual_type} --output-file {output.single} &> {log}")
+
