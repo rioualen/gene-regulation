@@ -1,0 +1,88 @@
+"""Read mapping for single end data using bowtie. 
+Requires the indexing to have previously been done (using the
+rule bowtie_index).
+
+Required parameters:
+    config["genome"]["version"]
+    config["qsub"]
+    config["bowtie"]["max_mismatches"]
+
+Optional parameters:
+    config["bowtie"]["dir"]
+    config["bowtie"]["threads"]
+
+Usage example:
+    ALIGNER=["bowtie", "bowtie2", "bwa"]
+    ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)
+    INDEX = expand(config["dir"]["genome"] + config["genome"]["version"] + "/{aligner}/" + config["genome"]["version"] + ".fa", aligner=ALIGNER)
+    MAPPING = expand("{alignment}.sam", alignment=ALIGNMENT)
+
+Contributors: 
+    Jacques van Helden, Lucie Khamvongsa, Claire Rioualen
+"""
+
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "version" in config["genome"].keys():
+    sys.exit("Genome version must be defined in the config file")
+
+if not "genome" in config["dir"].keys():
+    sys.exit("Genome dir must be defined in the dir section of the config file")
+
+if not "seq_type" in config["metadata"].keys():
+    sys.exit("Sequencing type (single or paired ends) must be defined in the config file")
+
+if not "bowtie" in config.keys():
+    config["bowtie"] = {}
+
+if not "threads" in config["bowtie"].keys():
+    config["bowtie"]["threads"] = "1"
+
+if not "max_mismatches" in config["bowtie"].keys():
+    config["bowtie"]["max_mismatches"] = "0"
+
+# Define paths
+if not "samples" in config["dir"].keys():
+    config["dir"]["samples"] = config["dir"]["results"]
+
+genome_version = config["genome"]["version"]
+genome_dir = config["dir"]["genome"] + genome_version + "/"
+genome_file = genome_dir + genome_version + ".fa"
+bowtie_dir = genome_dir + "bowtie/"
+bowtie_index = bowtie_dir + genome_version + ".fa"
+
+
+# Define input files
+def bowtie_inputs(wildcards):
+    if (seq_type == "pe"):
+        reads = expand("{file}_{strand}.fastq", strand=["R1", "R2"], file=wildcards.reads)
+    elif (seq_type == "se"):
+        reads = expand("{file}.fastq", file=wildcards.reads)
+    else:
+        sys.exit("Error: invalid sequencing type parameter. Must be 'se' or 'pe'")
+    return reads
+
+rule bowtie:
+    input:
+        reads = bowtie_inputs, 
+        index = bowtie_index
+    output:
+        sam = "{reads}_bowtie.sam", \
+        bam = "{reads}_bowtie.bam"
+    params:
+        max_mismatches = config["bowtie"]["max_mismatches"],
+        threads = config["bowtie"]["threads"],
+        qsub = config["qsub"] \
+          + " -e " + "{reads}_bowtie_qsub.err" \
+          + " -o " + "{reads}_bowtie_qsub.out"
+    log: "{reads}_bowtie.log"
+    benchmark: "{reads}_bowtie_benchmark.json"
+    run:
+        if (seq_type == "pe"):
+            shell("bowtie -t -q -S -n {params.max_mismatches} --threads {params.threads} --phred33-quals {input.index} -1 " + input.reads[0] + " -2 " + input.reads[1] + " {output.sam} 2> {log}")
+        elif (seq_type == "se"):
+            shell("bowtie -t -q -S -n {params.max_mismatches} --threads {params.threads} --phred33-quals {input.index} {input.reads} {output.sam} 2> {log}")
+        shell("samtools view -b -S {output.sam} > {output.bam} 2> {log}")
+
