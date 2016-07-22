@@ -41,16 +41,30 @@ if not "threads" in config["tophat"].keys():
 if not "max_mismatches" in config["tophat"].keys():
     config["tophat"]["max_mismatches"] = "2"
 
+## Define paths
+#if not "samples" in config["dir"].keys():
+#    config["dir"]["samples"] = config["dir"]["results"]
+
 genome_version = config["genome"]["version"]
 genome_dir = config["dir"]["genome"] + genome_version + "/"
 genome_file = genome_dir + genome_version + ".fa"
 bowtie2_dir = genome_dir + "bowtie2/"
 bowtie2_index = bowtie2_dir + genome_version + ".fa"
 
-rule tophat_pe:
+
+# Define input files
+def tophat_inputs(wildcards):
+    if (seq_type == "pe"):
+        reads = expand("{file}_{strand}.fastq", strand=["R1", "R2"], file=wildcards.reads)
+    elif (seq_type == "se"):
+        reads = expand("{file}.fastq", file=wildcards.reads)
+    else:
+        sys.exit("Error: invalid sequencing type parameter. Must be 'se' or 'pe'")
+    return reads
+
+rule tophat:
     input:
-        forward = "{reads}_1.fastq", \
-        reverse = "{reads}_2.fastq", \
+        reads = tophat_inputs,
         index = bowtie2_index
     output:
         bam = "{reads}_tophat.bam"
@@ -61,9 +75,12 @@ rule tophat_pe:
         qsub = config["qsub"] \
           + " -e " + "{reads}_tophat_qsub.err" \
           + " -o " + "{reads}_tophat_qsub.out"
-    log: "{reads}_tophat_pe.log"
-    benchmark: "{reads}_tophat_pe_benchmark.json"
-    shell: """
-tophat --num-threads {params.threads} --read-mismatches {params.max_mismatches} --output-dir {params.outdir} {input.index} {input.forward} {input.reverse} 2> {log}
-mv {params.outdir}/accepted_hits.bam {output.bam} 2> {log}
-"""
+    log: "{reads}_tophat.log"
+    benchmark: "{reads}_tophat_benchmark.json"
+    run:
+        if (seq_type == "pe"):
+            shell("tophat --num-threads {params.threads} --read-mismatches {params.max_mismatches} --output-dir {params.outdir} {input.index} " + input.reads[0] + " " + input.reads[1] + " 2> {log}")
+        elif (seq_type == "se"):
+            shell("tophat --num-threads {params.threads} --read-mismatches {params.max_mismatches} --output-dir {params.outdir} {input.index} {input.reads} 2> {log}")
+        shell("mv {params.outdir}/accepted_hits.bam {output.bam} 2> {log}")
+

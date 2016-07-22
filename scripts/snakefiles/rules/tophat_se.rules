@@ -40,15 +40,7 @@ if not "threads" in config["tophat"].keys():
 if not "max_mismatches" in config["tophat"].keys():
     config["tophat"]["max_mismatches"] = "2"
 
-## Define paths
-#if not "samples" in config["dir"].keys():
-#    config["dir"]["samples"] = config["dir"]["results"]
-
-genome_version = config["genome"]["version"]
-genome_dir = config["dir"]["genome"] + genome_version + "/"
-genome_file = genome_dir + genome_version + ".fa"
-bowtie2_dir = genome_dir + "bowtie2/"
-bowtie2_index = bowtie2_dir + genome_version + ".fa"
+bowtie2_index = config["dir"]["genome"] + config["genome"]["version"] + "/bowtie2/" + config["genome"]["version"] + ".fa"
 
 rule tophat_se:
     input:
@@ -69,31 +61,3 @@ rule tophat_se:
 tophat --num-threads {params.threads} --read-mismatches {params.max_mismatches} --output-dir {params.outdir} {input.index} {input.reads} 2> {log}
 mv {params.outdir}/accepted_hits.bam {output.bam} 2> {log}
 """
-
-
-
-
-#rule tophat:
-#	input: "{exp}/FASTQ/{title}_m_t.fq"
-#	params: GTF, INDEX, ppn="nodes=1:ppn=2"
-#	threads: 2
-#	log: "{exp}/LOG/{title}_tophat.log"
-#	output: "{exp}/BAM/{title}.bam"
-#	message: """--- Mapping with tophat."""
-
-#	shell:  """
-#		/usr/bin/python /usr/local/bin/tophat   	\
-#			-o {wildcards.exp}/TOPHAT 		\
-#			-g 1 					\
-#			-G {params[0]} 				\
-#			-x 1 					\
-#			-p 2					\
-#			--no-novel-juncs		\
-#			--no-coverage-search                    \
-#			{params[1]} 				\
-#			{input} &> {log}
-
-#		cd {wildcards.exp}/TOPHAT
-#		mv accepted_hits.bam ../BAM/{wildcards.title}.bam
-#		"""
-
