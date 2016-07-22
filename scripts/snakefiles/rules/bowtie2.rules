@@ -58,11 +58,12 @@ seq_type = config["metadata"]["seq_type"]
 # Define input files
 def bowtie2_inputs(wildcards):
     if (seq_type == "pe"):
-        return expand("{file}_{strand}.fastq", strand=["R1", "R2"], file=wildcards.reads)
+        reads = expand("{file}_{strand}.fastq", strand=["R1", "R2"], file=wildcards.reads)
     elif (seq_type == "se"):
-        return expand("{file}.fastq", file=wildcards.reads)
+        reads = expand("{file}.fastq", file=wildcards.reads)
     else:
         sys.exit("Error: invalid sequencing type parameter. Must be 'se' or 'pe'")
+    return reads
 
 rule bowtie2:
     input:
@@ -81,7 +82,7 @@ rule bowtie2:
     benchmark: "{reads}_bowtie2_benchmark.json"
     run:
         if (seq_type == "pe"):
-            shell("bowtie2 -x {input.index} -1 {input.forward} -2 {input.reverse} -S {output.sam} --phred33 -N {params.max_mismatches} --threads {params.threads} 2> {log}")
+            shell("bowtie2 -x {input.index} -1 " + input.reads[0] + " -2 " + input.reads[1] + " -S {output.sam} --phred33 -N {params.max_mismatches} --threads {params.threads} 2> {log}")
         elif (seq_type == "se"):
             shell("bowtie2 -x {input.index} -U {input.reads} -S {output.sam} --threads {params.threads} --phred33 -N {params.max_mismatches} 2> {log}")
         shell("samtools view -b -S {output.sam} > {output.bam} 2> {log}")
