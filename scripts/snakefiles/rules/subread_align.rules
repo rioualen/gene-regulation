@@ -61,10 +61,19 @@ genome_file = genome_dir + genome_version + ".fa"
 subread_dir = genome_dir + "subread/"
 subread_index = subread_dir + genome_version
 
+# Define input files
+def subread_inputs(wildcards):
+    if (seq_type == "pe"):
+        reads = expand("{file}_{strand}.fastq", strand=["R1", "R2"], file=wildcards.reads)
+    elif (seq_type == "se"):
+        reads = expand("{file}.fastq", file=wildcards.reads)
+    else:
+        sys.exit("Error: invalid sequencing type parameter. Must be 'se' or 'pe'")
+    return reads
 
-rule subread_se:
+rule subread_align:
     input:
-        reads = "{reads}.fastq", \
+        reads = subread_inputs, 
         fa = subread_index + ".fa"
     output:
         sam = "{reads}_subread.sam", \
@@ -75,11 +84,15 @@ rule subread_se:
         threads = config["subread"]["threads"], \
 #        seq_type = config["subread"]["seq_type"], \
         qsub = config["qsub"] \
-          + " -e " + "{reads}_subread_se_qsub.err" \
-          + " -o " + "{reads}_subread_se_qsub.out"
-    log: "{reads}_subread_se.log"
-    benchmark: "{reads}_subread_se_benchmark.json"
-    shell: """
-subread-align -i {params.index} -r {input.reads} -t 1 -T {params.threads} -M {params.max_mismatches} -o {output.sam} 2> {log}
-samtools view -b -S {output.sam} > {output.bam} 2> {log}
-"""
+          + " -e " + "{reads}_subread_qsub.err" \
+          + " -o " + "{reads}_subread_qsub.out"
+    log: "{reads}_subread.log"
+    benchmark: "{reads}_subread_benchmark.json"
+    run:
+        if (seq_type == "pe"):
+            shell("subread-align -i {params.index} -r " + input.reads[0] + " -R " + input.reads[1] + " -t 0 -T {params.threads} -M {params.max_mismatches} -o {output.sam} 2> {log}")
+        elif (seq_type == "se"):
+            shell("subread-align -i {params.index} -r {input.reads} -t 1 -T {params.threads} -M {params.max_mismatches} -o {output.sam} 2> {log}")
+        shell("samtools view -b -S {output.sam} > {output.bam} 2> {log}")
+
+
