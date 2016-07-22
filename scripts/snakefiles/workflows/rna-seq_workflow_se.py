@@ -77,7 +77,7 @@ include: os.path.join(RULES, "bam_stats.rules")
 include: os.path.join(RULES, "bowtie2_index.rules")
 include: os.path.join(RULES, "bowtie2.rules")
 include: os.path.join(RULES, "bowtie_index.rules")
-include: os.path.join(RULES, "bowtie_se.rules")
+include: os.path.join(RULES, "bowtie.rules")
 include: os.path.join(RULES, "bwa_index.rules")
 include: os.path.join(RULES, "bwa_se.rules")
 include: os.path.join(RULES, "count_reads.rules")
@@ -89,13 +89,13 @@ include: os.path.join(RULES, "gzip.rules")
 include: os.path.join(RULES, "genome_coverage_bedgraph.rules")
 include: os.path.join(RULES, "genome_download.rules")
 include: os.path.join(RULES, "get_chrom_sizes.rules")
-include: os.path.join(RULES, "sickle_se.rules")
+include: os.path.join(RULES, "sickle.rules")
 #include: os.path.join(RULES, "sam_to_bam.rules")
 include: os.path.join(RULES, "sra_to_fastq.rules")
 include: os.path.join(RULES, "subread_index.rules")
-include: os.path.join(RULES, "subread_se.rules")
+include: os.path.join(RULES, "subread_align.rules")
 include: os.path.join(RULES, "subread_featureCounts.rules")
-include: os.path.join(RULES, "tophat_se.rules")
+include: os.path.join(RULES, "tophat.rules")
 
 #ruleorder: bam_by_pos > sam_to_bam
 
@@ -171,14 +171,14 @@ GRAPHICS = expand(REPORTS_DIR + "{graph}.png", graph=["dag", "rulegraph"])
 # Quality control
 #----------------------------------------------------------------#
 
-QC = expand(SAMPLE_DIR + "{samples}/{samples}_fastqc/{samples}_fastqc.html", samples=SAMPLE_IDS)
+RAW_QC = expand(SAMPLE_DIR + "{samples}/{samples}_fastqc/{samples}_fastqc.html", samples=SAMPLE_IDS)
 
 
 #----------------------------------------------------------------#
 # Trimming
 #----------------------------------------------------------------#
 
-#TRIMMER="sickle-se-q" + config["sickle"]["threshold"]
+#TRIMMER="sickle-q" + config["sickle"]["threshold"]
 #TRIMMING=expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}", samples=SAMPLE_IDS, trimmer=TRIMMER)
 #TRIM = expand("{trimming}.fastq", trimming=TRIMMING)
 
@@ -192,10 +192,10 @@ QC = expand(SAMPLE_DIR + "{samples}/{samples}_fastqc/{samples}_fastqc.html", sam
 #----------------------------------------------------------------#
 
 
-ALIGNER=["bowtie2"]#, "subread"]
+ALIGNER=["bowtie2", "bowtie", "subread"]
 INDEX = expand(GENOME_DIR + "/{aligner}/" + GENOME + ".fa", aligner=ALIGNER)
 
-#ALIGNER.append("tophat")
+ALIGNER.append("tophat")
 
 ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)
 MAPPING = expand("{alignment}.bam", alignment=ALIGNMENT)
@@ -230,8 +230,7 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: GRAPHICS, BAM_STATS, FEATURE_COUNTS, INFER_TRANSCRIPTS, GENOME_COVERAGE#QC
-#	input: IMPORT, QC, GRAPHICS, TRIM, INDEX, MAPPING, BAM_STATS, SORTED_BAM, FEATURE_COUNTS
+	input: GRAPHICS, BAM_STATS, FEATURE_COUNTS, INFER_TRANSCRIPTS, GENOME_COVERAGE
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
