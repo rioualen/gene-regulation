@@ -34,7 +34,7 @@
     gene_regulation: "gene-regulation/"                                         # required: location of the snakemake library
 
     samples: "results/samples/"                                # optional: will hold sample treatment (trimming, alignment, QC...).    If not mentioned, will be config["dir"]["results"]
-#    DEG: "results/RNA-seq_GSE71562/DEG/"                                       # optional: will hold the results of differential expression analysis.  If not mentioned, will be config["dir"]["results"]
+    DEG: "results/DEG/"                                       # optional: will hold the results of differential expression analysis.  If not mentioned, will be config["dir"]["results"]
     reports: "results/reports/"                                # optional: will hold reports and graphics.                             If not mentioned, will be config["dir"]["results"]
 
   fastqc: 
