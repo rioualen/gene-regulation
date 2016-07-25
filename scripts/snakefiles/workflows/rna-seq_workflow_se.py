@@ -110,10 +110,17 @@ READS = config["dir"]["reads_source"]
 SAMPLES = read_table(config["metadata"]["samples"])
 SAMPLE_IDS = SAMPLES.iloc[:,0]
 
+
 ## Design
 DESIGN = read_table(config["metadata"]["design"])
-#TREATMENT = DESIGN['treatment']
-#CONTROL = DESIGN['control']
+T0 = DESIGN.iloc[:,0]
+T10 = DESIGN.iloc[:,1]
+if (verbosity >= 1):
+    print("Design file:\t" + config["metadata"]["design"])
+    if (verbosity >= 3):
+        print("\tT0:\t" + ";".join(T0))
+        print("\tT10:\t" + ";".join(T10))
+
 
 ## Data & results dir
 
@@ -128,22 +135,21 @@ if not ("results" in config["dir"].keys()):
     sys.exit("The parameter config['dir']['results'] should be specified in the config file.")
 
 RESULTS_DIR = config["dir"]["results"]
-#if not os.path.exists(RESULTS_DIR):
-#    os.makedirs(RESULTS_DIR)
 
 if not ("samples" in config["dir"].keys()):
     SAMPLE_DIR = config["dir"]["results"]
 else:
     SAMPLE_DIR = config["dir"]["samples"]
-#if not os.path.exists(SAMPLE_DIR):
-#    os.makedirs(SAMPLE_DIR)
 
 if not ("reports" in config["dir"].keys()):
     REPORTS_DIR = config["dir"]["results"]
 else:
     REPORTS_DIR = config["dir"]["reports"]
-#if not os.path.exists(REPORTS_DIR):
-#    os.makedirs(REPORTS_DIR)
+
+if not ("DEG" in config["dir"].keys()):
+    DEG_DIR = config["dir"]["results"]
+else:
+    DEG_DIR = config["dir"]["DEG"]
 
 
 #================================================================#
@@ -210,7 +216,9 @@ BAM_STATS = expand("{alignment}_bam_stats.txt", alignment=ALIGNMENT)
 
 
 INFER_TRANSCRIPTS = expand("{alignment}_cufflinks/transcripts.gtf", alignment=ALIGNMENT)
-FEATURE_COUNTS = expand("{alignment}_featureCounts.tab", alignment=ALIGNMENT)
+
+
+FEATURE_COUNTS = expand(DEG_DIR + "{aligner}_featureCounts.tab", aligner=ALIGNER)
 
 
 
