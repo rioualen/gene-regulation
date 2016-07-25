@@ -133,7 +133,7 @@ rule merge_featurecounts_tables:
     input: path_table = config["files"]["count_file_paths"]
     output: count_table = config["files"]["count_table"]
     log: config["files"]["count_table"] + ".log"
-    log: config["files"]["count_table"] + "_benchmark.json"
+    benchmark: config["files"]["count_table"] + "_benchmark.json"
     params: qsub = config["qsub"] \
             + " -e " + config["files"]["count_table"] + "_qsub.err" \
             + " -o " + config["files"]["count_table"] + "_qsub.out"
