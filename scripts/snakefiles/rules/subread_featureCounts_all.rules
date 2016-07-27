@@ -24,27 +24,29 @@ def featureCounts_inputs(wildcards):
     bam_files =  expand(SAMPLE_DIR + "{samples}/{samples}_{aligner}.bam", samples=SAMPLE_IDS, aligner=wildcards.aligner)
     return bam_files
 
-rule subread_featureCounts:
+rule subread_featureCounts_all:
     input: 
-        bam = "{reads}_sorted_pos.bam",
+        bam = featureCounts_inputs,
         gtf = genome_gtf
-    output: "{reads}_featureCounts.txt"
+    output: "{deg}/{aligner}_featureCounts.tab"
     params:
         wd = config["dir"]["base"],
         qsub = config["qsub"]\
-            + " -e {reads}_featureCounts_qsub.err"\
-            + " -o {reads}_featureCounts_qsub.out"
-    log: "{reads}_featureCounts.log"
-    benchmark: "{reads}_featureCounts_benchmark.json"
+            + " -e {deg}featureCounts_qsub.err"\
+            + " -o {deg}featureCounts_qsub.out"
+    log: "{deg}/{aligner}_featureCounts.log"
+    benchmark: "{deg}/{aligner}_feature_counts_benchmark.json"
     run:
         shell("featureCounts -a {input.gtf} -o {output} {input.bam} &> {log}")
         R("""
             setwd("{params.wd}")
-            counts <- read.table("{output}", header=TRUE)
-            new <- counts[,-which(names(counts) %in% c("Chr", "Start", "End", "Strand", "Length"))]
-            write.table(new, file = "{output}", sep="\t", col.names=FALSE, row.names=FALSE)
+            all.counts <- read.table("{output}", header=TRUE)
+            new <- all.counts[,-which(names(all.counts) %in% c("Chr", "Start", "End", "Strand", "Length"))]
+            for(i in 2:length(colnames(new))){{
+                colnames(new)[i] <- strsplit(colnames(new)[i], "\\\.")[[1]][3] ## NB to be changed one day...
+            }}
+            write.table(new, file = "{output}", sep="\t", col.names=TRUE, row.names=FALSE)
         """)
-
 
 
 
