@@ -89,15 +89,13 @@ include: os.path.join(RULES, "gzip.rules")
 include: os.path.join(RULES, "genome_coverage_bedgraph.rules")
 include: os.path.join(RULES, "genome_download.rules")
 include: os.path.join(RULES, "get_chrom_sizes.rules")
+include: os.path.join(RULES, "sartools_edgeR.rules")
 include: os.path.join(RULES, "sickle.rules")
-#include: os.path.join(RULES, "sam_to_bam.rules")
 include: os.path.join(RULES, "sra_to_fastq.rules")
 include: os.path.join(RULES, "subread_index.rules")
 include: os.path.join(RULES, "subread_align.rules")
 include: os.path.join(RULES, "subread_featureCounts.rules")
 include: os.path.join(RULES, "tophat.rules")
-
-#ruleorder: bam_by_pos > sam_to_bam
 
 #================================================================#
 #                      Data & wildcards                          #
@@ -150,6 +148,7 @@ if not ("DEG" in config["dir"].keys()):
     DEG_DIR = config["dir"]["results"]
 else:
     DEG_DIR = config["dir"]["DEG"]
+
 
 
 #================================================================#
@@ -218,8 +217,9 @@ BAM_STATS = expand("{alignment}_bam_stats.txt", alignment=ALIGNMENT)
 INFER_TRANSCRIPTS = expand("{alignment}_cufflinks/transcripts.gtf", alignment=ALIGNMENT)
 
 
-FEATURE_COUNTS = expand(DEG_DIR + "{aligner}_featureCounts.tab", aligner=ALIGNER)
+FEATURE_COUNTS = expand("{alignment}_featureCounts.txt", alignment=ALIGNMENT)
 
+EDGER = expand(DEG_DIR + "{aligner}_edgeR_report.html", aligner=ALIGNER)
 
 
 GENOME_COVERAGE = expand("{alignment}.bedgraph.gz", alignment=ALIGNMENT)
@@ -238,7 +238,7 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: GRAPHICS, BAM_STATS, FEATURE_COUNTS, INFER_TRANSCRIPTS, GENOME_COVERAGE
+	input: GRAPHICS, BAM_STATS, FEATURE_COUNTS, INFER_TRANSCRIPTS, GENOME_COVERAGE, EDGER
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
