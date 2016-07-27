@@ -1,0 +1,132 @@
+"""featureCounts from the subread toolkit. 
+
+Required parameters:
+    config["qsub"]
+    config["dir"]["base"]
+
+Usage: 
+
+Authors: 
+    Claire Rioualen
+"""
+
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+# Define input files (no global variables allowed?)
+
+SAMPLE_DIR = config["dir"]["samples"]
+DEG_DIR = config["dir"]["DEG"]
+
+SAMPLES = read_table(config["metadata"]["samples"])
+SAMPLE_IDS = SAMPLES.iloc[:,0]
+SAMPLE_CONDITIONS = SAMPLES['condition']
+
+def sartools_edgeR_inputs(wildcards):
+    filename = expand(DEG_DIR + "SARTools_design_{aligner}.txt", aligner=wildcards.aligner)[0]
+    f = open(filename, "w")
+    f.write("label\tfiles\tgroup\n")
+    for id in range(len(SAMPLE_IDS)):
+        cond = SAMPLE_CONDITIONS[id]
+        counts = expand(SAMPLE_IDS[id] + "/" + SAMPLE_IDS[id] + "_{aligner}_featureCounts.txt", aligner=wildcards.aligner)
+        f.write(SAMPLE_IDS[id] + "\t" + counts[0] + "\t" + cond + "\n")
+    f.close()
+    return filename
+
+rule sartools_edgeR:
+    input: 
+        targetFile = sartools_edgeR_inputs#DEG_DIR + "SARTools_design.txt"#
+    output: "{dir}/{aligner}_edgeR_report.html"
+    params:
+        wd = config["dir"]["base"],
+        sample_dir = SAMPLE_DIR,##
+        projectName = "{dir}/{aligner}_edgeR",
+        author = config["author"],
+        featuresToRemove = config["edgeR"]["featuresToRemove"],
+        varInt = config["edgeR"]["varInt"],
+        condRef = config["edgeR"]["condRef"],
+        batch = config["edgeR"]["batch"],
+        alpha = config["edgeR"]["alpha"],
+        pAdjustMethod = config["edgeR"]["pAdjustMethod"],
+        cpmCutoff = config["edgeR"]["cpmCutoff"],
+        gene_selection = config["edgeR"]["gene_selection"],
+        normalizationMethod = config["edgeR"]["normalizationMethod"]
+#        qsub = ""
+    log: "{dir}/{aligner}_edgeR.log"
+#    benchmark: ""
+    run:
+        R("""
+
+        rm(list=ls())
+
+        sink("{log}")
+
+        setwd("{params.wd}")
+        library(SARTools)
+
+        colors <- sample(colours(), 4)
+
+        # setting params
+
+        projectName <- "{params.projectName}"
+        author <- "{params.author}"
+        targetFile <- "{input.targetFile}"
+        rawDir <- "{params.sample_dir}"
+        featuresToRemove <- "{params.featuresToRemove}"
+        varInt <- "{params.varInt}"
+        condRef <- "{params.condRef}"
+        #batch <- "{params.batch}"
+        alpha <- {params.alpha}
+        pAdjustMethod <- "{params.pAdjustMethod}"
+        cpmCutoff <- {params.cpmCutoff}
+        gene.selection <- "{params.gene_selection}"
+        normalizationMethod <- "{params.normalizationMethod}"
+        workDir <- "{params.wd}"
+
+        # checking parameters
+        checkParameters.edgeR(projectName=projectName,author=author,targetFile=targetFile,
+                              rawDir=rawDir,featuresToRemove=featuresToRemove,varInt=varInt,
+                              condRef=condRef,batch=NULL,alpha=alpha,pAdjustMethod=pAdjustMethod,
+                              cpmCutoff=cpmCutoff,gene.selection=gene.selection,
+                              normalizationMethod=normalizationMethod,colors=colors)
+
+
+        print(projectName)
+        print(targetFile)
+
+        # loading target file
+        target <- loadTargetFile(targetFile=targetFile, varInt=varInt, condRef=condRef, batch=NULL)
+
+        # loading counts
+        counts <- loadCountData(target=target, rawDir=rawDir, featuresToRemove=featuresToRemove)
+
+        # description plots
+        majSequences <- descriptionPlots(counts=counts, group=target[,varInt], col=colors)
+
+        # edgeR analysis
+        out.edgeR <- run.edgeR(counts=counts, target=target, varInt=varInt, condRef=condRef,
+                               batch=NULL, cpmCutoff=cpmCutoff, normalizationMethod=normalizationMethod,
+                               pAdjustMethod=pAdjustMethod)
+
+        # MDS + clustering
+        exploreCounts(object=out.edgeR$dge, group=target[,varInt], gene.selection=gene.selection, col=colors)
+
+        # summary of the analysis (boxplots, dispersions, export table, nDiffTotal, histograms, MA plot)
+        summaryResults <- summarizeResults.edgeR(out.edgeR, group=target[,varInt], counts=counts, alpha=alpha, col=colors)
+
+        # save image of the R session
+        save.image(file=paste0(projectName, ".RData"))
+
+        # generating HTML report
+        writeReport.edgeR(target=target, counts=counts, out.edgeR=out.edgeR, summaryResults=summaryResults,
+                          majSequences=majSequences, workDir=workDir, projectName=projectName, author=author,
+                          targetFile=targetFile, rawDir=rawDir, featuresToRemove=featuresToRemove, varInt=varInt,
+                          condRef=condRef, batch=NULL, alpha=alpha, pAdjustMethod=pAdjustMethod, colors=colors,
+                          gene.selection=gene.selection, normalizationMethod=normalizationMethod)
+
+        sink()
+        """)
+
+
+
