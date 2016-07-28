@@ -1,0 +1,41 @@
+"""
+Authors: 
+    Claire Rioualen
+"""
+
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+# List samples (shouldn't it be global?)
+SAMPLE_IDS = read_table(config["metadata"]["samples"]).iloc[:,0]
+SAMPLE_CONDITIONS = read_table(config["metadata"]["samples"])['condition']
+
+# Define input files
+def targetfiles_inputs(wildcards):
+    count_files =  expand(SAMPLE_DIR + "{samples}/{samples}_{aligner}_featureCounts.txt", samples=SAMPLE_IDS, aligner=wildcards.aligner)
+    return count_files
+
+rule generate_sartools_targetfile:
+    input: 
+        count_files = targetfiles_inputs
+    output: config["dir"]["DEG"] + "{aligner}_SARTools_design.txt"
+    params:
+        qsub = config["qsub"]\
+            + " -e " + config["dir"]["DEG"] + "targetfile_qsub.err"\
+            + " -o " + config["dir"]["DEG"] + "targetfile_qsub.out"
+    log: config["dir"]["DEG"] + "{aligner}_targetfile.log"
+    benchmark: config["dir"]["DEG"] + "{aligner}_feature_counts_benchmark.json"
+    run:
+        f = open(output[0], "w+")
+        f.write("label\tfiles\tgroup\n")
+        for id in range(len(SAMPLE_IDS)):
+            cond = SAMPLE_CONDITIONS[id]
+            counts = expand(SAMPLE_IDS[id] + "/" + SAMPLE_IDS[id] + "_{aligner}_featureCounts.txt", aligner=wildcards.aligner)
+            f.write(SAMPLE_IDS[id] + "\t" + counts[0] + "\t" + cond + "\n")
+        f.close()
+
+
+
+
+
