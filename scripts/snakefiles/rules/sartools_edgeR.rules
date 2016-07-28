@@ -1,8 +1,10 @@
-"""featureCounts from the subread toolkit. 
+"""
 
 Required parameters:
     config["qsub"]
     config["dir"]["base"]
+
+... TODO params checking
 
 Usage: 
 
@@ -14,34 +16,14 @@ Authors:
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
-# Define input files (no global variables allowed?)
-
-SAMPLE_DIR = config["dir"]["samples"]
-DEG_DIR = config["dir"]["DEG"]
-
-SAMPLES = read_table(config["metadata"]["samples"])
-SAMPLE_IDS = SAMPLES.iloc[:,0]
-SAMPLE_CONDITIONS = SAMPLES['condition']
-
-def sartools_edgeR_inputs(wildcards):
-    filename = expand(DEG_DIR + "SARTools_design_{aligner}.txt", aligner=wildcards.aligner)[0]
-    f = open(filename, "w")
-    f.write("label\tfiles\tgroup\n")
-    for id in range(len(SAMPLE_IDS)):
-        cond = SAMPLE_CONDITIONS[id]
-        counts = expand(SAMPLE_IDS[id] + "/" + SAMPLE_IDS[id] + "_{aligner}_featureCounts.txt", aligner=wildcards.aligner)
-        f.write(SAMPLE_IDS[id] + "\t" + counts[0] + "\t" + cond + "\n")
-    f.close()
-    return filename
-
 rule sartools_edgeR:
     input: 
-        targetFile = sartools_edgeR_inputs#DEG_DIR + "SARTools_design.txt"#
-    output: "{dir}/{aligner}_edgeR_report.html"
+        targetFile = "{deg}_SARTools_design.txt"
+    output: "{deg}_edgeR_report.html"
     params:
         wd = config["dir"]["base"],
-        sample_dir = SAMPLE_DIR,##
-        projectName = "{dir}/{aligner}_edgeR",
+        sample_dir = config["dir"]["samples"],
+        projectName = "{deg}_edgeR",
         author = config["author"],
         featuresToRemove = config["edgeR"]["featuresToRemove"],
         varInt = config["edgeR"]["varInt"],
@@ -53,7 +35,7 @@ rule sartools_edgeR:
         gene_selection = config["edgeR"]["gene_selection"],
         normalizationMethod = config["edgeR"]["normalizationMethod"]
 #        qsub = ""
-    log: "{dir}/{aligner}_edgeR.log"
+    log: "{deg}_DESeq2.log"
 #    benchmark: ""
     run:
         R("""
