@@ -86,10 +86,12 @@ include: os.path.join(RULES, "dot_graph.rules")
 include: os.path.join(RULES, "dot_to_image.rules")
 include: os.path.join(RULES, "fastqc.rules")
 include: os.path.join(RULES, "gzip.rules")
+include: os.path.join(RULES, "generate_sartools_targetfile.rules")
 include: os.path.join(RULES, "genome_coverage_bedgraph.rules")
 include: os.path.join(RULES, "genome_download.rules")
 include: os.path.join(RULES, "get_chrom_sizes.rules")
 include: os.path.join(RULES, "sartools_edgeR.rules")
+include: os.path.join(RULES, "sartools_DESeq2.rules")
 include: os.path.join(RULES, "sickle.rules")
 include: os.path.join(RULES, "sra_to_fastq.rules")
 include: os.path.join(RULES, "subread_index.rules")
@@ -107,18 +109,6 @@ READS = config["dir"]["reads_source"]
 # Samples
 SAMPLES = read_table(config["metadata"]["samples"])
 SAMPLE_IDS = SAMPLES.iloc[:,0]
-
-
-## Design
-DESIGN = read_table(config["metadata"]["design"])
-T0 = DESIGN.iloc[:,0]
-T10 = DESIGN.iloc[:,1]
-if (verbosity >= 1):
-    print("Design file:\t" + config["metadata"]["design"])
-    if (verbosity >= 3):
-        print("\tT0:\t" + ";".join(T0))
-        print("\tT10:\t" + ";".join(T10))
-
 
 ## Data & results dir
 
@@ -219,7 +209,9 @@ INFER_TRANSCRIPTS = expand("{alignment}_cufflinks/transcripts.gtf", alignment=AL
 
 FEATURE_COUNTS = expand("{alignment}_featureCounts.txt", alignment=ALIGNMENT)
 
-EDGER = expand(DEG_DIR + "{aligner}_edgeR_report.html", aligner=ALIGNER)
+SARTOOLS_TARGETFILE = expand(DEG_DIR + "{aligner}_SARTools_design.txt", aligner=ALIGNER)
+
+DEG = expand(DEG_DIR + "{aligner}_{deg}_report.html", aligner=ALIGNER, deg=["DESeq2", "edgeR"])
 
 
 GENOME_COVERAGE = expand("{alignment}.bedgraph.gz", alignment=ALIGNMENT)
@@ -238,7 +230,7 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: GRAPHICS, BAM_STATS, FEATURE_COUNTS, INFER_TRANSCRIPTS, GENOME_COVERAGE, EDGER
+	input: GRAPHICS, BAM_STATS, FEATURE_COUNTS, INFER_TRANSCRIPTS, GENOME_COVERAGE, SARTOOLS_TARGETFILE, DEG
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
