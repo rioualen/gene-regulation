@@ -1,0 +1,119 @@
+"""
+
+Required parameters:
+    config["qsub"]
+    config["dir"]["base"]
+
+... TODO params checking
+
+Usage: 
+
+Authors: 
+    Claire Rioualen
+"""
+
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+rule sartools_DESeq2:
+    input: 
+        targetFile = "{deg}_SARTools_design.txt"
+    output: "{deg}_DESeq2_report.html"
+    params:
+        wd = config["dir"]["base"],
+        sample_dir = config["dir"]["samples"],
+        projectName = "{deg}_DESeq2",
+        author = config["author"],
+        featuresToRemove = config["DESeq2"]["featuresToRemove"],
+        varInt = config["DESeq2"]["varInt"],
+        condRef = config["DESeq2"]["condRef"],
+        batch = config["DESeq2"]["batch"],
+        alpha = config["DESeq2"]["alpha"],
+        pAdjustMethod = config["DESeq2"]["pAdjustMethod"],
+        fitType = config["DESeq2"]["fitType"],
+        cooksCutoff = config["DESeq2"]["cooksCutoff"],
+        independentFiltering = config["DESeq2"]["independentFiltering"],
+        typeTrans = config["DESeq2"]["typeTrans"],
+        locfunc = config["DESeq2"]["locfunc"]
+#        qsub = ""
+    log: "{deg}_DESeq2.log"
+#    benchmark: ""
+    run:
+        R("""
+
+        rm(list=ls())
+
+        sink("{log}")
+
+        setwd("{params.wd}")
+        library(SARTools)
+
+        colors <- sample(colours(), 4)
+
+        # setting params
+
+        projectName <- "{params.projectName}"
+        author <- "{params.author}"
+        targetFile <- "{input.targetFile}"
+        rawDir <- "{params.sample_dir}"
+        featuresToRemove <- "{params.featuresToRemove}"
+        varInt <- "{params.varInt}"
+        condRef <- "{params.condRef}"
+        batch <- {params.batch}
+        fitType <- "{params.fitType}"
+        cooksCutoff <- {params.cooksCutoff}
+        independentFiltering <- {params.independentFiltering}
+        typeTrans <- "{params.typeTrans}"
+        locfunc <- "{params.locfunc}"
+        alpha <- {params.alpha}
+        pAdjustMethod <- "{params.pAdjustMethod}"
+        workDir <- "{params.wd}"
+
+        # checking parameters
+        checkParameters.DESeq2(projectName=projectName,author=author,targetFile=targetFile,
+                               rawDir=rawDir,featuresToRemove=featuresToRemove,varInt=varInt,
+                               condRef=condRef,batch=batch,fitType=fitType,cooksCutoff=cooksCutoff,
+                               independentFiltering=independentFiltering,alpha=alpha,pAdjustMethod=pAdjustMethod,
+                               typeTrans=typeTrans,locfunc=locfunc,colors=colors)
+
+        # loading target file
+        target <- loadTargetFile(targetFile=targetFile, varInt=varInt, condRef=condRef, batch=batch)
+
+        # loading counts
+        counts <- loadCountData(target=target, rawDir=rawDir, featuresToRemove=featuresToRemove)
+
+        # description plots
+        majSequences <- descriptionPlots(counts=counts, group=target[,varInt], col=colors)
+
+        # analysis with DESeq2
+        out.DESeq2 <- run.DESeq2(counts=counts, target=target, varInt=varInt, batch=batch,
+                                 locfunc=locfunc, fitType=fitType, pAdjustMethod=pAdjustMethod,
+                                 cooksCutoff=cooksCutoff, independentFiltering=independentFiltering, alpha=alpha)
+
+        # PCA + clustering
+        exploreCounts(object=out.DESeq2$dds, group=target[,varInt], typeTrans=typeTrans, col=colors)
+
+        # summary of the analysis (boxplots, dispersions, diag size factors, export table, nDiffTotal, histograms, MA plot)
+        summaryResults <- summarizeResults.DESeq2(out.DESeq2, group=target[,varInt], col=colors,
+                                                  independentFiltering=independentFiltering,
+                                                  cooksCutoff=cooksCutoff, alpha=alpha)
+
+        # save image of the R session
+        save.image(file=paste0(projectName, ".RData"))
+
+        # generating HTML report
+        writeReport.DESeq2(target=target, counts=counts, out.DESeq2=out.DESeq2, summaryResults=summaryResults,
+                           majSequences=majSequences, workDir=workDir, projectName=projectName, author=author,
+                           targetFile=targetFile, rawDir=rawDir, featuresToRemove=featuresToRemove, varInt=varInt,
+                           condRef=condRef, batch=batch, fitType=fitType, cooksCutoff=cooksCutoff,
+                           independentFiltering=independentFiltering, alpha=alpha, pAdjustMethod=pAdjustMethod,
+                           typeTrans=typeTrans, locfunc=locfunc, colors=colors)
+
+        sink()
+        """)
+
+
+
+
+
