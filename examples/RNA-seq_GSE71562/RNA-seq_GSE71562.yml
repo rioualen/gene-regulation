@@ -11,32 +11,32 @@
   qsub: "-V -m a -d ."  # qsub options, which should be adapted to the local configuration
   genome:
     organism: "Escherichia coli K12 MG1655"
-    version: "Ecoli_K12"                                                          # required: has to match genome filenames and directories
+    version: "Ecoli_K12"                                                          # required. has to match genome filenames and directories
     size: "4639221"
-    fasta_url: "ftp://ftp.ensemblgenomes.org/pub/release-21/bacteria/fasta/bacteria_22_collection/escherichia_coli_str_k_12_substr_mg1655/dna/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.1.21.dna.genome.fa.gz"            # required for genome download: provide url to .fa.gz
-    gff3_url: "ftp://ftp.ensemblgenomes.org/pub/release-21/bacteria/gff3/bacteria_22_collection/escherichia_coli_str_k_12_substr_mg1655/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.1.21.gff3.gz"                          # required for annotation_download: provide url to .gff3.gz
+    fasta_url: "ftp://ftp.ensemblgenomes.org/pub/release-21/bacteria/fasta/bacteria_22_collection/escherichia_coli_str_k_12_substr_mg1655/dna/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.1.21.dna.genome.fa.gz"            # required for genome download. provide url to .fa.gz
+    gff3_url: "ftp://ftp.ensemblgenomes.org/pub/release-21/bacteria/gff3/bacteria_22_collection/escherichia_coli_str_k_12_substr_mg1655/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.1.21.gff3.gz"                          # required for annotation_download. provide url to .gff3.gz
     gtf_url: "ftp://ftp.ensemblgenomes.org/pub/release-21/bacteria/gtf/bacteria_22_collection/escherichia_coli_str_k_12_substr_mg1655/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.1.21.gtf.gz"
 
 
   metadata: 
-    samples: "gene-regulation/examples/RNA-seq_GSE71562/samples.tab"                                    # required: has to contain at least sample ids
-    design: "gene-regulation/examples/RNA-seq_GSE71562/design.tab"                                      # required: has to contain at least ids of pairs of samples to be compared
+    samples: "gene-regulation/examples/RNA-seq_GSE71562/samples.tab"                                    # required. has to contain at least sample ids
+    design: "gene-regulation/examples/RNA-seq_GSE71562/design.tab"                                      # required. has to contain at least ids of pairs of samples to be compared
     configfile: "gene-regulation/examples/RNA-seq_GSE71562/RNA-seq_GSE71562.yml"                        # required for flowcharts generation; maybe this should be revised
     seq_type: "se"
 
   dir:
-    base: "."                                                                   # required: all paths are determined relatively to this directory. See documentation to know more about the file organization.
-    reads_source: "data/"                                                       # required: dir containing raw data organized in sub directories named after the samples
-    genome: "genome/"                                                          # required: where to store genomes
-    results: "results/"                                                         # required: dir for all result files that are produced by the pipeline
-    gene_regulation: "gene-regulation/"                                         # required: location of the snakemake library
+    base: "."                                                                   # required. all paths are determined relatively to this directory. See documentation to know more about the file organization.
+    reads_source: "data/"                                                       # required. dir containing raw data organized in sub directories named after the samples
+    genome: "genome/"                                                          # required. where to store genomes
+    results: "results/"                                                         # required. dir for all result files that are produced by the pipeline
+    gene_regulation: "gene-regulation/"                                         # required. location of the snakemake library
 
-    samples: "results/samples/"                                # optional: will hold sample treatment (trimming, alignment, QC...).    If not mentioned, will be config["dir"]["results"]
-    DEG: "results/DEG/"                                       # optional: will hold the results of differential expression analysis.  If not mentioned, will be config["dir"]["results"]
-    reports: "results/reports/"                                # optional: will hold reports and graphics.                             If not mentioned, will be config["dir"]["results"]
+    samples: "results/samples/"                                # optional. will hold sample treatment (trimming, alignment, QC...).    If not mentioned, will be config["dir"]["results"]
+    DEG: "results/DEG/"                                        # optional. will hold the results of differential expression analysis.  If not mentioned, will be config["dir"]["results"]
+    reports: "results/reports/"                                # optional. will hold reports and graphics.                             If not mentioned, will be config["dir"]["results"]
 
   fastqc: 
-    other_options: ""                                                           # optional (def: empty string)
+    other_options: ""                                                           # optional (def. empty string)
 
   sickle:
     threshold: "20"                                                             # ... 
@@ -75,4 +75,18 @@
     cpmCutoff: "1"
     gene_selection: "pairwise"
     normalizationMethod: "TMM"
+
+  DESeq2:
+    featuresToRemove: NULL                          # c("alignment_not_unique", "ambiguous", "no_feature", "not_aligned", "too_low_aQual")
+    varInt: "group"
+    condRef: "t0"
+    batch: "NULL"
+    fitType: "parametric"                           # "parametric" (default) or "local"
+    cooksCutoff: "TRUE"
+    independentFiltering: "TRUE"
+    alpha: "0.05"
+    pAdjustMethod: "BH"                             # "BH" (default) or "BY"
+    typeTrans: "VST"                                # "VST" or "rlog"
+    locfunc: "median"                               # "median" (default) or "shorth" to estimate the size factors
+
 
