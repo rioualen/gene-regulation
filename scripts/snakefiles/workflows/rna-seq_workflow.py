@@ -94,6 +94,7 @@ include: os.path.join(RULES, "index_bam.rules")               ## Index bam for v
 include: os.path.join(RULES, "genome_coverage.rules")         ## Compute density profiles in bedgraph format
 include: os.path.join(RULES, "cufflinks.rules")               ## Detect transcripts based on genome annotations (GTF) plus RNA-seq data`
 # include: os.path.join(RULES, "htseq.rules")                   ## Count reads per gene with htseq-count
+#include: os.path.join(RULES, "getfasta.rules")                ## Get fasta sequences from genomic coordinates (bed, gtf, ...)
 include: os.path.join(RULES, "featurecounts.rules")           ## Count reads per gene with R subread::featurecounts
 
 #================================================================#
@@ -221,6 +222,10 @@ CUFFLINKS_TRANSCRIPTS=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sam
 if (verbosity >= 3):
     print ("CUFFLINKS_TRANSCRIPTS:\n\t" + "\n\t".join(CUFFLINKS_TRANSCRIPTS))
 
+CUFFLINKS_TRANSCRIPT_SEQ=expand(config["dir"]["mapped_reads"] + "/{sample_dir}/{sample_id}_subread-align_pe_sorted_pos_CUFFLINKS/transcripts.fasta", zip, sample_dir=SAMPLE_IDS, sample_id=SAMPLE_IDS)
+if (verbosity >= 3):
+    print ("CUFFLINKS_TRANSCRIPT_SEQ:\n\t" + "\n\t".join(CUFFLINKS_TRANSCRIPT_SEQ))
+
 CUFFMERGE_TRANSCRIPTS=config["cufflinks"]["cuffmerge_transcripts"]
 rule cuffmerge:
     """Merge transcripts obtained from RNA-seq reads with cufflinks.
@@ -329,10 +334,13 @@ rule all:
             SUBREADALIGN_PE_PLUSMIN_BAM, \
             SUBREADALIGN_PE_PLUSMIN_BAI, \
             SUBREADALIGN_PE_PLUSMIN_TDF, \
-            COUNT_FILES, \
-            CUFFLINKS_TRANSCRIPTS #,#            CUFFMERGE_TRANSCRIPTS #, COUNT_TABLE
+            # CUFFLINKS_TRANSCRIPTS, \
+#            CUFFLINKS_TRANSCRIPT_SEQ, \
+#            CUFFMERGE_TRANSCRIPTS, \
+            COUNT_FILES, COUNT_TABLE
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
+
 
 # #----------------------------------------------------------------#
 # # Get all targets

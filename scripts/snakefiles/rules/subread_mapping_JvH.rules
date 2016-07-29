@@ -45,7 +45,7 @@ rule subread_buildindex:
     """Build an index of the genome, which is required before alignig the
 reads with subread-align.
 """
-    input: reference_genome = config["genome"]["fasta"]
+    input: genome_seq = config["genome"]["fasta"]
     output: files=config["subread"]["index"] + ".files", \
         benchmark=config["subread"]["index"] + "_buildindex_benchmark.json"
     params: reference_index = config["subread"]["index"], \
@@ -54,7 +54,7 @@ reads with subread-align.
             + " -o " + config["subread"]["index"] + "_buildindex_qsub.out"
     log: config["subread"]["index"] + "_buildindex_log.txt"
     benchmark: config["subread"]["index"] + "_buildindex_benchmark.json"
-    shell: "subread-buildindex -o {params.reference_index}  {input.reference_genome} &> {log}"
+    shell: "subread-buildindex -o {params.reference_index}  {input.genome_seq} &> {log}"
 
 
 ## If SAM file exists (resulting from version < 1.4) convert SAM to

@@ -1,23 +1,37 @@
-"""To all: rename to fetch-sequences.rules?"""
+"""Rules to obtain genomic sequences (in fasta format) from a file
+indicating genomic coordinates (bed, gtf, ...)."""
 
-rule getfasta:
-	"""get fasta from bed file.
-
-	Usage: 
-		bedtools getfasta -fi input.fa -bed some_peaks.bed -fo output.fa
-        
-	Parameters:
-	        config["qsub"] : qsub options
-        	config["genome"]["file"] 
-	"""
-	input: "{regions}.bed"
-	output: "{regions}.fasta"
-	log: "{regions}_getfasta.log"
-	benchmark: "{regions}_getfasta_benchmark.json"
-	params: genome = config["genome"]["fasta"], \
-                qsub = config["qsub"] + " -e {regions}_getfasta_qsub.err -o {regions}_getfasta_qsub.out"
-	shell:"""bedtools getfasta -fi {params.genome} -bed {input} -fo {output} 2> {log}"""
+if not (("genome" in config.keys()) and ("fasta" in config["genome"].keys())):
+    sys.exit("The parameter config['genome']['fasta'] should be specified in the config file.")
 
 
-#bedtools getfasta -fi /data/genomes/pa/BWAIndex/pa.fa -bed ~/Desktop/5_ACAGTG_L002_R1_001_vs_5T_GGCTAC_L002_R1_001/homer/5_ACAGTG_L002_R1_001_vs_5T_GGCTAC_L002_R1_001_bwa_homer_peaks.bed -fo test.fa
-
+rule fasta_from_gtf:
+   """get fasta from bed file.
+   
+   Command: 
+      bedtools getfasta -fi input.fa -bed some_peaks.bed -fo output.fa
+   
+   Parameters:
+      config["qsub"] : qsub options
+      config["genome"]["fasta"] 
+   """
+#     input: gtf="{regions}.bed", genome_seq = config["genome"]["fasta"]
+#     output: "{regions}.fasta"
+#     log: "{regions}_fasta_from_gtf.log"
+#     benchmark: "{regions}_fasta_from_gtf_benchmark.json"
+#     params:qsub = config["qsub"] + " -e {regions}_fasta_from_gtf_qsub.err -o {regions}_fasta_from_gtf_qsub.out"
+#     shell:"""bedtools getfasta -fi {params.genome} -bed {input} -fo {output} 2> {log}"""
+#
+#
+# #bedtools getfasta -fi /data/genomes/pa/BWAIndex/pa.fa -bed ~/Desktop/5_ACAGTG_L002_R1_001_vs_5T_GGCTAC_L002_R1_001/homer/5_ACAGTG_L002_R1_001_vs_5T_GGCTAC_L002_R1_001_bwa_homer_peaks.bed -fo test.fa
+#
+# rule fasta_from_gtf:
+#    """Get fasta sequences from a feature file in GTF format.
+#
+# """
+    input: gtf="{regions}.gtf", genome_seq = config["genome"]["fasta"]
+    output: region_seq="{regions}.fasta"
+    log: "{regions}_fasta_from_gtf.log"
+    params: qsub = config["qsub"] + " -e {regions}_fasta_from_gtf_qsub.err -o {regions}_fasta_from_gtf_qsub.out"
+    benchmark: "{regions}_fasta_from_gtf_benchmark.json"
+    shell: "bedtools getfasta -fi {input.genome_seq} -bed {input.gtf} -s -fo {output.region_seq} 2> {log}"
