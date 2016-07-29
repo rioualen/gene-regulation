@@ -77,13 +77,18 @@ def read_table(file:str, verbosity:int=0, header:int=0, skip_blank_lines=True, c
 
     """
     if verbosity >= 3:
-        print ("read_table()\t" + file)
+        print ("read_table()\t" + file 
+               + "\t" + "header=" + str(header)
+               + "\t" + "skip_blank_lines:=" + str(skip_blank_lines)
+               + "\t" + "comment=" + comment)
     df = pd.read_csv(file, sep="\t", 
                      header=header, 
                      skip_blank_lines=skip_blank_lines,
                      comment=comment)
     if verbosity >= 4:
         print("\tColumns:\t" + ";".join(list(df.columns)))
+    if verbosity >= 10:
+        print(df)
     return(df)
     
 # ################################################################
