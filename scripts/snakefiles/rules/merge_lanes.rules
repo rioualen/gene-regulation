@@ -8,8 +8,8 @@ if not (("dir" in config.keys()) and ("results" in config["dir"].keys())):
 if not "samples" in config["dir"].keys():
     config["dir"]["samples"] = config["dir"]["results"]
 
-if not (("files" in config.keys()) and ("lane_merging" in config["files"].keys())):
-    sys.exit("The parameter config['files']['lane_merging'] should be specified in the config file.")
+if not (("metadata" in config.keys()) and ("lane_merging" in config["metadata"].keys())):
+    sys.exit("The parameter config['metadata']['lane_merging'] should be specified in the config file.")
 
 rule merge_lanes:
     """Concatenate multiple fastq files to produce a merged fastq file.
@@ -21,7 +21,7 @@ rule merge_lanes:
     Since the file naming conventions are highly dependent on the sequencing
     platform, the file grouping is read from a user-provided text file with
     tab-separated values (extension .tsv). This file must have been specified
-    in the config file, as config["files"]["lane_merging"].
+    in the config file, as config["metadata"]["lane_merging"].
 
     This file must contain at least two columns with this precise header:
         source_file
@@ -38,18 +38,22 @@ rule merge_lanes:
 
     Required configuration parameters:
 
-    config["files"]["lane_merging"] file indicating the source/merged file names
+    config["metadata"]["lane_merging"] file indicating the source/merged file names
     config["dir"]["fastq"]          base of the directory containing the fastq files
 
     """
     input: config["metadata"]["lane_merging"]
 #    output: config["dir"]["samples"] + "/lane_merging_benchmark.json"
     output: touch(config["dir"]["samples"] + "merge_lanes.done")
+    params:
+        qsub = config["qsub"] \
+          + " -e " + config["dir"]["samples"] + "lane_merging_qsub.err" \
+          + " -o " + config["dir"]["samples"] + "lane_merging_qsub.out"
     log: config["dir"]["samples"] + "lane_merging.log"
     benchmark: config["dir"]["samples"] + "lane_merging_benchmark.json"
     run:
         if (verbosity >= 0):
-            print("Lane merging table:\t" + config["files"]["lane_merging"])
+            print("Lane merging table:\t" + config["metadata"]["lane_merging"])
 
         # Read the lane merging table
         lane_merging_table = read_table(config["metadata"]["lane_merging"], verbosity=verbosity)
