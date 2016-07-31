@@ -35,8 +35,10 @@ rule sartools_DESeq2:
         cooksCutoff = config["DESeq2"]["cooksCutoff"],
         independentFiltering = config["DESeq2"]["independentFiltering"],
         typeTrans = config["DESeq2"]["typeTrans"],
-        locfunc = config["DESeq2"]["locfunc"]
-#        qsub = ""
+        locfunc = config["DESeq2"]["locfunc"],
+        qsub = config["qsub"] \
+          + " -e " + "{deg}_DESeq2_qsub.err" \
+          + " -o " + "{deg}_DESeq2_qsub.out"
     log: "{deg}_DESeq2.log"
 #    benchmark: ""
     run:
