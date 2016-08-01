@@ -72,12 +72,12 @@ include: os.path.join(PYTHON, "util.py")
 
 include: os.path.join(RULES, "annotation_download.rules")
 include: os.path.join(RULES, "bam_by_pos.rules")
-include: os.path.join(RULES, "bam_to_bed.rules")
 include: os.path.join(RULES, "bam_stats.rules")
-include: os.path.join(RULES, "bowtie2_index.rules")
-include: os.path.join(RULES, "bowtie2.rules")
-include: os.path.join(RULES, "bowtie_index.rules")
+include: os.path.join(RULES, "bam_to_bed.rules")
 include: os.path.join(RULES, "bowtie.rules")
+include: os.path.join(RULES, "bowtie2.rules")
+include: os.path.join(RULES, "bowtie2_index.rules")
+include: os.path.join(RULES, "bowtie_index.rules")
 include: os.path.join(RULES, "bwa_index.rules")
 include: os.path.join(RULES, "bwa_se.rules")
 include: os.path.join(RULES, "count_reads.rules")
@@ -85,18 +85,18 @@ include: os.path.join(RULES, "cufflinks.rules")
 include: os.path.join(RULES, "dot_graph.rules")
 include: os.path.join(RULES, "dot_to_image.rules")
 include: os.path.join(RULES, "fastqc.rules")
-include: os.path.join(RULES, "gzip.rules")
 include: os.path.join(RULES, "generate_sartools_targetfile.rules")
 include: os.path.join(RULES, "genome_coverage_bedgraph.rules")
 include: os.path.join(RULES, "genome_download.rules")
 include: os.path.join(RULES, "get_chrom_sizes.rules")
-include: os.path.join(RULES, "sartools_edgeR.rules")
+include: os.path.join(RULES, "gzip.rules")
 include: os.path.join(RULES, "sartools_DESeq2.rules")
+include: os.path.join(RULES, "sartools_edgeR.rules")
 include: os.path.join(RULES, "sickle.rules")
 include: os.path.join(RULES, "sra_to_fastq.rules")
-include: os.path.join(RULES, "subread_index.rules")
 include: os.path.join(RULES, "subread_align.rules")
 include: os.path.join(RULES, "subread_featureCounts.rules")
+include: os.path.join(RULES, "subread_index.rules")
 include: os.path.join(RULES, "tophat.rules")
 
 #================================================================#
@@ -110,30 +110,36 @@ READS = config["dir"]["reads_source"]
 SAMPLES = read_table(config["metadata"]["samples"])
 SAMPLE_IDS = SAMPLES.iloc[:,0]
 
-## Data & results dir
+
+################################################################
+## Check that data & result directories are properly defined
 
 if not (("dir" in config.keys()) and ("reads_source" in config["dir"].keys())):
     sys.exit("The parameter config['dir']['reads_source'] should be specified in the config file.")
 
+## Directory containing the original reads (source)
 READS = config["dir"]["reads_source"]
 if not os.path.exists(READS):
     os.makedirs(READS)
 
+## Define the main directory for the results
 if not ("results" in config["dir"].keys()):
     sys.exit("The parameter config['dir']['results'] should be specified in the config file.")
-
 RESULTS_DIR = config["dir"]["results"]
 
+## Define here the directory where sample-wise results will be stored
 if not ("samples" in config["dir"].keys()):
     SAMPLE_DIR = config["dir"]["results"]
 else:
     SAMPLE_DIR = config["dir"]["samples"]
 
+## Directory for the automatically generated reports
 if not ("reports" in config["dir"].keys()):
     REPORTS_DIR = config["dir"]["results"]
 else:
     REPORTS_DIR = config["dir"]["reports"]
 
+## DIrectory for the detection of differentially expressed genes (DEG)
 if not ("DEG" in config["dir"].keys()):
     DEG_DIR = config["dir"]["results"]
 else:

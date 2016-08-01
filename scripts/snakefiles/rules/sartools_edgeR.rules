@@ -33,9 +33,11 @@ rule sartools_edgeR:
         pAdjustMethod = config["edgeR"]["pAdjustMethod"],
         cpmCutoff = config["edgeR"]["cpmCutoff"],
         gene_selection = config["edgeR"]["gene_selection"],
-        normalizationMethod = config["edgeR"]["normalizationMethod"]
-#        qsub = ""
-    log: "{deg}_DESeq2.log"
+        normalizationMethod = config["edgeR"]["normalizationMethod"],
+        qsub = config["qsub"] \
+          + " -e " + "{deg}_edgeR_qsub.err" \
+          + " -o " + "{deg}_edgeR_qsub.out"
+    log: "{deg}_edgeR.log"
 #    benchmark: ""
     run:
         R("""

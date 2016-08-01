@@ -61,7 +61,9 @@ genome_file = genome_dir + genome_version + ".fa"
 subread_dir = genome_dir + "subread/"
 subread_index = subread_dir + genome_version
 
-# Define input files
+################################################################
+# Define input files depending on whether reads are single-end or
+# paired-ends.
 def subread_inputs(wildcards):
     if (seq_type == "pe"):
         reads = expand("{file}_{strand}.fastq", strand=["R1", "R2"], file=wildcards.reads)
