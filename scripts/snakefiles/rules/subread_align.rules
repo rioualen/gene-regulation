@@ -12,12 +12,12 @@
 Required parameters:
     config["genome"]["version"]
     config["qsub"]
-    config["subread"]["seq_type"]
+    config["subread-align"]["seq_type"]
 
 Optional parameters:
-    config["subread"]["dir"]
-    config["subread"]["threads"]
-    config["subread"]["max_mismatches"]
+    config["subread-align"]["dir"]
+    config["subread-align"]["threads"]
+    config["subread-align"]["max_mismatches"]
 
 Usage example:
     ALIGNER=["subread"]
@@ -36,20 +36,20 @@ if not "qsub" in config.keys():
 if not "version" in config["genome"].keys():
     sys.exit("Genome version must be defined in the config file")
 
-#if not "seq_type" in config["subread"].keys():
+#if not "seq_type" in config["subread-align"].keys():
 #    sys.exit("The param subread/seqtype must be defined in the config file")
 
 if not "genome" in config["dir"].keys():
     sys.exit("Genome dir must be defined in the dir section of the config file")
 
 if not "subread" in config.keys():
-    config["subread"] = {}
+    config["subread-align"] = {}
 
-if not "threads" in config["subread"].keys():
-    config["subread"]["threads"] = "1"
+if not "threads" in config["subread-align"].keys():
+    config["subread-align"]["threads"] = "1"
 
-if not "max_mismatches" in config["subread"].keys():
-    config["subread"]["max_mismatches"] = "3"
+if not "max_mismatches" in config["subread-align"].keys():
+    config["subread-align"]["max_mismatches"] = "3"
 
 # Define paths
 if not "samples" in config["dir"].keys():
@@ -58,7 +58,7 @@ if not "samples" in config["dir"].keys():
 genome_version = config["genome"]["version"]
 genome_dir = config["dir"]["genome"] + genome_version + "/"
 genome_file = genome_dir + genome_version + ".fa"
-subread_dir = genome_dir + "subread/"
+subread_dir = genome_dir + "subread-align/"
 subread_index = subread_dir + genome_version
 
 ################################################################
@@ -70,7 +70,7 @@ def subread_inputs(wildcards):
     elif (seq_type == "se"):
         reads = expand("{file}.fastq", file=wildcards.reads)
     else:
-        sys.exit("Error: invalid sequencing type parameter. Must be 'se' or 'pe'")
+        sys.exit("Error: invalid seq_type parameter. Must be 'se' or 'pe'")
     return reads
 
 rule subread_align:
@@ -78,23 +78,21 @@ rule subread_align:
         reads = subread_inputs, 
         fa = subread_index + ".fa"
     output:
-#        sam = "{reads}_subread.sam", \
-        bam = "{reads}_subread.bam"
+        bam = "{reads}_subread-align.bam"
     params:
         index = subread_index, \
-        max_mismatches = config["subread"]["max_mismatches"], \
-        threads = config["subread"]["threads"], \
-#        seq_type = config["subread"]["seq_type"], \
+        max_mismatches = config["subread-align"]["max_mismatches"], \
+        threads = config["subread-align"]["threads"], \
+#        seq_type = config["subread-align"]["seq_type"], \
         qsub = config["qsub"] \
-          + " -e " + "{reads}_subread_qsub.err" \
-          + " -o " + "{reads}_subread_qsub.out"
-    log: "{reads}_subread.log"
-    benchmark: "{reads}_subread_benchmark.json"
+          + " -e " + "{reads}_subread-align_qsub.err" \
+          + " -o " + "{reads}_subread-align_qsub.out"
+    log: "{reads}_subread-align.log"
+    benchmark: "{reads}_subread-align_benchmark.json"
     run:
         if (seq_type == "pe"):
             shell("subread-align -i {params.index} -r " + input.reads[0] + " -R " + input.reads[1] + " -t 0 -T {params.threads} -M {params.max_mismatches} -o {output.bam} 2> {log}")
         elif (seq_type == "se"):
             shell("subread-align -i {params.index} -r {input.reads} -t 1 -T {params.threads} -M {params.max_mismatches} -o {output.bam} 2> {log}")
-#        shell("samtools view -b -S {output.sam} > {output.bam} 2> {log}")
 
 
