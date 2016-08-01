@@ -25,5 +25,3 @@ rule bam_by_pos:
     shell:"""
 samtools sort  {input} -o {output}
 """
-
-#samtools index {output}
