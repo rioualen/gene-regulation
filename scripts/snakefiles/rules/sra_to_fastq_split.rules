@@ -24,8 +24,8 @@ if not "reads_source" in config["dir"].keys():
 rule sra_to_fastq_split:
     input: datadir = config["dir"]["reads_source"]
     output:
-        forward = "{results}/{sample}/{sample}_1.fastq", \
-        reverse = "{results}/{sample}/{sample}_2.fastq"
+        forward = "{results}/{sample}/{sample}_R1.fastq", \
+        reverse = "{results}/{sample}/{sample}_R2.fastq"
     log: "{results}/{sample}/{sample}_sra-conversion.log"
     benchmark: "{results}/{sample}/{sample}_sra-conversion_benchmark.json"
     params: qsub = config["qsub"] \
@@ -61,9 +61,9 @@ do
         base=$(basename ${{files[0]}} .sra)
         echo "Converting $base.sra to $base.fastq..."
         fastq-dump --outdir {wildcards.results}/$sam -I --split-files {input.datadir}$sam/$base.sra
-        echo "Moving {wildcards.results}/$sam/$base"_1".fastq and {wildcards.results}/$sam/$base"_2".fastq to {wildcards.results}/$sam/$sam"_1".fastq and {wildcards.results}/$sam/$sam"_2".fastq"
-        mv  {wildcards.results}/$sam/$base"_1".fastq {wildcards.results}/$sam/$sam"_1".fastq
-        mv  {wildcards.results}/$sam/$base"_2".fastq {wildcards.results}/$sam/$sam"_2".fastq
+        echo "Moving {wildcards.results}/$sam/$base"_R1".fastq and {wildcards.results}/$sam/$base"_R2".fastq to {wildcards.results}/$sam/$sam"_R1".fastq and {wildcards.results}/$sam/$sam"_R2".fastq"
+        mv  {wildcards.results}/$sam/$base"_R1".fastq {wildcards.results}/$sam/$sam"_R1".fastq
+        mv  {wildcards.results}/$sam/$base"_R2".fastq {wildcards.results}/$sam/$sam"_R2".fastq
     fi
 done
 echo "Job done.") &> {log}
