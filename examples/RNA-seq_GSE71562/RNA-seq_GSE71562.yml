@@ -38,9 +38,6 @@
   fastqc: 
     other_options: ""                                                           # optional (def. empty string)
 
-  sickle:
-    threshold: "20"                                                             # ... 
-
   bowtie2:
     max_mismatches: "1"
     threads: "10"
