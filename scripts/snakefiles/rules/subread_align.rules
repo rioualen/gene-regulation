@@ -78,7 +78,7 @@ rule subread_align:
         reads = subread_inputs, 
         fa = subread_index + ".fa"
     output:
-        sam = "{reads}_subread.sam", \
+#        sam = "{reads}_subread.sam", \
         bam = "{reads}_subread.bam"
     params:
         index = subread_index, \
@@ -92,9 +92,9 @@ rule subread_align:
     benchmark: "{reads}_subread_benchmark.json"
     run:
         if (seq_type == "pe"):
-            shell("subread-align -i {params.index} -r " + input.reads[0] + " -R " + input.reads[1] + " -t 0 -T {params.threads} -M {params.max_mismatches} -o {output.sam} 2> {log}")
+            shell("subread-align -i {params.index} -r " + input.reads[0] + " -R " + input.reads[1] + " -t 0 -T {params.threads} -M {params.max_mismatches} -o {output.bam} 2> {log}")
         elif (seq_type == "se"):
-            shell("subread-align -i {params.index} -r {input.reads} -t 1 -T {params.threads} -M {params.max_mismatches} -o {output.sam} 2> {log}")
-        shell("samtools view -b -S {output.sam} > {output.bam} 2> {log}")
+            shell("subread-align -i {params.index} -r {input.reads} -t 1 -T {params.threads} -M {params.max_mismatches} -o {output.bam} 2> {log}")
+#        shell("samtools view -b -S {output.sam} > {output.bam} 2> {log}")
 
 
