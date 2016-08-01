@@ -8,6 +8,12 @@ if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
 # List samples (shouldn't it be global?)
+GENEREG_LIB = os.path.abspath(config["dir"]["gene_regulation"])
+
+# Python includes
+PYTHON = os.path.join(GENEREG_LIB, "scripts/python_lib")
+include: os.path.join(PYTHON, "util.py")
+
 SAMPLE_IDS = read_table(config["metadata"]["samples"]).iloc[:,0]
 SAMPLE_CONDITIONS = read_table(config["metadata"]["samples"])['condition']
 
@@ -16,16 +22,16 @@ def targetfiles_inputs(wildcards):
     count_files =  expand(SAMPLE_DIR + "{samples}/{samples}_{aligner}_featureCounts.txt", samples=SAMPLE_IDS, aligner=wildcards.aligner)
     return count_files
 
-rule generate_sartools_targetfile:
+rule sartools_targetfile:
     input: 
         count_files = targetfiles_inputs
-    output: config["dir"]["DEG"] + "{aligner}_SARTools_design.txt"
+    output: config["dir"]["diffexpr"] + "{aligner}_SARTools_design.txt"
     params:
         qsub = config["qsub"]\
-            + " -e " + config["dir"]["DEG"] + "targetfile_qsub.err"\
-            + " -o " + config["dir"]["DEG"] + "targetfile_qsub.out"
-    log: config["dir"]["DEG"] + "{aligner}_targetfile.log"
-    benchmark: config["dir"]["DEG"] + "{aligner}_feature_counts_benchmark.json"
+            + " -e " + config["dir"]["diffexpr"] + "targetfile_qsub.err"\
+            + " -o " + config["dir"]["diffexpr"] + "targetfile_qsub.out"
+    log: config["dir"]["diffexpr"] + "{aligner}_targetfile.log"
+    benchmark: config["dir"]["diffexpr"] + "{aligner}_feature_counts_benchmark.json"
     run:
         f = open(output[0], "w+")
         f.write("label\tfiles\tgroup\n")
