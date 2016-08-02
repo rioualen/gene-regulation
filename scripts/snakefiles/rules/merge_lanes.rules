@@ -11,6 +11,12 @@ if not "samples" in config["dir"].keys():
 if not (("metadata" in config.keys()) and ("lane_merging" in config["metadata"].keys())):
     sys.exit("The parameter config['metadata']['lane_merging'] should be specified in the config file.")
 
+
+# Read the lane merging table
+lane_merging_table = read_table(config["metadata"]["lane_merging"], verbosity=verbosity)
+SOURCE_FILES = lane_merging_table['source_file']
+MERGED_FILES = lane_merging_table['merged_file']
+
 rule merge_lanes:
     """Concatenate multiple fastq files to produce a merged fastq file.
 
@@ -42,9 +48,11 @@ rule merge_lanes:
     config["dir"]["fastq"]          base of the directory containing the fastq files
 
     """
-    input: config["metadata"]["lane_merging"]
+    input: table=config["metadata"]["lane_merging"], \
+        source_files=SOURCE_FILES
 #    output: config["dir"]["samples"] + "/lane_merging_benchmark.json"
-    output: touch(config["dir"]["samples"] + "merge_lanes.done")
+    output: done_file=touch(config["dir"]["samples"] + "merge_lanes.done"), \
+        merged_files=MERGED_FILES
     params:
         qsub = config["qsub"] \
           + " -e " + config["dir"]["samples"] + "lane_merging_qsub.err" \
@@ -55,14 +63,14 @@ rule merge_lanes:
         if (verbosity >= 0):
             print("Lane merging table:\t" + config["metadata"]["lane_merging"])
 
-        # Read the lane merging table
-        lane_merging_table = read_table(config["metadata"]["lane_merging"], verbosity=verbosity)
-        source_file = lane_merging_table['source_file']
-        merged_file = lane_merging_table['merged_file']
+        # # Read the lane merging table
+        # lane_merging_table = read_table(config["metadata"]["lane_merging"], verbosity=verbosity)
+        # source_file = lane_merging_table['source_file']
+        # merged_file = lane_merging_table['merged_file']
 
         # Build a dictionary indexed by merged file, where values are lists of files to be merged
         merging_dict = {}
-        for s,m in zip(source_file, merged_file):
+        for s,m in zip({input.source_file}, {output.merged_files}):
             # print("\t".join([s,m]))
             if (m in merging_dict):
                 merging_dict[m].append(s)
@@ -71,8 +79,8 @@ rule merge_lanes:
 
         # Verbosity
         if (verbosity >= 5):
-            print("\tsource_file:\t" + ";".join(source_file))
-            print("\tmerged_file:\t" + ";".join(merged_file))
+            print("\tsource_files:\t" + ";".join({input.source_file}))
+            print("\tmerged_files:\t" + ";".join({output.merged_files}))
             print("\tmerging_dict:\t" + str(merging_dict))
 
         # Merge the files
