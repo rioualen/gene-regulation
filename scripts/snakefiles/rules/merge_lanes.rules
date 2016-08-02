@@ -51,8 +51,9 @@ rule merge_lanes:
     input: table=config["metadata"]["lane_merging"], \
         source_files=SOURCE_FILES
 #    output: config["dir"]["samples"] + "/lane_merging_benchmark.json"
-    output: done_file=touch(config["dir"]["samples"] + "merge_lanes.done"), \
+    output: 
         merged_files=MERGED_FILES
+#done_file=touch(config["dir"]["samples"] + "merge_lanes.done"), \
     params:
         qsub = config["qsub"] \
           + " -e " + config["dir"]["samples"] + "lane_merging_qsub.err" \
@@ -70,7 +71,7 @@ rule merge_lanes:
 
         # Build a dictionary indexed by merged file, where values are lists of files to be merged
         merging_dict = {}
-        for s,m in zip({input.source_file}, {output.merged_files}):
+        for s,m in zip({input.source_files}, {output.merged_files}):
             # print("\t".join([s,m]))
             if (m in merging_dict):
                 merging_dict[m].append(s)
