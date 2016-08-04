@@ -17,6 +17,8 @@ lane_merging_table = read_table(config["metadata"]["lane_merging"], verbosity=ve
 SOURCE_FILES = lane_merging_table['source_file']
 MERGED_FILES = lane_merging_table['merged_file']
 
+print(type(SOURCE_FILES))
+
 rule merge_lanes:
     """Concatenate multiple fastq files to produce a merged fastq file.
 
@@ -80,7 +82,7 @@ rule merge_lanes:
 
         # Verbosity
         if (verbosity >= 5):
-            print("\tsource_files:\t" + ";".join({input.source_file}))
+            print("\tsource_files:\t" + ";".join({input.source_files}))
             print("\tmerged_files:\t" + ";".join({output.merged_files}))
             print("\tmerging_dict:\t" + str(merging_dict))
 
