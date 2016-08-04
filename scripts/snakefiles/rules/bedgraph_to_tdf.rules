@@ -1,3 +1,7 @@
+genome_version = config["genome"]["version"]
+genome_dir = config["dir"]["genome"] + genome_version + "/"
+genome_file = genome_dir + genome_version + ".fa"
+
 rule bedgraph_to_tdf:
     """Convert bedgraph to TDF format, which is recommended to load
     coverage data in IGV.
@@ -10,6 +14,6 @@ rule bedgraph_to_tdf:
     output: "{coverage}.tdf"
     log: "{coverage}_bedgraph_to_tdf.log"
     benchmark: "{coverage}_bedgraph_to_tdf_benchmark.json"
-    params: genome=config["genome"]["fasta"], \
+    params: genome=genome_file, \
             qsub = config["qsub"] + " -e {coverage}_bedgraph_to_tdf_qsub.err -o {coverage}_bedgraph_to_tdf_qsub.out"
     shell: "igvtools totdf {input} {output} {params.genome} 2> {log}"
