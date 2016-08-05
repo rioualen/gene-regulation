@@ -15,6 +15,8 @@ Authors:
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
+config["subread-align"]["feature_type"] = "transcript"     ## TODO properly
+
 # Define paths
 genome_gtf = config["dir"]["genome"] + config["genome"]["version"] + "/" + config["genome"]["version"] + ".gtf"
 
@@ -28,16 +30,17 @@ rule subread_featureCounts:
     input: 
         bam = "{reads}_sorted_pos.bam",
         gtf = genome_gtf
-    output: "{reads}_featureCounts.txt"
+    output: "{reads}_featureCounts_transcripts.txt"
     params:
         wd = config["dir"]["base"],
+        feature_type = config["subread-align"]["feature_type"], 
         qsub = config["qsub"]\
             + " -e {reads}_featureCounts_qsub.err"\
             + " -o {reads}_featureCounts_qsub.out"
     log: "{reads}_featureCounts.log"
     benchmark: "{reads}_featureCounts_benchmark.json"
     run:
-        shell("featureCounts -a {input.gtf} -o {output} {input.bam} &> {log}")
+        shell("featureCounts -a {input.gtf} -o {output} {input.bam} -t {params.feature_type} &> {log}")
         R("""
             setwd("{params.wd}")
             counts <- read.table("{output}", header=TRUE)
