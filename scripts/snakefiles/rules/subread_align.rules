@@ -36,14 +36,20 @@ if not "qsub" in config.keys():
 if not "version" in config["genome"].keys():
     sys.exit("Genome version must be defined in the config file")
 
-#if not "seq_type" in config["subread-align"].keys():
-#    sys.exit("The param subread/seqtype must be defined in the config file")
+if not "seq_type" in config["metadata"].keys():
+    sys.exit("The param metadata/seqtype must be defined in the config file (pe or se)")
+
+if config["metadata"]["seq_type"] == "pe" &&  not "seq_type" in config["metadata"].keys():
+    sys.exit("The param metadata/strands must be defined when analysing paired end data")
 
 if not "genome" in config["dir"].keys():
     sys.exit("Genome dir must be defined in the dir section of the config file")
 
-if not "subread" in config.keys():
+if not "subread-align" in config.keys():
     config["subread-align"] = {}
+
+if not "seq_data" in config["subread-align"].keys():
+    config["subread-align"]["seq_data"] = "0"
 
 if not "threads" in config["subread-align"].keys():
     config["subread-align"]["threads"] = "1"
@@ -51,9 +57,14 @@ if not "threads" in config["subread-align"].keys():
 if not "max_mismatches" in config["subread-align"].keys():
     config["subread-align"]["max_mismatches"] = "3"
 
+if not "align_options" in config["subread-align"].keys():
+    config["subread-align"]["align_options"] = "-d 50 -D 600"
+
+
+
 # Define paths
-if not "samples" in config["dir"].keys():
-    config["dir"]["samples"] = config["dir"]["results"]
+if not "fastq" in config["dir"].keys():
+    sys.exit("You must define a location for the fastq file.")
 
 genome_version = config["genome"]["version"]
 genome_dir = config["dir"]["genome"] + genome_version + "/"
@@ -66,9 +77,9 @@ subread_index = subread_dir + genome_version
 # paired-ends.
 def subread_inputs(wildcards):
     if (seq_type == "pe"):
-        reads = expand("{file}_{strand}.fastq", strand=["R1", "R2"], file=wildcards.reads)
+        reads = expand("{fastq_dir}/{reads}_{strand}.fastq", strand=config["metadata"]["strands"].split(), file=wildcards.reads, fastq_dir=config["dir"]["fastq"])
     elif (seq_type == "se"):
-        reads = expand("{file}.fastq", file=wildcards.reads)
+        reads = expand("{fastq_dir}/{reads}.fastq", file=wildcards.reads, fastq_dir=config["dir"]["fastq"])
     else:
         sys.exit("Error: invalid seq_type parameter. Must be 'se' or 'pe'")
     return reads
@@ -78,21 +89,22 @@ rule subread_align:
         reads = subread_inputs, 
         fa = subread_index + ".fa"
     output:
-        bam = "{reads}_subread-align.bam"
+        bam = "{map_dir}/{reads}_subread-align.bam"
     params:
         index = subread_index, \
-        max_mismatches = config["subread-align"]["max_mismatches"], \
+        seq_data = config["subread-align"]["seq_data"], \
         threads = config["subread-align"]["threads"], \
-#        seq_type = config["subread-align"]["seq_type"], \
+        max_mismatches = config["subread-align"]["max_mismatches"], \
+        align_options = config["subread-align"]["align_options"], \
         qsub = config["qsub"] \
-          + " -e " + "{reads}_subread-align_qsub.err" \
-          + " -o " + "{reads}_subread-align_qsub.out"
-    log: "{reads}_subread-align.log"
-    benchmark: "{reads}_subread-align_benchmark.json"
+          + " -e " + "{map_dir}/{reads}_subread-align_qsub.err" \
+          + " -o " + "{map_dir}/{reads}_subread-align_qsub.out"
+    log: "{map_dir}/{reads}_subread-align.log"
+    benchmark: "{map_dir}/{reads}_subread-align_benchmark.json"
     run:
         if (seq_type == "pe"):
-            shell("subread-align -i {params.index} -r " + input.reads[0] + " -R " + input.reads[1] + " -t 0 -T {params.threads} -M {params.max_mismatches} -o {output.bam} 2> {log}")
+            shell("subread-align -i {params.index} -r " + input.reads[0] + " -R " + input.reads[1] + " -t {params.seq_data} -T {params.threads} -M {params.max_mismatches} {params.align_options} -o {output.bam} 2> {log}")
         elif (seq_type == "se"):
-            shell("subread-align -i {params.index} -r {input.reads} -t 1 -T {params.threads} -M {params.max_mismatches} -o {output.bam} 2> {log}")
+            shell("subread-align -i {params.index} -r {input.reads} -t {params.seq_data} -T {params.threads} -M {params.max_mismatches} {params.align_options} -o {output.bam} 2> {log}")
 
 
