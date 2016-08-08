@@ -1,0 +1,11 @@
+Package: Rgenereg
+Type: Package
+Title: Utilities to analyse NGS data about gene regulation
+Version: 0.1.0
+Author: Jacques van Helden
+Maintainer: Jacques van Helden <Jacques.van-Helden@univ-amu.fr>
+Description: Utilities for the analysis of Next-Generation Sequencing data about
+    gene regulation (RNA-seq and ChIP-seq)
+License: What license is it under?
+LazyData: TRUE
+RoxygenNote: 5.0.1
