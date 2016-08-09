@@ -1,21 +1,12 @@
-"""Trim one a single end raw reads file with sickle.
-
-Required parameters:
-    config["qsub"]
-Optional parameters:
-    config["sickle"]["threshold"]
-    config["sickle"]["qual"]
-
-Usage:
-
-
-Authors:
-    Claire Rioualen, Lucie Khamvongsa
-"""
-
-# Set defaults params in case they're not defined in config file
+# Set defaults params
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
+
+if not "seq_type" in config["metadata"].keys():
+    sys.exit("Sequencing type (single or paired ends) must be defined in the config file")
+
+if config["metadata"]["seq_type"] == "pe" and not "strands" in config["metadata"].keys():
+    sys.exit("The param metadata/strands must be defined when analysing paired end data")
 
 if not "sickle" in config.keys():
     config["sickle"] = {}
@@ -34,15 +25,30 @@ suffix = "sickle"
 
 # Define input files
 def sickle_inputs(wildcards):
+    seq_type = config["metadata"]["seq_type"]
     if (seq_type == "pe"):
-        reads = expand("{file}_{strand}.fastq", strand=["R1", "R2"], file=wildcards.reads)
+        reads = expand("{fastq_dir}{samples}/{samples}_{strand}.fastq", strand=config["metadata"]["strands"].split(), samples=wildcards.samples, fastq_dir=config["dir"]["fastq"])
     elif (seq_type == "se"):
-        reads = expand("{file}.fastq", file=wildcards.reads)
+        reads = expand("{fastq_dir}{samples}/{samples}.fastq", samples=wildcards.samples, fastq_dir=config["dir"]["fastq"])
     else:
         sys.exit("Error: invalid sequencing type parameter. Must be 'se' or 'pe'")
     return reads
 
 rule sickle:
+    """Trim one a single end raw reads file with sickle.
+
+    Required parameters:
+        config["qsub"]
+        config["metadata"]["seq_type"]
+
+    Optional parameters:
+        config["sickle"]["threshold"]
+        config["sickle"]["qual"]
+        config["metadata"]["strands"]
+
+    Authors:
+        Claire Rioualen, Lucie Khamvongsa
+    """
     input: reads = sickle_inputs
     output:
         forward = "{reads}_" + suffix + "_R1.fastq",
@@ -58,6 +64,7 @@ rule sickle:
     benchmark: "{reads}_" + suffix + "_benchmark.json"
     run:
         if (seq_type == "pe"):
+
             shell("sickle pe --pe-file1 " + input.reads[0] + " --pe-file2 " + input.reads[1] + " --qual-type {params.qual_type} --qual-threshold {params.threshold} --output-pe1 {output.forward} --output-pe2 {output.reverse} --output-single {output.single} 2> {log}")
         elif (seq_type == "se"):
             shell("sickle se --fastq-file {input} --qual-type {params.qual_type} --output-file {output.single} &> {log}")
