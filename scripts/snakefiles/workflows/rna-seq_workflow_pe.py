@@ -29,8 +29,9 @@ Contact: 		Jacques.van-Helden@univ-amu.fr
 
 """
 
+
 #================================================================#
-#                        Imports & includes
+#                       Python Imports 
 #================================================================#
 
 from snakemake.utils import R
@@ -39,49 +40,20 @@ import sys
 import datetime
 import pandas as pd
 
-
-#if not ("base" in config["dir"].keys()):
-#    sys.exit("The parameter 'dir base' should be specified in the config file.")
-
-GENEREG_LIB = os.path.abspath(config["dir"]["gene_regulation"])
-
-# Snakemake includes
-RULES = os.path.join(GENEREG_LIB, "scripts/snakefiles/rules")
-include: os.path.join(RULES, "annotation_download.rules")
-include: os.path.join(RULES, "bam_by_pos.rules")
-include: os.path.join(RULES, "bam_stats.rules")
-include: os.path.join(RULES, "bam_to_bed.rules")
-include: os.path.join(RULES, "bowtie.rules")
-include: os.path.join(RULES, "bowtie_index.rules")
-include: os.path.join(RULES, "bowtie2.rules")
-include: os.path.join(RULES, "bowtie2_index.rules")
-include: os.path.join(RULES, "count_reads.rules")
-include: os.path.join(RULES, "cufflinks.rules")
-include: os.path.join(RULES, "dot_graph.rules")
-include: os.path.join(RULES, "dot_to_image.rules")
-include: os.path.join(RULES, "fastqc.rules")
-include: os.path.join(RULES, "genome_download.rules")
-include: os.path.join(RULES, "get_chrom_sizes.rules")
-include: os.path.join(RULES, "sartools_DESeq2.rules")
-include: os.path.join(RULES, "sartools_edgeR.rules")
-include: os.path.join(RULES, "sartools_targetfile.rules")
-include: os.path.join(RULES, "sickle.rules")
-include: os.path.join(RULES, "sra_to_fastq_split.rules")
-include: os.path.join(RULES, "subread_align.rules")
-include: os.path.join(RULES, "subread_featureCounts.rules")
-include: os.path.join(RULES, "subread_index.rules")
-
-# Python includes
-PYTHON = os.path.join(GENEREG_LIB, "scripts/python_lib")
-include: os.path.join(PYTHON, "util.py")
-
 # Define verbosity
 if not ("verbosity" in config.keys()):
     config["verbosity"] = 0
 verbosity = int(config["verbosity"])
 
+
+GENEREG_LIB = os.path.abspath(config["dir"]["gene_regulation"])
+
+# Python includes
+PYTHON = os.path.join(GENEREG_LIB, "scripts/python_lib")
+include: os.path.join(PYTHON, "util.py")
+
 #================================================================#
-#                      Data & wildcards                          #
+#                      Global variables
 #================================================================#
 
 # Raw data
@@ -98,13 +70,9 @@ STRANDS = config["metadata"]["strands"].split()
 # Samples
 SAMPLES = read_table(config["metadata"]["samples"])
 SAMPLE_IDS = SAMPLES.iloc[:,0]
-
-## Design ## TODO 
-DESIGN = read_table(config["metadata"]["design"])
-
+SAMPLE_CONDITIONS = read_table(config["metadata"]["samples"])['condition']
 
 ## Data & results dir
-
 if not (("dir" in config.keys()) and ("reads_source" in config["dir"].keys())):
     sys.exit("The parameter config['dir']['reads_source'] should be specified in the config file.")
 
@@ -116,6 +84,11 @@ if not ("results" in config["dir"].keys()):
     sys.exit("The parameter config['dir']['results'] should be specified in the config file.")
 else:
     RESULTS_DIR = config["dir"]["results"]
+
+if not ("fastq" in config["dir"].keys()):
+    sys.exit("The parameter config['dir']['fastq'] should be specified in the config file.")
+else:
+    FASTQ_DIR = config["dir"]["fastq"]
 
 if not ("samples" in config["dir"].keys()):
     SAMPLE_DIR = config["dir"]["results"]
@@ -133,13 +106,46 @@ else:
     DEG_DIR = config["dir"]["diffexpr"]
 
 
+#================================================================#
+#               Snakemake includes
+#================================================================#
+
+RULES = os.path.join(GENEREG_LIB, "scripts/snakefiles/rules")
+include: os.path.join(RULES, "annotation_download.rules")
+include: os.path.join(RULES, "bam_by_pos.rules")
+include: os.path.join(RULES, "bam_stats.rules")
+include: os.path.join(RULES, "bam_to_bed.rules")
+include: os.path.join(RULES, "bedgraph_to_tdf.rules")
+include: os.path.join(RULES, "bowtie.rules")
+include: os.path.join(RULES, "bowtie_index.rules")
+include: os.path.join(RULES, "bowtie2.rules")
+include: os.path.join(RULES, "bowtie2_index.rules")
+include: os.path.join(RULES, "count_reads.rules")
+include: os.path.join(RULES, "cufflinks.rules")
+include: os.path.join(RULES, "dot_graph.rules")
+include: os.path.join(RULES, "dot_to_image.rules")
+include: os.path.join(RULES, "fastqc.rules")
+include: os.path.join(RULES, "genome_coverage_bedgraph.rules")
+include: os.path.join(RULES, "genome_coverage_bedgraph_strands.rules")
+include: os.path.join(RULES, "genome_download.rules")
+include: os.path.join(RULES, "get_chrom_sizes.rules")
+include: os.path.join(RULES, "index_bam.rules")
+include: os.path.join(RULES, "sartools_DESeq2.rules")
+include: os.path.join(RULES, "sartools_edgeR.rules")
+include: os.path.join(RULES, "sartools_targetfile.rules")
+include: os.path.join(RULES, "sickle.rules")
+include: os.path.join(RULES, "sra_to_fastq_split.rules")
+include: os.path.join(RULES, "subread_align.rules")
+include: os.path.join(RULES, "subread_featureCounts.rules")
+include: os.path.join(RULES, "subread_index.rules")
+include: os.path.join(RULES, "tophat.rules")
 
 #================================================================#
 #                         Workflow                               #
 #================================================================#
 
 ## Data import 
-IMPORT = expand(SAMPLE_DIR + "{samples}/{samples}_{strand}.fastq", samples=SAMPLE_IDS, strand=STRANDS)
+IMPORT = expand(FASTQ_DIR + "{samples}/{samples}_{strand}.fastq", samples=SAMPLE_IDS, strand=STRANDS)
 
 
 ## Genome & annotations download
@@ -159,7 +165,7 @@ GRAPHICS = expand(REPORTS_DIR + "{graph}.png", graph=["dag", "rulegraph"])
 # Quality control
 #----------------------------------------------------------------#
 
-RAW_QC = expand(SAMPLE_DIR + "{samples}/{samples}_{strand}_fastqc/{samples}_{strand}_fastqc.html", samples=SAMPLE_IDS, strand=STRANDS)
+RAW_QC = expand(FASTQ_DIR + "{samples}/{samples}_{strand}_fastqc/{samples}_{strand}_fastqc.html", samples=SAMPLE_IDS, strand=STRANDS)
 QC = RAW_QC
 
 #----------------------------------------------------------------#
@@ -169,12 +175,12 @@ QC = RAW_QC
 if not (("tools" in config.keys()) and ("trimming" in config["tools"].keys())):
     sys.exit("The parameter config['tools']['trimming'] should be specified in the config file. Empty quotes equal to no trimming.")
 
-TRIMMING_SUFFIXES = ["_" + s for s in config["tools"]["trimming"].split()]
+TRIMMING_TOOLS = config["tools"]["trimming"].split()
 
-TRIMMING = expand(SAMPLE_DIR + "{samples}/{samples}{trimmer}_{strand}", samples=SAMPLE_IDS, trimmer=TRIMMING_SUFFIXES, strand=STRANDS)
+TRIMMING = expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}_{strand}", samples=SAMPLE_IDS, trimmer=TRIMMING_TOOLS, strand=STRANDS)
 TRIM = expand("{trimming}.fastq", trimming=TRIMMING)
 
-TRIM_QC = expand(SAMPLE_DIR + "{samples}/{samples}{trimmer}_{strand}_fastqc/{samples}{trimmer}_{strand}_fastqc.html", samples=SAMPLE_IDS, trimmer=TRIMMING_SUFFIXES, strand=STRANDS)
+TRIM_QC = expand(FASTQ_DIR + "{samples}/{samples}_{trimmer}_{strand}_fastqc/{samples}_{trimmer}_{strand}_fastqc.html", samples=SAMPLE_IDS, trimmer=TRIMMING_TOOLS, strand=STRANDS)
 
 QC = RAW_QC + TRIM_QC
 
@@ -187,34 +193,41 @@ if not (("tools" in config.keys()) and ("mapping" in config["tools"].keys())):
     sys.exit("The parameter config['tools']['mapping'] should be specified in the config file.")
 
 MAPPING_TOOLS = config["tools"]["mapping"].split()
-MAPPING_SUFFIXES = ["_" + s for s in MAPPING_TOOLS]
 
-ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}{trimmer}{aligner}", samples=SAMPLE_IDS, aligner=MAPPING_SUFFIXES, trimmer=TRIMMING_SUFFIXES)
+if TRIMMING_TOOLS:
+    PREFIX = expand("{trimmer}_{aligner}", aligner=MAPPING_TOOLS, trimmer=TRIMMING_TOOLS)
+else:
+    PREFIX = expand("{aligner}", aligner=MAPPING_TOOLS)
 
-INDEX = expand(GENOME_DIR + "{tool}/" + GENOME + ".fa", map=MAPPING_TOOLS)
 
+ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{prefix}", samples=SAMPLE_IDS, prefix=PREFIX)
+
+INDEX = expand(GENOME_DIR + "{aligner}/" + GENOME + ".fa", aligner=MAPPING_TOOLS)
+
+MAPPING_TOOLS.append("tophat")
 MAPPING = expand("{alignment}.bam", alignment=ALIGNMENT)
 
-SORTED_BAM = expand("{alignment}_sorted_pos.bam", alignment=ALIGNMENT)
-BAM_STATS = expand("{alignment}_bam_stats.txt", alignment=ALIGNMENT)
 
+SORTED_BAM = expand("{alignment}_sorted_pos.bam", alignment=ALIGNMENT)
+SORTED_BAM_BAI = expand("{alignment}_sorted_pos.bam.bai", alignment=ALIGNMENT)
+BAM_STATS = expand("{alignment}_bam_stats.txt", alignment=ALIGNMENT)
 
 #----------------------------------------------------------------#
 # RNA-seq analysis
 #----------------------------------------------------------------#
 
-FEATURE_COUNTS = expand("{alignment}_featureCounts.txt", alignment=ALIGNMENT)
+FEATURE_COUNTS = expand("{alignment}_featureCounts.txt", alignment=ALIGNMENT) ## todo _{feature} , feature=config["subread-featureCounts"]["feature_type"])
 
 INFER_TRANSCRIPTS = expand("{alignment}_cufflinks/transcripts.gtf", alignment=ALIGNMENT)
 
 if not (("tools" in config.keys()) and ("diffexpr" in config["tools"].keys())):
     sys.exit("The parameter config['tools']['diffexpr'] should be specified in the config file.")
 
-DIFFEXPR_TOOLS = config["tools"]["diffexpr"]
+DIFFEXPR_TOOLS = config["tools"]["diffexpr"].split()
 
-SARTOOLS_TARGETFILE = expand(DEG_DIR + "{map}_SARTools_design.txt", map=MAPPING_TOOLS)
+SARTOOLS_TARGETFILE = expand(DEG_DIR + "{prefix}_SARTools_targetfile.txt", prefix=PREFIX)
 
-DEG = expand(DEG_DIR + "{map}_{deg}_report.html", map=MAPPING_TOOLS, deg=DIFFEXPR_TOOLS)
+DEG = expand(DEG_DIR + "{deg}/{prefix}_{deg}_report.html", prefix=PREFIX, deg=DIFFEXPR_TOOLS)
 
 
 ## ----------------------------------------------------------------
@@ -223,9 +236,13 @@ DEG = expand(DEG_DIR + "{map}_{deg}_report.html", map=MAPPING_TOOLS, deg=DIFFEXP
 
 ## TODO
 
-
 GENOME_COVERAGE = expand("{alignment}.bedgraph", alignment=ALIGNMENT)
+GENOME_COVERAGE_PLUS = expand("{alignment}_plus_strand.bedgraph", alignment=ALIGNMENT)
+GENOME_COVERAGE_MINUS = expand("{alignment}_minus_strand.bedgraph", alignment=ALIGNMENT)
+
 GENOME_COVERAGE_GZ = expand("{alignment}.bedgraph.gz", alignment=ALIGNMENT)
+GENOME_COVERAGE_TDF = expand("{alignment}.tdf", alignment=ALIGNMENT)
+
 
 #================================================================#
 #                        Rule all                                #
@@ -235,7 +252,23 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: GRAPHICS, QC, GENOME_ANNOTATIONS, FEATURE_COUNTS, INFER_TRANSCRIPTS, SARTOOLS_TARGETFILE, DEG
+	input: \
+            IMPORT, \
+            INDEX, \
+            MAPPING, \
+            SORTED_BAM, \
+            SORTED_BAM_BAI, \
+            BAM_STATS, \
+            QC, \
+            GENOME_ANNOTATIONS, \
+            GENOME_COVERAGE_TDF, \
+            GENOME_COVERAGE_PLUS, \
+            GENOME_COVERAGE_MINUS, \
+#            INFER_TRANSCRIPTS, \
+            FEATURE_COUNTS, \
+            SARTOOLS_TARGETFILE, \
+            DEG, \
+            GRAPHICS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
