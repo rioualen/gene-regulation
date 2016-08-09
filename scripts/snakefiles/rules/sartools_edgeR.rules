@@ -1,29 +1,74 @@
-"""
-
-Required parameters:
-    config["qsub"]
-    config["dir"]["base"]
-
-... TODO params checking
-
-Usage: 
-
-Authors: 
-    Claire Rioualen
-"""
-
 # Set parameters
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
+if not "samples" in config["dir"].keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "author" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "featuresToRemove" in config["edgeR"].keys():
+    config["edgeR"]["featuresToRemove"] = "NULL"
+
+if not "varInt" in config["edgeR"].keys():
+    config["edgeR"]["varInt"] = "group"
+
+if not "condRef" in config["edgeR"].keys():
+    config["edgeR"]["condRef"] = "WT"
+
+#if not "batch" in config["edgeR"].keys():
+#    config["edgeR"]["batch"] = "NULL"
+
+if not "alpha" in config["edgeR"].keys():
+    config["edgeR"]["alpha"] = 0.05
+
+if not "pAdjustMethod" in config["edgeR"].keys():
+    config["edgeR"]["pAdjustMethod"] = "BH"
+
+if not "cpmCutoff" in config["edgeR"].keys():
+    config["edgeR"]["cpmCutoff"] = 1
+
+if not "gene_selection" in config["edgeR"].keys():
+    config["edgeR"]["gene_selection"] = "pairwise"
+
+if not "normalizationMethod" in config["edgeR"].keys():
+    config["edgeR"]["normalizationMethod"] = "TMM"
+
 rule sartools_edgeR:
+    """This rule is designed to perform differential expression analysis of RNA-seq data
+    with DESeq2, using the R package SARTools (https://github.com/PF2-pasteur-fr/SARTools/). 
+
+    It requires replicated data to run properly.
+
+    Required parameters:
+        config["qsub"]
+        config["author"]
+        config["dir"]["samples"]
+
+    Optional parameters:
+        config["edgeR"]["featuresToRemove"]
+        config["edgeR"]["varInt"]
+        config["edgeR"]["condRef"]
+        config["edgeR"]["alpha"]
+        config["edgeR"]["pAdjustMethod"]
+        config["edgeR"]["fitType"]
+        config["edgeR"]["cpmCutoff"]
+        config["edgeR"]["gene_selection"]
+        config["edgeR"]["normalizationMethod"]
+
+    Authors: 
+        Claire Rioualen (claire.rioualen@inserm.fr)
+    """
     input: 
-        targetFile = "{deg}_SARTools_design.txt"
-    output: "{deg}_edgeR_report.html"
+        targetFile = "{diffexpr_dir}/{file_prefix}_SARTools_targetfile.txt"
+    output: "{diffexpr_dir}/edgeR/{file_prefix}_edgeR_report.html"
     params:
-        wd = config["dir"]["base"],
-        sample_dir = config["dir"]["samples"],
-        projectName = "{deg}_edgeR",
+        wd = "{diffexpr_dir}/edgeR",
+        targetFile = "{file_prefix}_SARTools_targetfile.txt",
+        rawDir = config["dir"]["base"] + "/" + config["dir"]["samples"],
+        baseDir = config["dir"]["base"],
+        projectName = "{file_prefix}_edgeR",
         author = config["author"],
         featuresToRemove = config["edgeR"]["featuresToRemove"],
         varInt = config["edgeR"]["varInt"],
@@ -35,10 +80,10 @@ rule sartools_edgeR:
         gene_selection = config["edgeR"]["gene_selection"],
         normalizationMethod = config["edgeR"]["normalizationMethod"],
         qsub = config["qsub"] \
-          + " -e " + "{deg}_edgeR_qsub.err" \
-          + " -o " + "{deg}_edgeR_qsub.out"
-    log: "{deg}_edgeR.log"
-#    benchmark: ""
+          + " -e " + "{diffexpr_dir}/{file_prefix}_edgeR_qsub.err" \
+          + " -o " + "{diffexpr_dir}/{file_prefix}_edgeR_qsub.out"
+#    log: "{diffexpr_dir}/{file_prefix}_edgeR.log"
+#    benchmark: "{diffexpr_dir}/{file_prefix}_edgeR_benchmark.json"
     run:
         R("""
 
@@ -46,17 +91,23 @@ rule sartools_edgeR:
 
         sink("{log}")
 
-        setwd("{params.wd}")
         library(SARTools)
 
-        colors <- sample(colours(), 4)
+        targetFile <- "{params.targetFile}"
+        setwd("{wildcards.diffexpr_dir}")
+        new.loc <- paste("edgeR/", targetFile, sep="")
+        file.copy(targetFile, new.loc)
+
+        setwd("edgeR")
+
+        colors <- c("green", "red", "blue", "pink")
 
         # setting params
 
         projectName <- "{params.projectName}"
         author <- "{params.author}"
-        targetFile <- "{input.targetFile}"
-        rawDir <- "{params.sample_dir}"
+
+        rawDir <- "{params.rawDir}"
         featuresToRemove <- "{params.featuresToRemove}"
         varInt <- "{params.varInt}"
         condRef <- "{params.condRef}"
@@ -109,8 +160,10 @@ rule sartools_edgeR:
                           condRef=condRef, batch=NULL, alpha=alpha, pAdjustMethod=pAdjustMethod, colors=colors,
                           gene.selection=gene.selection, normalizationMethod=normalizationMethod)
 
+        file.rename(from="tables", to="tables_edgeR")
+        file.rename(from="figures", to="figures_edgeR")
+
+        setwd("{params.baseDir}")
         sink()
         """)
-
-
 

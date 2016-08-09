@@ -1,29 +1,82 @@
-"""
-
-Required parameters:
-    config["qsub"]
-    config["dir"]["base"]
-
-... TODO params checking
-
-Usage: 
-
-Authors: 
-    Claire Rioualen
-"""
-
 # Set parameters
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
+if not "samples" in config["dir"].keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "author" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "featuresToRemove" in config["DESeq2"].keys():
+    config["DESeq2"]["featuresToRemove"] = "NULL"
+
+if not "varInt" in config["DESeq2"].keys():
+    config["DESeq2"]["varInt"] = "group"
+
+
+if not "condRef" in config["DESeq2"].keys():
+    config["DESeq2"]["condRef"] = "WT"
+
+#if not "batch" in config["DESeq2"].keys():
+#    config["DESeq2"]["batch"] = "NULL"
+
+if not "alpha" in config["DESeq2"].keys():
+    config["DESeq2"]["alpha"] = 0.05
+
+if not "pAdjustMethod" in config["DESeq2"].keys():
+    config["DESeq2"]["pAdjustMethod"] = "BH"
+
+if not "fitType" in config["DESeq2"].keys():
+    config["DESeq2"]["fitType"] = "parametric"
+
+if not "cooksCutoff" in config["DESeq2"].keys():
+    config["DESeq2"]["cooksCutoff"] = "TRUE"
+
+if not "independentFiltering" in config["DESeq2"].keys():
+    config["DESeq2"]["independentFiltering"] = "TRUE"
+
+if not "typeTrans" in config["DESeq2"].keys():
+    config["DESeq2"]["typeTrans"] = "VST"
+
+if not "locfunc" in config["DESeq2"].keys():
+    config["DESeq2"]["locfunc"] = "median"
+
 rule sartools_DESeq2:
+    """This rule is designed to perform differential expression analysis of RNA-seq data
+    with DESeq2, using the R package SARTools (https://github.com/PF2-pasteur-fr/SARTools/). 
+
+    It requires replicated data to run properly.
+
+    Required parameters:
+        config["qsub"]
+        config["author"]
+        config["dir"]["samples"]
+
+    Optional parameters:
+        config["DESeq2"]["featuresToRemove"]
+        config["DESeq2"]["varInt"]
+        config["DESeq2"]["condRef"]
+        config["DESeq2"]["alpha"]
+        config["DESeq2"]["pAdjustMethod"]
+        config["DESeq2"]["fitType"]
+        config["DESeq2"]["cooksCutoff"]
+        config["DESeq2"]["independentFiltering"]
+        config["DESeq2"]["typeTrans"]
+        config["DESeq2"]["locfunc"]
+
+    Authors: 
+        Claire Rioualen (claire.rioualen@inserm.fr)
+    """
     input: 
-        targetFile = "{deg}_SARTools_design.txt"
-    output: "{deg}_DESeq2_report.html"
+        targetFile = "{diffexpr_dir}/{file_prefix}_SARTools_targetfile.txt"
+    output: "{diffexpr_dir}/DESeq2/{file_prefix}_DESeq2_report.html"
     params:
-        wd = config["dir"]["base"],
-        sample_dir = config["dir"]["samples"],
-        projectName = "{deg}_DESeq2",
+        wd = "{diffexpr_dir}/DESeq2",
+        targetFile = "{file_prefix}_SARTools_targetfile.txt",
+        rawDir = config["dir"]["base"] + "/" + config["dir"]["samples"],
+        baseDir = config["dir"]["base"],
+        projectName = "{file_prefix}_DESeq2",
         author = config["author"],
         featuresToRemove = config["DESeq2"]["featuresToRemove"],
         varInt = config["DESeq2"]["varInt"],
@@ -37,10 +90,10 @@ rule sartools_DESeq2:
         typeTrans = config["DESeq2"]["typeTrans"],
         locfunc = config["DESeq2"]["locfunc"],
         qsub = config["qsub"] \
-          + " -e " + "{deg}_DESeq2_qsub.err" \
-          + " -o " + "{deg}_DESeq2_qsub.out"
-    log: "{deg}_DESeq2.log"
-#    benchmark: ""
+          + " -e " + "{diffexpr_dir}/{file_prefix}_DESeq2_qsub.err" \
+          + " -o " + "{diffexpr_dir}/{file_prefix}_DESeq2_qsub.out"
+#    log: "{diffexpr_dir}/{file_prefix}_DESeq2.log"
+#    benchmark: "{diffexpr_dir}/{file_prefix}_DESeq2_benchmark.json"
     run:
         R("""
 
@@ -48,17 +101,23 @@ rule sartools_DESeq2:
 
         sink("{log}")
 
-        setwd("{params.wd}")
         library(SARTools)
 
-        colors <- sample(colours(), 4)
+        targetFile <- "{params.targetFile}"
+        setwd("{wildcards.diffexpr_dir}")
+        new.loc <- paste("DESeq2/", targetFile, sep="")
+        file.copy(targetFile, new.loc)
+
+        setwd("DESeq2")
+
+        colors <- c("green", "red", "blue", "pink")
 
         # setting params
 
         projectName <- "{params.projectName}"
         author <- "{params.author}"
-        targetFile <- "{input.targetFile}"
-        rawDir <- "{params.sample_dir}"
+
+        rawDir <- "{params.rawDir}"
         featuresToRemove <- "{params.featuresToRemove}"
         varInt <- "{params.varInt}"
         condRef <- "{params.condRef}"
@@ -112,10 +171,9 @@ rule sartools_DESeq2:
                            independentFiltering=independentFiltering, alpha=alpha, pAdjustMethod=pAdjustMethod,
                            typeTrans=typeTrans, locfunc=locfunc, colors=colors)
 
+        file.rename(from="tables", to="tables_DESeq2")
+        file.rename(from="figures", to="figures_DESeq2")
+
+        setwd("{params.baseDir}")
         sink()
         """)
-
-
-
-
-
