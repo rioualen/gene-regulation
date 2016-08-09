@@ -20,11 +20,12 @@
     design: "gene-regulation/examples/RNA-seq_GSE41190/design.tab"                                      # required. has to contain at least ids of pairs of samples to be compared
     configfile: "gene-regulation/examples/RNA-seq_GSE41190/RNA-seq_GSE41190.yml"                        # required for flowcharts generation; maybe this should be revised
     seq_type: "pe"
-    strands: "R1 R2"
+    strands: "1 2"
 
   dir:
-    base: "."                                                                   # required. all paths are determined relatively to this directory. See documentation to know more about the file organization.
-    reads_source: "data/"                                                       # required. dir containing raw data organized in sub directories named after the samples
+    base: "/data/analyses/RNA-seq_GSE41190/"                                                                   # required. all paths are determined relatively to this directory. See documentation to know more about the file organization.
+    reads_source: "data/"                                                       # opt
+    fastq: "fastq/"                                                                 # required
     genome: "genome/"                                                          # required. where to store genomes
     results: "results/"                                                         # required. dir for all result files that are produced by the pipeline
     gene_regulation: "gene-regulation/"                                         # required. location of the snakemake library
@@ -35,7 +36,7 @@
 
   tools:                                                        # required
     trimming: ""
-    mapping: "bowtie2 subread-align"  # bowtie2"
+    mapping: "subread-align" # bowtie2 bowtie"  # bowtie2"
     diffexpr: "edgeR DESeq2"
 
   fastqc: 
@@ -49,8 +50,16 @@
     threads: "10"
 
   subread-align:
-    max_mismatches: "1"
     threads: "10"
+    seq_data: "0"                       ## Sequence type for subread-align. 0=RNA-seq, 1=genomic DNA-seq
+    max_mismatches: "3" 
+    align_options: "-d 0 -D 600"        ## Additional options for subread-align
+
+  subread-featureCounts:
+    attr_type: "gene_id" 
+    feature_type: "exon"
+    strand_specificity: 1               ## strand-specific read counting.  0 (unstranded), 1 (stranded) and 2 (reversely stranded). 
+    multi_mapping: ""
 
   bowtie:
     max_mismatches: "1"
@@ -67,7 +76,7 @@
   edgeR:
     featuresToRemove: "NULL"
     varInt: "group"
-    condRef: "t0"
+    condRef: "WT"
     batch: NULL
     alpha: "0.05"
     pAdjustMethod: "BH"
@@ -78,7 +87,7 @@
   DESeq2:
     featuresToRemove: NULL                          # c("alignment_not_unique", "ambiguous", "no_feature", "not_aligned", "too_low_aQual")
     varInt: "group"
-    condRef: "t0"
+    condRef: "WT"
     batch: "NULL"
     fitType: "parametric"                           # "parametric" (default) or "local"
     cooksCutoff: "TRUE"
