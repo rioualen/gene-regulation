@@ -1,34 +1,3 @@
-"""Align each sample with the R-package subread.
-
-   To align each sample on the reference genome the R-package subread
-   first needs to build a index with the function builindex(). The
-   alignment is then executed with the function align(), which calls
-   the tool read mapping tool Subread.  
-
-   Reference: Liao Y, Smyth GK and Shi W (2013). The Subread aligner:
-   fast, accurate and scalable read mapping by seed-and-vote.  Nucleic
-   Acids Research, 41(10):e108
-
-Required parameters:
-    config["genome"]["version"]
-    config["qsub"]
-    config["subread-align"]["seq_type"]
-
-Optional parameters:
-    config["subread-align"]["dir"]
-    config["subread-align"]["threads"]
-    config["subread-align"]["max_mismatches"]
-
-Usage example:
-    ALIGNER=["subread"]
-    ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)             ## todo
-    SUBREAD_INDEX = expand(config["dir"]["genome"] + "{genome}/subread/{genome}.fa.1.bt2", genome=GENOME)     ## todo
-    MAPPING = expand("{alignment}.sam", alignment=ALIGNMENT)
-
-Contributors: 
-    Claire Rioualen
-"""
-
 # Set parameters
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
@@ -39,7 +8,7 @@ if not "version" in config["genome"].keys():
 if not "seq_type" in config["metadata"].keys():
     sys.exit("The param metadata/seqtype must be defined in the config file (pe or se)")
 
-if config["metadata"]["seq_type"] == "pe" &&  not "seq_type" in config["metadata"].keys():
+if config["metadata"]["seq_type"] == "pe" and not "strands" in config["metadata"].keys():
     sys.exit("The param metadata/strands must be defined when analysing paired end data")
 
 if not "genome" in config["dir"].keys():
@@ -60,8 +29,6 @@ if not "max_mismatches" in config["subread-align"].keys():
 if not "align_options" in config["subread-align"].keys():
     config["subread-align"]["align_options"] = "-d 50 -D 600"
 
-
-
 # Define paths
 if not "fastq" in config["dir"].keys():
     sys.exit("You must define a location for the fastq file.")
@@ -72,24 +39,49 @@ genome_file = genome_dir + genome_version + ".fa"
 subread_dir = genome_dir + "subread-align/"
 subread_index = subread_dir + genome_version
 
-################################################################
-# Define input files depending on whether reads are single-end or
-# paired-ends.
+
+# Define input files depending on whether reads are single-end or paired-ends.
 def subread_inputs(wildcards):
+    seq_type = config["metadata"]["seq_type"]
     if (seq_type == "pe"):
-        reads = expand("{fastq_dir}/{reads}_{strand}.fastq", strand=config["metadata"]["strands"].split(), file=wildcards.reads, fastq_dir=config["dir"]["fastq"])
+        reads = expand("{fastq_dir}{samples}/{samples}_{strand}.fastq", strand=config["metadata"]["strands"].split(), samples=wildcards.samples, fastq_dir=config["dir"]["fastq"])
     elif (seq_type == "se"):
-        reads = expand("{fastq_dir}/{reads}.fastq", file=wildcards.reads, fastq_dir=config["dir"]["fastq"])
+        reads = expand("{fastq_dir}{samples}/{samples}.fastq", samples=wildcards.samples, fastq_dir=config["dir"]["fastq"])
     else:
         sys.exit("Error: invalid seq_type parameter. Must be 'se' or 'pe'")
     return reads
 
 rule subread_align:
+    """Align each sample with the R-package subread.
+
+       To align each sample on the reference genome the R-package subread
+       first needs to build a index with the function builindex(). The
+       alignment is then executed with the function align(), which calls
+       the tool read mapping tool Subread.  
+
+       Reference: Liao Y, Smyth GK and Shi W (2013). The Subread aligner:
+       fast, accurate and scalable read mapping by seed-and-vote.  Nucleic
+       Acids Research, 41(10):e108
+
+    Required parameters:
+        config["genome"]["version"]
+        config["qsub"]
+        config["subread-align"]["seq_type"]
+
+    Optional parameters:
+        config["subread-align"]["dir"]
+        config["subread-align"]["threads"]
+        config["subread-align"]["max_mismatches"]
+        config["subread-align"]["align_options"]
+
+    Contributors: 
+        Jacques van Helden, Claire Rioualen
+    """
     input:
         reads = subread_inputs, 
         fa = subread_index + ".fa"
     output:
-        bam = "{map_dir}/{reads}_subread-align.bam"
+        bam = config["dir"]["samples"] + "{samples}/{samples}_subread-align.bam"
     params:
         index = subread_index, \
         seq_data = config["subread-align"]["seq_data"], \
@@ -97,10 +89,10 @@ rule subread_align:
         max_mismatches = config["subread-align"]["max_mismatches"], \
         align_options = config["subread-align"]["align_options"], \
         qsub = config["qsub"] \
-          + " -e " + "{map_dir}/{reads}_subread-align_qsub.err" \
-          + " -o " + "{map_dir}/{reads}_subread-align_qsub.out"
-    log: "{map_dir}/{reads}_subread-align.log"
-    benchmark: "{map_dir}/{reads}_subread-align_benchmark.json"
+          + " -e " + config["dir"]["samples"] + "{samples}/{samples}_subread-align_qsub.err" \
+          + " -o " + config["dir"]["samples"] + "{samples}/{samples}_subread-align_qsub.out"
+    log: config["dir"]["samples"] + "{samples}/{samples}_subread-align.log"
+    benchmark: config["dir"]["samples"] + "{samples}/{samples}_subread-align_benchmark.json"
     run:
         if (seq_type == "pe"):
             shell("subread-align -i {params.index} -r " + input.reads[0] + " -R " + input.reads[1] + " -t {params.seq_data} -T {params.threads} -M {params.max_mismatches} {params.align_options} -o {output.bam} 2> {log}")
