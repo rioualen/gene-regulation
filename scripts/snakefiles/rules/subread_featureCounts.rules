@@ -46,13 +46,13 @@ rule subread_featureCounts:
     input: 
         bam = "{reads}_sorted_pos.bam",
         gtf = genome_gtf
-    output: "{reads}_featureCounts_transcripts_multi.txt"          #### !!
+    output: "{reads}_featureCounts.txt"          #### !!_" + config["subread-featureCounts"]["feature_type"] + "
     params:
         wd = config["dir"]["base"],
-        attr_type = config["subread-align"]["attr_type"], 
-        feature_type = config["subread-align"]["feature_type"], 
-        multi_mapping = config["subread-align"]["multi_mapping"], 
-        strand_specificity = config["subread-align"]["strand_specificity"], 
+        attr_type = config["subread-featureCounts"]["attr_type"], 
+        feature_type = config["subread-featureCounts"]["feature_type"], 
+        multi_mapping = config["subread-featureCounts"]["multi_mapping"], 
+        strand_specificity = config["subread-featureCounts"]["strand_specificity"], 
         qsub = config["qsub"]\
             + " -e {reads}_featureCounts_qsub.err"\
             + " -o {reads}_featureCounts_qsub.out"
