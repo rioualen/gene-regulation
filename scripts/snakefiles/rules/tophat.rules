@@ -1,27 +1,3 @@
-"""Read mapping for single end data using Bowtie2. 
-Requires the indexing to have previously been done (using the
-rule bowtie2_index).
-
-Required parameters:
-    config["genome"]["version"]
-    config["qsub"]
-
-
-Optional parameters:
-    config["tophat"]["max_mismatches"]
-    config["tophat"]["threads"]
-
-
-Usage example:
-    ALIGNER=["tophat"]
-    ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)
-    BOWTIE2_INDEX = expand(config["dir"]["genome"] + "{genome}/Bowtie2Index/{genome}.fa.1.bt2", genome=GENOME)
-    MAPPING = expand("{alignment}.bam", alignment=ALIGNMENT)
-
-Contributors: 
-    Claire Rioualen
-"""
-
 # Set parameters
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
@@ -31,6 +7,12 @@ if not "version" in config["genome"].keys():
 
 if not "genome" in config["dir"].keys():
     sys.exit("Genome dir must be defined in the dir section of the config file")
+
+if not "seq_type" in config["metadata"].keys():
+    sys.exit("Sequencing type (single or paired ends) must be defined in the config file")
+
+if config["metadata"]["seq_type"] == "pe" and not "strands" in config["metadata"].keys():
+    sys.exit("The param metadata/strands must be defined when analysing paired end data")
 
 if not "tophat" in config.keys():
     config["tophat"] = {}
@@ -54,29 +36,46 @@ bowtie2_index = bowtie2_dir + genome_version + ".fa"
 
 # Define input files
 def tophat_inputs(wildcards):
+    seq_type = config["metadata"]["seq_type"]
     if (seq_type == "pe"):
-        reads = expand("{file}_{strand}.fastq", strand=["R1", "R2"], file=wildcards.reads)
+        reads = expand("{fastq_dir}{samples}/{samples}_{strand}.fastq", strand=config["metadata"]["strands"].split(), samples=wildcards.samples, fastq_dir=config["dir"]["fastq"])
     elif (seq_type == "se"):
-        reads = expand("{file}.fastq", file=wildcards.reads)
+        reads = expand("{fastq_dir}{samples}/{samples}.fastq", samples=wildcards.samples, fastq_dir=config["dir"]["fastq"])
     else:
         sys.exit("Error: invalid sequencing type parameter. Must be 'se' or 'pe'")
     return reads
 
 rule tophat:
+    """Read mapping for single end data using Bowtie2. 
+    Requires the indexing to have previously been done (using the
+    rule bowtie2_index).
+
+    Required parameters:
+        config["genome"]["version"]
+        config["qsub"]
+
+
+    Optional parameters:
+        config["tophat"]["max_mismatches"]
+        config["tophat"]["threads"]
+
+    Contributors: 
+        Claire Rioualen
+    """
     input:
         reads = tophat_inputs,
         index = bowtie2_index
     output:
-        bam = "{reads}_tophat.bam"
+        bam = "{map_dir}/{reads}_tophat.bam"
     params:
-        outdir = "{reads}_tophat", \
+        outdir = "{map_dir}/{reads}_tophat", \
         max_mismatches = config["tophat"]["max_mismatches"], \
         threads = config["tophat"]["threads"], \
         qsub = config["qsub"] \
-          + " -e " + "{reads}_tophat_qsub.err" \
-          + " -o " + "{reads}_tophat_qsub.out"
-    log: "{reads}_tophat.log"
-    benchmark: "{reads}_tophat_benchmark.json"
+          + " -e " + "{map_dir}/{reads}_tophat_qsub.err" \
+          + " -o " + "{map_dir}/{reads}_tophat_qsub.out"
+    log: "{map_dir}/{reads}_tophat.log"
+    benchmark: "{map_dir}/{reads}_tophat_benchmark.json"
     run:
         if (seq_type == "pe"):
             shell("tophat --num-threads {params.threads} --read-mismatches {params.max_mismatches} --output-dir {params.outdir} {input.index} " + input.reads[0] + " " + input.reads[1] + " 2> {log}")
