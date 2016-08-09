@@ -1,43 +1,42 @@
-"""
-Authors: 
-    Claire Rioualen
-"""
-
 # Set parameters
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
-# List samples (shouldn't it be global?)
-GENEREG_LIB = os.path.abspath(config["dir"]["gene_regulation"])
-
-# Python includes
-PYTHON = os.path.join(GENEREG_LIB, "scripts/python_lib")
-include: os.path.join(PYTHON, "util.py")
-
-SAMPLE_IDS = read_table(config["metadata"]["samples"]).iloc[:,0]
-SAMPLE_CONDITIONS = read_table(config["metadata"]["samples"])['condition']
+if not "diffexpr" in config["dir"].keys():
+    sys.exit("The parameter dir/diffexpr must be defined in the config file")
 
 # Define input files
 def targetfiles_inputs(wildcards):
-    count_files =  expand(SAMPLE_DIR + "{samples}/{samples}_{aligner}_featureCounts.txt", samples=SAMPLE_IDS, aligner=wildcards.aligner)
+    count_files =  expand(SAMPLE_DIR + "{samples}/{samples}_{file_prefix}_featureCounts.txt", samples=SAMPLE_IDS, file_prefix=wildcards.file_prefix)
     return count_files
 
 rule sartools_targetfile:
+    """
+    This rule creates a so-called "targetfile", which is required by SARTools to run differential expression analyses
+    with rules sartools_DESeq2 and sartools_edgeR.
+
+    Required parameters:
+        config["qsub"]
+        config["dir"]["diffexpr"]
+
+    Authors: 
+        Claire Rioualen
+    """
     input: 
         count_files = targetfiles_inputs
-    output: config["dir"]["diffexpr"] + "{aligner}_SARTools_design.txt"
+    output: config["dir"]["diffexpr"] + "{file_prefix}_SARTools_targetfile.txt"
     params:
         qsub = config["qsub"]\
             + " -e " + config["dir"]["diffexpr"] + "targetfile_qsub.err"\
             + " -o " + config["dir"]["diffexpr"] + "targetfile_qsub.out"
-    log: config["dir"]["diffexpr"] + "{aligner}_targetfile.log"
-    benchmark: config["dir"]["diffexpr"] + "{aligner}_feature_counts_benchmark.json"
+    log: config["dir"]["diffexpr"] + "{file_prefix}_targetfile.log"
+    benchmark: config["dir"]["diffexpr"] + "{file_prefix}_targetfile_benchmark.json"
     run:
         f = open(output[0], "w+")
         f.write("label\tfiles\tgroup\n")
         for id in range(len(SAMPLE_IDS)):
             cond = SAMPLE_CONDITIONS[id]
-            counts = expand(SAMPLE_IDS[id] + "/" + SAMPLE_IDS[id] + "_{aligner}_featureCounts.txt", aligner=wildcards.aligner)
+            counts = expand(SAMPLE_IDS[id] + "/" + SAMPLE_IDS[id] + "_{file_prefix}_featureCounts.txt", file_prefix=wildcards.file_prefix)
             f.write(SAMPLE_IDS[id] + "\t" + counts[0] + "\t" + cond + "\n")
         f.close()
 
