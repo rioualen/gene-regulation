@@ -34,6 +34,9 @@ if not "genome" in config["dir"].keys():
 if not "seq_type" in config["metadata"].keys():
     sys.exit("Sequencing type (single or paired ends) must be defined in the config file")
 
+if config["metadata"]["seq_type"] == "pe" and not "strands" in config["metadata"].keys():
+    sys.exit("The param metadata/strands must be defined when analysing paired end data")
+
 if not "bowtie2" in config.keys():
     config["bowtie2"] = {}
 
@@ -57,10 +60,11 @@ seq_type = config["metadata"]["seq_type"]
 
 # Define input files
 def bowtie2_inputs(wildcards):
+    seq_type = config["metadata"]["seq_type"]
     if (seq_type == "pe"):
-        reads = expand("{file}_{strand}.fastq", strand=["R1", "R2"], file=wildcards.reads)
+        reads = expand("{fastq_dir}{samples}/{samples}_{strand}.fastq", strand=config["metadata"]["strands"].split(), samples=wildcards.samples, fastq_dir=config["dir"]["fastq"])
     elif (seq_type == "se"):
-        reads = expand("{file}.fastq", file=wildcards.reads)
+        reads = expand("{fastq_dir}{samples}/{samples}.fastq", samples=wildcards.samples, fastq_dir=config["dir"]["fastq"])
     else:
         sys.exit("Error: invalid sequencing type parameter. Must be 'se' or 'pe'")
     return reads
@@ -70,16 +74,16 @@ rule bowtie2:
         reads = bowtie2_inputs, 
         index = bowtie2_index
     output:
-        bam = "{reads}_bowtie2.bam"
+        bam = config["dir"]["samples"] + "{samples}/{samples}_bowtie2.bam"
     params:
-        sam = "{reads}_bowtie2.sam", 
+        sam = config["dir"]["samples"] + "{samples}/{samples}_bowtie2.sam", 
         max_mismatches = config["bowtie2"]["max_mismatches"], 
         threads = config["bowtie2"]["threads"], 
         qsub = config["qsub"] \
-          + " -e " + "{reads}_bowtie2_qsub.err" \
-          + " -o " + "{reads}_bowtie2_qsub.out"
-    log: "{reads}_bowtie2.log"
-    benchmark: "{reads}_bowtie2_benchmark.json"
+          + " -e " + config["dir"]["samples"] + "{samples}/{samples}_bowtie2_qsub.err" \
+          + " -o " + config["dir"]["samples"] + "{samples}/{samples}_bowtie2_qsub.out"
+    log: config["dir"]["samples"] + "{samples}/{samples}_bowtie2.log"
+    benchmark: config["dir"]["samples"] + "{samples}/{samples}_bowtie2_benchmark.json"
     run:
         if (seq_type == "pe"):
             shell("bowtie2 -x {input.index} -1 " + input.reads[0] + " -2 " + input.reads[1] + " -S {params.sam} --phred33 -N {params.max_mismatches} --threads {params.threads} 2> {log}")
