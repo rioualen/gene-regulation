@@ -1,0 +1,24 @@
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+rule blast_formatdb:
+    """Run the formatdb program of the BLAST suite in order to index all
+    k-mers of the reference database. This has to be done only once, then
+    the DB can be used for multiple searches with blastall.
+    
+    Parameters
+    
+    - type (formatdb option -p): sequence type: peptidic (-pT) or nucleic (-pF)
+"""
+    input: fasta_seq="{ref_db}.fa"
+    output: "{ref_db}_blastdb_p{type}.{extensions,(phr|psq|psi|psd|pin)}"
+    params: basename="{ref_db}_blastdb_p{type}", \
+        qsub = config["qsub"] \
+          + " -e " + "{ref_db}_blastdb_p{type}_qsub.err" \
+          + " -o " + "{ref_db}_blastdb_p{type}_qsub.out"
+    log: "{ref_db}_blastdb_p{type}.log"
+    benchmark: "{ref_db}_blastdb_p{type}_benchmark.json"
+    shell: """
+    formatdb -p {wildcards.type} -i {input.fasta_seq} -o t -n {params.basename} -l {log}
+"""

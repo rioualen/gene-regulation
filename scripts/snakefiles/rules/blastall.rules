@@ -1,0 +1,41 @@
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "blastall" in config.keys():
+    sys.exit("The parameter blastall must be defined in the config file")
+
+if not "db" in config["blastall"].keys():
+    sys.exit("The parameter config['blastall']['db'] must be defined in the config file")
+
+if not "matrix" in config["blastall"].keys():
+    config['blastall']['matrix'] = "BLOSUM62"
+
+if not "expect" in config["blastall"].keys():
+    config['blastall']['expect'] = "1e-5"
+
+if not "view" in config["blastall"].keys():
+    config['blastall']['view'] = "8"
+
+rule blastall:
+    """Output file name: {query}_{blast_program}_hits.txt
+
+Where {blast_program} should be replaced by one of the supported
+program options in balstall: blastp, blastn, blastx, tblastn.
+
+    """
+    input: query="{query}.fa", db_index=config["blastall"]["db"] + ".psi"
+    output: hits="{query}_{blast_program}_hits.tsv"
+    params: \
+        db=config["blastall"]["db"], \
+        matrix=config["blastall"]["matrix"], \
+        expect=config["blastall"]["expect"], \
+        view = config["blastall"]["view"], \
+        qsub = config["qsub"] \
+          + " -e " + "{query}_{blast_program}_hits_qsub.err" \
+          + " -o " + "{query}_{blast_program}_hits_qsub.out"
+    log: "{query}_{blast_program}_hits.log"
+    benchmark: "{query}_{blast_program}_hits_benchmark.json"
+    shell: """
+    blastall -i {input.query} -d {params.db} -M {params.matrix} -p {wildcards.blast_program} -m {params.view} -e {params.expect} > {output.hits} 2> {log}
+"""
