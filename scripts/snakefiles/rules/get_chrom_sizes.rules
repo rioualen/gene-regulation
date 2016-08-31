@@ -1,4 +1,4 @@
-"""Generates chromsize file specified in the config file."""
+
 rule get_chrom_sizes:
 	input: "{genome}.fa"
 	output: "{genome}.genome"
