@@ -1,20 +1,3 @@
-"""Rule for the creation of Bowtie 2 index. Has to be done only once.  The
-output file is used to test whether the index already exists
-when aligning.
-
-Required parameters:
-    config["qsub"]
-    config["dir"]["genome"]
-    config["genome"]["version"]
-Optional parameters:
-
-Usage example:
-    ALIGNER=["bowtie2", "bwa"]
-    INDEX = expand(config["dir"]["genome"] + config["genome"]["version"] + "/{aligner}/" + config["genome"]["version"] + ".fa", aligner=ALIGNER)
-
-Contributors: 
-    Claire Rioualen
-"""
 
 # Set parameters
 if not "qsub" in config.keys():
@@ -23,18 +6,36 @@ if not "qsub" in config.keys():
 if not "version" in config["genome"].keys():
     sys.exit("Genome version must be defined in the config file")
 
+if not "fasta_file" in config["genome"].keys():
+    sys.exit("Fasta file must be defined in the config file")
+
 if not "genome" in config["dir"].keys():
     sys.exit("Genome dir must be defined in the 'dir' section of the config file")
 
 # Define paths
 genome_version = config["genome"]["version"]
-genome_dir = config["dir"]["genome"] + genome_version + "/"
-genome_file = genome_dir + genome_version + ".fa"
+genome_dir = config["dir"]["genome"] + "/"
+genome_file = genome_dir + config["genome"]["fasta_file"]
 bowtie2_dir = genome_dir + "bowtie2/"
 bowtie2_index = bowtie2_dir + genome_version + ".fa"
 
-
+# Rule
 rule bowtie2_index:
+    """Rule for the creation of Bowtie 2 index. Has to be done only once.  The
+    output file is used to test whether the index already exists
+    when aligning.
+
+    Required parameters:
+        config["qsub"]
+        config["dir"]["genome"]
+        config["genome"]["version"]
+        config["genome"]["fasta_file"]
+
+    Optional parameters:
+
+    Contributors: 
+        Claire Rioualen
+    """
     input: genome_file
     output: bowtie2_index
     params:
@@ -47,7 +48,7 @@ rule bowtie2_index:
     benchmark: bowtie2_index + "_benchmark.json"
     shell: """
 mkdir -p {params.dir}
-cp {input} {params.dir}
+cp {input} {params.dir}{params.version}.fa
 #cd {params.dir}
 bowtie2-build  {params.dir}{params.version}.fa  {params.dir}{params.version}.fa &> {log}
 """

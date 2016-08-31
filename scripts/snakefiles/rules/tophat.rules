@@ -5,6 +5,9 @@ if not "qsub" in config.keys():
 if not "version" in config["genome"].keys():
     sys.exit("Genome version must be defined in the config file")
 
+if not "fasta_file" in config["genome"].keys():
+    sys.exit("Fasta file must be defined in the config file")
+
 if not "genome" in config["dir"].keys():
     sys.exit("Genome dir must be defined in the dir section of the config file")
 
@@ -23,13 +26,13 @@ if not "threads" in config["tophat"].keys():
 if not "max_mismatches" in config["tophat"].keys():
     config["tophat"]["max_mismatches"] = "2"
 
-## Define paths
-#if not "samples" in config["dir"].keys():
-#    config["dir"]["samples"] = config["dir"]["results"]
+# Define paths
+if not "fastq" in config["dir"].keys():
+    sys.exit("You must define a location for the fastq file.")
 
 genome_version = config["genome"]["version"]
-genome_dir = config["dir"]["genome"] + genome_version + "/"
-genome_file = genome_dir + genome_version + ".fa"
+genome_dir = config["dir"]["genome"] + "/"
+genome_file = genome_dir + config["genome"]["fasta_file"]
 bowtie2_dir = genome_dir + "bowtie2/"
 bowtie2_index = bowtie2_dir + genome_version + ".fa"
 
@@ -38,9 +41,9 @@ bowtie2_index = bowtie2_dir + genome_version + ".fa"
 def tophat_inputs(wildcards):
     seq_type = config["metadata"]["seq_type"]
     if (seq_type == "pe"):
-        reads = expand("{fastq_dir}{samples}/{samples}_{strand}.fastq", strand=config["metadata"]["strands"].split(), samples=wildcards.samples, fastq_dir=config["dir"]["fastq"])
+        reads = expand("{fastq_dir}/{samples}/{samples}_{strand}.fastq", strand=config["metadata"]["strands"].split(), samples=wildcards.samples, fastq_dir=config["dir"]["fastq"])
     elif (seq_type == "se"):
-        reads = expand("{fastq_dir}{samples}/{samples}.fastq", samples=wildcards.samples, fastq_dir=config["dir"]["fastq"])
+        reads = expand("{fastq_dir}/{samples}/{samples}.fastq", samples=wildcards.samples, fastq_dir=config["dir"]["fastq"])
     else:
         sys.exit("Error: invalid sequencing type parameter. Must be 'se' or 'pe'")
     return reads
@@ -52,6 +55,7 @@ rule tophat:
 
     Required parameters:
         config["genome"]["version"]
+        config["genome"]["fasta_file"]
         config["qsub"]
 
 
@@ -66,16 +70,16 @@ rule tophat:
         reads = tophat_inputs,
         index = bowtie2_index
     output:
-        bam = "{map_dir}/{reads}_tophat.bam"
+        bam = config["dir"]["samples"] + "/{samples}/{samples}_tophat.bam"
     params:
-        outdir = "{map_dir}/{reads}_tophat", \
+        outdir = config["dir"]["samples"] + "/{samples}/{samples}_tophat", \
         max_mismatches = config["tophat"]["max_mismatches"], \
         threads = config["tophat"]["threads"], \
         qsub = config["qsub"] \
-          + " -e " + "{map_dir}/{reads}_tophat_qsub.err" \
-          + " -o " + "{map_dir}/{reads}_tophat_qsub.out"
-    log: "{map_dir}/{reads}_tophat.log"
-    benchmark: "{map_dir}/{reads}_tophat_benchmark.json"
+          + " -e " + config["dir"]["samples"] + "/{samples}/{samples}_tophat_qsub.err" \
+          + " -o " + config["dir"]["samples"] + "/{samples}/{samples}_tophat_qsub.out"
+    log: config["dir"]["samples"] + "/{samples}/{samples}_tophat.log"
+    benchmark: config["dir"]["samples"] + "/{samples}/{samples}_tophat_benchmark.json"
     run:
         if (seq_type == "pe"):
             shell("tophat --num-threads {params.threads} --read-mismatches {params.max_mismatches} --output-dir {params.outdir} {input.index} " + input.reads[0] + " " + input.reads[1] + " 2> {log}")

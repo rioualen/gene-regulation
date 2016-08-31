@@ -1,23 +1,59 @@
-"""Rule for the creation of BWA index. Has to be done only once.  The
-output file is used to test whether the index already exists
-when aligning.
+#"""Rule for the creation of BWA index. Has to be done only once.  The
+#output file is used to test whether the index already exists
+#when aligning.
 
-Required parameters:
-    config["qsub"]
+#Required parameters:
+#    config["qsub"]
 
-Optional parameters:
-
-
-Usage example:
-    ALIGNER=["bowtie", "bowtie2", "bwa"]
-    ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)
-    INDEX = expand(config["dir"]["genome"] + config["genome"]["version"] + "/{aligner}/" + config["genome"]["version"] + ".fa", aligner=ALIGNER)
-    MAPPING = expand("{alignment}.sam", alignment=ALIGNMENT)
+#Optional parameters:
 
 
-Contributors: 
-    Claire Rioualen
-"""
+#Usage example:
+#    ALIGNER=["bowtie", "bowtie2", "bwa"]
+#    ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)
+#    INDEX = expand(config["dir"]["genome"] + config["genome"]["version"] + "/{aligner}/" + config["genome"]["version"] + ".fa", aligner=ALIGNER)
+#    MAPPING = expand("{alignment}.sam", alignment=ALIGNMENT)
+
+
+#Contributors: 
+#    Claire Rioualen
+#"""
+
+
+## Set parameters
+#if not "qsub" in config.keys():
+#    sys.exit("The parameter qsub must be defined in the config file")
+
+#if not "version" in config["genome"].keys():
+#    sys.exit("Genome version must be defined in the config file")
+
+#if not "genome" in config["dir"].keys():
+#    sys.exit("Genome dir must be defined in the 'dir' section of the config file")
+
+## Define paths
+#genome_version = config["genome"]["version"]
+#genome_dir = config["dir"]["genome"] + genome_version + "/"
+#genome_file = genome_dir + genome_version + ".fa"
+#bwa_dir = genome_dir + "bwa/"
+#bwa_index = bwa_dir + genome_version + ".fa"
+
+#rule bwa_index:
+#    input: genome_file
+#    output: bwa_index
+#    params:
+#        dir = bwa_dir, \
+#        version = genome_version, \
+#        qsub = config["qsub"] \
+#          + " -e " + bwa_dir + "index_qsub.err" \
+#          + " -o " + bwa_dir + "index_qsub.out"
+#    log: bwa_index + ".log"
+#    benchmark: bwa_index + "_benchmark.json"
+#    shell: """
+#mkdir -p {params.dir}
+#cp {input} {params.dir}
+##cd {params.dir}
+#bwa index {params.dir}{params.version}.fa 2> {log}
+#"""
 
 
 # Set parameters
@@ -27,17 +63,36 @@ if not "qsub" in config.keys():
 if not "version" in config["genome"].keys():
     sys.exit("Genome version must be defined in the config file")
 
+if not "fasta_file" in config["genome"].keys():
+    sys.exit("Fasta file must be defined in the config file")
+
 if not "genome" in config["dir"].keys():
     sys.exit("Genome dir must be defined in the 'dir' section of the config file")
 
 # Define paths
 genome_version = config["genome"]["version"]
-genome_dir = config["dir"]["genome"] + genome_version + "/"
-genome_file = genome_dir + genome_version + ".fa"
+genome_dir = config["dir"]["genome"] + "/"
+genome_file = genome_dir + config["genome"]["fasta_file"]
 bwa_dir = genome_dir + "bwa/"
 bwa_index = bwa_dir + genome_version + ".fa"
 
+# Rule
 rule bwa_index:
+    """Rule for the creation of BWA index. Has to be done only once. The
+    output file is used to test whether the index already exists
+    when aligning.
+
+    Required parameters:
+        config["qsub"]
+        config["dir"]["genome"]
+        config["genome"]["version"]
+        config["genome"]["fasta_file"]
+
+    Optional parameters:
+
+    Contributors: 
+        Claire Rioualen
+    """
     input: genome_file
     output: bwa_index
     params:
@@ -50,7 +105,7 @@ rule bwa_index:
     benchmark: bwa_index + "_benchmark.json"
     shell: """
 mkdir -p {params.dir}
-cp {input} {params.dir}
+cp {input} {params.dir}{params.version}.fa
 #cd {params.dir}
 bwa index {params.dir}{params.version}.fa 2> {log}
 """
