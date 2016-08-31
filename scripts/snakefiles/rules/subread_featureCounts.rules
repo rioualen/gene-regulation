@@ -1,21 +1,15 @@
-"""featureCounts from the subread toolkit. 
-
-Required parameters:
-    config["qsub"]
-    config["dir"]["base"]
-
-Usage: 
-    Usage: featureCounts [options] -a <annotation_file> -o <output_file> input_file1 [input_file2] ... 
-
-Authors: 
-    Claire Rioualen
-"""
-
 # Set parameters
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
+if not "gtf_file" in config["genome"].keys():
+    sys.exit("GTF file must be defined in the config file")
 
+if not "genome" in config["dir"].keys():
+    sys.exit("Genome directory must be defined in the config file")
+
+if not "base" in config["dir"].keys():
+    sys.exit("Dir base must be defined in the config file")
 
 if not "subread-featureCounts" in config.keys():
     config["subread-featureCounts"] = {}
@@ -32,20 +26,37 @@ if not "multi_mapping" in config["subread-featureCounts"].keys():
 if not "strand_specificity" in config["subread-featureCounts"].keys():
     config["subread-featureCounts"]["strand_specificity"] = "0"
 
-
-# Define paths
-genome_gtf = config["dir"]["genome"] + config["genome"]["version"] + "/" + config["genome"]["version"] + ".gtf"
-
 # Define input files (no global variables allowed?)
 def featureCounts_inputs(wildcards):
     SAMPLE_IDS = read_table(config["metadata"]["samples"]).iloc[:,0]
     bam_files =  expand(SAMPLE_DIR + "{samples}/{samples}_{aligner}.bam", samples=SAMPLE_IDS, aligner=wildcards.aligner)
     return bam_files
 
+# Rule
 rule subread_featureCounts:
+    """featureCounts from the subread toolkit. 
+
+    Required parameters:
+        config["qsub"]
+        config["dir"]["base"]
+        config["dir"]["genome"]
+        config["genome"]["gtf_file"]
+
+    Optional parameters:
+        config["subread-featureCounts"]["attr_type"]
+        config["subread-featureCounts"]["feature_type"]
+        config["subread-featureCounts"]["multi_mapping"]
+        config["subread-featureCounts"]["strand_specificity"]
+
+    Usage: 
+        Usage: featureCounts [options] -a <annotation_file> -o <output_file> input_file1 [input_file2] ... 
+
+    Contributors: 
+        Claire Rioualen, Jacques van Helden
+    """
     input: 
         bam = "{reads}_sorted_pos.bam",
-        gtf = genome_gtf
+        gtf = config["dir"]["genome"] + "/" + config["genome"]["gtf_file"]
     output: "{reads}_featureCounts.txt"          #### !!_" + config["subread-featureCounts"]["feature_type"] + "
     params:
         wd = config["dir"]["base"],
