@@ -171,9 +171,6 @@ rule sartools_DESeq2:
                            independentFiltering=independentFiltering, alpha=alpha, pAdjustMethod=pAdjustMethod,
                            typeTrans=typeTrans, locfunc=locfunc, colors=colors)
 
-        file.rename(from="tables", to="tables_DESeq2")
-        file.rename(from="figures", to="figures_DESeq2")
-
         setwd("{params.baseDir}")
         sink()
         """)

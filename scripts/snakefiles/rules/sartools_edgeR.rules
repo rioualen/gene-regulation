@@ -160,9 +160,6 @@ rule sartools_edgeR:
                           condRef=condRef, batch=NULL, alpha=alpha, pAdjustMethod=pAdjustMethod, colors=colors,
                           gene.selection=gene.selection, normalizationMethod=normalizationMethod)
 
-        file.rename(from="tables", to="tables_edgeR")
-        file.rename(from="figures", to="figures_edgeR")
-
         setwd("{params.baseDir}")
         sink()
         """)

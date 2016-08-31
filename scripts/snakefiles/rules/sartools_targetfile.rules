@@ -24,7 +24,7 @@ rule sartools_targetfile:
     """
     input: 
         count_files = targetfiles_inputs
-    output: config["dir"]["diffexpr"] + "{file_prefix}_SARTools_targetfile.txt"
+    output: config["dir"]["diffexpr"] + "/{file_prefix}_SARTools_targetfile.txt"
     params:
         qsub = config["qsub"]\
             + " -e " + config["dir"]["diffexpr"] + "targetfile_qsub.err"\
