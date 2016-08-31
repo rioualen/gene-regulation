@@ -1,7 +1,19 @@
-genome_version = config["genome"]["version"]
-genome_dir = config["dir"]["genome"] + genome_version + "/"
-genome_file = genome_dir + genome_version + ".fa"
 
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "fasta_file" in config["genome"].keys():
+    sys.exit("Fasta file must be defined in the config file")
+
+if not "genome" in config["dir"].keys():
+    sys.exit("Genome dir must be defined in the 'dir' section of the config file")
+
+# Var
+genome_dir = config["dir"]["genome"] + "/"
+genome_file = genome_dir + config["genome"]["fasta_file"]
+
+# Rule
 rule bedgraph_to_tdf:
     """Convert bedgraph to TDF format, which is recommended to load
     coverage data in IGV.

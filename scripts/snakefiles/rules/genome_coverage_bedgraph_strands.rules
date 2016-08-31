@@ -1,9 +1,17 @@
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
 rule genome_coverage_bedgraph_strands:
     """Compute two strand-specific genome coverage files (with suffixes
     _strand- and _strand+) from a bam-formatted file with aligned
     reads.  The coverage files are in bedgraph format, which can be
     loaded in the genome viewer IGV.
 
+    Required parameters: 
+        config["qsub"]
+
+    Contributors: Jacques van Helden, Claire Rioualen
     """
     input: reads = "{reads}_sorted_pos.bam"
     output: bedg_plus = "{reads}_plus_strand.bedgraph", \
