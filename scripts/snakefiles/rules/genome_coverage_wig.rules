@@ -1,15 +1,30 @@
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "genome" in config["dir"].keys():
+    sys.exit("Genome directory must be defined in the config file")
+
+if not "fasta_file" in config["genome"].keys():
+    sys.exit("Fasta file must be defined in the config file")
+
+genome_dir = config["dir"]["genome"] + "/"
+genome_file = genome_dir + config["genome"]["fasta_file"]
+
+# Rule
 rule genome_coverage_wig:    
     """Compute genome coverage from a bam-formatted file with aligned
     reads and produce a wig or bigWig file, the recommended format to
     upload coverage-type data as UCSC tracks.
 
+    Author: Jacques van Helden, Claire Rioualen
     """
     input: "{reads}.bam"
     output: "{reads}.wig"
+    params: output_prefix = "{reads}",
+            chromsize = re.sub('\.fa$', '', genome_file) + ".genome", 
+            qsub = config["qsub"] + " -e {reads}_bam2wig_qsub.err -o {reads}_bam2wig_qsub.out"
     log:  "{reads}_bam2wig.log"
     benchmark:  "{reads}_bam2wig_benchmark.json"
-    params: output_prefix = "{reads}", \
-            chromsize = config["genome"]["chromsize"], \
-            qsub = config["qsub"] + " -e {reads}_bam2wig_qsub.err -o {reads}_bam2wig_qsub.out"
     shell: "bam2wig.py -i {input} -s {params.chromsize} -o {params.output_prefix} 2> {log}" 
 

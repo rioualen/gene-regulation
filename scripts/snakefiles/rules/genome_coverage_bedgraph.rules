@@ -1,4 +1,3 @@
-
 # Set parameters
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
@@ -33,8 +32,8 @@ rule genome_coverage_bedgraph:
     Contributors: Jacques van Helden, Claire Rioualen
     """
     input: reads = "{reads}_sorted_pos.bam", chrom_size = chrom_size
-    output: bedg = "{reads}.bedgraph"
+    output: "{reads}.bedgraph"
     params: qsub = config["qsub"] + " -e {reads}_genomecov_bedgraph_qsub.err -o {reads}_genomecov_bedgraph_qsub.out"
     log:  "{reads}_genomecov_bedgraph.log"
     benchmark:  "{reads}_genomecov_bedgraph_benchmark.json"
-    shell: "bedtools genomecov -bg -ibam {input.reads} -g {input.chrom_size} > {output.bedg} 2> {log}" 
+    shell: "bedtools genomecov -bg -ibam {input.reads} -g {input.chrom_size} > {output} 2> {log}" 

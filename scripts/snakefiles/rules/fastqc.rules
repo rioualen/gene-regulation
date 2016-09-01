@@ -1,20 +1,3 @@
-"""Check the quality of thre reads in a fastq file ({reads}.fastq)
-using the program fastQC (quality control). Results are stored in
-folder named '{reads}_fastqc'.
-
-Custom parameters specified in the configuration file with the
-option config["fastqc"]["other options"] will be passed to fastQC. 
-
-Required parameters:
-    config['qsub']
-
-Optional parameters:
-    config['fastqc']['other_options']
-
-Authors: 
-    Claire Rioualen, Lucie Khamvongsa & Jacques van Helden
-"""
-
 # Set parameters
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
@@ -25,7 +8,24 @@ if not "fastqc" in config.keys():
 if not "other_options" in config["fastqc"].keys():
     config["fastqc"]["other_options"] = ""
 
+# Rule
 rule fastqc:
+    """Check the quality of thre reads in a fastq file ({reads}.fastq)
+    using the program fastQC (quality control). Results are stored in
+    folder named '{reads}_fastqc'.
+
+    Custom parameters specified in the configuration file with the
+    option config["fastqc"]["other options"] will be passed to fastQC. 
+
+    Required parameters:
+        config['qsub']
+
+    Optional parameters:
+        config['fastqc']['other_options']
+
+    Authors: 
+        Claire Rioualen, Lucie Khamvongsa & Jacques van Helden
+    """
     input: "{reads}.fastq"
     output: "{reads}_fastqc/{sample}_fastqc.html"
     params:

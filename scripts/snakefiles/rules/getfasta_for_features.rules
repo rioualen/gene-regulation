@@ -1,12 +1,13 @@
 
 
 rule getfasta_from_gff:
-"""Get sequences from a user-specified fasta file (sequences) and
-a genomic feature file in gff3 format.  
+    """Get sequences from a user-specified fasta file (sequences) and
+    a genomic feature file in gff3 format.  
 
-The GFF format is imposed by bedtools getfasta, which currently does
-not support the GTF format.
+    The GFF format is imposed by bedtools getfasta, which currently does
+    not support the GTF format.
 
+    Author: Jacques van Helden
 """
         
 

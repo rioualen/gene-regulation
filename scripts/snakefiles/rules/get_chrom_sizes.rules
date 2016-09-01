@@ -1,17 +1,22 @@
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
 
+# Rule
 rule get_chrom_sizes:
-	input: "{genome}.fa"
-	output: "{genome}.genome"
-	log: "{genome}_chromsize.log"
-	benchmark: "{genome}_chromsize_benchmark.json"
-        params: qsub=config["qsub"] \
+    """This rule generates a file containg the chrmosome sizes, with file extension *.genome. 
+    This file is required by a number of bedtools utilities.
+
+    Author: Claire Rioualen
+    """
+    input: "{genome}.fa"
+    output: "{genome}.genome"
+    params: qsub=config["qsub"] \
           + " -e {genome}_chromsize_qsub.err" \
           + " -o {genome}_chromsize_qsub.out"
-	shell:"""
-samtools faidx {input}
-cut -f1,2 {input}.fai > {output}
+    log: "{genome}_chromsize.log"
+    benchmark: "{genome}_chromsize_benchmark.json"
+    shell:"""
+(samtools faidx {input}
+cut -f1,2 {input}.fai > {output}) 2> {log}
 """
-#pip install pyfaidx
-#$ faidx input.fasta -i chromsizes > sizes.genome
-
-#cat {params.fasta} | awk '$0 ~ ">" {{print c; c=0;printf substr($0,2,100) "\t"; }} $0 !~ ">" {{c+=length($0);}} END {{ print c; }}' > {output}

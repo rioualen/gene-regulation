@@ -2,6 +2,7 @@
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
+# Rule
 rule genome_coverage_bedgraph_strands:
     """Compute two strand-specific genome coverage files (with suffixes
     _strand- and _strand+) from a bam-formatted file with aligned
@@ -16,9 +17,11 @@ rule genome_coverage_bedgraph_strands:
     input: reads = "{reads}_sorted_pos.bam"
     output: bedg_plus = "{reads}_plus_strand.bedgraph", \
             bedg_minus = "{reads}_minus_strand.bedgraph"
+    params: qsub = config["qsub"] + " -e {reads}_genomecov_bedgraph_str_qsub.err -o {reads}_genomecov_bedgraph_str_qsub.out"
     log:  "{reads}_genomecov_bedgraph_str.log"
     benchmark:  "{reads}_genomecov_bedgraph_str_benchmark.json"
-    params: qsub = config["qsub"] + " -e {reads}_genomecov_bedgraph_str_qsub.err -o {reads}_genomecov_bedgraph_str_qsub.out"
-    shell: "bedtools genomecov -bg -strand + -ibam {input.reads} > {output.bedg_plus} 2> {log}" \
-        + "; bedtools genomecov -bg -strand - -ibam {input.reads} > {output.bedg_minus} 2>> {log}"
+    shell: """
+bedtools genomecov -bg -strand + -ibam {input.reads} > {output.bedg_plus} 2> {log}
+bedtools genomecov -bg -strand - -ibam {input.reads} > {output.bedg_minus} 2>> {log}
+"""
 

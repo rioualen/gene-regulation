@@ -1,22 +1,4 @@
-"""
-Download genome sequence to location specified in the config file.
-
-Assumes you provided a url corresponding to a .fa.gz file.
-
-Usage example:
-
-Required parameters:
-    config["qsub"]
-    config["dir"]["genome"]
-    config["genome"]["version"]
-    config["genome"]["gff3_url"]
-    config["genome"]["gtf_url"]
-
-Optional parameters:
-
-Authors: 
-    Claire Rioualen
-"""
+## This rule is not up-to-date with our new policy on genome management.
 
 # Set parameters
 if not "qsub" in config.keys():
@@ -36,7 +18,7 @@ if not "gtf_url" in config["genome"].keys():
 
 # Define paths
 genome_version = config["genome"]["version"]
-genome_dir = config["dir"]["genome"] + genome_version + "/"
+genome_dir = config["dir"]["genome"] + "/"
 gff3_file = genome_dir + genome_version + ".gff3"
 gtf_file = genome_dir + genome_version + ".gtf"
 

@@ -1,25 +1,3 @@
-"""Peak-calling with SWEMBL.
-
-Beware: for SWEMBL the peaks MUST be sorted by position. If not,
-SWEMBL runs indefinitely.
-
-Usage example:
-    PEAKCALLER = "swembl-R" + config["swembl"]["R"]
-    PEAKCALLING=expand(expand(PEAKS_DIR + "{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER)
-    PEAKS = expand("{peakcalling}.bed", peakcalling=PEAKCALLING)
-
-
-Required parameters:
-    config["qsub"]
-
-Optional parameters:
-    config["swembl"]["x"]
-    config["swembl"]["R"]
-
- Contributors: 
-       Claire Rioualen, Lucie Khamvongsa
-"""
-
 # Set parameters
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
@@ -40,26 +18,41 @@ if not "samples" in config["dir"].keys():
 if not "peaks" in config["dir"].keys():
     config["dir"]["peaks"] = config["dir"]["results"]
 
-suffix = "swembl-R" + config["swembl"]["R"]                                     # check consistency with the list of peak-callers in the workflow file
+suffix = "swembl-R" + config["swembl"]["R"]
 
-
+# Rule
 rule swembl:
+    """Peak-calling with SWEMBL.
+
+    Beware: for SWEMBL the peaks MUST be sorted by position, other wise SWEMBL runs indefinitely. 
+    Usually by default we sort all bam files by position after alignment. 
+
+    Required parameters:
+        config["qsub"]
+
+    Optional parameters:
+        config["swembl"]["x"]
+        config["swembl"]["R"]
+
+    Contributors:
+        Claire Rioualen, Lucie Khamvongsa
+    """
     input:
-        treatment = config["dir"]["samples"] + "{treatment}/{treatment}{preprocess,.*}_sorted_pos.bed", \
-        control=config["dir"]["samples"] + "{control}/{control}{preprocess,.*}_sorted_pos.bed"
+        treatment = config["dir"]["samples"] + "/{treatment}/{treatment}{preprocess,.*}_sorted_pos.bed", \
+        control=config["dir"]["samples"] + "/{control}/{control}{preprocess,.*}_sorted_pos.bed"
     output:
-        peaks_swembl = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".swembl", \
-        peaks_bed = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".bed", \
+        peaks_swembl = config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".swembl", \
+        peaks_bed = config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".bed", \
 #        peak_len ="{result_dir}/{treatment}_vs_{control}/swembl-R{R}/{treatment}_vs_{control}_{aligner}_swembl-R{R}_peaklen.tab"
     params:
         R =  config["swembl"]["R"], \
         x = config["swembl"]["x"], \
         compa_name = "{treatment}_vs_{control}", \
         qsub = config["qsub"] \
-          + " -e " + config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.err" \
-          + " -o " + config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.out"
-    log: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".log"
-    benchmark: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_benchmark.json"
+          + " -e " + config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.err" \
+          + " -o " + config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.out"
+    log: config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".log"
+    benchmark: config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_benchmark.json"
     shell: """
 (SWEMBL -i {input.treatment} -r {input.control} -B -R {params.R} -x {params.x} -o {output.peaks_swembl}; \
 grep -v '^#' {output.peaks_swembl} \

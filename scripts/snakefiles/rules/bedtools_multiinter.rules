@@ -2,7 +2,7 @@
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
-
+# Rule
 rule bedtools_multiinter:
 	input: bed = PEAKS
 	output: "{dir}multiinter.tab"

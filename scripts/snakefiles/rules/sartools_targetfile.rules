@@ -10,6 +10,7 @@ def targetfiles_inputs(wildcards):
     count_files =  expand(SAMPLE_DIR + "{samples}/{samples}_{file_prefix}_featureCounts.txt", samples=SAMPLE_IDS, file_prefix=wildcards.file_prefix)
     return count_files
 
+# Rule
 rule sartools_targetfile:
     """
     This rule creates a so-called "targetfile", which is required by SARTools to run differential expression analyses
@@ -29,8 +30,8 @@ rule sartools_targetfile:
         qsub = config["qsub"]\
             + " -e " + config["dir"]["diffexpr"] + "targetfile_qsub.err"\
             + " -o " + config["dir"]["diffexpr"] + "targetfile_qsub.out"
-    log: config["dir"]["diffexpr"] + "{file_prefix}_targetfile.log"
-    benchmark: config["dir"]["diffexpr"] + "{file_prefix}_targetfile_benchmark.json"
+    log: config["dir"]["diffexpr"] + "/{file_prefix}_targetfile.log"
+    benchmark: config["dir"]["diffexpr"] + "/{file_prefix}_targetfile_benchmark.json"
     run:
         f = open(output[0], "w+")
         f.write("label\tfiles\tgroup\n")

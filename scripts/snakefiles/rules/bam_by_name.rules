@@ -1,43 +1,24 @@
-"""
-Sort aligned reads (in bam format) by name.
-
-Beware This was updated with Samtools V 1.3.
-
-Required parameters:
-    config["qsub"]
-
-Authors:
-    Jacques van Helden, Claire Rioualen
-"""
-
 # Set parameters
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
-
+# Rule
 rule bam_by_name:
+    """
+    Sort aligned reads (in bam format) by name.
+
+    Beware This was updated with Samtools V 1.3.
+
+    Required parameters:
+        config["qsub"]
+
+    Authors:
+        Jacques van Helden, Claire Rioualen
+    """
     input: "{aligned_reads}.bam"
     output: "{aligned_reads}_sorted_name.bam"
     log: "{aligned_reads}_sorted_name.log"
     benchmark: "{aligned_reads}_sorted_name_benchmark.json"
     params: prefix = "{aligned_reads}_sorted_name", \
             qsub = config["qsub"] + " -e {aligned_reads}_sorted_name_qsub.err -o {aligned_reads}_sorted_name_qsub.out"
-    shell:"""
-samtools sort -n {input} -o {output}
-"""
-
-#samtools index {output}
-
-
-
-#rule bam_by_name:
-#    """
-#    Sort aligned reads (in bam format) by name.
-#    """
-#    input: "{aligned_reads}.bam"
-#    output: "{aligned_reads}_sorted_name.bam"
-#    log: "{aligned_reads}_sorted_name.log"
-#    benchmark: "{aligned_reads}_sorted_name_benchmark.json"
-#    params: prefix = "{aligned_reads}_sorted_name", \
-#            qsub = config["qsub"] + " -e {aligned_reads}_sorted_name_qsub.err -o {aligned_reads}_sorted_name_qsub.out"
-#    shell:"samtools sort -n {input} {params.prefix} 2> {log}; samtools index {output} 2>> {log}"
+    shell: "samtools sort -n {input} -o {output} 2> {log}"

@@ -1,4 +1,5 @@
-"""
+rule ChIPseeker:
+    """
 	The R package ChIPseeker is a package for annotating ChIP-seq data analysis.
 	It supports annotating ChIP peaks and provides functions to visualize ChIP peaks 
 	coverage over chromosomes and profiles of peaks binding to TSS regions. 
@@ -7,13 +8,10 @@
 	ChIP peak annotation, comparison and visualization.
 	Bioinformatics 2015. 31(14): 2382-2383.
 
-        Author: Lucie Khamvongsa
+    Author: Lucie Khamvongsa
 
-        User manual: https://bioconductor.org/packages/release/bioc/vignettes/ChIPseeker/inst/doc/ChIPseeker.html
-
-"""
-
-rule peaks_annotation:
+    User manual: https://bioconductor.org/packages/release/bioc/vignettes/ChIPseeker/inst/doc/ChIPseeker.html
+    """
 	input: "{regions}.bed"
 	output: covplot = "{regions}_covplot.pdf", \
 			peakHeatmap = "{regions}_peakHeatmap.pdf", \
@@ -21,10 +19,10 @@ rule peaks_annotation:
 			peakAnno_tab = "{regions}_peakAnno.tab", \
 			plotAnnoPie = "{regions}_plotAnnoPie.pdf", \
 			vennpie = "{regions}_vennpie.pdf"
-	log: "{regions}_ChIPseeker.log"
-	benchmark: "{regions}_ChIPseeker_benchmark.json"
 	params: qsub = config["qsub"] + " -e {regions}_ChIPseeker_qsub.err -o {regions}_ChIPseeker_qsub.out", \
 			dir_main = config["dir"]["base"]
+	log: "{regions}_ChIPseeker.log"
+	benchmark: "{regions}_ChIPseeker_benchmark.json"
 	run: 
 		R("""
 

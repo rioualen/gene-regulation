@@ -1,27 +1,3 @@
-"""Peak-calling with macs14.
-Input: bed (others supported)
-Output: bed
-
-Usage example: 
-    PEAKCALLER="macs14-pval" + config["macs14"]["pval"]
-    PEAKCALLING=expand(expand("{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER)
-    PEAKS = expand(RESULTS_DIR + "{peakcalling}.bed", peakcalling=PEAKCALLING)
-
-Required parameters:
-    config["genome"]["size"]
-    config["qsub"]
-
-Optional parameters:
-    config["macs14"]["pval"]
-    config["macs14"]["keep_dup"]
-    config["macs14"]["bandwidth"]
-    config["macs14"]["mfold"]
-    config["macs14"]["other_options"]
-
-Contributors: 
-    Lucie Khamvongsa, Claire Rioualen
-"""
-
 # Set parameters
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
@@ -54,28 +30,47 @@ if not "samples" in config["dir"].keys():
 if not "peaks" in config["dir"].keys():
     config["dir"]["peaks"] = config["dir"]["results"]
 
-suffix = "macs14-pval" + config["macs14"]["pval"]                    # check consistency with the list of peak-callers in the workflow file
+suffix = "macs14-pval" + config["macs14"]["pval"]
 
+# Rule
 rule macs14:
+    """Peak-calling with macs14.
+    Input: bed (others supported)
+    Output: bed
+
+    Required parameters:
+        config["genome"]["size"]
+        config["qsub"]
+
+    Optional parameters:
+        config["macs14"]["pval"]
+        config["macs14"]["keep_dup"]
+        config["macs14"]["bandwidth"]
+        config["macs14"]["mfold"]
+        config["macs14"]["other_options"]
+
+    Contributors: 
+        Claire Rioualen, Lucie Khamvongsa
+    """
     input:
-        treatment = config["dir"]["samples"] + "{treatment}/{treatment}{preprocess,.*}_sorted_pos.bed", \
-        control=config["dir"]["samples"] + "{control}/{control}{preprocess,.*}_sorted_pos.bed"
+        treatment = config["dir"]["samples"] + "/{treatment}/{treatment}{preprocess,.*}_sorted_pos.bed",
+        control=config["dir"]["samples"] + "/{control}/{control}{preprocess,.*}_sorted_pos.bed"
     output:
-        peaks_bed = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".bed"
+        peaks_bed = config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".bed"
     params:
-        outdir = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix, \
-        name = "{treatment}_vs_{control}{preprocess,.*}_" + suffix, \
-        pval = config["macs14"]["pval"], \
-        keep_dup = config["macs14"]["keep_dup"], \
-        mfold = config["macs14"]["mfold"], \
-        bandwidth = config["macs14"]["bandwidth"], \
-        other_options = config["macs14"]["other_options"], \
-        genome_size = config["genome"]["size"], \
+        outdir = config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix,
+        name = "{treatment}_vs_{control}{preprocess,.*}_" + suffix,
+        pval = config["macs14"]["pval"],
+        keep_dup = config["macs14"]["keep_dup"],
+        mfold = config["macs14"]["mfold"],
+        bandwidth = config["macs14"]["bandwidth"],
+        other_options = config["macs14"]["other_options"],
+        genome_size = config["genome"]["size"],
         qsub=config["qsub"] \
-          + " -e " + config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.err" \
-          + " -o " + config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.out"
-    log: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".log"
-    benchmark: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_benchmark.json"
+          + " -e " + config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.err" \
+          + " -o " + config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.out"
+    log: config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".log"
+    benchmark: config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_benchmark.json"
     shell: """
 (mkdir -p {params.outdir}
 #cd {params.outdir}

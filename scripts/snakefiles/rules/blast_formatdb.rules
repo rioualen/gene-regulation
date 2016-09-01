@@ -2,6 +2,7 @@
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
+# Rule
 rule blast_formatdb:
     """Run the formatdb program of the BLAST suite in order to index all
     k-mers of the reference database. This has to be done only once, then
@@ -10,7 +11,7 @@ rule blast_formatdb:
     Parameters
     
     - type (formatdb option -p): sequence type: peptidic (-pT) or nucleic (-pF)
-"""
+    """
     input: fasta_seq="{ref_db}.fa"
     output: "{ref_db}_blastdb_p{type}.{extensions,(phr|psq|psi|psd|pin)}"
     params: basename="{ref_db}_blastdb_p{type}", \

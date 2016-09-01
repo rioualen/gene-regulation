@@ -13,6 +13,7 @@ genome_version = config["genome"]["version"]
 genome_dir = config["dir"]["genome"] + genome_version + "/"
 gff3_file = genome_dir + genome_version + ".gff3"
 
+# Rule
 rule bedtools_window:
 	input: bed = "{regions}.bed", gff3 = gff3_file
 	output: "{regions}_window_annot.bed"

@@ -1,6 +1,6 @@
 rule bedgraph_to_bigwig:
     """Convert bedGraph to bigWig format."""
-    input: chromizes="", bedgraph="{coverage}.bedGraph"
+    input: chromizes="", bedgraph="{coverage}.bedgraph"
     output: "{coverage}.bw"
     log:  "{coverage}_bedGraphToBigWig.log"
     benchmark:  "{coverage}_bedGraphToBigWig.json"

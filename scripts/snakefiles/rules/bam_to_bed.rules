@@ -1,17 +1,14 @@
-"""Converts sam files into bam files.
-
-Required parameters:
-    config["qsub"]
-
-Usage: 
-    input:expand('{read_dir}/{sample}/{sample}_{aligner}.bed', sample=SAMPLES, read_dir=READS, aligner=ALIGNERS)
-"""
-
 # Set parameters
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
+# Rule
 rule bam_to_bed:
+    """Converts bam files into bed files.
+
+    Required parameters:
+        config["qsub"]
+    """
     input: "{reads}.bam"
     output: "{reads}.bed"
     params:

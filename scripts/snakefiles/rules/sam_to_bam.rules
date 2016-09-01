@@ -1,3 +1,8 @@
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+# Rule
 rule sam_to_bam:
     """
     Convert reads from SAM (sequence alignment map) to BAM (binary
@@ -10,5 +15,7 @@ rule sam_to_bam:
     benchmark: "{reads}_sam_to_bam_benchmark.json"
     params: qsub = config["qsub"] + " -e {reads}_sam_to_bam_qsub.err -o {reads}_sam_to_bam_qsub.out", \
             stats = "{reads}_bam_stat.txt"
-    shell:	"samtools view -b -S {input.sam} > {output.bam} 2> {log}; \
-		samtools flagstat {output} > {params.stats}"
+    shell: """
+samtools view -b -S {input.sam} > {output.bam} 2> {log}
+samtools flagstat {output} > {params.stats}
+"""

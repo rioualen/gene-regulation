@@ -1,19 +1,3 @@
-"""Converts SRA files in fastq format with SRA toolkit. 
-
-Required parameters:
-    config['qsub']
-    config['dir']['reads_source']
-
-Optional parameters:
-    config['fastq_dump']['options']
-
-Usage example :
-    IMPORT = expand(RESULTS_DIR + "{samples}/{samples}.fastq", samples=SAMPLE_IDS) 
-
-Contributors: 
-    Claire Rioualen
-"""
-
 # Set parameters
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
@@ -21,8 +5,27 @@ if not "qsub" in config.keys():
 if not "reads_source" in config["dir"].keys():
     sys.exit("Source directory containing sra files must be defined in the config file")
 
+if not "strands" in config["metadata"].keys():
+    sys.exit("Strands suffixes must be defined in the config file")
+
+# Rule
 rule sra_to_fastq_split:
-    input: datadir = config["dir"]["reads_source"]
+    """Converts SRA files in separate fastq files por paired-end data with SRA toolkit. 
+
+    Required parameters:
+        config['qsub']
+        config['dir']['reads_source']
+
+    Optional parameters:
+        config['fastq_dump']['options']
+
+    Usage example :
+        IMPORT = expand(RESULTS_DIR + "{samples}/{samples}.fastq", samples=SAMPLE_IDS) 
+
+    Contributors: 
+        Claire Rioualen
+    """
+    input: datadir = config["dir"]["reads_source"] + "/"
     output:
         forward = "{fastq}/{sample}/{sample}_" + config["metadata"]["strands"].split()[0] + ".fastq", \
         reverse = "{fastq}/{sample}/{sample}_" + config["metadata"]["strands"].split()[1] + ".fastq"

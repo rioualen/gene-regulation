@@ -17,12 +17,12 @@ if not "expect" in config["blastall"].keys():
 if not "view" in config["blastall"].keys():
     config['blastall']['view'] = "8"
 
+# Rule
 rule blastall:
     """Output file name: {query}_{blast_program}_hits.txt
 
-Where {blast_program} should be replaced by one of the supported
-program options in balstall: blastp, blastn, blastx, tblastn.
-
+    Where {blast_program} should be replaced by one of the supported
+    program options in balstall: blastp, blastn, blastx, tblastn.
     """
     input: query="{query}.fa", db_index=config["blastall"]["db"] + ".psi"
     output: hits="{query}_{blast_program}_hits.tsv"

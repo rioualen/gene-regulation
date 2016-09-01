@@ -1,3 +1,7 @@
+# Check parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
 if not "configfile" in config["metadata"].keys():
     sys.exit("The parameter ['metadata']['configfile'] must be defined in the config file")
 
@@ -7,15 +11,20 @@ if not "results" in config["dir"].keys():
 if not "reports" in config["dir"].keys():
     config["dir"]["reports"] = config["dir"]["results"];
 
+# Rule
 rule dot_graph:
-    output: config["dir"]["reports"] + "{graph}.dot"
+    """This rule generates dot files for snakemake's DAG and rulegraph. 
+    """
+    output: config["dir"]["reports"] + "/{graph}.dot"
     params: snakefile = workflow.snakefile, configfile = config["metadata"]["configfile"], \
         qsub=config["qsub"] \
-          + " -e " + config["dir"]["reports"] + "{graph}_dot_qsub.err" \
-          + " -o " + config["dir"]["reports"] + "{graph}_dot_qsub.out"
-    log: config["dir"]["reports"] + "{graph}_dot.log"
+          + " -e " + config["dir"]["reports"] + "/{graph}_dot_qsub.err" \
+          + " -o " + config["dir"]["reports"] + "/{graph}_dot_qsub.out"
+    log: config["dir"]["reports"] + "/{graph}_dot.log"
+    benchmark: config["dir"]["reports"] + "/{graph}_dot_benchmark.json"
     shell: """
 (snakemake -s {params.snakefile}  --configfile  {params.configfile} --{wildcards.graph} > {output}
+#if {wildcards.graph} == "dag" cat output | perl -pe 's/graph\[/graph\[rankdir='LR', /'  ## TODO
 sed -n '/digraph/,$p' <{output} > tmp
 mv tmp {output}) &> {log}
 """

@@ -43,9 +43,9 @@ subread_index = subread_dir + genome_version
 def subread_inputs(wildcards):
     seq_type = config["metadata"]["seq_type"]
     if (seq_type == "pe"):
-        reads = expand("{fastq_dir}/{samples}/{samples}_{strand}.fastq", strand=config["metadata"]["strands"].split(), samples=wildcards.samples, fastq_dir=config["dir"]["fastq"])
+        reads = expand("{fastq_dir}/{samples}/{prefix}_{strand}.fastq", strand=config["metadata"]["strands"].split(), samples=wildcards.samples, fastq_dir=config["dir"]["fastq"], prefix=wildcards.prefix)
     elif (seq_type == "se"):
-        reads = expand("{fastq_dir}/{samples}/{samples}.fastq", samples=wildcards.samples, fastq_dir=config["dir"]["fastq"])
+        reads = expand("{fastq_dir}/{samples}/{prefix}.fastq", samples=wildcards.samples, fastq_dir=config["dir"]["fastq"], prefix=wildcards.prefix)
     else:
         sys.exit("Error: invalid seq_type parameter. Must be 'se' or 'pe'")
     return reads
@@ -82,7 +82,7 @@ rule subread_align:
         reads = subread_inputs, 
         fa = subread_index + ".fa"
     output:
-        bam = config["dir"]["samples"] + "/{samples}/{samples}_subread-align.bam"
+        bam = config["dir"]["samples"] + "/{samples}/{prefix}_subread-align.bam"
     params:
         index = subread_index, \
         seq_data = config["subread-align"]["seq_data"], \
@@ -90,10 +90,10 @@ rule subread_align:
         max_mismatches = config["subread-align"]["max_mismatches"], \
         align_options = config["subread-align"]["align_options"], \
         qsub = config["qsub"] \
-          + " -e " + config["dir"]["samples"] + "/{samples}/{samples}_subread-align_qsub.err" \
-          + " -o " + config["dir"]["samples"] + "/{samples}/{samples}_subread-align_qsub.out"
-    log: config["dir"]["samples"] + "/{samples}/{samples}_subread-align.log"
-    benchmark: config["dir"]["samples"] + "/{samples}/{samples}_subread-align_benchmark.json"
+          + " -e " + config["dir"]["samples"] + "/{samples}/{prefix}_subread-align_qsub.err" \
+          + " -o " + config["dir"]["samples"] + "/{samples}/{prefix}_subread-align_qsub.out"
+    log: config["dir"]["samples"] + "/{samples}/{prefix}_subread-align.log"
+    benchmark: config["dir"]["samples"] + "/{samples}/{prefix}_subread-align_benchmark.json"
     run:
         if (seq_type == "pe"):
             shell("subread-align -i {params.index} -r " + input.reads[0] + " -R " + input.reads[1] + " -t {params.seq_data} -T {params.threads} -M {params.max_mismatches} {params.align_options} -o {output.bam} 2> {log}")

@@ -1,3 +1,8 @@
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+# Rule
 rule genome_coverage_dz:
     """Compute coverage (reads per position) for each position of a
     genome, from a bam-formatted file with aligned reads.
@@ -5,12 +10,12 @@ rule genome_coverage_dz:
     BEWARE: this rule is usefull for small genomes (Bacteria, Fungi)
     but would produce a very big file for Metazoan or Plant genomes.
 
+    Author: Jacques van Helden
     """
     input: reads="{reads}.bam"
     output: "{reads}_genomecov_dz.txt"
+    params: qsub = config["qsub"] + " -e {reads}_genomecov_dz_qsub.err -o {reads}_genomecov_dz_qsub.out"
     log:  "{reads}_genomecov_dz.log"
     benchmark:  "{reads}_genomecov_dz_benchmark.json"
-    params: qsub = config["qsub"] + " -e {reads}_genomecov_dz_qsub.err -o {reads}_genomecov_dz_qsub.out"
-    shell: "bedtools genomecov -strand -dz -ibam {input.reads} " \
-        + "  > {output} 2> {log}"
+    shell: "bedtools genomecov -strand -dz -ibam {input.reads} > {output} 2> {log}"
 

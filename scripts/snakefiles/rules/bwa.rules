@@ -1,77 +1,3 @@
-#"""Read mapping for single end data using BWA. 
-#Requires the indexing to have previously been done (using the
-#rule bwa_index).
-
-#Required parameters:
-#    config["genome"]["version"]
-#    config["qsub"]
-
-#Optional parameters:
-#    config["bwa"]["dir"]
-#    config["bwa"]["threads"]
-
-#Usage example:
-
-
-#Contributors: 
-#    Claire Rioualen
-
-
-#//!\\ This rule is currently outdated. 
-#"""
-
-## Set parameters
-#if not "qsub" in config.keys():
-#    sys.exit("The parameter qsub must be defined in the config file")
-
-#if not "version" in config["genome"].keys():
-#    sys.exit("Genome version must be defined in the config file")
-
-#if not "genome" in config["dir"].keys():
-#    sys.exit("Genome dir must be defined in the dir section of the config file")
-
-#if not "bwa" in config.keys():
-#    config["bwa"] = {}
-
-#if not "threads" in config["bwa"].keys():
-#    config["bwa"]["threads"] = "1"
-
-## Define paths
-#if not "samples" in config["dir"].keys():
-#    config["dir"]["samples"] = config["dir"]["results"]
-
-#genome_version = config["genome"]["version"]
-#genome_dir = config["dir"]["genome"] + genome_version + "/"
-#genome_file = genome_dir + genome_version + ".fa"
-#bwa_dir = genome_dir + "bwa/"
-#bwa_index = bwa_dir + genome_version + ".fa"
-
-
-#rule bwa_se:
-#    input:
-#        reads = "{reads}.fastq", \
-#        index = bwa_index
-#    output:
-#        sam = "{reads}_bwa.sam", \
-#        bam = "{reads}_bwa.bam"
-#    params:
-#        threads = config["bwa"]["threads"], \
-#        sai= "{reads}_bwa.sai", \
-#        qsub = config["qsub"] \
-#          + " -e " + "{reads}_bwa_qsub.err" \
-#          + " -o " + "{reads}_bwa_qsub.out"
-#    log: "{reads}_bwa.log"
-#    benchmark: "{reads}_bwa_benchmark.json"
-#    message: "Mapping reads on reference genome {input.index} using BWA..."
-#    shell:"""
-#bwa aln -t {params.threads} {input.index} {input.reads} > {params.sai} 2> {log}
-#bwa samse {input.index} {params.sai} {input.reads} > {output.sam} 2> {log}
-#samtools view -b -S {output.sam} > {output.bam} 2> {log}
-#"""
-
-
-
-
 # Set parameters
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
@@ -113,9 +39,9 @@ seq_type = config["metadata"]["seq_type"]
 def bwa_inputs(wildcards):
     seq_type = config["metadata"]["seq_type"]
     if (seq_type == "pe"):
-        reads = expand("{fastq_dir}/{samples}/{samples}_{strand}.fastq", strand=config["metadata"]["strands"].split(), samples=wildcards.samples, fastq_dir=config["dir"]["fastq"])
+        reads = expand("{fastq_dir}/{samples}/{prefix}_{strand}.fastq", strand=config["metadata"]["strands"].split(), samples=wildcards.samples, fastq_dir=config["dir"]["fastq"], prefix=wildcards.prefix)
     elif (seq_type == "se"):
-        reads = expand("{fastq_dir}/{samples}/{samples}.fastq", samples=wildcards.samples, fastq_dir=config["dir"]["fastq"])
+        reads = expand("{fastq_dir}/{samples}/{prefix}.fastq", samples=wildcards.samples, fastq_dir=config["dir"]["fastq"], prefix=wildcards.prefix)
     else:
         sys.exit("Error: invalid sequencing type parameter. Must be 'se' or 'pe'")
     return reads
@@ -142,16 +68,16 @@ rule bwa:
         reads = bwa_inputs, 
         index = bwa_index
     output:
-        bam = config["dir"]["samples"] + "/{samples}/{samples}_bwa.bam"
+        bam = config["dir"]["samples"] + "/{samples}/{prefix}_bwa.bam"
     params:
-#        sai = config["dir"]["samples"] + "/{samples}/{samples}_bwa.sai", 
-        sam = config["dir"]["samples"] + "/{samples}/{samples}_bwa.sam", 
+#        sai = config["dir"]["samples"] + "/{samples}/{prefix}_bwa.sai", 
+        sam = config["dir"]["samples"] + "/{samples}/{prefix}_bwa.sam", 
         threads = config["bwa"]["threads"], 
         qsub = config["qsub"] \
-          + " -e " + config["dir"]["samples"] + "/{samples}/{samples}_bwa_qsub.err" \
-          + " -o " + config["dir"]["samples"] + "/{samples}/{samples}_bwa_qsub.out"
-    log: config["dir"]["samples"] + "/{samples}/{samples}_bwa.log"
-    benchmark: config["dir"]["samples"] + "/{samples}/{samples}_bwa_benchmark.json"
+          + " -e " + config["dir"]["samples"] + "/{samples}/{prefix}_bwa_qsub.err" \
+          + " -o " + config["dir"]["samples"] + "/{samples}/{prefix}_bwa_qsub.out"
+    log: config["dir"]["samples"] + "/{samples}/{prefix}_bwa.log"
+    benchmark: config["dir"]["samples"] + "/{samples}/{prefix}_bwa_benchmark.json"
     run:
         if (seq_type == "pe"):
             shell("bwa aln -t {params.threads} {input.index} " + input.reads[0] + " > " + input.reads[0] + ".sai 2> {log}")
@@ -159,7 +85,7 @@ rule bwa:
             shell("bwa sampe {input.index} " + input.reads[0] + ".sai " + input.reads[1] + ".sai " + input.reads[0] + " " + input.reads[1] + " > {params.sam} 2> {log}")
         elif (seq_type == "se"):
             shell("bwa aln -t {params.threads} {input.index} {input.reads} > {input.reads}.sai 2> {log}")
-            shell("bwa samse {input.index} {params.sai} {input.reads} > {output.sam} 2> {log}")
+            shell("bwa samse {input.index} {input.reads}.sai {input.reads} > {params.sam} 2> {log}")
         shell("samtools view -b -S {params.sam} > {output.bam} 2> {log}")
         shell("rm {params.sam}")
 

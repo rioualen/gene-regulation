@@ -1,14 +1,18 @@
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
 rule gzip:
     """Compress a file with the gzip program. The rule is very simple, but
     is convenient to use in a workflow: it can be used to fix some
     dependencies on.gz extensions, and/or to send compression jobs to
     a queue.
 
+    Author: Jacques van Helden
     """
     input: "{file}"
     output: "{file}.gz"
+    params: qsub = config["qsub"] + " -e {file}_gzip_qsub.err -o {file}_gzip_qsub.out"
     log: "{file}_gzip.log"
     benchmark: "{file}_gzip_benchmark.json"
-    params: qsub = config["qsub"] + " -e {file}_gzip_qsub.err -o {file}_gzip_qsub.out"
     shell:"gzip -f {input} 2> {log} "
 

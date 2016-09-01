@@ -18,8 +18,8 @@ if not "qual" in config["sickle"].keys():
     config["sickle"]["qual"] = "sanger"
 
 # Define paths
-if not "samples" in config["dir"].keys():
-    config["dir"]["samples"] = config["dir"]["results"]
+if not "fastq" in config["dir"].keys():
+    sys.exit(">> config['dir']['fastq'] must be in the config file.")
 
 suffix = "sickle"
 
@@ -27,13 +27,14 @@ suffix = "sickle"
 def sickle_inputs(wildcards):
     seq_type = config["metadata"]["seq_type"]
     if (seq_type == "pe"):
-        reads = expand("{fastq_dir}{samples}/{samples}_{strand}.fastq", strand=config["metadata"]["strands"].split(), samples=wildcards.samples, fastq_dir=config["dir"]["fastq"])
+        reads = expand("{fastq_dir}/{samples}/{samples}_{strand}.fastq", strand=config["metadata"]["strands"].split(), samples=wildcards.samples, fastq_dir=config["dir"]["fastq"])
     elif (seq_type == "se"):
-        reads = expand("{fastq_dir}{samples}/{samples}.fastq", samples=wildcards.samples, fastq_dir=config["dir"]["fastq"])
+        reads = expand("{fastq_dir}/{samples}/{samples}.fastq", samples=wildcards.samples, fastq_dir=config["dir"]["fastq"])
     else:
         sys.exit("Error: invalid sequencing type parameter. Must be 'se' or 'pe'")
     return reads
 
+# Rule
 rule sickle:
     """Trim one a single end raw reads file with sickle.
 
@@ -51,17 +52,17 @@ rule sickle:
     """
     input: reads = sickle_inputs
     output:
-        forward = "{reads}_" + suffix + "_R1.fastq",
-        reverse = "{reads}_" + suffix + "_R2.fastq",
-        single = "{reads}_" + suffix + ".fastq"
+        forward = config["dir"]["fastq"] + "/{samples}/{samples}_" + suffix + "_R1.fastq",
+        reverse = config["dir"]["fastq"] + "/{samples}/{samples}_" + suffix + "_R2.fastq",
+        single = config["dir"]["fastq"] + "/{samples}/{samples}_" + suffix + ".fastq"
     params:
         threshold = config["sickle"]["threshold"],
         qual_type = config["sickle"]["qual"],
         qsub = config['qsub'] \
-            + " -e "+ "{reads}_" + suffix + "_qsub.err" \
-            + " -o "+ "{reads}_" + suffix + "_qsub.out"
-    log: "{reads}_" + suffix + ".log"
-    benchmark: "{reads}_" + suffix + "_benchmark.json"
+            + " -e "+ config["dir"]["fastq"] + "/{samples}/{samples}_" + suffix + "_qsub.err" \
+            + " -o "+ config["dir"]["fastq"] + "/{samples}/{samples}_" + suffix + "_qsub.out"
+    log: config["dir"]["fastq"] + "/{samples}/{samples}_" + suffix + ".log"
+    benchmark: config["dir"]["fastq"] + "/{samples}/{samples}_" + suffix + "_benchmark.json"
     run:
         if (seq_type == "pe"):
 

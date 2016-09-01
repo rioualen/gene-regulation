@@ -1,34 +1,3 @@
-"""
-bPeaks is a peak-calling tool running in R.
-It was specifically designed for small eucaryotic organisms, such as the yeast.
-It is thus not recommanded for bigger genomes, as it could be very slow. 
-You should choose parameters carefully.
-
-    Input: bam
-    Output: bed
-
-Usage example:
-    PEAKCALLER = "bPeaks_allGenome"
-    PEAKCALLING=expand(expand(PEAKS_DIR + "{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER)
-    PEAKS = expand("{peakcalling}.bed", peakcalling=PEAKCALLING)
-
-Required parameters:
-    config["qsub"]
-    config["dir"]["r_libs"]
-
-Optional parameters:
-    config["bPeaks"]["IPcoeff"]
-    config["bPeaks"]["controlCoeff"]
-    config["bPeaks"]["log2FC"]
-    config["bPeaks"]["averageQuantiles"]
-    config["bPeaks"]["windowSize"]
-    config["bPeaks"]["windowOverlap"]
-
-
-Contributors: 
-    Claire Rioualen
-"""
-
 # Set parameters
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
@@ -61,17 +30,38 @@ if not "samples" in config["dir"].keys():
 if not "peaks" in config["dir"].keys():
     config["dir"]["peaks"] = config["dir"]["results"]
 
-suffix = "bPeaks-log" + config["bPeaks"]["log2FC"]                                                     # check consistency with the list of peak-callers in the workflow file / make it more standard 
+suffix = "bPeaks-log" + config["bPeaks"]["log2FC"]
 
-
+# Rule
 rule bPeaks:
+    """
+    bPeaks is a peak-calling tool running in R.
+    It was specifically designed for small eucaryotic organisms, such as the yeast.
+    It is thus not recommanded for bigger genomes, as it could be very slow. 
+    You should choose parameters carefully. Input in bam, output in bed.
+
+    Required parameters:
+        config["qsub"]
+        config["dir"]["r_libs"]
+
+    Optional parameters:
+        config["bPeaks"]["IPcoeff"]
+        config["bPeaks"]["controlCoeff"]
+        config["bPeaks"]["log2FC"]
+        config["bPeaks"]["averageQuantiles"]
+        config["bPeaks"]["windowSize"]
+        config["bPeaks"]["windowOverlap"]
+
+    Contributors: 
+        Claire Rioualen
+    """
     input:
-        treatment = config["dir"]["samples"] + "{treatment}/{treatment}{preprocess,.*}_sorted_pos.bam", \
-        control=config["dir"]["samples"] + "{control}/{control}{preprocess,.*}_sorted_pos.bam"
+        treatment = config["dir"]["samples"] + "/{treatment}/{treatment}{preprocess,.*}_sorted_pos.bam", \
+        control=config["dir"]["samples"] + "/{control}/{control}{preprocess,.*}_sorted_pos.bam"
     output: 
-        peaks_bed = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".bed"
+        peaks_bed = config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".bed"
     params:
-        outdir = config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix, \
+        outdir = config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix, \
         name = "{treatment}_vs_{control}{preprocess,.*}", \
         IPcoeff = config["bPeaks"]["IPcoeff"], \
         controlCoeff = config["bPeaks"]["controlCoeff"], \
@@ -80,10 +70,10 @@ rule bPeaks:
         windowSize = config["bPeaks"]["windowSize"], \
         windowOverlap = config["bPeaks"]["windowOverlap"], \
         qsub=config["qsub"] \
-          + " -e " + config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.err" \
-          + " -o " + config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.out"
-    log: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".log"
-    benchmark: config["dir"]["peaks"] + "{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_benchmark.json"
+          + " -e " + config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.err" \
+          + " -o " + config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.out"
+    log: config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".log"
+    benchmark: config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_benchmark.json"
     run: 
         R("""sink("{log}")
         
