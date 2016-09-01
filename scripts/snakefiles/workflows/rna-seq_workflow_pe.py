@@ -38,6 +38,7 @@ from snakemake.utils import R
 import os
 import sys
 import datetime
+import re
 import pandas as pd
 
 # Define verbosity
@@ -72,6 +73,14 @@ SAMPLES = read_table(config["metadata"]["samples"])
 SAMPLE_IDS = SAMPLES.iloc[:,0]
 SAMPLE_CONDITIONS = read_table(config["metadata"]["samples"])['condition']
 
+# Genome & annotations
+GENOME_VER = config["genome"]["version"]
+GENOME_DIR = config["dir"]["genome"] + "/"
+GENOME_FASTA = GENOME_DIR + config["genome"]["fasta_file"]
+GENOME_GFF3 = GENOME_DIR + config["genome"]["gff3_file"]
+GENOME_GTF = GENOME_DIR + config["genome"]["gtf_file"]
+
+
 ## Data & results dir
 if not (("dir" in config.keys()) and ("reads_source" in config["dir"].keys())):
     sys.exit("The parameter config['dir']['reads_source'] should be specified in the config file.")
@@ -83,27 +92,27 @@ if not os.path.exists(READS):
 if not ("results" in config["dir"].keys()):
     sys.exit("The parameter config['dir']['results'] should be specified in the config file.")
 else:
-    RESULTS_DIR = config["dir"]["results"]
+    RESULTS_DIR = config["dir"]["results"] + "/"
 
 if not ("fastq" in config["dir"].keys()):
     sys.exit("The parameter config['dir']['fastq'] should be specified in the config file.")
 else:
-    FASTQ_DIR = config["dir"]["fastq"]
+    FASTQ_DIR = config["dir"]["fastq"] + "/"
 
 if not ("samples" in config["dir"].keys()):
-    SAMPLE_DIR = config["dir"]["results"]
+    SAMPLE_DIR = config["dir"]["results"] + "/"
 else:
-    SAMPLE_DIR = config["dir"]["samples"]
+    SAMPLE_DIR = config["dir"]["samples"] + "/"
 
 if not ("reports" in config["dir"].keys()):
-    REPORTS_DIR = config["dir"]["results"]
+    REPORTS_DIR = config["dir"]["results"] + "/"
 else:
-    REPORTS_DIR = config["dir"]["reports"]
+    REPORTS_DIR = config["dir"]["reports"] + "/"
 
 if not ("diffexpr" in config["dir"].keys()):
-    DEG_DIR = config["dir"]["results"]
+    DEG_DIR = config["dir"]["results"] + "/"
 else:
-    DEG_DIR = config["dir"]["diffexpr"]
+    DEG_DIR = config["dir"]["diffexpr"] + "/"
 
 
 #================================================================#
@@ -111,7 +120,7 @@ else:
 #================================================================#
 
 RULES = os.path.join(GENEREG_LIB, "scripts/snakefiles/rules")
-include: os.path.join(RULES, "annotation_download.rules")
+#include: os.path.join(RULES, "annotation_download.rules")
 include: os.path.join(RULES, "bam_by_pos.rules")
 include: os.path.join(RULES, "bam_stats.rules")
 include: os.path.join(RULES, "bam_to_bed.rules")
@@ -120,6 +129,8 @@ include: os.path.join(RULES, "bowtie.rules")
 include: os.path.join(RULES, "bowtie_index.rules")
 include: os.path.join(RULES, "bowtie2.rules")
 include: os.path.join(RULES, "bowtie2_index.rules")
+include: os.path.join(RULES, "bwa_index.rules")
+include: os.path.join(RULES, "bwa.rules")
 include: os.path.join(RULES, "count_reads.rules")
 include: os.path.join(RULES, "cufflinks.rules")
 include: os.path.join(RULES, "dot_graph.rules")
@@ -127,7 +138,7 @@ include: os.path.join(RULES, "dot_to_image.rules")
 include: os.path.join(RULES, "fastqc.rules")
 include: os.path.join(RULES, "genome_coverage_bedgraph.rules")
 include: os.path.join(RULES, "genome_coverage_bedgraph_strands.rules")
-include: os.path.join(RULES, "genome_download.rules")
+#include: os.path.join(RULES, "genome_download.rules")
 include: os.path.join(RULES, "get_chrom_sizes.rules")
 include: os.path.join(RULES, "index_bam.rules")
 include: os.path.join(RULES, "sartools_DESeq2.rules")
@@ -146,17 +157,6 @@ include: os.path.join(RULES, "tophat.rules")
 
 ## Data import 
 IMPORT = expand(FASTQ_DIR + "{samples}/{samples}_{strand}.fastq", samples=SAMPLE_IDS, strand=STRANDS)
-
-
-## Genome & annotations download
-GENOME = config["genome"]["version"]
-GENOME_DIR = config["dir"]["genome"] + config["genome"]["version"] + "/"
-
-if not os.path.exists(GENOME_DIR):
-    os.makedirs(GENOME_DIR)
-
-GENOME_FASTA = expand(GENOME_DIR + "/" + GENOME + ".fa")
-GENOME_ANNOTATIONS = expand(GENOME_DIR + "/" + GENOME + ".{ext}", ext=["gff3", "gtf"])
 
 ## Graphics & reports
 GRAPHICS = expand(REPORTS_DIR + "{graph}.png", graph=["dag", "rulegraph"])
@@ -194,19 +194,18 @@ if not (("tools" in config.keys()) and ("mapping" in config["tools"].keys())):
 
 MAPPING_TOOLS = config["tools"]["mapping"].split()
 
+INDEX = expand(GENOME_DIR + "{aligner}/" + GENOME_VER + ".fa", aligner=MAPPING_TOOLS)
+
+#MAPPING_TOOLS.append("tophat")
+
 if TRIMMING_TOOLS:
     PREFIX = expand("{trimmer}_{aligner}", aligner=MAPPING_TOOLS, trimmer=TRIMMING_TOOLS)
 else:
     PREFIX = expand("{aligner}", aligner=MAPPING_TOOLS)
 
-
 ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{prefix}", samples=SAMPLE_IDS, prefix=PREFIX)
 
-INDEX = expand(GENOME_DIR + "{aligner}/" + GENOME + ".fa", aligner=MAPPING_TOOLS)
-
-MAPPING_TOOLS.append("tophat")
 MAPPING = expand("{alignment}.bam", alignment=ALIGNMENT)
-
 
 SORTED_BAM = expand("{alignment}_sorted_pos.bam", alignment=ALIGNMENT)
 SORTED_BAM_BAI = expand("{alignment}_sorted_pos.bam.bai", alignment=ALIGNMENT)
@@ -254,20 +253,19 @@ rule all:
 	"""
 	input: \
             IMPORT, \
+            QC, \
             INDEX, \
             MAPPING, \
-            SORTED_BAM, \
-            SORTED_BAM_BAI, \
-            BAM_STATS, \
-            QC, \
-            GENOME_ANNOTATIONS, \
-            GENOME_COVERAGE_TDF, \
-            GENOME_COVERAGE_PLUS, \
-            GENOME_COVERAGE_MINUS, \
-#            INFER_TRANSCRIPTS, \
-            FEATURE_COUNTS, \
-            SARTOOLS_TARGETFILE, \
-            DEG, \
+#            SORTED_BAM, \
+#            SORTED_BAM_BAI, \
+#            BAM_STATS, \
+#            GENOME_COVERAGE_TDF, \
+#            GENOME_COVERAGE_PLUS, \
+#            GENOME_COVERAGE_MINUS, \
+##            INFER_TRANSCRIPTS, \
+#            FEATURE_COUNTS, \
+#            SARTOOLS_TARGETFILE, \
+#            DEG, \
             GRAPHICS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
