@@ -1,0 +1,11 @@
+rule readnb_from_sam:
+    """Count number of reads in a bam-formatted file (binary alignment map, compressed sam).
+
+    Author: Jacques.van-Helden@univ-amu.fr
+    """
+    input: "{file}.sam"
+    output: "{file}_sam_readnb.txt"
+    log: "{file}_sam_readnb.log"
+    params: qsub = config["qsub"] + " -e {file}_sam_readnb_qsub.err -o {file}_sam_readnb_qsub.out"
+    shell: "samtools view -S -c {input} > {output} 2> {log}"
+

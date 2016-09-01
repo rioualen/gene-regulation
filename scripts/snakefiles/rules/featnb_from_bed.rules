@@ -1,0 +1,10 @@
+rule featnb_from_bed:
+    """Count number of features in a bed-formatted file.
+
+    Author: Jacques.van-Helden@univ-amu.fr
+    """
+    input: "{file}.bed"
+    output: "{file}_bed_nb.txt"
+    log: "{file}_bed_nb.log"
+    params: qsub = config["qsub"] + " -e {file}_bed_nb_qsub.err -o {file}_bed_nb_qsub.out"
+    shell: "grep -v '^#' {input} | wc -l | perl -pe 's| +||g' > {output} 2> {log}"

@@ -1,0 +1,10 @@
+rule readnb_from_fastq:
+    """Count number of reads in a fastq-formatted file (unaligned reads).
+    
+    Author: Jacques.van-Helden@univ-amu.fr
+    """
+    input: "{file}.fastq"
+    output: "{file}_fastq_readnb.txt"
+    params: qsub = config["qsub"] + " -e {file}_readnb_qsub.err -o {file}_readnb_qsub.out"
+    shell: "grep '^@' {input} | wc -l > {output}"
+
