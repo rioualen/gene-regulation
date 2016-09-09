@@ -14,7 +14,7 @@ genome_file = genome_dir + config["genome"]["fasta_file"]
 # Rule
 rule genome_coverage_wig:    
     """Compute genome coverage from a bam-formatted file with aligned
-    reads and produce a wig or bigWig file, the recommended format to
+    reads and produce a wig file, the recommended format to
     upload coverage-type data as UCSC tracks.
 
     Author: Jacques van Helden, Claire Rioualen
