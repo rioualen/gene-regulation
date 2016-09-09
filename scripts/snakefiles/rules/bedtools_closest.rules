@@ -1,19 +1,48 @@
+## TODO configure parameters
+
 # Set parameters
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
-if not "version" in config["genome"].keys():
-    sys.exit("Genome version must be defined in the config file")
+if not "gff3_file" in config["genome"].keys():
+    sys.exit("GFF3 file must be defined in the config file")
+
+if not "fasta_file" in config["genome"].keys():
+    sys.exit("fasta file must be defined in the config file")
 
 if not "genome" in config["dir"].keys():
     sys.exit("Genome dir must be defined in the dir section of the config file")
 
+#if not "bedtools" in config.keys():
+#    config["bedtools"] = {}
+
+#if not "window" in config["bedtools"].keys():
+#    config["bedtools"][""] = ""
+
 # Define paths
-genome_version = config["genome"]["version"]
-genome_dir = config["dir"]["genome"] + genome_version + "/"
-gff3_file = genome_dir + genome_version + ".gff3"
+genome_dir = config["dir"]["genome"] + "/"
+gff3_file = genome_dir + config["genome"]["gff3_file"]
+fasta_file = genome_dir + config["genome"]["fasta_file"]
+
 
 rule bedtools_closest:
+    """
+    Similar to intersect, closest searches for overlapping features in A and B. 
+    In the event that no feature in B overlaps the current feature in A, closest will report the nearest 
+    (that is, least genomic distance from the start or end of A) feature in B. 
+
+    More: http://bedtools.readthedocs.io/en/latest/content/tools/closest.html
+
+    Required parameters: 
+        config["qsub"]
+        config["dir"]["genome"]
+        config["genome"]["gff3_file"]
+
+    Opional parameters:
+        config["bedtools"]["window"]
+
+    Author: Claire Rioualen
+    """
 	input: bed = "{regions}.bed", gff3 = gff3_file
 	output: "{regions}_closest_annot.bed"
 	log: "{regions}_closest.log"
@@ -26,3 +55,5 @@ rule bedtools_closest:
 #                           -b <FILE1, FILE2, ..., FILEN>
 
 #bedtools closest -a peaks.bed -b Ecoli_K12.gff3
+
+

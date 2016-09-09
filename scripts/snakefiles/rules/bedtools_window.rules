@@ -2,25 +2,54 @@
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
-if not "version" in config["genome"].keys():
-    sys.exit("Genome version must be defined in the config file")
+if not "gff3_file" in config["genome"].keys():
+    sys.exit("GFF3 file must be defined in the config file")
+
+if not "fasta_file" in config["genome"].keys():
+    sys.exit("fasta file must be defined in the config file")
 
 if not "genome" in config["dir"].keys():
     sys.exit("Genome dir must be defined in the dir section of the config file")
 
+if not "bedtools" in config.keys():
+    config["bedtools"] = {}
+
+if not "window" in config["bedtools"].keys():
+    config["bedtools"]["window"] = "1000"
+
 # Define paths
-genome_version = config["genome"]["version"]
-genome_dir = config["dir"]["genome"] + genome_version + "/"
-gff3_file = genome_dir + genome_version + ".gff3"
+genome_dir = config["dir"]["genome"] + "/"
+gff3_file = genome_dir + config["genome"]["gff3_file"]
+fasta_file = genome_dir + config["genome"]["fasta_file"]
+
 
 # Rule
 rule bedtools_window:
+    """
+    Similar to bedtools intersect, window searches for overlapping features in A and B. 
+    However, window adds a specified number (1000, by default) of base pairs upstream 
+    and downstream of each feature in A. In effect, this allows features in B that are 
+    “near” features in A to be detected.
+
+    More: http://bedtools.readthedocs.io/en/latest/content/tools/window.html
+
+    Required parameters: 
+        config["qsub"]
+        config["dir"]["genome"]
+        config["genome"]["gff3_file"]
+
+    Opional parameters:
+        config["bedtools"]["window"]
+
+    Author: Claire Rioualen
+    """
 	input: bed = "{regions}.bed", gff3 = gff3_file
 	output: "{regions}_window_annot.bed"
 	log: "{regions}_window.log"
 	benchmark: "{regions}_window_benchmark.json"
-	params: qsub = config["qsub"] + " -e {regions}_window_qsub.err -o {regions}_window_qsub.out"
-	shell:"""bedtools window -a {input.bed} -b {input.gff3} > {output}"""
+	params: window = config["bedtools"]["window"],\
+        qsub = config["qsub"] + " -e {regions}_window_qsub.err -o {regions}_window_qsub.out"
+	shell:"""bedtools window -a {input.bed} -b {input.gff3} -w {params.window} > {output}"""
 
 
 #bedtools window [OPTIONS] [-a|-abam] -b <BED/GFF/VCF>

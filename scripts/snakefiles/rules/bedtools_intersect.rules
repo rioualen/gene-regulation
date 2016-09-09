@@ -2,25 +2,42 @@
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
-if not "version" in config["genome"].keys():
-    sys.exit("Genome version must be defined in the config file")
+if not "gff3_file" in config["genome"].keys():
+    sys.exit("GFF3 file must be defined in the config file")
+
+if not "fasta_file" in config["genome"].keys():
+    sys.exit("fasta file must be defined in the config file")
 
 if not "genome" in config["dir"].keys():
     sys.exit("Genome dir must be defined in the dir section of the config file")
 
 # Define paths
-genome_version = config["genome"]["version"]
-genome_dir = config["dir"]["genome"] + genome_version + "/"
-gff3_file = genome_dir + genome_version + ".gff3"
+genome_dir = config["dir"]["genome"] + "/"
+gff3_file = genome_dir + config["genome"]["gff3_file"]
+fasta_file = genome_dir + config["genome"]["fasta_file"]
 
 # Rule
 rule bedtools_intersect:
+    """
+    bedtools intersect allows one to screen for overlaps between two sets of genomic features. 
+    Moreover, it allows one to have fine control as to how the intersections are reported. 
+    bedtools intersect works with both BED/GFF/VCF and BAM files as input.
+
+    More: http://bedtools.readthedocs.io/en/latest/content/tools/intersect.html
+
+    Required parameters: 
+        config["qsub"]
+        config["dir"]["genome"]
+        config["genome"]["gff3_file"]
+
+    Author: Claire Rioualen
+    """
 	input: bed = "{regions}.bed", gff3 = gff3_file
 	output: "{regions}_intersect_annot.bed"
 	log: "{regions}_intersect.log"
 	benchmark: "{regions}_intersect_benchmark.json"
 	params: qsub = config["qsub"] + " -e {regions}_intersect_qsub.err -o {regions}_intersect_qsub.out"
-	shell:"""bedtools intersect -wa -a {input.bed} -b {input.gff3} > {output}"""
+	shell:"""bedtools intersect -a {input.bed} -b {input.gff3} > {output} 2> {log}"""
 
 
 
