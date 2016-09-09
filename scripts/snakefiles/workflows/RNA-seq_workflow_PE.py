@@ -264,8 +264,8 @@ rule all:
 #            GENOME_COVERAGE_MINUS, \
 ##            INFER_TRANSCRIPTS, \
 #            FEATURE_COUNTS, \
-#            SARTOOLS_TARGETFILE, \
-#            DEG, \
+            SARTOOLS_TARGETFILE, \
+            DEG, \
             GRAPHICS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"

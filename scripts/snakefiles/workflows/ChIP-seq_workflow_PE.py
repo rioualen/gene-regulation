@@ -1,3 +1,4 @@
+
 """Generic work< flow for the analysis of ChIP-seq data for the binding
 of transcription factors.
 
@@ -133,8 +134,6 @@ RULES = os.path.join(GENEREG_LIB, "scripts/snakefiles/rules")
 include: os.path.join(RULES, "bam_by_pos.rules")
 include: os.path.join(RULES, "bam_to_bed.rules")
 include: os.path.join(RULES, "bam_stats.rules")
-include: os.path.join(RULES, "bedgraph_to_tdf.rules")
-include: os.path.join(RULES, "bedtools_window.rules")
 include: os.path.join(RULES, "bowtie_index.rules")
 include: os.path.join(RULES, "bowtie.rules")
 include: os.path.join(RULES, "bowtie2_index.rules")
@@ -151,75 +150,134 @@ include: os.path.join(RULES, "getfasta.rules")
 include: os.path.join(RULES, "get_chrom_sizes.rules")
 include: os.path.join(RULES, "gzip.rules")
 include: os.path.join(RULES, "homer.rules")
-include: os.path.join(RULES, "index_bam.rules")
+include: os.path.join(RULES, "igv_session.rules")
 include: os.path.join(RULES, "macs2.rules")
 include: os.path.join(RULES, "macs14.rules")
 include: os.path.join(RULES, "peak_motifs.rules")
 include: os.path.join(RULES, "sickle.rules")
 include: os.path.join(RULES, "spp.rules")
 include: os.path.join(RULES, "subread_index.rules")
-include: os.path.join(RULES, "subread_align.rules")
+include: os.path.join(RULES, "subread.rules")
 include: os.path.join(RULES, "swembl.rules")
 include: os.path.join(RULES, "sra_to_fastq.rules")
+
+
+#================================================================#
+#                      Data & wildcards                          #
+#================================================================#
+
+# Raw data
+READS = config["dir"]["reads_source"]
+
+# Samples
+SAMPLES = read_table(config["metadata"]["samples"])
+SAMPLE_IDS = SAMPLES.iloc[:,0]
+
+
+## Design
+DESIGN = read_table(config["metadata"]["design"])
+TREATMENT = DESIGN['treatment']
+CONTROL = DESIGN['control']
+
+## Data & results dir
+
+if not (("dir" in config.keys()) and ("reads_source" in config["dir"].keys())):
+    sys.exit("The parameter config['dir']['reads_source'] should be specified in the config file.")
+
+READS = config["dir"]["reads_source"]
+if not os.path.exists(READS):
+    os.makedirs(READS)
+
+if not ("results" in config["dir"].keys()):
+    sys.exit("The parameter config['dir']['results'] should be specified in the config file.")
+
+RESULTS_DIR = config["dir"]["results"]
+if not os.path.exists(RESULTS_DIR):
+    os.makedirs(RESULTS_DIR)
+
+if not ("samples" in config["dir"].keys()):
+    SAMPLE_DIR = config["dir"]["results"]
+else:
+    SAMPLE_DIR = config["dir"]["samples"]
+if not os.path.exists(SAMPLE_DIR):
+    os.makedirs(SAMPLE_DIR)
+
+if not ("peaks" in config["dir"].keys()):
+    PEAKS_DIR = config["dir"]["results"]
+else:
+    PEAKS_DIR = config["dir"]["peaks"]
+if not os.path.exists(PEAKS_DIR):
+    os.makedirs(PEAKS_DIR)
+
+if not ("reports" in config["dir"].keys()):
+    REPORTS_DIR = config["dir"]["results"]
+else:
+    REPORTS_DIR = config["dir"]["reports"]
+if not os.path.exists(REPORTS_DIR):
+    os.makedirs(REPORTS_DIR)
+
+
 
 #================================================================#
 #                         Workflow                               #
 #================================================================#
 
 ## Data import 
-IMPORT = expand(FASTQ_DIR + "{samples}/{samples}.fastq", samples=SAMPLE_IDS)
 
-## Graphics & reports
-GRAPHICS = expand(REPORTS_DIR + "{graph}.png", graph=["dag", "rulegraph"])
+IMPORT = expand(SAMPLE_DIR + "{samples}/{samples}.fastq", samples=SAMPLE_IDS)
 
-#----------------------------------------------------------------#
+# Genome
+GENOME = config["genome"]["version"]
+GENOME_DIR = config["dir"]["genome"] + config["genome"]["version"]
+
+if not os.path.exists(GENOME_DIR):
+    os.makedirs(GENOME_DIR)
+
+GENOME_FASTA = expand(GENOME_DIR + "/" + GENOME + ".fa")
+GENOME_ANNOTATIONS = expand(GENOME_DIR + "/" + GENOME + ".gff3")
+
+#----------------------------------------------------------------
 # Quality control
-#----------------------------------------------------------------#
+#----------------------------------------------------------------
 
-RAW_QC = expand(FASTQ_DIR + "{samples}/{samples}_fastqc/{samples}_fastqc.html", samples=SAMPLE_IDS)
-QC = RAW_QC
+RAW_QC = expand(SAMPLE_DIR + "{samples}/{samples}_fastqc/{samples}_fastqc.html", samples=SAMPLE_IDS)
 
-#----------------------------------------------------------------#
+
+#----------------------------------------------------------------
 # Trimming
-#----------------------------------------------------------------#
+#----------------------------------------------------------------
 
-if not (("tools" in config.keys()) and ("trimming" in config["tools"].keys())):
-    sys.exit("The parameter config['tools']['trimming'] should be specified in the config file. Empty quotes equal to no trimming.")
+TRIMMER="sickle-se-q" + config["sickle"]["threshold"]#trimmomatic
+TRIMMING=expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}", samples=SAMPLE_IDS, trimmer=TRIMMER)
+TRIM = expand(SAMPLE_DIR + "{trimming}.fastq", trimming=TRIMMING)
 
-TRIMMING_TOOLS = config["tools"]["trimming"].split()
-
-TRIMMING = expand(FASTQ_DIR + "{samples}/{samples}_{trimmer}", samples=SAMPLE_IDS, trimmer=TRIMMING_TOOLS)
-TRIM = expand("{trimming}.fastq", trimming=TRIMMING)
-
-TRIM_QC = expand(FASTQ_DIR + "{samples}/{samples}_{trimmer}_fastqc/{samples}_{trimmer}_fastqc.html", samples=SAMPLE_IDS, trimmer=TRIMMING_TOOLS)
+TRIM_QC = expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}_fastqc/{samples}_{trimmer}_fastqc.html", samples=SAMPLE_IDS, trimmer=TRIMMER)
 
 QC = RAW_QC + TRIM_QC
 
-#----------------------------------------------------------------#
+
+#----------------------------------------------------------------
 # Alignment
-#----------------------------------------------------------------#
+#----------------------------------------------------------------
 
-if not (("tools" in config.keys()) and ("mapping" in config["tools"].keys())):
-    sys.exit("The parameter config['tools']['mapping'] should be specified in the config file.")
 
-MAPPING_TOOLS = config["tools"]["mapping"].split()
+ALIGNER=["bowtie"]# bwa, bowtie2, subread
+ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER, trimmer=TRIMMER)
 
-INDEX = expand(GENOME_DIR + "{aligner}/" + GENOME_VER + ".fa", aligner=MAPPING_TOOLS)
+INDEX = expand(GENOME_DIR + "/{aligner}/" + GENOME + ".fa", aligner=ALIGNER)
 
-if TRIMMING_TOOLS:
-    PREFIX = expand("{trimmer}_{aligner}", aligner=MAPPING_TOOLS, trimmer=TRIMMING_TOOLS)
-else:
-    PREFIX = expand("{aligner}", aligner=MAPPING_TOOLS)
+MAPPING = expand("{alignment}.sam", alignment=ALIGNMENT)
 
-ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{prefix}", samples=SAMPLE_IDS, prefix=PREFIX)
-
-MAPPING = expand("{alignment}.bam", alignment=ALIGNMENT)
-
-SORTED_BAM = expand("{alignment}_sorted_pos.bam", alignment=ALIGNMENT)
-SORTED_BAM_BAI = expand("{alignment}_sorted_pos.bam.bai", alignment=ALIGNMENT)
 BAM_STATS = expand("{alignment}_bam_stats.txt", alignment=ALIGNMENT)
 
-SORTED_BED = expand("{alignment}_sorted_pos.bed", alignment=ALIGNMENT)
+GENOME_COVERAGE = expand("{alignment}.bedgraph", alignment=ALIGNMENT)
+GENOME_COVERAGE_GZ = expand("{alignment}.bedgraph.gz", alignment=ALIGNMENT)
+
+
+# Sort mapped reads
+
+#SORTED_READS_BED = expand("{alignment}_sorted_pos.bed", alignment=ALIGNMENT)
+
 
 # ----------------------------------------------------------------
 # Peak-calling
@@ -228,44 +286,40 @@ SORTED_BED = expand("{alignment}_sorted_pos.bed", alignment=ALIGNMENT)
 PEAKCALLER=[
     "homer-fdr" + config["homer"]["fdr"],
     "macs2-qval" + config["macs2"]["qval"], 
-#    "swembl-R" + config["swembl"]["R"],
+    "swembl-R" + config["swembl"]["R"],
     "macs14-pval" + config["macs14"]["pval"],
-#    "spp-fdr" + config["spp"]["fdr"],
-#    "bPeaks-log" + config["bPeaks"]["log2FC"],
+    "spp-fdr" + config["spp"]["fdr"],
+    "bPeaks-log" + config["bPeaks"]["log2FC"],
 ]
 
-PEAKCALLING=expand(expand(PEAKS_DIR + "{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=MAPPING_TOOLS, trimmer=TRIMMING_TOOLS)
+PEAKCALLING=expand(expand(PEAKS_DIR + "{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER, trimmer=TRIMMER)
 
 PEAKS = expand("{peakcalling}.bed", peakcalling=PEAKCALLING)
 
-print(PEAKS)
 # ----------------------------------------------------------------
 # Peak annotation
 # ----------------------------------------------------------------
 
-#GENE_ANNOT = ["intersect", "window"]#"closest"
-#PEAKS_TO_GENES = expand("{peakcalling}_{gene_annotation}_annot.bed", peakcalling=PEAKCALLING, gene_annotation=GENE_ANNOT)
+GENE_ANNOT = ["intersect", "window"]#"closest"
+PEAKS_TO_GENES = expand("{peakcalling}_{gene_annotation}_annot.bed", peakcalling=PEAKCALLING, gene_annotation=GENE_ANNOT)
 
-MOTIFS=expand(expand("{treat}_vs_{control}/{{peakcaller}}/peak-motifs/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}_peak-motifs_synthesis", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=MAPPING_TOOLS, trimmer=TRIMMING_TOOLS)
+MOTIFS=expand(expand("{treat}_vs_{control}/{{peakcaller}}/peak-motifs/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}_peak-motifs_synthesis", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=ALIGNER, trimmer=TRIMMER)
+
 
 GET_FASTA = expand(PEAKS_DIR + "{peakcalling}.fasta", peakcalling=PEAKCALLING)
 PEAK_MOTIFS = expand(PEAKS_DIR + "{motifs}.html", motifs=MOTIFS)
 
-## ----------------------------------------------------------------
-## Visualization & reports
-## ----------------------------------------------------------------
+# ----------------------------------------------------------------
+# Reports
+# ----------------------------------------------------------------
 
-## TODO
 
-GENOME_COVERAGE = expand("{alignment}.bedgraph", alignment=ALIGNMENT)
-GENOME_COVERAGE_GZ = expand("{alignment}.bedgraph.gz", alignment=ALIGNMENT)
-GENOME_COVERAGE_TDF = expand("{alignment}.tdf", alignment=ALIGNMENT)
+GRAPHICS = expand(REPORTS_DIR + "{graph}.{ext}", graph=["dag", "rulegraph"], ext=["png", "pdf"])
 
 
 ## Following not yet properly implemented
 #IGV = expand(REPORTS_DIR + "igv_session.xml")
 #BED_INTER = expand(REPORTS_DIR + "multiinter.tab")
-
 
 #================================================================#
 #                        Rule all                                #
@@ -275,20 +329,6 @@ rule all:
 	"""
 	Run all the required analyses.
 	"""
-	input: \
-            IMPORT, \
-            QC, \
-#            TRIM, \
-#            INDEX, \
-#            MAPPING, \
-#            SORTED_BAM, \
-            BAM_STATS, \
-            GENOME_COVERAGE_TDF, \
-#            SORTED_BED, \
-#            PEAKS, \
-            PEAK_MOTIFS, \
-            GRAPHICS
+	input: BAM_STATS, GENOME_COVERAGE_GZ, GRAPHICS, QC, PEAKS_TO_GENES, PEAKS#, PEAK_MOTIFS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
-
-
