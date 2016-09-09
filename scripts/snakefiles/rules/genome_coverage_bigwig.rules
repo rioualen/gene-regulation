@@ -1,0 +1,33 @@
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+#if not "genome" in config["dir"].keys():
+#    sys.exit("Genome directory must be defined in the config file")
+
+#if not "fasta_file" in config["genome"].keys():
+#    sys.exit("Fasta file must be defined in the config file")
+
+#genome_dir = config["dir"]["genome"] + "/"
+#genome_file = genome_dir + config["genome"]["fasta_file"]
+
+# Rule
+rule genome_coverage_bigwig:    
+    """Compute genome coverage from a bam-formatted file with aligned
+    reads and produce a bigWig file. Uses bamCoverage tool from the
+    deepTools suite. 
+
+    Author: Claire Rioualen
+    """
+    input: 
+        bam = "{reads}_sorted_pos.bam",
+        bai = "{reads}_sorted_pos.bam.bai"
+    output: "{reads}.bw"
+    params: 
+#            output_prefix = "{reads}",
+#            chromsize = re.sub('\.fa$', '', genome_file) + ".genome", 
+            qsub = config["qsub"] + " -e {reads}_bam2bigwig_qsub.err -o {reads}_bam2bigwig_qsub.out"
+    log:  "{reads}_bam2bigwig.log"
+    benchmark:  "{reads}_bam2bigwig_benchmark.json"
+    shell: "bamCoverage -b {input.bam} -o {output} 2> {log}" 
+
