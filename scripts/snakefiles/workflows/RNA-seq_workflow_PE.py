@@ -120,7 +120,7 @@ else:
 #================================================================#
 
 RULES = os.path.join(GENEREG_LIB, "scripts/snakefiles/rules")
-#include: os.path.join(RULES, "annotation_download.rules")
+
 include: os.path.join(RULES, "bam_by_pos.rules")
 include: os.path.join(RULES, "bam_stats.rules")
 include: os.path.join(RULES, "bam_to_bed.rules")
@@ -138,7 +138,7 @@ include: os.path.join(RULES, "dot_to_image.rules")
 include: os.path.join(RULES, "fastqc.rules")
 include: os.path.join(RULES, "genome_coverage_bedgraph.rules")
 include: os.path.join(RULES, "genome_coverage_bedgraph_strands.rules")
-#include: os.path.join(RULES, "genome_download.rules")
+
 include: os.path.join(RULES, "get_chrom_sizes.rules")
 include: os.path.join(RULES, "index_bam.rules")
 include: os.path.join(RULES, "sartools_DESeq2.rules")
@@ -256,14 +256,14 @@ rule all:
             QC, \
             INDEX, \
             MAPPING, \
-#            SORTED_BAM, \
-#            SORTED_BAM_BAI, \
-#            BAM_STATS, \
-#            GENOME_COVERAGE_TDF, \
-#            GENOME_COVERAGE_PLUS, \
-#            GENOME_COVERAGE_MINUS, \
+            SORTED_BAM, \
+            SORTED_BAM_BAI, \
+            BAM_STATS, \
+            GENOME_COVERAGE_TDF, \
+            GENOME_COVERAGE_PLUS, \
+            GENOME_COVERAGE_MINUS, \
 ##            INFER_TRANSCRIPTS, \
-#            FEATURE_COUNTS, \
+            FEATURE_COUNTS, \
             SARTOOLS_TARGETFILE, \
             DEG, \
             GRAPHICS

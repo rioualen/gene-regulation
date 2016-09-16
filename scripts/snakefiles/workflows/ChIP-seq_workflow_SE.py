@@ -129,6 +129,7 @@ else:
 
 RULES = os.path.join(GENEREG_LIB, "scripts/snakefiles/rules")
 
+include: os.path.join(RULES, "annotate_peaks.rules")
 include: os.path.join(RULES, "bam_by_pos.rules")
 include: os.path.join(RULES, "bam_to_bed.rules")
 include: os.path.join(RULES, "bam_stats.rules")
@@ -163,6 +164,7 @@ include: os.path.join(RULES, "subread_align.rules")
 include: os.path.join(RULES, "swembl.rules")
 include: os.path.join(RULES, "sra_to_fastq.rules")
 
+#ruleorder: 
 #================================================================#
 #                         Workflow                               #
 #================================================================#
@@ -230,7 +232,7 @@ PEAKCALLER=[
     "homer-fdr" + config["homer"]["fdr"],
     "macs2-qval" + config["macs2"]["qval"], 
 #    "swembl-R" + config["swembl"]["R"],
-    "macs14-pval" + config["macs14"]["pval"],
+#    "macs14-pval" + config["macs14"]["pval"],
 #    "spp-fdr" + config["spp"]["fdr"],
 #    "bPeaks-log" + config["bPeaks"]["log2FC"],
 ]
@@ -243,9 +245,9 @@ PEAKS = expand("{peakcalling}.bed", peakcalling=PEAKCALLING)
 # Peak annotation
 # ----------------------------------------------------------------
 
-GENE_ANNOT = ["intersect", "window"]  #, "window"]#"closest" ## todo put in the config file
-PEAKS_TO_GENES = expand("{peakcalling}_{gene_annotation}_annot.bed", peakcalling=PEAKCALLING, gene_annotation=GENE_ANNOT)
-
+DISTANCE = ["intersect"]#, "window"]  #, "window"]#"closest" ## todo put in the config file
+GENOMIC_FEAT = expand("{peakcalling}_{distance}_annot.bed", peakcalling=PEAKCALLING, distance=DISTANCE)
+GENE_LIST = expand("{peakcalling}_{distance}_annot_gene_list.tab", peakcalling=PEAKCALLING, distance=DISTANCE)
 
 MOTIFS=expand(expand("{treat}_vs_{control}/{{peakcaller}}/peak-motifs/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}_peak-motifs_synthesis", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLER, aligner=MAPPING_TOOLS, trimmer=TRIMMING_TOOLS)
 
@@ -280,27 +282,21 @@ rule all:
 	Run all the required analyses.
 	"""
 	input: \
-            IMPORT, \
+#            IMPORT, \
             QC, \
 #            TRIM, \
 #            INDEX, \
 #            MAPPING, \
 #            SORTED_BAM, \
             BAM_STATS, \
-            SORTED_BAM_BAI, \
+#            SORTED_BAM_BAI, \
             GENOME_COVERAGE_TDF, \
             GENOME_COVERAGE_BIGWIG, \
 #            SORTED_BED, \
 #            PEAKS, \
-            PEAKS_TO_GENES, \
+#            GENOMIC_FEAT, \
+            GENE_LIST, \
             PEAK_MOTIFS, \
             GRAPHICS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
-
-
-#annotatePeaks.pl results/peaks/GSM1010219_vs_GSM1010224/homer-fdr0.01/GSM1010219_vs_GSM1010224_sickle_bowtie2_homer-fdr0.01_intersect_annot.bed \
-#genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.1.21.dna.genome.fa \
-#-gtf genome/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.1.21.gtf > test
-
-
