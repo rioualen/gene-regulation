@@ -1,3 +1,5 @@
+## This rule is currently working solely on Drosophila melanogaster, and uses hard-codded parameters. To be changed.
+
 rule ChIPseeker:
     """
 	The R package ChIPseeker is a package for annotating ChIP-seq data analysis.
@@ -29,12 +31,12 @@ rule ChIPseeker:
 
 
 		library("ChIPseeker")
-		library("TxDb.Dmelanogaster.UCSC.dm3.ensGene")
-		require(TxDb.Dmelanogaster.UCSC.dm3.ensGene)
+#		library("TxDb.Dmelanogaster.UCSC.dm3.ensGene")
+#		require(TxDb.Dmelanogaster.UCSC.dm3.ensGene)
 		library("clusterProfiler")
 		library("GenomicRanges")
 		library("ChIPpeakAnno")
-		library("org.Dm.eg.db")
+#		library("org.Dm.eg.db")
 		
 
 
