@@ -35,7 +35,40 @@ def sickle_inputs(wildcards):
     return reads
 
 # Rule
-rule sickle:
+rule sickle_se:
+    """Trim one a single end raw reads file with sickle.
+
+    Required parameters:
+        config["qsub"]
+        config["metadata"]["seq_type"]
+
+    Optional parameters:
+        config["sickle"]["threshold"]
+        config["sickle"]["qual"]
+        config["metadata"]["strands"]
+
+    Authors:
+        Claire Rioualen, Lucie Khamvongsa
+    """
+    input: reads = sickle_inputs
+    output:
+        single = config["dir"]["fastq"] + "/{samples}/{samples}_" + suffix + ".fastq"
+    params:
+        threshold = config["sickle"]["threshold"],
+        qual_type = config["sickle"]["qual"],
+        qsub = config['qsub'] \
+            + " -e "+ config["dir"]["fastq"] + "/{samples}/{samples}_" + suffix + "_qsub.err" \
+            + " -o "+ config["dir"]["fastq"] + "/{samples}/{samples}_" + suffix + "_qsub.out"
+    log: config["dir"]["fastq"] + "/{samples}/{samples}_" + suffix + ".log"
+    benchmark: config["dir"]["fastq"] + "/{samples}/{samples}_" + suffix + "_benchmark.json"
+    run:
+#        if (seq_type == "pe"):
+
+#            shell("sickle pe --pe-file1 " + input.reads[0] + " --pe-file2 " + input.reads[1] + " --qual-type {params.qual_type} --qual-threshold {params.threshold} --output-pe1 {output.forward} --output-pe2 {output.reverse} --output-single {output.single} 2> {log}")
+#        elif (seq_type == "se"):
+            shell("sickle se --fastq-file {input} --qual-type {params.qual_type} --output-file {output.single} &> {log}")
+
+rule sickle_pe:
     """Trim one a single end raw reads file with sickle.
 
     Required parameters:
@@ -53,9 +86,9 @@ rule sickle:
     input: reads = sickle_inputs
     output:
         forward = config["dir"]["fastq"] + "/{samples}/{samples}_" + suffix + "_R1.fastq",
-        reverse = config["dir"]["fastq"] + "/{samples}/{samples}_" + suffix + "_R2.fastq",
-        single = config["dir"]["fastq"] + "/{samples}/{samples}_" + suffix + ".fastq"
+        reverse = config["dir"]["fastq"] + "/{samples}/{samples}_" + suffix + "_R2.fastq"
     params:
+        single = config["dir"]["fastq"] + "/{samples}/{samples}_" + suffix + ".fastq",
         threshold = config["sickle"]["threshold"],
         qual_type = config["sickle"]["qual"],
         qsub = config['qsub'] \
@@ -64,9 +97,44 @@ rule sickle:
     log: config["dir"]["fastq"] + "/{samples}/{samples}_" + suffix + ".log"
     benchmark: config["dir"]["fastq"] + "/{samples}/{samples}_" + suffix + "_benchmark.json"
     run:
-        if (seq_type == "pe"):
+#        if (seq_type == "pe"):
 
-            shell("sickle pe --pe-file1 " + input.reads[0] + " --pe-file2 " + input.reads[1] + " --qual-type {params.qual_type} --qual-threshold {params.threshold} --output-pe1 {output.forward} --output-pe2 {output.reverse} --output-single {output.single} 2> {log}")
-        elif (seq_type == "se"):
-            shell("sickle se --fastq-file {input} --qual-type {params.qual_type} --output-file {output.single} &> {log}")
+            shell("sickle pe --pe-file1 " + input.reads[0] + " --pe-file2 " + input.reads[1] + " --qual-type {params.qual_type} --qual-threshold {params.threshold} --output-pe1 {output.forward} --output-pe2 {output.reverse} --output-single {params.single} 2> {log}")
+#        elif (seq_type == "se"):
+#            shell("sickle se --fastq-file {input} --qual-type {params.qual_type} --output-file {output.single} &> {log}")
+
+#rule sickle:
+#    """Trim one a single end raw reads file with sickle.
+
+#    Required parameters:
+#        config["qsub"]
+#        config["metadata"]["seq_type"]
+
+#    Optional parameters:
+#        config["sickle"]["threshold"]
+#        config["sickle"]["qual"]
+#        config["metadata"]["strands"]
+
+#    Authors:
+#        Claire Rioualen, Lucie Khamvongsa
+#    """
+#    input: reads = sickle_inputs
+#    output:
+#        forward = config["dir"]["fastq"] + "/{samples}/{samples}_" + suffix + "_R1.fastq",
+#        reverse = config["dir"]["fastq"] + "/{samples}/{samples}_" + suffix + "_R2.fastq",
+#        single = config["dir"]["fastq"] + "/{samples}/{samples}_" + suffix + ".fastq"
+#    params:
+#        threshold = config["sickle"]["threshold"],
+#        qual_type = config["sickle"]["qual"],
+#        qsub = config['qsub'] \
+#            + " -e "+ config["dir"]["fastq"] + "/{samples}/{samples}_" + suffix + "_qsub.err" \
+#            + " -o "+ config["dir"]["fastq"] + "/{samples}/{samples}_" + suffix + "_qsub.out"
+#    log: config["dir"]["fastq"] + "/{samples}/{samples}_" + suffix + ".log"
+#    benchmark: config["dir"]["fastq"] + "/{samples}/{samples}_" + suffix + "_benchmark.json"
+#    run:
+#        if (seq_type == "pe"):
+
+#            shell("sickle pe --pe-file1 " + input.reads[0] + " --pe-file2 " + input.reads[1] + " --qual-type {params.qual_type} --qual-threshold {params.threshold} --output-pe1 {output.forward} --output-pe2 {output.reverse} --output-single {output.single} 2> {log}")
+#        elif (seq_type == "se"):
+#            shell("sickle se --fastq-file {input} --qual-type {params.qual_type} --output-file {output.single} &> {log}")
 
