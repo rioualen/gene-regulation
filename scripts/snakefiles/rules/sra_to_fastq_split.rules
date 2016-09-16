@@ -54,7 +54,7 @@ do
 #            base=$(basename $f .sra)
 #            echo "$base"
 #            echo "Converting $base.sra to $base.fastq..."
-#            fastq-dump --outdir {wildcards.fastq}/$sam/ -I --split-files {input.datadir}$sam/$base.sra
+#            fastq-dump --outdir {wildcards.fastq}/$sam/ --split-files {input.datadir}$sam/$base.sra ## option -I ?
 #        done
 #        echo "Merging ${{#files[@]}} together as $sam.fastq."
 #        echo "Cmd: cat ${{files[@]}} > {input.datadir}$sam.fastq"
@@ -66,7 +66,7 @@ do
         base=$(basename ${{files[0]}} .sra)
         echo "Converting $base.sra to $base.fastq..."
         echo "fastq-dump --outdir {wildcards.fastq}/$sam -I --split-files {input.datadir}$sam/$base.sra"
-        fastq-dump --outdir {wildcards.fastq}/$sam -I --split-files {input.datadir}$sam/$base.sra
+        fastq-dump --outdir {wildcards.fastq}/$sam --split-files {input.datadir}$sam/$base.sra ## option -I ?
         echo "Moving {wildcards.fastq}/$sam/$base"_{params.forward_strand}".fastq and {wildcards.fastq}/$sam/$base"_{params.reverse_strand}".fastq to {wildcards.fastq}/$sam/$sam"_{params.forward_strand}".fastq and {wildcards.fastq}/$sam/$sam"_{params.reverse_strand}".fastq"
         mv  {wildcards.fastq}/$sam/$base"_{params.forward_strand}".fastq {wildcards.fastq}/$sam/$sam"_{params.forward_strand}".fastq
         mv  {wildcards.fastq}/$sam/$base"_{params.reverse_strand}".fastq {wildcards.fastq}/$sam/$sam"_{params.reverse_strand}".fastq
