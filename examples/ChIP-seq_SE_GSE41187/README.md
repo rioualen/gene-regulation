@@ -30,9 +30,10 @@ git clone https://github.com/rioualen/gene-regulation.git
 
 ## Download data
 
-mkdir -p ${ANALYSIS_DIR}/data/GSM1010224 ${ANALYSIS_DIR}/data/GSM1010219
+mkdir -p ${ANALYSIS_DIR}/data/GSM1010224 ${ANALYSIS_DIR}/data/GSM1010219 ${ANALYSIS_DIR}/data/GSM1010220
 wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX189%2FSRX189778/SRR576938/SRR576938.sra -P ${ANALYSIS_DIR}/data/GSM1010224
 wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX189%2FSRX189773/SRR576933/SRR576933.sra -P ${ANALYSIS_DIR}/data/GSM1010219
+wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX/SRX189/SRX189774/SRR576934/SRR576934.sra -P ${ANALYSIS_DIR}/data/GSM1010220
 
 
 ## Download reference genome & annotations

@@ -36,7 +36,7 @@
 
   tools:
     trimming: "sickle"
-    mapping: "bowtie2 subread-align" # bwa bowtie
+    mapping: "bowtie2" # subread-align" # bwa bowtie
 
 
   fastqc: 
@@ -53,7 +53,7 @@
     other_options: "--nomodel"                                                  # opt, to be tested can include -bdg (time-consuming), -wig (time-consuming), --call-summits (requires PeakSplitter)
 
   macs2: 
-    qval: "0.001"                                                               # optional (def. 0.05)
+    qval: "0.0001"                                                               # optional (def. 0.05)
     keep_dup: "all"                                                             # optional (def. 1)
     mfold_min: "1"                                                              # optional (def. 5)
     mfold_max: "50"                                                             # optional (def. 50)
@@ -68,7 +68,7 @@
     F: "2"                                                                      # optional (def. 4)
     L: "2"                                                                      # optional (def. 4)
     P: "0.01"                                                                   # optional (def. 0.0001)
-    fdr: "0.01"                                                                 # optional (def. 0.001)
+    fdr: "0.001"                                                                 # optional (def. 0.001)
 
   spp: 
     fdr: "0.05"                                                                 # optional (def. 0.01)
