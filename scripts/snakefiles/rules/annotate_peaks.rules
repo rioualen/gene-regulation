@@ -1,0 +1,52 @@
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "fasta_file" in config["genome"].keys():
+    sys.exit("fasta file must be defined in the config file")
+
+if not "gtf_file" in config["genome"].keys():
+    sys.exit("GTF file must be defined in the config file")
+
+if not "genome" in config["dir"].keys():
+    sys.exit("Genome dir must be defined in the dir section of the config file")
+
+# Define paths
+genome_dir = config["dir"]["genome"] + "/"
+fasta_file = genome_dir + config["genome"]["fasta_file"]
+gtf_file = genome_dir + config["genome"]["gtf_file"]
+
+# Rule
+rule annotate_peaks:
+    """
+    This rule runs a program that is part of the HOMER tools suite. 
+    It outputs a list of gene identifiers using a bed file, a fasta file and a gtf file. 
+
+    More: http://homer.salk.edu/homer/ngs/annotation.html
+
+    Required parameters: 
+        config["qsub"]
+        config["dir"]["genome"]
+        config["genome"]["fasta_file"]
+        config["genome"]["gtf_file"]
+
+    Author: Claire Rioualen
+    """
+    input: 
+        bed = "{regions}.bed",
+        fasta = fasta_file,
+        gtf = gtf_file
+    output: "{regions}_gene_list.tab"
+    log: "{regions}_gene_list.log"
+    benchmark: "{regions}_gene_list_benchmark.json"
+    params: qsub = config["qsub"] + " -e {regions}_gene_list_qsub.err -o {regions}_gene_list_qsub.out"
+    run:
+        shell("annotatePeaks.pl {input.bed} {input.fasta} -gtf {input.gtf} -gid > {output}")
+        R("""
+tab <- read.table("{output}", sep="\t", header=T)
+gene_list <- unique(sort(tab[,"Nearest.PromoterID"]))
+write.table(gene_list, file="{output}", row.names=F, col.names=F, quote=F)
+""")
+
+
+
