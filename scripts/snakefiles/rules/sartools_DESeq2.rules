@@ -71,7 +71,8 @@ rule sartools_DESeq2:
     """
     input: 
         targetFile = "{diffexpr_dir}/{file_prefix}_SARTools_targetfile.txt"
-    output: "{diffexpr_dir}/DESeq2/{file_prefix}_DESeq2_report.html"
+    output: "{diffexpr_dir}/DESeq2/{file_prefix}_DESeq2_report.html",
+        gene_list = "{diffexpr_dir}/DESeq2/{file_prefix}_DESeq2_gene_list.tab"
     params:
         wd = "{diffexpr_dir}/DESeq2",
         targetFile = "{file_prefix}_SARTools_targetfile.txt",
@@ -91,10 +92,10 @@ rule sartools_DESeq2:
         typeTrans = config["DESeq2"]["typeTrans"],
         locfunc = config["DESeq2"]["locfunc"],
         qsub = config["qsub"] \
-          + " -e " + "{diffexpr_dir}/{file_prefix}_DESeq2_qsub.err" \
-          + " -o " + "{diffexpr_dir}/{file_prefix}_DESeq2_qsub.out"
-    log: "{diffexpr_dir}/{file_prefix}_DESeq2.log"
-    benchmark: "{diffexpr_dir}/{file_prefix}_DESeq2_benchmark.json"
+          + " -e " + "{diffexpr_dir}/DESeq2/{file_prefix}_DESeq2_qsub.err" \
+          + " -o " + "{diffexpr_dir}/DESeq2/{file_prefix}_DESeq2_qsub.out"
+    log: "{diffexpr_dir}/DESeq2/{file_prefix}_DESeq2.log"
+    benchmark: "{diffexpr_dir}/DESeq2/{file_prefix}_DESeq2_benchmark.json"
     run:
         R("""
 
@@ -172,6 +173,16 @@ rule sartools_DESeq2:
                            independentFiltering=independentFiltering, alpha=alpha, pAdjustMethod=pAdjustMethod,
                            typeTrans=typeTrans, locfunc=locfunc, colors=colors)
 
+        # get list of gene_ids of up/down genes
+        up <- as.vector(read.table(paste("tables/", list.files(path = "tables", pattern = "up.txt$"), sep=""))[,1])
+        down <- as.vector(read.table(paste("tables/", list.files(path = "tables", pattern = "down.txt$"), sep=""))[,1])
+
         setwd("{params.baseDir}")
+
+        gene_list <- c(up[2:length(up)], down[2:length(down)])
+        print(gene_list)
+        write.table(gene_list, file="{output.gene_list}", row.names=F, col.names=F, quote=F)
+
         sink()
         """)
+

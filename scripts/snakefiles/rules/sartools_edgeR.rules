@@ -63,7 +63,9 @@ rule sartools_edgeR:
     """
     input: 
         targetFile = "{diffexpr_dir}/{file_prefix}_SARTools_targetfile.txt"
-    output: "{diffexpr_dir}/edgeR/{file_prefix}_edgeR_report.html"
+    output: 
+        report = "{diffexpr_dir}/edgeR/{file_prefix}_edgeR_report.html",
+        gene_list = "{diffexpr_dir}/edgeR/{file_prefix}_edgeR_gene_list.tab"
     params:
         wd = "{diffexpr_dir}/edgeR",
         targetFile = "{file_prefix}_SARTools_targetfile.txt",
@@ -81,10 +83,10 @@ rule sartools_edgeR:
         gene_selection = config["edgeR"]["gene_selection"],
         normalizationMethod = config["edgeR"]["normalizationMethod"],
         qsub = config["qsub"] \
-          + " -e " + "{diffexpr_dir}/{file_prefix}_edgeR_qsub.err" \
-          + " -o " + "{diffexpr_dir}/{file_prefix}_edgeR_qsub.out"
-#    log: "{diffexpr_dir}/{file_prefix}_edgeR.log"
-#    benchmark: "{diffexpr_dir}/{file_prefix}_edgeR_benchmark.json"
+          + " -e " + "{diffexpr_dir}/DESeq2/{file_prefix}_edgeR_qsub.err" \
+          + " -o " + "{diffexpr_dir}/DESeq2/{file_prefix}_edgeR_qsub.out"
+    log: "{diffexpr_dir}/edgeR/{file_prefix}_edgeR.log"
+    benchmark: "{diffexpr_dir}/edgeR/{file_prefix}_edgeR_benchmark.json"
     run:
         R("""
 
@@ -161,7 +163,16 @@ rule sartools_edgeR:
                           condRef=condRef, batch=NULL, alpha=alpha, pAdjustMethod=pAdjustMethod, colors=colors,
                           gene.selection=gene.selection, normalizationMethod=normalizationMethod)
 
+        # get list of gene_ids of up/down genes
+        up <- as.vector(read.table(paste("tables/", list.files(path = "tables", pattern = "up.txt$"), sep=""))[,1])
+        down <- as.vector(read.table(paste("tables/", list.files(path = "tables", pattern = "down.txt$"), sep=""))[,1])
+
         setwd("{params.baseDir}")
+
+        gene_list <- c(up[2:length(up)], down[2:length(down)])
+        print(gene_list)
+        write.table(gene_list, file="{output.gene_list}", row.names=F, col.names=F, quote=F)
+
         sink()
         """)
 
