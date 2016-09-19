@@ -7,32 +7,32 @@
     Optional parameters, if not provided, are automatically set to the default value provided with the given program.
 
   author: "Claire Rioualen & Jacques van Helden"
-  qsub: "" 
+  qsub: "-V -m a -d ." 
   genome:
     organism: "Escherichia coli K12 MG1655"
-    version: "Ecoli_K12"                                                          # required. has to match genome filenames and directories
+    version: "Ecoli_K12"
     size: "4639221"
     fasta_file: Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.1.21.dna.genome.fa
     gff3_file: Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.1.21.gff3
     gtf_file: Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.1.21.gtf
 
   metadata:
-    samples: "gene-regulation/examples/ChIP-seq_SE_GSE41187/samples.tab"                         # required. has to contain at least sample ids
-    design: "gene-regulation/examples/ChIP-seq_SE_GSE41187/design.tab"                                      # required. has to contain at least ids of pairs of samples to be compared
-    configfile: "gene-regulation/examples/ChIP-seq_SE_GSE41187/config.yml"                # required for flowcharts generation; maybe this should be revised
-    seq_type: "se"                                      # required
+    samples: "gene-regulation/examples/ChIP-seq_SE_GSE41187/samples.tab"                            # required. has to contain at least sample ids
+    design: "gene-regulation/examples/ChIP-seq_SE_GSE41187/design.tab"                              # required. has to contain at least ids of pairs of samples to be compared
+    configfile: "gene-regulation/examples/ChIP-seq_SE_GSE41187/config.yml"                          # required for flowcharts generation; maybe this should be revised
+    seq_type: "se"                                                                                  # required
 
   dir:
-    base: "/data/analyses/ChIP-seq_SE_GSE41187"                                                               # required. ALL DIRECTORIES SHOULD BE SPECIFIED RELATIVE TO THE BASE DIRECTORY
-    reads_source: "data"                                             # required. dir containing raw data organized in sub directories named after the samples
+    base: "/data/analyses/ChIP-seq_SE_GSE41187"                                                     # required. ALL DIRECTORIES SHOULD BE SPECIFIED RELATIVE TO THE BASE DIRECTORY
+    reads_source: "data"                                                                            # required. dir containing raw data organized in sub directories named after the samples
     fastq: "fastq"
-    genome: "genome"                                                   # required. where to store genomes
-    results: "results_ChIP-seq"                                          # required. dir for all result files that are produced by the pipeline
-    gene_regulation: "gene-regulation"                                                                 # required. location of the snakemake library
+    genome: "genome"                                                                                # required. where to store genomes
+    results: "results_ChIP-seq"                                                                     # required. dir for all result files that are produced by the pipeline
+    gene_regulation: "gene-regulation"                                                              # required. location of the snakemake library
 
-    samples: "results/samples"                                  # optional. will hold sample treatment (trimming, alignment, QC...).    If not mentioned, will be config["dir"]["results"]
-    peaks: "results/peaks"                                      # optional. will hold the results of differential expression analysis. If not mentioned, will be config["dir"]["results"]
-    reports: "results/reports"                                          # optional. will hold reports and graphics.                             If not mentioned, will be config["dir"]["results"]
+    samples: "results/samples"                                                                      # optional. will hold sample treatment (trimming, alignment, QC...).    If not mentioned, will be config["dir"]["results"]
+    peaks: "results/peaks"                                                                          # optional. will hold the results of differential expression analysis. If not mentioned, will be config["dir"]["results"]
+    reports: "results/reports"                                                                      # optional. will hold reports and graphics.                             If not mentioned, will be config["dir"]["results"]
 
   tools:
     trimming: "sickle"
@@ -53,7 +53,7 @@
     other_options: "--nomodel"                                                  # opt, to be tested can include -bdg (time-consuming), -wig (time-consuming), --call-summits (requires PeakSplitter)
 
   macs2: 
-    qval: "0.0001"                                                               # optional (def. 0.05)
+    qval: "0.001"                                                               # optional (def. 0.05)
     keep_dup: "all"                                                             # optional (def. 1)
     mfold_min: "1"                                                              # optional (def. 5)
     mfold_max: "50"                                                             # optional (def. 50)
@@ -68,7 +68,7 @@
     F: "2"                                                                      # optional (def. 4)
     L: "2"                                                                      # optional (def. 4)
     P: "0.01"                                                                   # optional (def. 0.0001)
-    fdr: "0.001"                                                                 # optional (def. 0.001)
+    fdr: "0.01"                                                                 # optional (def. 0.001)
 
   spp: 
     fdr: "0.05"                                                                 # optional (def. 0.01)
@@ -82,9 +82,9 @@
     windowOverlap: "40"                                                         # optional (def. 50)
 
   peak-motifs: 
-    tasks: "all"                                                                                                   # optional (def. "all", incl. purge,seqlen,composition,ref_motifs,disco,meme,chipmunk,merge_words,motifs_vs_ref,motifs_vs_db,timelog,synthesis) (what about collect_motifs,motifs_vs_motifs,archive,small_summary,scan ?...)
-    max_seq_len: "0"                                                                                               # default ? curr not used
-    motif_db: "RegulonDB tf $RSAT/public_html/motif_databases/REGULONDB/regulonDB_2015-08-07.tf"                     # required. name format db_file
-    disco: "oligos,positions,dyads"                                                                                # default ? oligos|dyads|positions|local_words|merged_words|meme|chipmunk
+    tasks: "all"                                                                                                    # optional (def. "all", incl. purge,seqlen,composition,ref_motifs,disco,meme,chipmunk,merge_words,motifs_vs_ref,motifs_vs_db,timelog,synthesis) (what about collect_motifs,motifs_vs_motifs,archive,small_summary,scan ?...)
+    max_seq_len: "0"                                                                                                # default ? curr not used
+    motif_db: "RegulonDB tf $RSAT/public_html/motif_databases/REGULONDB/regulonDB_2015-08-07.tf"                    # required. name format db_file
+    disco: "oligos,positions,dyads"                                                                                 # default ? oligos|dyads|positions|local_words|merged_words|meme|chipmunk
 
 

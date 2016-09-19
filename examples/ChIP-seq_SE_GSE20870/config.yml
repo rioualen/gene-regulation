@@ -7,11 +7,11 @@
     Optional parameters, if not provided, are automatically set to the default value provided with the given program.
 
   author: "Claire Rioualen"
-  qsub: "-V -m a -d  ~/ChIP-seq_SE_GSE20870"  # qsub options, which should be adapted to the local configuration
+  qsub: "-V -m a -d ."
   genome:
     organism: "Saccharomyces cerevisiae"
-    size: "12500000"                                                            # required. if using macs2, macs14, homer...
-    version: "sacCer2"                                                          # required. has to match genome filenames and directories
+    size: "12500000"                                                                                        # required. if using macs2, macs14, homer...
+    version: "sacCer2"                                                                                      # required. has to match genome filenames and directories
     fasta_file: "Saccharomyces_cerevisiae.R64-1-1.30.dna.genome.fa"
     gff3_file: "Saccharomyces_cerevisiae.R64-1-1.30.gff3"
     gtf_file: "Saccharomyces_cerevisiae.R64-1-1.30.gtf"
@@ -24,21 +24,21 @@
     seq_type: "se"
 
   dir:
-    base: "~/ChIP-seq_SE_GSE20870"                                                               # required. ALL DIRECTORIES SHOULD BE SPECIFIED RELATIVE TO THE BASE DIRECTORY
-    reads_source: "data"                                             # required. dir containing raw data organized in sub directories named after the samples
+    base: "/data/analyses/ChIP-seq_SE_GSE20870"                                                             # required. ALL DIRECTORIES SHOULD BE SPECIFIED RELATIVE TO THE BASE DIRECTORY
+    reads_source: "data"                                                                                    # required. dir containing raw data organized in sub directories named after the samples
     fastq: "fastq"
-    genome: "genome"                                                   # required. where to store genomes
-    results: "results"                                          # required. dir for all result files that are produced by the pipeline
-    gene_regulation: "gene-regulation"                                                                 # required. location of the libraries
+    genome: "genome"                                                                                        # required. where to store genomes
+    results: "results"                                                                                      # required. dir for all result files that are produced by the pipeline
+    gene_regulation: "gene-regulation"                                                                      # required. location of the libraries
 
-    samples: "results/samples"                                  # optional. will hold sample treatment (trimming, alignment, QC...).    If not mentioned, will be config["dir"]["results"]
-    peaks: "results/peaks"                                      # optional. will hold comparison data (peak-calling, motifs search...). If not mentioned, will be config["dir"]["results"]
-    reports: "results/reports"                                          # optional. will hold reports and graphics.                             If not mentioned, will be config["dir"]["results"]
+    samples: "results/samples"                                                                              # optional. will hold sample treatment (trimming, alignment, QC...).    If not mentioned, will be config["dir"]["results"]
+    peaks: "results/peaks"                                                                                  # optional. will hold comparison data (peak-calling, motifs search...). If not mentioned, will be config["dir"]["results"]
+    reports: "results/reports"                                                                              # optional. will hold reports and graphics.                             If not mentioned, will be config["dir"]["results"]
 
   tools:
     trimming: "sickle"
-    mapping: "bowtie2 subread-align" # bwa bowtie
-
+    mapping: "bowtie2 subread-align"
+    
   fastqc: 
     other_options: ""                                                           # optional (def. empty string)
 
@@ -91,7 +91,7 @@
   peak-motifs: 
     tasks: "all"                                                                                                   # optional (def. "all", incl. purge,seqlen,composition,ref_motifs,disco,meme,chipmunk,merge_words,motifs_vs_ref,motifs_vs_db,timelog,synthesis) (what about collect_motifs,motifs_vs_motifs,archive,small_summary,scan ?...)
     max_seq_len: "0"                                                                                               # default ? curr not used
-    motif_db: "Yeastract tf $RSAT/public_html/motif_databases/Yeastract/yeastract_20150629.tf "                     # required. name format db_file
+    motif_db: "Yeastract tf $RSAT/public_html/motif_databases/Yeastract/yeastract_20150629.tf "                 # required. name format db_file
     disco: "oligos,positions,dyads"                                                                                # default ? oligos|dyads|positions|local_words|merged_words|meme|chipmunk
 
 

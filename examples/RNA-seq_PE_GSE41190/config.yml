@@ -38,8 +38,8 @@
 
   tools:                                                        # required
     trimming: ""
-    mapping: "bowtie2" #subread-align" # bwa" # bowtie2 bowtie"  # bowtie2"
-    diffexpr: "edgeR" #  DESeq2"
+    mapping: "bowtie2"
+    diffexpr: "edgeR DESeq2"
 
   fastqc: 
     other_options: ""                                                           # optional (def. empty string)
