@@ -1,3 +1,5 @@
+import sys
+
 # Set parameters
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
@@ -5,9 +7,19 @@ if not "qsub" in config.keys():
 if not "diffexpr" in config["dir"].keys():
     sys.exit("The parameter dir/diffexpr must be defined in the config file")
 
+if not "samples" in config["dir"].keys():
+    sys.exit("The parameter dir/samples must be defined in the config file")
+
+if not "samples" in config["metadata"].keys():
+    sys.exit("The parameter metadata/samples must be defined in the config file")
+
+SAMPLES = read_table(config["metadata"]["samples"])
+SAMPLE_IDS = SAMPLES.iloc[:,0]
+SAMPLE_CONDITIONS = read_table(config["metadata"]["samples"])['condition']
+
 # Define input files
 def targetfiles_inputs(wildcards):
-    count_files =  expand(SAMPLE_DIR + "{samples}/{samples}_{file_prefix}_featureCounts.txt", samples=SAMPLE_IDS, file_prefix=wildcards.file_prefix)
+    count_files =  expand(config["dir"]["samples"] + "/{samples}/{samples}_{file_prefix}_featureCounts.txt", samples=SAMPLE_IDS, file_prefix=wildcards.file_prefix)
     return count_files
 
 # Rule
@@ -33,6 +45,7 @@ rule sartools_targetfile:
     log: config["dir"]["diffexpr"] + "/{file_prefix}_targetfile.log"
     benchmark: config["dir"]["diffexpr"] + "/{file_prefix}_targetfile_benchmark.json"
     run:
+#        sys.stdout = open('{log}', 'w')
         f = open(output[0], "w+")
         f.write("label\tfiles\tgroup\n")
         for id in range(len(SAMPLE_IDS)):
@@ -40,6 +53,7 @@ rule sartools_targetfile:
             counts = expand(SAMPLE_IDS[id] + "/" + SAMPLE_IDS[id] + "_{file_prefix}_featureCounts.txt", file_prefix=wildcards.file_prefix)
             f.write(SAMPLE_IDS[id] + "\t" + counts[0] + "\t" + cond + "\n")
         f.close()
+#        sys.stdout.close()
 
 
 
