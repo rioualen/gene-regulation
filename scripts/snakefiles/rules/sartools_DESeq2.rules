@@ -57,7 +57,7 @@ rule sartools_DESeq2:
     Optional parameters:
         config["DESeq2"]["featuresToRemove"]
         config["DESeq2"]["varInt"]
-        config["DESeq2"]["condRef"]
+#        config["DESeq2"]["condRef"]
         config["DESeq2"]["alpha"]
         config["DESeq2"]["pAdjustMethod"]
         config["DESeq2"]["fitType"]
@@ -174,8 +174,8 @@ rule sartools_DESeq2:
                            typeTrans=typeTrans, locfunc=locfunc, colors=colors)
 
         # get list of gene_ids of up/down genes
-        up <- as.vector(read.table(paste("tables/", list.files(path = "tables", pattern = "up.txt$"), sep=""))[,1])
-        down <- as.vector(read.table(paste("tables/", list.files(path = "tables", pattern = "down.txt$"), sep=""))[,1])
+        up <- as.vector(read.table(paste("tables/", list.files(path = "tables", pattern = "up.txt$")[1], sep=""))[,1])
+        down <- as.vector(read.table(paste("tables/", list.files(path = "tables", pattern = "down.txt$")[1], sep=""))[,1])
 
         setwd("{params.baseDir}")
 
