@@ -1,5 +1,5 @@
 # France Genomique  Workpackage 2.6 - Gene Regulation  
-*Claire Rioualen - May 26th, 2016*
+*Claire Rioualen - Sept. 19th, 2016*
 
 This git repository holds shared code for the analysis of Next
 Generation Sequencing data related to gene regulation: ChIP-seq,
@@ -7,8 +7,6 @@ RNA-seq, and related technologies.
 
 We have chosen to use the [Snakemake workflow management system](https://bitbucket.org/snakemake/snakemake/wiki/Home)[1] 
 in order to build reproducible and flexible NGS analysis pipelines.
-
-**Full tutorials** can be found in the `doc` section, including the creation of a virtual machine/docker container, the installation of the tools and dependencies and the execution of the workflows: [`doc/gene-regulation_tutorials`](doc/gene-regulation_tutorials).
 
 # Snakemake workflows
 
@@ -23,17 +21,14 @@ Here, we present a repository of reusable NGS-specific rules, as well as a few w
 
 # Workflow example
 
-Our workflows are meant to work using four main files: 
+In the [example directory](https://github.com/rioualen/gene-regulation/blob/master/examples) you will find several case studies. Each study includes the following files:
 
-* a so-called workflow file (\*.py) specific to the type of study (factor in a ChIP-seq study, differential analysis in an RNA-seq study...)
-* three files of metadata related to a particular study case:
-    * a configuration file (\*yml) that contains the necessary paths and parameters
-    * `samples.tab` contains a list of sample IDs, and possibly any additional info on samples
-    * `design.tab` contains the samples to be compared (typically, pairs of ChIP/input in a ChIP-seq study)
+  * `config.yml`, a configuration file that contains the necessary paths and parameters
+  * `samples.tab` contains a list of sample IDs, and possibly any additional info on samples
+  * `design.tab` contains the samples to be compared (typically, pairs of ChIP/input in a ChIP-seq study)
+  * `README.md`, a file describing how to execute the corresponding workflow
 
-Here, we will show how to execute the ChIP-seq workflow [`factor_workflow.py`](https://github.com/rioualen/gene-regulation/blob/master/scripts/snakefiles/workflows/factor_workflow.py).
-
-In the [example directory](https://github.com/rioualen/gene-regulation/blob/master/examples) you will find several case studies. We will use the `GSE20870` yeast study.
+<!--We will use the `GSE20870` yeast study.
 
 In order to execute it, you should create a directory dedicated to the analysis and get inside.
 ```
@@ -83,11 +78,15 @@ You can now run the workflow by typing, from the analysis directory:
 cd GSE20870_analysis
 snakemake -p -s gene-regulation/scripts/snakefiles/workflows/factor_workflow.py --configfile gene-regulation/exampels/GSE20870/GSE20870.yml
 ```
+-->
 
 The workflow generates a flowchart of the analysis:
 
-![alt text](img/rule.png)
+![](img/rule.png)
 
+# Virtualization
+
+**Full tutorials** can be found in the `doc` section, including the creation of a virtual machine/docker container, the installation of all the tools and dependencies and the execution of the workflows: [`doc/gene-regulation_tutorials`](doc/gene-regulation_tutorials).
 
 # Purpose of this repository
 
