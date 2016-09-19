@@ -5,6 +5,17 @@ This git repository holds shared code for the analysis of Next
 Generation Sequencing data related to gene regulation: ChIP-seq,
 RNA-seq, and related technologies. 
 
+The goals are multiple.
+
+1. Avoid duplication of efforts by sharing the developments of
+different bioinformaticians involved in ChIP-seq and RNA-seq projects.
+
+2. Ensure portability and re-usability of the code.
+
+3. Enable validation of the code by independent users.
+
+
+
 We have chosen to use the [Snakemake workflow management system](https://bitbucket.org/snakemake/snakemake/wiki/Home)[1] 
 in order to build reproducible and flexible NGS analysis pipelines.
 
@@ -27,6 +38,8 @@ In the [example directory](https://github.com/rioualen/gene-regulation/blob/mast
   * `samples.tab` contains a list of sample IDs, and possibly any additional info on samples
   * `design.tab` contains the samples to be compared (typically, pairs of ChIP/input in a ChIP-seq study)
   * `README.md`, a file describing how to execute the corresponding workflow
+
+Follow the instructions in the `README.md` file in order to execute the whole workflow. 
 
 <!--We will use the `GSE20870` yeast study.
 
@@ -88,27 +101,14 @@ The workflow generates a flowchart of the analysis:
 
 **Full tutorials** can be found in the `doc` section, including the creation of a virtual machine/docker container, the installation of all the tools and dependencies and the execution of the workflows: [`doc/gene-regulation_tutorials`](doc/gene-regulation_tutorials).
 
-# Purpose of this repository
-
-This git repository holds shared code for the analysis of Next
-Generation Sequencing data related to gene regulation: ChIP-seq,
-RNA-seq, and related technologies.
-
-The goals are multiple.
-
-1. Avoid duplication of efforts by sharing the developments of
-different bioinformaticians involved in ChIP-seq and RNA-seq projects.
-
-2. Ensure portability and re-usability of the code.
-
-3. Enable validation of the code by independent users.
-
+These tutorials have been developed for ChIP-seq studies; however RNA-seq pipelines are soon to be included. 
 
 # Pre-requisites
 
 We recommand using one of our [tutorials on virtualization](doc/gene-regulation_tutorials), in order to run the workflows under a unix system without damaging your installation. 
 
 However, this repository contains a makefile that installs all the tools and dependencies used by gene-regulation. 
+*[NB currently only ChIP-seq dependencies are included, RNA-seq specific tools are to be included soon.]*
 
 ```
 make -f gene-regulation/scripts/makefiles/install_tools_and_libs.mk all
