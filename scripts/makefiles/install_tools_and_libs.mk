@@ -57,13 +57,15 @@ usage:
 
 UBUNTU_VER_NAME="trusty"
 CRAN_MIRROR="http://cran.univ-lyon1.fr"
-CRAN_PACK_LIST='XML', 'bPeaks', 'caTools'
-BIOC_PACK_LIST='affy', 'biomaRt', 'Rsamtools', 'edgeR', 'DESqe2', 'GenomicFeatures'
+CRAN_PACK_LIST='XML', 'bPeaks', 'caTools', 'VennDiagram', 'devtools'
+BIOC_PACK_LIST='affy', 'biomaRt', 'Rsamtools', 'genefilter', 'edgeR', 'DESeq2', 'GenomicFeatures', 'ChIPseeker'
 PUB_KEY=51716619E084DAB9 F7B8CEA6056E8E56
 
+BEDOPS_VER=2.4.19
 BEDTOOLS_VER=2.24.0
 BOWTIE1_VER=1.1.1
 BOWTIE2_VER=2.2.6
+CUFFLINKS_VER=2.2.1
 FASTQC_VER=0.11.5
 IGV_VER=2.3.59
 IGVTOOLS_VER=2.3.57
@@ -76,6 +78,7 @@ SAMTOOLS_VER=1.3
 SRATOOLKIT_VER=2.5.2
 SCIPY_VER=0.16.0
 SPP_VER=1.11
+STAR_VER=2.5.2b
 SUBREAD_VER=1.5.0
 SWEMBL_VER=3.3.1
 
@@ -157,7 +160,8 @@ R_lib:
 	source('http://bioconductor.org/biocLite.R'); \
 	pack.list <- c($(BIOC_PACK_LIST)); \
 	pack <- pack.list[!(pack.list %in% installed.packages()[,'Package'])]; \
-	if(length(pack)) biocLite(pack)"
+	if(length(pack)) biocLite(pack)
+	install_github("PF2-pasteur-fr/SARTools", build_vignettes=TRUE)"
 
 Rstudio: 
 	sudo apt-get install -y libjpeg62
@@ -173,6 +177,7 @@ python:
 	sudo pip install numpy
 	sudo pip3 install snakemake docutils pandas
 	sudo pip3 install pyyaml
+	sudo pip install pyBigWig
 
 
 ubuntu_packages: add_pub_key add_repos add_packages
@@ -188,7 +193,6 @@ R: R_installation R_lib Rstudio
 # File management tools
 # ----------------------------------------------------------------
 
-## Install samtools
 samtools:
 	cd $(SOURCE_DIR);\
 	wget --no-clobber http://sourceforge.net/projects/samtools/files/samtools/$(SAMTOOLS_VER)/samtools-$(SAMTOOLS_VER).tar.bz2;\
@@ -212,13 +216,19 @@ sratoolkit:
 	tar xzf sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz; \
 	cp `find sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin -maxdepth 1 -executable -type l` $(BIN_DIR)
 
-## todo
-#bedops
-#wget https://github.com/bedops/bedops/releases/download/v2.4.19/bedops_linux_x86_64-v2.4.19.tar.bz2
-#tar jxvf bedops_linux_x86_64-v2.4.19.tar.bz2
-#mkdir bedops
-#mv bin bedops
-#cp bedops/bin/* /usr/local/bin
+bedops:
+	cd $(SOURCE_DIR); \
+	wget -nc https://github.com/bedops/bedops/releases/download/v$(BEDOPS_VER)/bedops_linux_x86_64-v$(BEDOPS_VER).tar.bz2; \
+	tar jxvf bedops_linux_x86_64-v$(BEDOPS_VER).tar.bz2; \
+	mkdir bedops; \
+	mv bin bedops; \
+	cp bedops/bin/* $(BIN_DIR)
+
+deeptools:
+	cd $(SOURCE_DIR); \
+	git clone https://github.com/fidelram/deepTools; \
+	cd deepTools; \
+	python setup.py install; \
 
 
 # ----------------------------------------------------------------
@@ -239,9 +249,6 @@ sickle:
 	make; \
 	cp sickle $(BIN_DIR)
 
-## todo or not todo
-# Trimmomatic
-
 
 # ----------------------------------------------------------------
 # Mapping tools
@@ -258,10 +265,10 @@ bowtie2:
 	wget --no-clobber http://downloads.sourceforge.net/project/bowtie-bio/bowtie2/$(BOWTIE2_VER)/bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
 	unzip bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
 	cp `find bowtie2-$(BOWTIE2_VER)/ -maxdepth 1 -executable -type f` $(BIN_DIR)
+
 bwa:
 	sudo apt-get -y install bwa
 #	wget -nc https://sourceforge.net/projects/bio-bwa/files/bwa-$(BWA_VER).tar.bz2; \
-
 
 subread:
 	cd $(SOURCE_DIR); \
@@ -272,21 +279,22 @@ subread:
 	cd ../bin; \
 	cp `find * -executable -type f` $(BIN_DIR)
 
-#star:
-#	wget -nc https://github.com/alexdobin/STAR/archive/2.5.2a.tar.gz
-#	tar xvzf 2.5.2a.tar.gz
-#	cd STAR-2.5.2a
-#	make STAR
-# todo $PATH
+star:
+	cd $(SOURCE_DIR); \
+	wget -nc https://github.com/alexdobin/STAR/archive/$(STAR_VER).tar.gz; \
+	tar xvzf $(STAR_VER).tar.gz; \
+	cd STAR-$(STAR_VER); \
+	make STAR
 
 
-#tophat2_install:
-#	@wget --no-clobber https://ccb.jhu.edu/software/tophat/downloads/tophat-$(TOPHAT_VER).Linux_x86_64.tar.gz;\
-#	tar xvfz tophat-$(TOPHAT_VER).Linux_x86_64.tar.gz;\
-#	cd tophat-$(TOPHAT_VER).Linux_x86_64; \
-#	rm -Rf AUTHORS LICENSE README intervaltree/ sortedcontainers/; \
-#	mv ./* /usr/local/bin;\
-#	cd ..; rm -Rf tophat-$(TOPHAT_VER).Linux_x86_64*
+tophat2:
+	cd $(SOURCE_DIR); \
+	wget --no-clobber https://ccb.jhu.edu/software/tophat/downloads/tophat-$(TOPHAT_VER).Linux_x86_64.tar.gz;\
+	tar xvfz tophat-$(TOPHAT_VER).Linux_x86_64.tar.gz;\
+	cd tophat-$(TOPHAT_VER).Linux_x86_64; \
+	rm -Rf AUTHORS LICENSE README intervaltree/ sortedcontainers/; \
+	mv ./* $(BIN_DIR); \
+	cd ..; rm -Rf tophat-$(TOPHAT_VER).Linux_x86_64*
 
 
 # ----------------------------------------------------------------
@@ -335,11 +343,22 @@ homer:
 	perl configureHomer.pl -install homer; \
 	cp `find $(SOURCE_DIR)/homer/bin -maxdepth 1 -executable -type f` $(BIN_DIR)
 
+# ----------------------------------------------------------------
+# RNA-seq diffexpr analysis
+# ----------------------------------------------------------------
 
-ngs_tools: samtools bedtools sratoolkit \
+cufflinks:
+	cd $(SOURCE_DIR);\
+	wget -nc http://cole-trapnell-lab.github.io/cufflinks/assets/downloads/cufflinks-$(CUFFLINKS_VER).Linux_x86_64.tar.gz
+	tar xvzf cufflinks-$(CUFFLINKS_VER).Linux_x86_64.tar.gz
+	cp `find $(SOURCE_DIR)/cufflinks-$(CUFFLINKS_VER).Linux_x86_64/ -maxdepth 1 -executable -type f` $(BIN_DIR)
+
+
+ngs_tools: samtools bedtools sratoolkit bedops deeptools\
 	fastqc sickle \
-	bowtie bowtie2 bwa subread \
-	macs1 macs2 spp homer
+	bowtie bowtie2 bwa subread tophat2 star \
+	macs1 macs2 spp homer \
+	cufflinks
 
 
 # ================================================================
@@ -377,8 +396,6 @@ desktop_and_x2go:
 	sudo apt-get install -y mate-desktop-environment-extra
 	sudo apt-get install -y mate-notification-daemon caja-gksu caja-open-terminal
 	sudo apt-get install -y ambiance-colors radiance-colors
-
-
 
 
 # ================================================================
