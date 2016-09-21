@@ -14,9 +14,9 @@ Access link
 
 export ANALYSIS_DIR=/data/analyses/ChIP-seq_SE_GSE20870
 
-mkdir -p ${ANALYSIS_DIR}
-mkdir -p ${ANALYSIS_DIR}/data 
-mkdir -p ${ANALYSIS_DIR}/genome
+<!--mkdir -p ${ANALYSIS_DIR}-->
+<!--mkdir -p ${ANALYSIS_DIR}/data -->
+<!--mkdir -p ${ANALYSIS_DIR}/genome-->
 
 cd ${ANALYSIS_DIR}
 <!--git clone https://github.com/rioualen/gene-regulation.git-->
@@ -24,7 +24,7 @@ ln -s ~/Desktop/workspace/gene-regulation gene-regulation
 
 ## Download data
 
-mkdir -p ${ANALYSIS_DIR}/data/GSM521934 ${ANALYSIS_DIR}/data/GSM521935
+<!--mkdir -p ${ANALYSIS_DIR}/data/GSM521934 ${ANALYSIS_DIR}/data/GSM521935-->
 wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021358/SRR051929/SRR051929.sra -P ${ANALYSIS_DIR}/data/GSM521934
 wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra -P ${ANALYSIS_DIR}/data/GSM521935
 
