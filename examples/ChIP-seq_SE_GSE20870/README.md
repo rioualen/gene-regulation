@@ -2,13 +2,13 @@
 
 **Reference**
 
-    Preti M, Ribeyre C, Pascali C, Bosio MC et al. 
-    The telomere-binding protein Tbf1 demarcates snoRNA gene promoters in Saccharomyces cerevisiae. 
-    Mol Cell 2010 May 28;38(4):614-20. PMID: 20513435
+Preti M, Ribeyre C, Pascali C, Bosio MC et al. 
+The telomere-binding protein Tbf1 demarcates snoRNA gene promoters in Saccharomyces cerevisiae. 
+Mol Cell 2010 May 28;38(4):614-20. PMID: 20513435
 
 **Access link**
 
-    http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE20870
+http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE20870
 
 ## Setup analysis environment
 ```
