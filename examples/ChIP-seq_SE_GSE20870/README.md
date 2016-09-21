@@ -20,6 +20,8 @@ ANALYSIS_DIR=$HOME/ChIP-seq_SE_GSE20870
 ```
 mkdir -p ${ANALYSIS_DIR}
 cd ${ANALYSIS_DIR}
+git clone https://github.com/rioualen/gene-regulation.git
+
 ln -s ~/Desktop/workspace/gene-regulation gene-regulation
 ```
 <!--git clone https://github.com/rioualen/gene-regulation.git-->
