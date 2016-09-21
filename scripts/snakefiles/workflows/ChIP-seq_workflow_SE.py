@@ -297,7 +297,7 @@ rule all:
 #            PEAKS, \
 #            GENOMIC_FEAT, \
             GENE_LIST, \
-            PEAK_MOTIFS, \
+#            PEAK_MOTIFS, \
 #            IGV, \
             GRAPHICS
 	params: qsub=config["qsub"]
