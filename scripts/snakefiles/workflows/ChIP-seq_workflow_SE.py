@@ -153,6 +153,7 @@ include: os.path.join(RULES, "getfasta.rules")
 include: os.path.join(RULES, "get_chrom_sizes.rules")
 include: os.path.join(RULES, "gzip.rules")
 include: os.path.join(RULES, "homer.rules")
+include: os.path.join(RULES, "igv_session.rules")
 include: os.path.join(RULES, "index_bam.rules")
 include: os.path.join(RULES, "macs2.rules")
 include: os.path.join(RULES, "macs14.rules")
@@ -269,7 +270,7 @@ GENOME_COVERAGE_BIGWIG = expand("{alignment}.bw", alignment=ALIGNMENT)
 
 
 ## Following not yet properly implemented
-#IGV = expand(REPORTS_DIR + "igv_session.xml")
+IGV = expand(REPORTS_DIR + "igv_session.xml")
 #BED_INTER = expand(REPORTS_DIR + "multiinter.tab")
 
 
@@ -290,13 +291,14 @@ rule all:
 #            SORTED_BAM, \
             BAM_STATS, \
 #            SORTED_BAM_BAI, \
-            GENOME_COVERAGE_TDF, \
-            GENOME_COVERAGE_BIGWIG, \
+            GENOME_COVERAGE_GZ, \
+#            GENOME_COVERAGE_BIGWIG, \
 #            SORTED_BED, \
 #            PEAKS, \
 #            GENOMIC_FEAT, \
             GENE_LIST, \
             PEAK_MOTIFS, \
+#            IGV, \
             GRAPHICS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
