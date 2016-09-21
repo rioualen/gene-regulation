@@ -93,7 +93,7 @@ snakemake -p -s gene-regulation/scripts/snakefiles/workflows/factor_workflow.py 
 ```
 -->
 
-The workflow generates a flowchart of the analysis:
+The workflow can generate a flowchart of the analysis, here is the chart for ChIP-seq_SE_GSE20870 study case:
 
 ![](img/rule.png)
 
