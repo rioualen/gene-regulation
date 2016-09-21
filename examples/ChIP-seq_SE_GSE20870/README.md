@@ -12,7 +12,7 @@ http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE20870
 
 ## Setup analysis environment
 ```
-ANALYSIS_DIR=/data/analyses/ChIP-seq_SE_GSE20870
+ANALYSIS_DIR=$HOME/ChIP-seq_SE_GSE20870
 ```
 <!--mkdir -p ${ANALYSIS_DIR}-->
 <!--mkdir -p ${ANALYSIS_DIR}/data -->
