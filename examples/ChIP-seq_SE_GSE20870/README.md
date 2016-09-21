@@ -14,10 +14,11 @@ http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE20870
 ```
 ANALYSIS_DIR=$HOME/ChIP-seq_SE_GSE20870
 ```
-<!--mkdir -p ${ANALYSIS_DIR}-->
+
 <!--mkdir -p ${ANALYSIS_DIR}/data -->
 <!--mkdir -p ${ANALYSIS_DIR}/genome-->
 ```
+mkdir -p ${ANALYSIS_DIR}
 cd ${ANALYSIS_DIR}
 ln -s ~/Desktop/workspace/gene-regulation gene-regulation
 ```
