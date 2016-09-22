@@ -54,5 +54,7 @@ gunzip ${ANALYSIS_DIR}/genome/*.gz
 
 snakemake -s ${ANALYSIS_DIR}/gene-regulation/scripts/snakefiles/workflows/RNA-seq_workflow_SE.py -p -j 5 --configfile ${ANALYSIS_DIR}/gene-regulation/examples/RNA-seq_SE_GSE71562/config.yml
 
+## Rulegraph
 
+![](rulegraph.png)
 
