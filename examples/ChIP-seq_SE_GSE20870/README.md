@@ -1,3 +1,6 @@
+---
+output: pdf_document
+---
 # The telomere-binding protein Tbf1 demarcates snoRNA gene promoters in Saccharomyces cerevisiae
 
 **Reference**
@@ -48,3 +51,6 @@ gunzip ${ANALYSIS_DIR}/genome/*.gz
 ```
 snakemake -s ${ANALYSIS_DIR}/gene-regulation/scripts/snakefiles/workflows/ChIP-seq_workflow_SE.py -p -j 5 --configfile ${ANALYSIS_DIR}/gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml
 ```
+## Rulegraph
+
+![](rulegraph.png)
