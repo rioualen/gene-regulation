@@ -2,26 +2,7 @@
 title: "Getting your hands on Snakemake"
 author: "Claire Rioualen"
 date: "April 13, 2016"
-output:
-  html_document:
-    fig_caption: yes
-    highlight: zenburn
-    number_sections: yes
-    theme: cerulean
-    toc: yes
-    toc_depth: 4
-    toc_float: yes
-  pdf_document:
-    fig_caption: yes
-    highlight: zenburn
-    number_sections: yes
-    toc: yes
-    toc_depth: 4
-  word_document:
-    toc: yes
-    toc_depth: 4
 ---
-
 
 # Introduction 
 
