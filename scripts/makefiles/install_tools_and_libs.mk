@@ -281,12 +281,12 @@ subread:
 	cd ../bin; \
 	cp `find * -executable -type f` $(BIN_DIR)
 
-star:
-	cd $(SOURCE_DIR); \
-	wget -nc https://github.com/alexdobin/STAR/archive/$(STAR_VER).tar.gz; \
-	tar xvzf $(STAR_VER).tar.gz; \
-	cd STAR-$(STAR_VER); \
-	make STAR
+#star:
+#	cd $(SOURCE_DIR); \
+#	wget -nc https://github.com/alexdobin/STAR/archive/$(STAR_VER).tar.gz; \
+#	tar xvzf $(STAR_VER).tar.gz; \
+#	cd STAR-$(STAR_VER); \
+#	make STAR
 
 
 tophat2:
