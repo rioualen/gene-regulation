@@ -58,7 +58,7 @@ usage:
 UBUNTU_VER_NAME='trusty'
 CRAN_MIRROR='http://cran.univ-lyon1.fr'
 CRAN_PACK_LIST='XML', 'bPeaks', 'caTools', 'VennDiagram', 'devtools'
-BIOC_PACK_LIST='affy', 'biomaRt', 'Rsamtools', 'genefilter', 'edgeR', 'DESeq2', 'GenomicFeatures', 'ChIPseeker'
+BIOC_PACK_LIST='affy', 'biomaRt', 'Rsamtools', 'genefilter', 'edgeR', 'DESeq2', 'GenomicFeatures'
 PUB_KEY=51716619E084DAB9 F7B8CEA6056E8E56
 
 BEDOPS_VER=2.4.19
@@ -160,7 +160,7 @@ R_lib:
 	source('http://bioconductor.org/biocLite.R'); \
 	pack.list <- c($(BIOC_PACK_LIST)); \
 	pack <- pack.list[!(pack.list %in% installed.packages()[,'Package'])]; \
-	if(length(pack)) biocLite(pack)
+	if(length(pack)) biocLite(pack); \
 	install_github('PF2-pasteur-fr/SARTools', build_vignettes=TRUE)"
 
 Rstudio: 
