@@ -147,7 +147,7 @@ add_packages:
 	sudo apt-get -y install gdebi												# required by rstudio install
 
 R_installation:
-	sudo echo "deb http://cran.univ-lyon1.fr/bin/linux/ubuntu/trusty/" >> /etc/apt/sources.list
+	sudo echo "deb http://cran.univ-lyon1.fr/bin/linux/ubuntu trusty" >> /etc/apt/sources.list
 	sudo apt-get update
 	sudo apt-get -y install r-base r-base-dev libcurl4-openssl-dev libxml2-dev
 	echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);" >> ~/.Rprofile
