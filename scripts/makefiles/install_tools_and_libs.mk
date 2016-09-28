@@ -161,7 +161,7 @@ R_lib:
 	pack.list <- c($(BIOC_PACK_LIST)); \
 	pack <- pack.list[!(pack.list %in% installed.packages()[,'Package'])]; \
 	if(length(pack)) biocLite(pack)
-	install_github("PF2-pasteur-fr/SARTools", build_vignettes=TRUE)"
+	install_github('PF2-pasteur-fr/SARTools', build_vignettes=TRUE)"
 
 Rstudio: 
 	sudo apt-get install -y libjpeg62
