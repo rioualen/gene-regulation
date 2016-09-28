@@ -58,7 +58,7 @@ usage:
 UBUNTU_VER_NAME='trusty'
 CRAN_MIRROR='http://cran.univ-lyon1.fr'
 CRAN_PACK_LIST='XML', 'bPeaks', 'caTools', 'VennDiagram', 'devtools'
-BIOC_PACK_LIST='affy', 'biomaRt', 'Rsamtools', 'genefilter', 'edgeR', 'DESeq2', 'GenomicFeatures'
+BIOC_PACK_LIST='affy', 'biomaRt', 'Rsamtools', 'genefilter', 'GenomicFeatures', 'edgeR', 'DESeq2'
 PUB_KEY=51716619E084DAB9 F7B8CEA6056E8E56
 
 BEDOPS_VER=2.4.19
