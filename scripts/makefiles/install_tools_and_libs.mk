@@ -55,8 +55,7 @@ usage:
 
 ## Tool & versions
 
-UBUNTU_VER_NAME='trusty'
-CRAN_MIRROR='http://cran.univ-lyon1.fr'
+
 CRAN_PACK_LIST='XML', 'bPeaks', 'caTools', 'VennDiagram', 'devtools'
 BIOC_PACK_LIST='affy', 'biomaRt', 'Rsamtools', 'genefilter', 'GenomicFeatures', 'edgeR', 'DESeq2'
 PUB_KEY=51716619E084DAB9 F7B8CEA6056E8E56
@@ -148,10 +147,12 @@ add_packages:
 	sudo apt-get -y install gdebi												# required by rstudio install
 
 R_installation:
-	sudo echo "deb $(CRAN_MIRROR)/bin/linux/ubuntu $(UBUNTU_VER_NAME)/" >> /etc/apt/sources.list
+	sudo echo "deb http://cran.univ-lyon1.fr/bin/linux/ubuntu/trusty/" >> /etc/apt/sources.list
 	sudo apt-get update
 	sudo apt-get -y install r-base r-base-dev libcurl4-openssl-dev libxml2-dev
 	echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);" >> ~/.Rprofile
+
+
 
 R_lib: 
 	sudo Rscript -e "pack.list <- c($(CRAN_PACK_LIST)); \
