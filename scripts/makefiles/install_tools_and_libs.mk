@@ -361,7 +361,7 @@ ngs_tools: samtools bedtools sratoolkit bedops deeptools\
 	fastqc sickle \
 	bowtie bowtie2 bwa subread tophat2 \
 	macs1 macs2 homer \
-	cufflinks
+#	cufflinks
 
 
 # ================================================================
