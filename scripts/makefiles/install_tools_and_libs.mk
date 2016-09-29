@@ -166,6 +166,7 @@ R_lib:
 	install_github('PF2-pasteur-fr/SARTools', build_vignettes=TRUE)"
 
 Rstudio: 
+	cd $(SOURCE_DIR);\
 	sudo apt-get install -y libjpeg62
 	wget --no-clobber https://download1.rstudio.org/rstudio-$(RSTUDIO_VER)-amd64.deb
 	yes | sudo gdebi rstudio-$(RSTUDIO_VER)-amd64.deb
