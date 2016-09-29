@@ -143,7 +143,7 @@ add_packages:
 	sudo apt-get -y install zlibc zlib1g-dev									# Required by sickle, bamtools, samtools...
 	sudo apt-get -y install build-essential										# Includes gcc compiler
 	sudo apt-get -y install libncurses5-dev libncursesw5-dev					# Required at least by samtools
-	sudo apt-get -y install libboost-dev										# might me required for spp, to be checked
+	sudo apt-get -y install libboost-dev										# might be required for spp, to be checked
 	sudo apt-get -y install gdebi												# required by rstudio install
 
 R_installation:
@@ -322,10 +322,10 @@ macs1:
 macs2:
 	sudo pip install MACS2
 
-spp:
-	cd $(SOURCE_DIR);\
-	wget -nc http://compbio.med.harvard.edu/Supplements/ChIP-seq/spp_$(SPP_VER).tar.gz;\
-	sudo R CMD INSTALL spp_$(SPP_VER).tar.gz
+#spp:
+#	cd $(SOURCE_DIR);\
+#	wget -nc http://compbio.med.harvard.edu/Supplements/ChIP-seq/spp_$(SPP_VER).tar.gz;\
+#	sudo R CMD INSTALL spp_$(SPP_VER).tar.gz
 
 ## Currently not working -> see w/ S.Wilder, new version to come?
 #swembl:
@@ -360,7 +360,7 @@ cufflinks:
 ngs_tools: samtools bedtools sratoolkit bedops deeptools\
 	fastqc sickle \
 	bowtie bowtie2 bwa subread tophat2 \
-	macs1 macs2 spp homer \
+	macs1 macs2 homer \
 	cufflinks
 
 
