@@ -357,10 +357,22 @@ homer:
 #	cp `find $(SOURCE_DIR)/cufflinks-$(CUFFLINKS_VER).Linux_x86_64/ -maxdepth 1 -executable -type f` $(BIN_DIR);\
 
 
-ngs_tools: samtools bedtools sratoolkit bedops deeptools\
-	fastqc sickle \
-	bowtie bowtie2 bwa subread tophat2 \
-	macs1 macs2 homer \
+ngs_tools: \
+	samtools\
+	bedtools\
+	sratoolkit\
+	bedops\
+	deeptools\
+	fastqc\
+	sickle\
+	bowtie\
+	bowtie2\
+	bwa\
+	subread\
+	tophat2\
+	macs1\
+	macs2\
+	homer\
 
 
 # ================================================================
@@ -405,10 +417,10 @@ desktop_and_x2go:
 # ================================================================
 
 all: \
-	init \
-	ubuntu_packages \
-	R \
-	python \
-	ngs_tools \
-	visualization \
+	init\
+	ubuntu_packages\
+	R\
+	python\
+	ngs_tools\
+	visualization\
 
