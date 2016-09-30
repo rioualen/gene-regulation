@@ -163,14 +163,14 @@ R_lib:
 	pack <- pack.list[!(pack.list %in% installed.packages()[,'Package'])]; \
 	if(length(pack)) biocLite(pack); \
 	library(devtools); \
-	install_github('PF2-pasteur-fr/SARTools', build_vignettes=TRUE)"
+	install_github('PF2-pasteur-fr/SARTools', build_vignettes=TRUE)";\
 
 Rstudio: 
 	cd $(SOURCE_DIR);\
 	sudo apt-get install -y libjpeg62
 	wget --no-clobber https://download1.rstudio.org/rstudio-$(RSTUDIO_VER)-amd64.deb
 	yes | sudo gdebi rstudio-$(RSTUDIO_VER)-amd64.deb
-	rm -f rstudio-$(RSTUDIO_VER)-amd64.deb
+	rm -f rstudio-$(RSTUDIO_VER)-amd64.deb;\
 
 python: 
 	sudo apt-get -y install python-pip python-dev
@@ -203,7 +203,7 @@ samtools:
 	tar xvf samtools-$(SAMTOOLS_VER).tar;\
 	cd samtools-$(SAMTOOLS_VER); \
 	make ;\
-	sudo make install
+	sudo make install;\
 
 bedtools:
 	cd $(SOURCE_DIR);\
@@ -211,13 +211,13 @@ bedtools:
 	tar xvfz bedtools-$(BEDTOOLS_VER).tar.gz;\
 	cd bedtools2; \
 	make; \
-	sudo make install
+	sudo make install;\
 
 sratoolkit:
 	cd $(SOURCE_DIR); \
 	wget -nc http://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/$(SRATOOLKIT_VER)/sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz; \
 	tar xzf sratoolkit.$(SRATOOLKIT_VER)-ubuntu64.tar.gz; \
-	cp `find sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin -maxdepth 1 -executable -type l` $(BIN_DIR)
+	cp `find sratoolkit.$(SRATOOLKIT_VER)-ubuntu64/bin -maxdepth 1 -executable -type l` $(BIN_DIR);\
 
 bedops:
 	cd $(SOURCE_DIR); \
@@ -225,7 +225,7 @@ bedops:
 	tar jxvf bedops_linux_x86_64-v$(BEDOPS_VER).tar.bz2; \
 	mkdir bedops; \
 	mv bin bedops; \
-	cp bedops/bin/* $(BIN_DIR)
+	cp bedops/bin/* $(BIN_DIR);\
 
 deeptools:
 	cd $(SOURCE_DIR); \
@@ -243,14 +243,14 @@ fastqc:
 	wget --no-clobber http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v$(FASTQC_VER).zip;\
 	unzip -o fastqc_v$(FASTQC_VER).zip; \
 	chmod +x FastQC/fastqc; \
-	ln -s -f $(SOURCE_DIR)/FastQC/fastqc $(BIN_DIR)/fastqc
+	ln -s -f $(SOURCE_DIR)/FastQC/fastqc $(BIN_DIR)/fastqc;\
 
 sickle: 
 	cd $(SOURCE_DIR); \
 	git clone https://github.com/najoshi/sickle.git; \
 	cd sickle;\
 	make; \
-	cp sickle $(BIN_DIR)
+	cp sickle $(BIN_DIR);\
 
 
 # ----------------------------------------------------------------
@@ -261,16 +261,16 @@ bowtie:
 	cd $(SOURCE_DIR); \
 	wget --no-clobber http://downloads.sourceforge.net/project/bowtie-bio/bowtie/$(BOWTIE1_VER)/bowtie-$(BOWTIE1_VER)-linux-x86_64.zip;\
 	unzip bowtie-$(BOWTIE1_VER)-linux-x86_64.zip;\
-	cp `find bowtie-$(BOWTIE1_VER)/ -maxdepth 1 -executable -type f` $(BIN_DIR)
+	cp `find bowtie-$(BOWTIE1_VER)/ -maxdepth 1 -executable -type f` $(BIN_DIR);\
 
 bowtie2:
 	cd $(SOURCE_DIR); \
 	wget --no-clobber http://downloads.sourceforge.net/project/bowtie-bio/bowtie2/$(BOWTIE2_VER)/bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
 	unzip bowtie2-$(BOWTIE2_VER)-linux-x86_64.zip;\
-	cp `find bowtie2-$(BOWTIE2_VER)/ -maxdepth 1 -executable -type f` $(BIN_DIR)
+	cp `find bowtie2-$(BOWTIE2_VER)/ -maxdepth 1 -executable -type f` $(BIN_DIR);\
 
 bwa:
-	sudo apt-get -y install bwa
+	sudo apt-get -y install bwa;\
 #	wget -nc https://sourceforge.net/projects/bio-bwa/files/bwa-$(BWA_VER).tar.bz2; \
 
 subread:
@@ -280,14 +280,14 @@ subread:
 	cd subread-$(SUBREAD_VER)-source/src; \
 	make -f Makefile.Linux; \
 	cd ../bin; \
-	cp `find * -executable -type f` $(BIN_DIR)
+	cp `find * -executable -type f` $(BIN_DIR);\
 
 #star:
 #	cd $(SOURCE_DIR); \
 #	wget -nc https://github.com/alexdobin/STAR/archive/$(STAR_VER).tar.gz; \
 #	tar xvzf $(STAR_VER).tar.gz; \
 #	cd STAR-$(STAR_VER); \
-#	make STAR
+#	make STAR;\
 
 
 tophat2:
@@ -297,7 +297,7 @@ tophat2:
 	cd tophat-$(TOPHAT_VER).Linux_x86_64; \
 	rm -Rf AUTHORS LICENSE README intervaltree/ sortedcontainers/; \
 	mv ./* $(BIN_DIR); \
-	cd ..; rm -Rf tophat-$(TOPHAT_VER).Linux_x86_64*
+	cd ..; rm -Rf tophat-$(TOPHAT_VER).Linux_x86_64*;\
 
 
 # ----------------------------------------------------------------
@@ -309,18 +309,18 @@ tophat2:
 #	wget --no-clobber https://github.com/downloads/taoliu/MACS/MACS-$(MACS1_VER)-1.tar.gz; \
 #	tar xvfz MACS-$(MACS1_VER)-1.tar.gz ; \
 #	cd MACS-$(MACS1_VER); \
-#	sudo python setup.py install
+#	sudo python setup.py install;\
 
 macs1:
 	cd $(SOURCE_DIR); \
 	wget --no-clobber https://pypi.python.org/packages/86/da/1e57f6e130b732160d87d96f2cc1771b9de24ce16522a4f73a8528166b87/MACS-1.4.3.tar.gz; \
 	tar xvzf MACS-1.4.3.tar.gz; \
 	cd MACS-1.4.3; \
-	sudo python setup.py install
+	sudo python setup.py install;\
 
 
 macs2:
-	sudo pip install MACS2
+	sudo pip install MACS2;\
 
 #spp:
 #	cd $(SOURCE_DIR);\
@@ -344,24 +344,23 @@ homer:
 	cd $(SOURCE_DIR)/homer;\
 	wget -nc "http://homer.salk.edu/homer/configureHomer.pl"; \
 	perl configureHomer.pl -install homer; \
-	cp `find $(SOURCE_DIR)/homer/bin -maxdepth 1 -executable -type f` $(BIN_DIR)
+	cp `find $(SOURCE_DIR)/homer/bin -maxdepth 1 -executable -type f` $(BIN_DIR);\
 
 # ----------------------------------------------------------------
 # RNA-seq diffexpr analysis
 # ----------------------------------------------------------------
 
-cufflinks:
-	cd $(SOURCE_DIR);\
-	wget -nc http://cole-trapnell-lab.github.io/cufflinks/assets/downloads/cufflinks-$(CUFFLINKS_VER).Linux_x86_64.tar.gz
-	tar xvzf cufflinks-$(CUFFLINKS_VER).Linux_x86_64.tar.gz
-	cp `find $(SOURCE_DIR)/cufflinks-$(CUFFLINKS_VER).Linux_x86_64/ -maxdepth 1 -executable -type f` $(BIN_DIR)
+#cufflinks:
+#	cd $(SOURCE_DIR);\
+#	wget -nc http://cole-trapnell-lab.github.io/cufflinks/assets/downloads/cufflinks-$(CUFFLINKS_VER).Linux_x86_64.tar.gz
+#	tar xvzf cufflinks-$(CUFFLINKS_VER).Linux_x86_64.tar.gz
+#	cp `find $(SOURCE_DIR)/cufflinks-$(CUFFLINKS_VER).Linux_x86_64/ -maxdepth 1 -executable -type f` $(BIN_DIR);\
 
 
 ngs_tools: samtools bedtools sratoolkit bedops deeptools\
 	fastqc sickle \
 	bowtie bowtie2 bwa subread tophat2 \
 	macs1 macs2 homer \
-#	cufflinks
 
 
 # ================================================================
@@ -381,13 +380,13 @@ igv:
 	cd $(SOURCE_DIR); \
 	wget --no-clobber http://data.broadinstitute.org/igv/projects/downloads/IGV_$(IGV_VER).zip; \
 	unzip IGV_$(IGV_VER).zip;\
-	ln -s -f $(SOURCE_DIR)/IGV_$(IGV_VER)/igv.sh $(BIN_DIR)/igv
+	ln -s -f $(SOURCE_DIR)/IGV_$(IGV_VER)/igv.sh $(BIN_DIR)/igv;\
 
 igv_tools:
 	cd $(SOURCE_DIR); \
 	wget --no-clobber http://data.broadinstitute.org/igv/projects/downloads/igvtools_$(IGVTOOLS_VER).zip ;\
 	unzip igvtools_$(IGVTOOLS_VER).zip;\
-	ln -s -f $(SOURCE_DIR)/IGVTools/igvtools $(BIN_DIR)/igvtools
+	ln -s -f $(SOURCE_DIR)/IGVTools/igvtools $(BIN_DIR)/igvtools;\
 
 visualization: java9 igv igv_tools
 
