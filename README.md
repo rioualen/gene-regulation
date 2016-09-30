@@ -41,58 +41,6 @@ In the [example directory](https://github.com/rioualen/gene-regulation/blob/mast
 
 Follow the instructions in the `README.md` file in order to execute the whole workflow. 
 
-<!--We will use the `GSE20870` yeast study.
-
-In order to execute it, you should create a directory dedicated to the analysis and get inside.
-```
-mkdir GSE20870_analysis
-cd GSE20870_analysis
-```
-In this case, we will study raw samples (\*.sra) downloaded from the GEO platform:
-
-```
-mkdir data/GSM521934 data/GSM521935
-```
-```
-cd data/GSM521934
-wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021358/SRR051929/SRR051929.sra
-cd data/GSM521935
-wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra
-```
-
-# Workflow execution
-
-This brief introduction assumes you have, in the analysis directory, either a copy of the gene-regulation repository, or a link to it. 
-
-You can chose what program(s) to use for mapping and peak-calling by commenting/uncommenting the following lines:
-
-```
-ALIGNER=[
-#    "bowtie",
-    "bowtie2",
-#    "bwa"
-]
-```
-```
-PEAKCALLER=[
-    "homer-fdr" + config["homer"]["fdr"] + "_peaks", 
-    "macs2-qval" + config["macs2"]["qval"], 
-#    "swembl-R" + config["swembl"]["R"],
-    "macs14-pval" + config["macs14"]["pval"],
-    "spp-fdr" + config["spp"]["fdr"],
-#    "bPeaks_allGenome"
-]
-```
-
-Note that the SWEMBL peak-caller installation currrently doesn't work in the `install_tools_and_libs.mk` makefile. 
-
-You can now run the workflow by typing, from the analysis directory:
-```
-cd GSE20870_analysis
-snakemake -p -s gene-regulation/scripts/snakefiles/workflows/factor_workflow.py --configfile gene-regulation/exampels/GSE20870/GSE20870.yml
-```
--->
-
 The workflow can generate a flowchart of the analysis, here is the chart for ChIP-seq_SE_GSE20870 study case:
 
 ![](img/rule.png)
