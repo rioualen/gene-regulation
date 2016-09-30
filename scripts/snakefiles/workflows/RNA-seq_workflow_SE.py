@@ -67,6 +67,12 @@ SAMPLES = read_table(config["metadata"]["samples"])
 SAMPLE_IDS = SAMPLES.iloc[:,0]
 SAMPLE_CONDITIONS = read_table(config["metadata"]["samples"])['condition']
 
+# Design
+#DESIGN = read_table(config["metadata"]["design"])
+#REFERENCE_COND = DESIGN.iloc[:,0]
+#TEST_COND = DESIGN.iloc[:,1]
+
+
 # Genome & annotations
 GENOME_VER = config["genome"]["version"]
 GENOME_DIR = config["dir"]["genome"] + "/"
@@ -218,6 +224,7 @@ SARTOOLS_TARGETFILE = expand(DEG_DIR + "{prefix}_SARTools_targetfile.txt", prefi
 
 DEG = expand(DEG_DIR + "{deg}/{prefix}_{deg}_report.html", prefix=PREFIX, deg=DIFFEXPR_TOOLS)
 
+#DEG = expand(expand(DEG_DIR + "{test}_vs_{ref}/{{deg}}/{{prefix}}_{{deg}}_report.html", zip, test=TEST_COND, ref=REFERENCE_COND), prefix=PREFIX, deg=DIFFEXPR_TOOLS)
 
 ## ----------------------------------------------------------------
 ## Visualization & reports
@@ -230,6 +237,8 @@ GENOME_COVERAGE = expand("{alignment}.bedgraph", alignment=ALIGNMENT)
 GENOME_COVERAGE_GZ = expand("{alignment}.bedgraph.gz", alignment=ALIGNMENT)
 GENOME_COVERAGE_TDF = expand("{alignment}.tdf", alignment=ALIGNMENT)
 
+
+GRAPHICS = expand(REPORTS_DIR + "{graph}.png", graph=["dag", "rulegraph"])
 
 #================================================================#
 #                        Rule all                                #
@@ -247,7 +256,7 @@ rule all:
 #            SORTED_BAM, \
             SORTED_BAM_BAI, \
             BAM_STATS, \
-            GENOME_COVERAGE_TDF, \
+#            GENOME_COVERAGE_TDF, \
 ##            INFER_TRANSCRIPTS, \
 #            FEATURE_COUNTS, \
 #            SARTOOLS_TARGETFILE, \
@@ -256,97 +265,3 @@ rule all:
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
-##================================================================#
-##                         Workflow                               #
-##================================================================#
-
-### Data import 
-#IMPORT = expand(SAMPLE_DIR + "{samples}/{samples}.fastq", samples=SAMPLE_IDS)
-
-
-### Genome
-#GENOME = config["genome"]["version"]
-#GENOME_DIR = config["dir"]["genome"] + config["genome"]["version"]
-
-#if not os.path.exists(GENOME_DIR):
-#    os.makedirs(GENOME_DIR)
-
-#GENOME_FASTA = expand(GENOME_DIR + "/" + GENOME + ".fa")
-#GENOME_ANNOTATIONS = expand(GENOME_DIR + "/" + GENOME + ".{ext}", ext=["gff3", "gtf"])
-
-### Graphics & reports
-#GRAPHICS = expand(REPORTS_DIR + "{graph}.png", graph=["dag", "rulegraph"])
-
-##----------------------------------------------------------------#
-## Quality control
-##----------------------------------------------------------------#
-
-#RAW_QC = expand(SAMPLE_DIR + "{samples}/{samples}_fastqc/{samples}_fastqc.html", samples=SAMPLE_IDS)
-
-
-##----------------------------------------------------------------#
-## Trimming
-##----------------------------------------------------------------#
-
-##TRIMMER="sickle-q" + config["sickle"]["threshold"]
-##TRIMMING=expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}", samples=SAMPLE_IDS, trimmer=TRIMMER)
-##TRIM = expand("{trimming}.fastq", trimming=TRIMMING)
-
-##TRIM_QC = expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}_fastqc/{samples}_{trimmer}_fastqc.html", samples=SAMPLE_IDS, trimmer=TRIMMER)
-
-##QC = RAW_QC + TRIM_QC
-
-
-##----------------------------------------------------------------#
-## Alignment
-##----------------------------------------------------------------#
-
-
-#ALIGNER=["bowtie2", "bowtie", "subread"]
-#INDEX = expand(GENOME_DIR + "/{aligner}/" + GENOME + ".fa", aligner=ALIGNER)
-
-#ALIGNER.append("tophat")
-
-#ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{aligner}", samples=SAMPLE_IDS, aligner=ALIGNER)
-#MAPPING = expand("{alignment}.bam", alignment=ALIGNMENT)
-
-#BAM_STATS = expand("{alignment}_bam_stats.txt", alignment=ALIGNMENT)
-
-##SORTED_BAM = expand("{alignment}_sorted_pos.bam", alignment=ALIGNMENT)
-
-##----------------------------------------------------------------#
-## RNA-seq analysis
-##----------------------------------------------------------------#
-
-
-#INFER_TRANSCRIPTS = expand("{alignment}_cufflinks/transcripts.gtf", alignment=ALIGNMENT)
-
-
-#FEATURE_COUNTS = expand("{alignment}_featureCounts.txt", alignment=ALIGNMENT)
-
-#SARTOOLS_TARGETFILE = expand(DEG_DIR + "{aligner}_SARTools_design.txt", aligner=ALIGNER)
-
-#DEG = expand(DEG_DIR + "{aligner}_{deg}_report.html", aligner=ALIGNER, deg=["DESeq2", "edgeR"])
-
-
-#GENOME_COVERAGE = expand("{alignment}.bedgraph.gz", alignment=ALIGNMENT)
-
-### ----------------------------------------------------------------
-### Visualization
-### ----------------------------------------------------------------
-
-##VISU = expand(PEAKS_DIR + "igv_session.xml")
-
-##================================================================#
-##                        Rule all                                #
-##================================================================#
-
-#rule all: 
-#	"""
-#	Run all the required analyses.
-#	"""
-#	input: GRAPHICS, BAM_STATS, FEATURE_COUNTS, INFER_TRANSCRIPTS, GENOME_COVERAGE, SARTOOLS_TARGETFILE, DEG
-#	params: qsub=config["qsub"]
-#	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
-
-##sed -n FEATURE_COUNTS,  '/digraph/,$p' <rulegraph.dot
