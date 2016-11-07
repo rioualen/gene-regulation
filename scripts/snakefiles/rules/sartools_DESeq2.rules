@@ -14,12 +14,11 @@ if not "featuresToRemove" in config["DESeq2"].keys():
 if not "varInt" in config["DESeq2"].keys():
     config["DESeq2"]["varInt"] = "group"
 
-
 if not "condRef" in config["DESeq2"].keys():
     config["DESeq2"]["condRef"] = "WT"
 
-#if not "batch" in config["DESeq2"].keys():
-#    config["DESeq2"]["batch"] = "NULL"
+if not "batch" in config["DESeq2"].keys():
+    config["DESeq2"]["batch"] = "NULL"
 
 if not "alpha" in config["DESeq2"].keys():
     config["DESeq2"]["alpha"] = 0.05
@@ -57,7 +56,8 @@ rule sartools_DESeq2:
     Optional parameters:
         config["DESeq2"]["featuresToRemove"]
         config["DESeq2"]["varInt"]
-#        config["DESeq2"]["condRef"]
+        config["DESeq2"]["condRef"]
+        config["DESeq2"]["batch"]
         config["DESeq2"]["alpha"]
         config["DESeq2"]["pAdjustMethod"]
         config["DESeq2"]["fitType"]

@@ -17,8 +17,8 @@ if not "varInt" in config["edgeR"].keys():
 if not "condRef" in config["edgeR"].keys():
     config["edgeR"]["condRef"] = "WT"
 
-#if not "batch" in config["edgeR"].keys():
-#    config["edgeR"]["batch"] = "NULL"
+if not "batch" in config["edgeR"].keys():
+    config["edgeR"]["batch"] = "NULL"
 
 if not "alpha" in config["edgeR"].keys():
     config["edgeR"]["alpha"] = 0.05
@@ -51,6 +51,7 @@ rule sartools_edgeR:
         config["edgeR"]["featuresToRemove"]
         config["edgeR"]["varInt"]
         config["edgeR"]["condRef"]
+        config["edgeR"]["batch"]
         config["edgeR"]["alpha"]
         config["edgeR"]["pAdjustMethod"]
         config["edgeR"]["fitType"]
@@ -114,7 +115,7 @@ rule sartools_edgeR:
         featuresToRemove <- "{params.featuresToRemove}"
         varInt <- "{params.varInt}"
         condRef <- "{params.condRef}"
-        #batch <- "{params.batch}"
+        batch <- "{params.batch}"
         alpha <- {params.alpha}
         pAdjustMethod <- "{params.pAdjustMethod}"
         cpmCutoff <- {params.cpmCutoff}
