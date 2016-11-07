@@ -8,6 +8,9 @@ if not "genome" in config["dir"].keys():
 if not "gtf_file" in config["genome"].keys():
     sys.exit("Genome dir must be defined in the 'dir' section of the config file")
 
+if not "cufflinks" in config.keys():
+    config["cufflinks"] = {}
+
 if not "threads" in config["cufflinks"].keys():
     config["cufflinks"]["threads"] = "1"
 
