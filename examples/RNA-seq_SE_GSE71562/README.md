@@ -18,9 +18,8 @@ ANALYSIS_DIR=/data/analyses/RNA-seq_SE_GSE71562
 
 mkdir -p ${ANALYSIS_DIR}
 cd ${ANALYSIS_DIR}
-<!--git clone https://github.com/rioualen/gene-regulation.git -->
+git clone https://github.com/rioualen/gene-regulation.git
 <!--TODO: replace with tar.gz download of gene-regulation-v3.0-->
-ln -s ~/Desktop/workspace/gene-regulation
 ```
 ## Download data
 ```
