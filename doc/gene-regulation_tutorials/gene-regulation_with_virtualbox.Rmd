@@ -251,14 +251,13 @@ Once in the virtual machine, you can install the required programs from a termin
 ## Get the `gene-regulation` repository
 
 ```
-mkdir ~/workspace
-wget --no-clobber https://github.com/rioualen/gene-regulation/archive/2.0.tar.gz -P ~/workspace
+cd
+wget --no-clobber https://github.com/rioualen/gene-regulation/archive/2.0.tar.gz -P
 tar zvxf 2.0.tar.gz
 ```
 
 ```
-mkdir ~/workspace
-cd ~/workspace
+cd
 git clone https://github.com/rioualen/gene-regulation.git
 ```
 
@@ -267,7 +266,7 @@ git clone https://github.com/rioualen/gene-regulation.git
 This may take a while (30mn to 1h) & source the `.bashrc` (it's been updated with the `$PATH` for newly installed applications).
 
 ```
-cd ~/workspace
+cd
 #make -f gene-regulation-2.0/scripts/makefiles/install_tools_and_libs.mk all
 make -f gene-regulation/scripts/makefiles/install_tools_and_libs.mk all
 source ~/.bashrc
@@ -276,32 +275,35 @@ source ~/.bashrc
 
 # Executing snakemake workflow example
 
+
+```
 ## Create a base directory for the analysis
 
-```
-export ANALYSIS_DIR="~/GSE20870-analysis"
+export ANALYSIS_DIR="$HOME/ChIP-seq_SE_GSM20870"
 mkdir $ANALYSIS_DIR
 ```
-
+```
 ## Download source data
 
-You can enter the following commands:
+mkdir -p ${ANALYSIS_DIR}/data/GSM521934 ${ANALYSIS_DIR}/data/GSM521935
+wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021358/SRR051929/SRR051929.sra -P ${ANALYSIS_DIR}/data/GSM521934
+wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra -P ${ANALYSIS_DIR}/data/GSM521935
 
 ```
-cd $ANALYSIS_DIR
-
-mkdir -p data/GSM521934
-wget -nc ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021358/SRR051929/SRR051929.sra -P data/GSM521934
-
-mkdir -p data/GSM521935
-wget -nc ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra -P data/GSM521935
 ```
+## Download reference genome & annotations
 
+wget -nc ftp://ftp.ensemblgenomes.org/pub/fungi/release-30/fasta/saccharomyces_cerevisiae/dna/Saccharomyces_cerevisiae.R64-1-1.30.dna.genome.fa.gz -P ${ANALYSIS_DIR}/genome
+wget -nc ftp://ftp.ensemblgenomes.org/pub/fungi/release-30/gff3/saccharomyces_cerevisiae/Saccharomyces_cerevisiae.R64-1-1.30.gff3.gz -P ${ANALYSIS_DIR}/genome
+wget -nc ftp://ftp.ensemblgenomes.org/pub/fungi/release-30/gtf/saccharomyces_cerevisiae/Saccharomyces_cerevisiae.R64-1-1.30.gtf.gz -P ${ANALYSIS_DIR}/genome
+gunzip ${ANALYSIS_DIR}/genome/*.gz
+```
+```
 ## Execute workflow
 
-```
-ln -s  gene-regulation-2.0 gene-regulation
-snakemake -p -s gene-regulation/scripts/snakefiles/workflows/factor_workflow.py --configfile gene-regulation/examples/GSE20870/GSE20870.yml
+cd ${ANALYSIS_DIR}
+ln -s  $HOME/gene-regulation
+snakemake -p -s gene-regulation/scripts/snakefiles/workflows/ChIP-seq_workflow_SE.py --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml
 ```
 
 Congratulations! You just executed this wonderful workflow:
