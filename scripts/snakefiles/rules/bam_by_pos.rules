@@ -22,3 +22,4 @@ rule bam_by_pos:
     params: prefix = "{aligned_reads}_sorted_pos", \
             qsub = config["qsub"] + " -e {aligned_reads}_sorted_pos_qsub.err -o {aligned_reads}_sorted_pos_qsub.out"
     shell: "samtools sort  {input} -o {output} 2> {log}"
+

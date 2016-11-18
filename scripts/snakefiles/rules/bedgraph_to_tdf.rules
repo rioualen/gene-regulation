@@ -8,9 +8,11 @@ if not "fasta_file" in config["genome"].keys():
 if not "genome" in config["dir"].keys():
     sys.exit("Genome dir must be defined in the 'dir' section of the config file")
 
+if not "base" in config["dir"].keys():
+    sys.exit("Base dir must be defined in the 'dir' section of the config file")
+
 # Var
-genome_dir = config["dir"]["genome"] + "/"
-genome_file = genome_dir + config["genome"]["fasta_file"]
+genome_file = os.path.join(config["dir"]["base"], config["dir"]["genome"], config["genome"]["fasta_file"])
 
 # Rule
 rule bedgraph_to_tdf:

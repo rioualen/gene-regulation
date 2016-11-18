@@ -11,17 +11,19 @@ if not "results" in config["dir"].keys():
 if not "reports" in config["dir"].keys():
     config["dir"]["reports"] = config["dir"]["results"];
 
+dir_reports = os.path.join(config["dir"]["base"], config["dir"]["reports"])
+
 # Rule
 rule dot_graph:
     """This rule generates dot files for snakemake's DAG and rulegraph. 
     """
-    output: config["dir"]["reports"] + "/{graph}.dot"
-    params: snakefile = workflow.snakefile, configfile = config["metadata"]["configfile"], \
+    output: dir_reports + "/{graph}.dot"
+    params: snakefile = os.path.join(config["dir"]["base"], workflow.snakefile), configfile = os.path.join(config["dir"]["base"], config["metadata"]["configfile"]), \
         qsub=config["qsub"] \
-          + " -e " + config["dir"]["reports"] + "/{graph}_dot_qsub.err" \
-          + " -o " + config["dir"]["reports"] + "/{graph}_dot_qsub.out"
-    log: config["dir"]["reports"] + "/{graph}_dot.log"
-    benchmark: config["dir"]["reports"] + "/{graph}_dot_benchmark.json"
+          + " -e " + dir_reports + "/{graph}_dot_qsub.err" \
+          + " -o " + dir_reports + "/{graph}_dot_qsub.out"
+    log: dir_reports + "/{graph}_dot.log"
+    benchmark: dir_reports + "/{graph}_dot_benchmark.json"
     shell: """
 (snakemake -s {params.snakefile}  --configfile  {params.configfile} --{wildcards.graph} > {output}
 #if {wildcards.graph} == "dag" cat output | perl -pe 's/graph\[/graph\[rankdir='LR', /'  ## TODO

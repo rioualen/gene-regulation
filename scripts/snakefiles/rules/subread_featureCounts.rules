@@ -28,8 +28,8 @@ if not "strand_specificity" in config["subread-featureCounts"].keys():
 
 # Define input files
 def featureCounts_inputs(wildcards):
-    SAMPLE_IDS = read_table(config["metadata"]["samples"]).iloc[:,0]
-    bam_files =  expand(SAMPLE_DIR + "{samples}/{samples}_{aligner}.bam", samples=SAMPLE_IDS, aligner=wildcards.aligner)
+    sample_ids = read_table(os.path.join(config["dir"]["base"], config["metadata"]["samples"]))["ID"]
+    bam_files =  expand(SAMPLE_DIR + "/{samples}/{samples}{prefix,.*}.bam", samples=sample_ids, prefix=wildcards.prefix)
     return bam_files
 
 # Rule
@@ -56,7 +56,7 @@ rule subread_featureCounts:
     """
     input: 
         bam = "{reads}_sorted_pos.bam",
-        gtf = config["dir"]["genome"] + "/" + config["genome"]["gtf_file"]
+        gtf = os.path.join(config["dir"]["base"], config["dir"]["genome"], config["genome"]["gtf_file"])
     output: "{reads}_featureCounts.txt"          #### !!_" + config["subread-featureCounts"]["feature_type"] + "
     params:
         wd = config["dir"]["base"],

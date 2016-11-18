@@ -29,14 +29,17 @@ if not "other_options" in config["macs2"].keys():
 if not "type" in config["macs2"].keys():
     config["macs2"]["type"] = "narrow"                                          #TODO choice narrow/broad
 
-# Define paths
-if not "samples" in config["dir"].keys():
-    config["dir"]["samples"] = config["dir"]["results"]
+## Define paths
+#if not "samples" in config["dir"].keys():
+#    config["dir"]["samples"] = config["dir"]["results"]
 
-if not "peaks" in config["dir"].keys():
-    config["dir"]["peaks"] = config["dir"]["results"]
+#if not "peaks" in config["dir"].keys():
+#    config["dir"]["peaks"] = config["dir"]["results"]
 
-suffix = "macs2-qval" + config["macs2"]["qval"]                                 # check consistency with the list of peak-callers in the workflow file
+dir_samples =  os.path.join(config["dir"]["base"], config["dir"]["samples"])
+dir_peaks =  os.path.join(config["dir"]["base"], config["dir"]["peaks"])
+
+suffix = "macs2"#-qval" + config["macs2"]["qval"]                                 # check consistency with the list of peak-callers in the workflow file
 
 # Rule
 rule macs2:
@@ -61,13 +64,13 @@ rule macs2:
         Claire Rioualen, Lucie Khamvongsa
     """
     input:
-        treatment = config["dir"]["samples"] + "/{treatment}/{treatment}{preprocess,.*}_sorted_pos.bed",
-        control = config["dir"]["samples"] + "/{control}/{control}{preprocess,.*}_sorted_pos.bed"
+        treatment = dir_samples + "/{treatment}/{treatment}{preprocess,.*}_sorted_pos.bed",
+        control = dir_samples + "/{control}/{control}{preprocess,.*}_sorted_pos.bed"
     output:
-        peaks = config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_peaks." + config["macs2"]["type"] + "Peak",
-        peaks_bed = config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".bed"
+        peaks = dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_peaks." + config["macs2"]["type"] + "Peak",
+        peaks_bed = dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".bed"
     params:
-        outdir = config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix,
+        outdir = dir_peaks + "/{treatment}_vs_{control}/" + suffix,
         name = "{treatment}_vs_{control}{preprocess,.*}_" + suffix,
         qval = config["macs2"]["qval"],
         keep_dup = config["macs2"]["keep_dup"],
@@ -77,10 +80,10 @@ rule macs2:
         other_options = config["macs2"]["other_options"],
         genome_size = config["genome"]["size"],
         qsub = config["qsub"] \
-          + " -e " + config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.err" \
-          + " -o " + config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.out"
-    log: config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".log"
-    benchmark: config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_benchmark.json"
+          + " -e " + dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.err" \
+          + " -o " + dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.out"
+    log: dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".log"
+    benchmark: dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_benchmark.json"
     shell: """
 (macs2 \
 callpeak -t {input.treatment} -c {input.control} --gsize {params.genome_size} \

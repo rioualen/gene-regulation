@@ -12,9 +12,8 @@ if not "genome" in config["dir"].keys():
     sys.exit("Genome dir must be defined in the dir section of the config file")
 
 # Define paths
-genome_dir = config["dir"]["genome"] + "/"
-fasta_file = genome_dir + config["genome"]["fasta_file"]
-gtf_file = genome_dir + config["genome"]["gtf_file"]
+gtf_file = os.path.join(config["dir"]["base"], config["dir"]["genome"], config["genome"]["gtf_file"])
+fasta_file = os.path.join(config["dir"]["base"], config["dir"]["genome"], config["genome"]["fasta_file"])
 
 # Rule
 rule annotate_peaks:
@@ -39,9 +38,11 @@ rule annotate_peaks:
     output: "{regions}_gene_list.tab"
     log: "{regions}_gene_list.log"
     benchmark: "{regions}_gene_list_benchmark.json"
-    params: qsub = config["qsub"] + " -e {regions}_gene_list_qsub.err -o {regions}_gene_list_qsub.out"
+    params: 
+        wd = config["dir"]["base"], 
+        qsub = config["qsub"] + " -e {regions}_gene_list_qsub.err -o {regions}_gene_list_qsub.out"
     run:
-        shell("annotatePeaks.pl {input.bed} {input.fasta} -gtf {input.gtf} -gid > {output}")
+        shell("annotatePeaks.pl {input.bed} {input.fasta} -gtf {input.gtf} > {output}")
         R("""
 tab <- read.table("{output}", sep="\t", header=T)
 gene_list <- unique(sort(tab[,"Nearest.PromoterID"]))

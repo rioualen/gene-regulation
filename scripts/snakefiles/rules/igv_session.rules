@@ -24,12 +24,12 @@ rule igv_session:
             file.write('        <Resource path="' + i + '"/>\n')
         for i in GENOME_COVERAGE_GZ:
             file.write('        <Resource path="' + i + '"/>\n')
-        file.write('        <Resource path="' + GENOME_ANNOTATIONS[0] + '"/>\n')
+        file.write('        <Resource path="' + GENOME_GFF3[0] + '"/>\n')
         file.write('    </Resources>\n\n')
 
 # Genome annotation panel
         file.write('    <Panel name="GeneAnnotPanel" height="60">\n')
-        file.write('        <Track id="' + GENOME_ANNOTATIONS[0] + '" name="' + params[0] + '"  color="0,204,255" fontSize="12" >\n') ## name
+        file.write('        <Track id="' + GENOME_GFF3[0] + '" name="' + params[0] + '"  color="0,204,255" fontSize="12" >\n') ## name
         file.write('            <DataRange/>\n')
         file.write('        </Track>\n')
         file.write('    </Panel>\n\n')

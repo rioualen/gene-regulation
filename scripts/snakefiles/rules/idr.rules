@@ -1,13 +1,10 @@
-"""Calculating IDR across replicates. Optimized for SPP peak-caller.
-"""
+
 rule idr:
 	"""Calculating IDR across replicates. Optimized for SPP peak-caller.
 	
 	Outdir "IDR" has to be created outside the shell command, hence the output touch.
-
-	Only takes spp files for now.
 	"""
-	input: expand(expand("{wdir}results/{chip}_vs_{{inp}}/{chip}_{aligner}_spp.narrowPeak", zip, chip=CHIP, aligner=ALIGNER, wdir=WDIR), inp=INPUT)
+	input: config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_peaks.narrowPeak"
 	output: touch("results/IDR/{ALIGNER}_idr.done")
 #	log: config["dir"]["results"] + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.idr.log"
 #	benchmark: config["dir"]["results"] + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.idr_benchmark.json"
@@ -18,8 +15,27 @@ rule idr:
 		cd {WDIR}"
 
 
-## TODO emplacement idr code à automatiser ? 
-## TODO include other peak-callers > arborescence ?
+
+
+
+##"""Calculating IDR across replicates. Optimized for SPP peak-caller.
+##"""
+##rule idr:
+##	"""Calculating IDR across replicates. Optimized for SPP peak-caller.
+##	
+##	Outdir "IDR" has to be created outside the shell command, hence the output touch.
+
+##	Only takes spp files for now.
+##	"""
+##	input: expand(expand("{wdir}results/{chip}_vs_{{inp}}/{chip}_{aligner}_spp.narrowPeak", zip, chip=CHIP, aligner=ALIGNER, wdir=WDIR), inp=INPUT)
+##	output: touch("results/IDR/{ALIGNER}_idr.done")
+###	log: config["dir"]["results"] + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.idr.log"
+###	benchmark: config["dir"]["results"] + "{CHIP}_vs_{INPUT}/{CHIP}_{ALIGNER}_spp.idr_benchmark.json"
+##	params: outdir=WDIR+"results/IDR/{ALIGNER}"
+##	shell: "cd ~/bin/idrCode ; \
+##		Rscript batch-consistency-analysis.r {input} -1 {params.outdir} 0 F signal.value 2> test.log; \
+##		Rscript batch-consistency-plot.r 1 {params.outdir} {params.outdir}; \
+##		cd {WDIR}"
 
 
 #	input:

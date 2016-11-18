@@ -71,7 +71,12 @@ STRANDS = config["metadata"]["strands"].split()
 # Samples
 SAMPLES = read_table(config["metadata"]["samples"])
 SAMPLE_IDS = SAMPLES.iloc[:,0]
-SAMPLE_CONDITIONS = read_table(config["metadata"]["samples"])['condition']
+SAMPLE_CONDITIONS = read_table(config["metadata"]["samples"])['Condition']
+
+# Design
+DESIGN = read_table(os.path.join(config["dir"]["base"], config["metadata"]["design"]))
+REFERENCE_COND = DESIGN.iloc[:,0]
+TEST_COND = DESIGN.iloc[:,1]
 
 # Genome & annotations
 GENOME_VER = config["genome"]["version"]
@@ -224,9 +229,12 @@ if not (("tools" in config.keys()) and ("diffexpr" in config["tools"].keys())):
 
 DIFFEXPR_TOOLS = config["tools"]["diffexpr"].split()
 
-SARTOOLS_TARGETFILE = expand(DEG_DIR + "{prefix}_SARTools_targetfile.txt", prefix=PREFIX)
+#SARTOOLS_TARGETFILE = expand(DEG_DIR + "{prefix}_SARTools_targetfile.txt", prefix=PREFIX)
+#DEG = expand(DEG_DIR + "{deg}/{prefix}_{deg}_report.html", prefix=PREFIX, deg=DIFFEXPR_TOOLS)
 
-DEG = expand(DEG_DIR + "{deg}/{prefix}_{deg}_report.html", prefix=PREFIX, deg=DIFFEXPR_TOOLS)
+
+SARTOOLS_TARGETFILE = expand(DEG_DIR + "/{test}_vs_{ref}/SARTools_targetfile.txt", test=TEST_COND, ref=REFERENCE_COND)
+DEG = expand(expand(DEG_DIR + "/{test}_vs_{ref}/{{deg}}/{test}_vs_{ref}_{{deg}}_report.html", zip, test=TEST_COND, ref=REFERENCE_COND), deg=DIFFEXPR_TOOLS)
 
 
 ## ----------------------------------------------------------------

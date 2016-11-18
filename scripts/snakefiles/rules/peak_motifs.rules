@@ -38,7 +38,7 @@ rule peak_motifs:
         tasks = config['peak-motifs']['tasks'], \
         disco = config['peak-motifs']['disco'], \
         motif_db = config['peak-motifs']['motif_db'], \
-        outdir = "{caller_dir}/peak-motifs/", \
+        outdir = "{caller_dir}/peak-motifs", \
         prefix="{peaks}_peak-motifs", \
         qsub = config['qsub'] + " -e {peaks}_qsub.err" \
                   + " -o {peaks}_qsub.out" 

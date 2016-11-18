@@ -13,13 +13,16 @@ if not "samples" in config["dir"].keys():
 if not "samples" in config["metadata"].keys():
     sys.exit("The parameter metadata/samples must be defined in the config file")
 
-SAMPLES = read_table(config["metadata"]["samples"])
-SAMPLE_IDS = SAMPLES.iloc[:,0]
-SAMPLE_CONDITIONS = read_table(config["metadata"]["samples"])['condition']
+#samples = read_table(os.path.join(config["dir"]["base"], config["metadata"]["samples"]))
+sample_ids = read_table(os.path.join(config["dir"]["base"], config["metadata"]["samples"]))['ID']
+sample_conditions = read_table(os.path.join(config["dir"]["base"], config["metadata"]["samples"]))['Condition']
+
+sample_dir = os.path.join(config["dir"]["base"], config["dir"]["samples"])
+diffexpr_dir = os.path.join(config["dir"]["base"], config["dir"]["diffexpr"])
 
 # Define input files
 def targetfiles_inputs(wildcards):
-    count_files =  expand(config["dir"]["samples"] + "/{samples}/{samples}_{file_prefix}_featureCounts.txt", samples=SAMPLE_IDS, file_prefix=wildcards.file_prefix)
+    count_files =  expand(sample_dir + "/{samples}/{samples}_featureCounts.txt", samples=sample_ids)
     return count_files
 
 # Rule
@@ -37,21 +40,21 @@ rule sartools_targetfile:
     """
     input: 
         count_files = targetfiles_inputs
-    output: config["dir"]["diffexpr"] + "/{file_prefix}_SARTools_targetfile.txt"
+    output: diffexpr_dir + "/{test}_vs_{ref}/SARTools_targetfile.txt"
     params:
         qsub = config["qsub"]\
-            + " -e " + config["dir"]["diffexpr"] + "targetfile_qsub.err"\
-            + " -o " + config["dir"]["diffexpr"] + "targetfile_qsub.out"
-    log: config["dir"]["diffexpr"] + "/{file_prefix}_targetfile.log"
-    benchmark: config["dir"]["diffexpr"] + "/{file_prefix}_targetfile_benchmark.json"
+            + " -e " + diffexpr_dir + "/{test}_vs_{ref}/targetfile_qsub.err"\
+            + " -o " + diffexpr_dir + "/{test}_vs_{ref}/targetfile_qsub.out"
+    log: diffexpr_dir + "/{test}_vs_{ref}/SARTools_targetfile.log"
+    benchmark: diffexpr_dir + "/{test}_vs_{ref}/SARTools_targetfile_benchmark.json"
     run:
 #        sys.stdout = open('{log}', 'w')
         f = open(output[0], "w+")
         f.write("label\tfiles\tgroup\n")
-        for id in range(len(SAMPLE_IDS)):
-            cond = SAMPLE_CONDITIONS[id]
-            counts = expand(SAMPLE_IDS[id] + "/" + SAMPLE_IDS[id] + "_{file_prefix}_featureCounts.txt", file_prefix=wildcards.file_prefix)
-            f.write(SAMPLE_IDS[id] + "\t" + counts[0] + "\t" + cond + "\n")
+        for id in range(len(sample_ids)):
+            cond = sample_conditions[id]
+            counts = expand(sample_ids[id] + "/" + sample_ids[id] + "_featureCounts.txt")
+            f.write(sample_ids[id] + "\t" + counts[0] + "\t" + cond + "\n")
         f.close()
 #        sys.stdout.close()
 
