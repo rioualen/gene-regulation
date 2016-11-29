@@ -11,12 +11,12 @@ if not "fasta_file" in config["genome"].keys():
 if not "genome" in config["dir"].keys():
     sys.exit("Genome dir must be defined in the 'dir' section of the config file")
 
-# Define paths
-genome_version = config["genome"]["version"]
-genome_dir = config["dir"]["genome"] + "/"
-genome_file = genome_dir + config["genome"]["fasta_file"]
-bowtie2_dir = genome_dir + "bowtie2/"
-bowtie2_index = bowtie2_dir + genome_version + ".fa"
+## Define paths
+#genome_version = config["genome"]["version"]
+genome_file = os.path.join(config["dir"]["base"], config["dir"]["genome"], config["genome"]["fasta_file"])
+bowtie2_dir = os.path.join(config["dir"]["base"], config["dir"]["genome"], "bowtie2")
+bowtie2_index = os.path.join(config["dir"]["base"], config["dir"]["genome"], "bowtie2", config["genome"]["fasta_file"])
+
 
 # Rule
 rule bowtie2_index:
@@ -25,10 +25,7 @@ rule bowtie2_index:
     when aligning.
 
     Required parameters:
-        config["qsub"]
-        config["dir"]["genome"]
-        config["genome"]["version"]
-        config["genome"]["fasta_file"]
+        ...
 
     Optional parameters:
 
@@ -39,7 +36,8 @@ rule bowtie2_index:
     output: bowtie2_index
     params:
         dir = bowtie2_dir, \
-        version = genome_version, \
+        index_file = bowtie2_index, \
+#        version = genome_version, \
         qsub = config["qsub"] \
           + " -e " + bowtie2_dir + "index_qsub.err" \
           + " -o " + bowtie2_dir + "index_qsub.out"
@@ -47,8 +45,7 @@ rule bowtie2_index:
     benchmark: bowtie2_index + "_benchmark.json"
     shell: """
 mkdir -p {params.dir}
-cp {input} {params.dir}{params.version}.fa
-#cd {params.dir}
-bowtie2-build  {params.dir}{params.version}.fa  {params.dir}{params.version}.fa &> {log}
+cp {input} {params.dir}
+bowtie2-build  {params.index_file}  {params.index_file} &> {log}
 """
 
