@@ -1,6 +1,6 @@
 ; Sample description file
 ; Organism: Saccharomyces cerevisiae
 ; Experiment type: ChIP-seq
-ID	condition
+ID	Condition
 GSM521934	input
 GSM521935	chip
