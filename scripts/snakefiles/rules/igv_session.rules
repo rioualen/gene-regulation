@@ -4,7 +4,7 @@ if not "version" in config["genome"].keys():
 
 rule igv_session:
 #    input:
-    output: "{dir}igv_session.xml"
+    output: "{dir}/igv_session.xml"
     params: config["genome"]["version"]
     run:
 
@@ -16,7 +16,7 @@ rule igv_session:
         file = open(filename, "w+")
 
         file.write('<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n')
-        file.write('<Session genome="' + GENOME_FASTA[0] + '" hasGeneTrack="true" hasSequenceTrack="true" locus="all" path="' + filename + '" version="8">\n')
+        file.write('<Session genome="' + os.path.join(config["dir"]["base"], config["dir"]["genome"], config["genome"]["fasta_file"]) + '" hasGeneTrack="true" hasSequenceTrack="true" locus="all" path="' + filename + '" version="8">\n')
 
 # Resource files
         file.write('    <Resources>\n')
@@ -24,14 +24,18 @@ rule igv_session:
             file.write('        <Resource path="' + i + '"/>\n')
         for i in GENOME_COVERAGE_GZ:
             file.write('        <Resource path="' + i + '"/>\n')
-        file.write('        <Resource path="' + GENOME_GFF3[0] + '"/>\n')
+        file.write('        <Resource path="' + os.path.join(config["dir"]["base"], config["dir"]["genome"], config["genome"]["gff3_file"]) + '"/>\n')
+#        file.write('        <Resource path="' + os.path.join(config["dir"]["base"], config["dir"]["genome"], config["genome"]["gtf_file"]) + '"/>\n')
         file.write('    </Resources>\n\n')
 
 # Genome annotation panel
         file.write('    <Panel name="GeneAnnotPanel" height="60">\n')
-        file.write('        <Track id="' + GENOME_GFF3[0] + '" name="' + params[0] + '"  color="0,204,255" fontSize="12" >\n') ## name
+        file.write('        <Track id="' + os.path.join(config["dir"]["base"], config["dir"]["genome"], config["genome"]["gff3_file"]) + '" name="gff3 ' + params[0] + '"  color="0,102,204" fontSize="12" >\n')
         file.write('            <DataRange/>\n')
         file.write('        </Track>\n')
+#        file.write('        <Track id="' + os.path.join(config["dir"]["base"], config["dir"]["genome"], config["genome"]["gtf_file"]) + '" name="gtf ' + params[0] + '"  color="0,102,204" fontSize="12" >\n')
+#        file.write('            <DataRange/>\n')
+#        file.write('        </Track>\n')
         file.write('    </Panel>\n\n')
 
 # Genome coverage panel
@@ -44,8 +48,8 @@ rule igv_session:
             cov = tab.iloc[:,3]
             max = int(np.percentile(cov, 99))
 
-            file.write('        <Track height="50" autoscale="true" id="' + bdg + '" name="' + name + '" color="204,204,204" fontSize="12">\n')
-            file.write('            <DataRange minimum="0" maximum="' + str(max) + '"/>\n')
+            file.write('        <Track height="50" autoscale="true" id="' + bdg + '" name="' + name + '" color="102,102,102" fontSize="12">\n')
+            file.write('            <DataRange minimum="0" maximum="200"/>\n')
             file.write('        </Track>\n')
         file.write('    </Panel>\n\n')
 
@@ -55,7 +59,7 @@ rule igv_session:
             name = bedfile.split(sep="_")[-1]
             name = os.path.splitext(name)[0]
 
-            file.write('        <Track id="' + bedfile + '" name="' + name + '" color="0,204,0" fontSize="12">\n')
+            file.write('        <Track id="' + bedfile + '" name="' + name + '" color="0,204,102" fontSize="12">\n')
             file.write('                <DataRange/>\n')
             file.write('        </Track>\n')
         file.write('    </Panel>\n\n')
