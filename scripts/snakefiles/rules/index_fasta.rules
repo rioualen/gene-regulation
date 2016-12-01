@@ -1,0 +1,19 @@
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+# Rule
+rule index_fasta:
+    """
+    Index a fasta file by creating a .fai file with Samtools
+
+    Author: Claire Rioualen
+    """
+    input: "{genome}"
+    output: "{genome}.fai"
+    params: qsub = config["qsub"] + "" \
+            + " -e {genome}_index_qsub.err" \
+            + " -o {genome}_index_qsub.err"
+    log: "{genome}_index.log"
+    benchmark: "{genome}_index_benchmark.log"
+    shell:"samtools faidx {input} 2> {log}"
