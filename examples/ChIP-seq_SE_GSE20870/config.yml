@@ -24,7 +24,7 @@
     seq_type: "se"
 
   dir:
-    base: "/home/rioualen/ChIP-seq_SE_GSE20870"                                                             # required. ALL DIRECTORIES SHOULD BE SPECIFIED RELATIVE TO THE BASE DIRECTORY
+    base: "/data/analyses/ChIP-seq_SE_GSE20870"                                                             # required. ALL DIRECTORIES SHOULD BE SPECIFIED RELATIVE TO THE BASE DIRECTORY
     reads_source: "data"                                                                                    # required. dir containing raw data organized in sub directories named after the samples
     fastq: "fastq"
     genome: "genome"                                                                                        # required. where to store genomes
@@ -37,8 +37,8 @@
 
   tools:
     trimming: "sickle"
-    mapping: "bowtie2" # subread-align"
-    peakcalling: "homer macs2"
+    mapping: "bowtie2" # bwa subread-align bowtie "
+    peakcalling: "macs2 homer" # macs14 spp swembl"
     
   fastqc: 
     other_options: ""                                                           # optional (def. empty string)
@@ -55,7 +55,7 @@
 
   macs14:
     pval: "0.00001"                                                             # optional (def. 0.00001)
-    mfold: "10,30"                                                              # optional (def. 10,30)
+    mfold: "5,30"                                                               # optional (def. 10,30)
     keep_dup: "auto"                                                            # optional (def. auto, else int)
     bandwidth: "300"                                                            # optional (def. 300)
     other_options: "--nomodel"                                                  # optional can include -bdg (time-consuming), -wig (time-consuming), --call-summits (requires PeakSplitter)
@@ -67,9 +67,10 @@
     mfold_max: "50"                                                             # optional (def. 50)
     other_options: "--call-summits"                                             # optional can include --call-summits, --broad...
 
-#  swembl:
-#    R: "0.05"                                                                   # optional (def. 0)
-#    x: "1.2"                                                                    # optional (def. 1)
+  swembl:
+    R: "0.05"                                                                   # optional (def. 0)
+    N: "1000000"
+    x: "1.2"                                                                    # optional (def. 1)
 
   homer: 
     style: "factor"                                                             # optional (def. factor), can be factor, histone, groseq, tss, dnase, super, mC (beware of output filenames)
