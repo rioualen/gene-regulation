@@ -309,6 +309,14 @@ rule bam_sorted:
 
 ## Workflow 9: Combining wildcards selectively
 
+## Workflow 10: Using regular expression in wildcards
+
+## Other
+
+* temp()
+* touch()
+* target/all
+
 
 # Bonus: generating flowcharts 
 
