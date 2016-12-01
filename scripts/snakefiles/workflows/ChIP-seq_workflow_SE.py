@@ -51,12 +51,6 @@ import datetime
 import re
 import pandas as pd
 
-# Define verbosity
-if not ("verbosity" in config.keys()):
-    config["verbosity"] = 0
-verbosity = int(config["verbosity"])
-
-
 GENEREG_LIB = os.path.join(config["dir"]["base"], config["dir"]["gene_regulation"])
 
 # Python includes
@@ -75,11 +69,12 @@ else:
     READS = os.path.join(config["dir"]["base"], config["dir"]["reads_source"])
 
 # Samples
-SAMPLES = read_table(config["metadata"]["samples"])
-SAMPLE_IDS = SAMPLES.iloc[:,0]
+#SAMPLES = read_table(config["metadata"]["samples"])
+#SAMPLE_IDS = SAMPLES.iloc[:,0]
+
+SAMPLE_IDS = read_table(os.path.join(config["dir"]["base"], config["metadata"]["samples"]))['ID']
 
 # Genome & annotations
-#GENOME_VER = config["genome"]["version"]
 GENOME_DIR = os.path.join(config["dir"]["base"], config["dir"]["genome"])
 GENOME_FASTA = os.path.join(GENOME_DIR, config["genome"]["fasta_file"])
 GENOME_GFF3 = os.path.join(GENOME_DIR, config["genome"]["gff3_file"])
@@ -154,6 +149,7 @@ include: os.path.join(RULES, "gzip.rules")
 include: os.path.join(RULES, "homer.rules")
 include: os.path.join(RULES, "igv_session.rules")
 include: os.path.join(RULES, "index_bam.rules")
+include: os.path.join(RULES, "index_fasta.rules")
 include: os.path.join(RULES, "macs2.rules")
 include: os.path.join(RULES, "macs14.rules")
 include: os.path.join(RULES, "peak_motifs.rules")
@@ -164,7 +160,6 @@ include: os.path.join(RULES, "subread_align.rules")
 include: os.path.join(RULES, "swembl.rules")
 include: os.path.join(RULES, "sra_to_fastq.rules")
 
-#ruleorder: 
 #================================================================#
 #                         Workflow                               #
 #================================================================#
@@ -228,16 +223,6 @@ SORTED_BED = expand("{alignment}_sorted_pos.bed", alignment=ALIGNMENT)
 # Peak-calling
 # ----------------------------------------------------------------
 
-#PEAKCALLER=[
-#    "homer-fdr" + config["homer"]["fdr"],
-#    "macs2-qval" + config["macs2"]["qval"], 
-##    "swembl-R" + config["swembl"]["R"],
-##    "macs14-pval" + config["macs14"]["pval"],
-##    "spp-fdr" + config["spp"]["fdr"],
-##    "bPeaks-log" + config["bPeaks"]["log2FC"],
-#]
-
-## Peak-calling
 if not (("tools" in config.keys()) and ("peakcalling" in config["tools"].keys())):
     sys.exit("The parameter config['tools']['peakcalling'] should be specified in the config file.")
 
@@ -259,12 +244,11 @@ MOTIFS=expand(expand("{treat}_vs_{control}/{{peakcaller}}/peak-motifs/{treat}_vs
 GET_FASTA = expand(PEAKS_DIR + "/{peakcalling}.fasta", peakcalling=PEAKCALLING)
 PEAK_MOTIFS = expand(PEAKS_DIR + "/{motifs}.html", motifs=MOTIFS)
 
-## ----------------------------------------------------------------
-## Visualization & reports
-## ----------------------------------------------------------------
+# ----------------------------------------------------------------
+# Visualization & reports
+# ----------------------------------------------------------------
 
-## TODO
-
+GENOME_INDEX = GENOME_FASTA + ".fai"
 GENOME_COVERAGE = expand("{alignment}.bedgraph", alignment=ALIGNMENT)
 GENOME_COVERAGE_GZ = expand("{alignment}.bedgraph.gz", alignment=ALIGNMENT)
 GENOME_COVERAGE_TDF = expand("{alignment}.tdf", alignment=ALIGNMENT)
@@ -274,7 +258,7 @@ GENOME_COVERAGE_BIGWIG = expand("{alignment}.bw", alignment=ALIGNMENT)
 
 
 ## Following not yet properly implemented
-IGV = expand(REPORTS_DIR + "igv_session.xml")
+IGV = expand(REPORTS_DIR + "/igv_session.xml")
 #BED_INTER = expand(REPORTS_DIR + "multiinter.tab")
 
 
@@ -294,15 +278,16 @@ rule all:
 #            MAPPING, \
 #            SORTED_BAM, \
             BAM_STATS, \
-            SORTED_BAM_BAI, \
+#            SORTED_BAM_BAI, \
+            GENOME_INDEX, \
             GENOME_COVERAGE_GZ, \
-#            GENOME_COVERAGE_BIGWIG, \
+            GENOME_COVERAGE_BIGWIG, \
 #            SORTED_BED, \
 #            PEAKS, \
 #            GENOMIC_FEAT, \
             GENE_LIST, \
-#            PEAK_MOTIFS, \
-#            IGV, \
+            PEAK_MOTIFS, \
+            IGV, \
             GRAPHICS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
