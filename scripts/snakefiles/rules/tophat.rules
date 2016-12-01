@@ -26,24 +26,20 @@ if not "threads" in config["tophat"].keys():
 if not "max_mismatches" in config["tophat"].keys():
     config["tophat"]["max_mismatches"] = "2"
 
-# Define paths
 if not "fastq" in config["dir"].keys():
     sys.exit("You must define a location for the fastq file.")
 
-genome_version = config["genome"]["version"]
-genome_dir = config["dir"]["genome"] + "/"
-genome_file = genome_dir + config["genome"]["fasta_file"]
-bowtie2_dir = genome_dir + "bowtie2/"
-bowtie2_index = bowtie2_dir + genome_version + ".fa"
-
+fastq_dir = os.path.join(config["dir"]["base"], config["dir"]["fastq"])
+sample_dir = os.path.join(config["dir"]["base"], config["dir"]["samples"])
+seq_type = config["metadata"]["seq_type"]
 
 # Define input files
 def tophat_inputs(wildcards):
     seq_type = config["metadata"]["seq_type"]
     if (seq_type == "pe"):
-        reads = expand("{fastq_dir}/{samples}/{prefix}_{strand}.fastq", strand=config["metadata"]["strands"].split(), samples=wildcards.samples, fastq_dir=config["dir"]["fastq"], prefix=wildcards.prefix)
+        reads = expand("{fastq_dir}/{samples}/{prefix}_{strand}.fastq", strand=config["metadata"]["strands"].split(), samples=wildcards.samples, fastq_dir=fastq_dir, prefix=wildcards.prefix)
     elif (seq_type == "se"):
-        reads = expand("{fastq_dir}/{samples}/{prefix}.fastq", samples=wildcards.samples, fastq_dir=config["dir"]["fastq"], prefix=wildcards.prefix)
+        reads = expand("{fastq_dir}/{samples}/{prefix}.fastq", samples=wildcards.samples, fastq_dir=fastq_dir, prefix=wildcards.prefix)
     else:
         sys.exit("Error: invalid sequencing type parameter. Must be 'se' or 'pe'")
     return reads
@@ -70,18 +66,18 @@ rule tophat:
     """
     input:
         reads = tophat_inputs,
-        index = bowtie2_index
+        index = os.path.join(config["dir"]["base"], config["dir"]["genome"], "bowtie2", config["genome"]["fasta_file"])
     output:
-        bam = config["dir"]["samples"] + "/{samples}/{prefix}_tophat.bam"
+        bam = sample_dir + "/{samples}/{prefix}_tophat.bam"
     params:
-        outdir = config["dir"]["samples"] + "/{samples}/{prefix}_tophat", \
+        outdir = sample_dir + "/{samples}/{prefix}_tophat", \
         max_mismatches = config["tophat"]["max_mismatches"], \
         threads = config["tophat"]["threads"], \
         qsub = config["qsub"] \
-          + " -e " + config["dir"]["samples"] + "/{samples}/{prefix}_tophat_qsub.err" \
-          + " -o " + config["dir"]["samples"] + "/{samples}/{prefix}_tophat_qsub.out"
-    log: config["dir"]["samples"] + "/{samples}/{prefix}_tophat.log"
-    benchmark: config["dir"]["samples"] + "/{samples}/{prefix}_tophat_benchmark.json"
+          + " -e " + sample_dir + "/{samples}/{prefix}_tophat_qsub.err" \
+          + " -o " + sample_dir + "/{samples}/{prefix}_tophat_qsub.out"
+    log: sample_dir + "/{samples}/{prefix}_tophat.log"
+    benchmark: sample_dir + "/{samples}/{prefix}_tophat_benchmark.json"
     run:
         if (seq_type == "pe"):
             shell("tophat --num-threads {params.threads} --read-mismatches {params.max_mismatches} --output-dir {params.outdir} {input.index} " + input.reads[0] + " " + input.reads[1] + " 2> {log}")

@@ -11,12 +11,7 @@ if not "fasta_file" in config["genome"].keys():
 if not "genome" in config["dir"].keys():
     sys.exit("Genome dir must be defined in the 'dir' section of the config file")
 
-## Define paths
-#genome_version = config["genome"]["version"]
-genome_file = os.path.join(config["dir"]["base"], config["dir"]["genome"], config["genome"]["fasta_file"])
 bowtie2_dir = os.path.join(config["dir"]["base"], config["dir"]["genome"], "bowtie2")
-bowtie2_index = os.path.join(config["dir"]["base"], config["dir"]["genome"], "bowtie2", config["genome"]["fasta_file"])
-
 
 # Rule
 rule bowtie2_index:
@@ -32,20 +27,18 @@ rule bowtie2_index:
     Contributors: 
         Claire Rioualen
     """
-    input: genome_file
-    output: bowtie2_index
+    input: os.path.join(config["dir"]["base"], config["dir"]["genome"], config["genome"]["fasta_file"])
+    output: os.path.join(bowtie2_dir, config["genome"]["fasta_file"])
     params:
         dir = bowtie2_dir, \
-        index_file = bowtie2_index, \
-#        version = genome_version, \
         qsub = config["qsub"] \
           + " -e " + bowtie2_dir + "index_qsub.err" \
           + " -o " + bowtie2_dir + "index_qsub.out"
-    log: bowtie2_index + ".log"
-    benchmark: bowtie2_index + "_benchmark.json"
+    log: bowtie2_dir + "/index.log"
+    benchmark: bowtie2_dir + "/index_benchmark.json"
     shell: """
 mkdir -p {params.dir}
 cp {input} {params.dir}
-bowtie2-build  {params.index_file}  {params.index_file} &> {log}
+bowtie2-build  {output}  {output} &> {log}
 """
 

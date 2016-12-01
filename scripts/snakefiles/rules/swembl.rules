@@ -8,20 +8,14 @@ if not "swembl" in config.keys():
 if not "R" in config["swembl"].keys():
     config["swembl"]["R"] = "0"
 
+if not "N" in config["swembl"].keys():
+    config["swembl"]["N"] = "0"
+
 if not "x" in config["swembl"].keys():
     config["swembl"]["x"] = "1"
 
-## Define paths
-#if not "samples" in config["dir"].keys():
-#    config["dir"]["samples"] = config["dir"]["results"]
-
-#if not "peaks" in config["dir"].keys():
-#    config["dir"]["peaks"] = config["dir"]["results"]
-
 dir_samples =  os.path.join(config["dir"]["base"], config["dir"]["samples"])
-dir_peaks =  os.path.join(config["dir"]["base"], config["dir"]["peaks"])
-
-suffix = "swembl" #-R" + config["swembl"]["R"]
+dir_swembl = os.path.join(config["dir"]["base"], config["dir"]["peaks"], "{treatment}_vs_{control}/swembl")
 
 # Rule
 rule swembl:
@@ -41,23 +35,23 @@ rule swembl:
         Claire Rioualen, Lucie Khamvongsa
     """
     input:
-        treatment = dir_samples + "/{treatment}/{treatment}{preprocess,.*}_sorted_pos.bed", \
+        treatment = dir_samples + "/{treatment}/{treatment}{preprocess,.*}_sorted_pos.bed",
         control = dir_samples + "/{control}/{control}{preprocess,.*}_sorted_pos.bed"
     output:
-        peaks_swembl = dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".swembl", \
-        peaks_bed = dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".bed", \
-#        peak_len ="{result_dir}/{treatment}_vs_{control}/swembl-R{R}/{treatment}_vs_{control}_{aligner}_swembl-R{R}_peaklen.tab"
+        peaks_swembl = dir_swembl + "/{treatment}_vs_{control}{preprocess,.*}_swembl.swembl",
+        peaks_bed = dir_swembl + "/{treatment}_vs_{control}{preprocess,.*}_swembl.bed",
     params:
-        R = config["swembl"]["R"], \
-        x = config["swembl"]["x"], \
-        compa_name = "{treatment}_vs_{control}", \
+        R = config["swembl"]["R"],
+        N = config["swembl"]["N"],
+        x = config["swembl"]["x"],
+        compa_name = "{treatment}_vs_{control}",
         qsub = config["qsub"] \
-          + " -e " + dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.err" \
-          + " -o " + dir_peaks+ "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.out"
-    log: dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".log"
-    benchmark: dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_benchmark.json"
+          + " -e " + dir_swembl + "/{treatment}_vs_{control}{preprocess,.*}_swembl_qsub.err" \
+          + " -o " + dir_swembl + "/{treatment}_vs_{control}{preprocess,.*}_swembl_qsub.out"
+    log: dir_swembl + "/{treatment}_vs_{control}{preprocess,.*}_swembl.log"
+    benchmark: dir_swembl + "/{treatment}_vs_{control}{preprocess,.*}_swembl_benchmark.json"
     shell: """
-(SWEMBL -i {input.treatment} -r {input.control} -B -R {params.R} -x {params.x} -o {output.peaks_swembl}; \
+(SWEMBL -i {input.treatment} -r {input.control} -B -R {params.R} -N {params.N} -x {params.x} -o {output.peaks_swembl}; \
 grep -v '^#' {output.peaks_swembl} \
   | awk -F'\t' '$1 != "Region" || $2 != "Start pos." {{print $1"\t"$2"\t"$3"\t{params.compa_name}_SWEMBL\t"$7"\t+"}}'> {output.peaks_bed}
 ) &> {log}

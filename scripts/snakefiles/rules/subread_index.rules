@@ -11,12 +11,7 @@ if not "genome" in config["dir"].keys():
 if not "fasta_file" in config["genome"].keys():
     sys.exit("Genome dir must be defined in the 'dir' section of the config file")
 
-# Define paths
-genome_version = config["genome"]["version"]
-genome_dir = config["dir"]["genome"] + "/"
-genome_file = genome_dir + config["genome"]["fasta_file"]
-subread_dir = genome_dir + "subread-align/"
-subread_index = subread_dir + genome_version + ".fa"
+subread_dir = os.path.join(config["dir"]["base"], config["dir"]["genome"], "subread-align")
 
 # Rule
 rule subread_index:
@@ -38,18 +33,18 @@ rule subread_index:
     Contributors: 
         Claire Rioualen, Jacques van Helden
     """
-    input: genome_file
-    output: subread_index
+    input: os.path.join(config["dir"]["base"], config["dir"]["genome"], config["genome"]["fasta_file"])
+    output: subread_index = os.path.join(subread_dir, config["genome"]["fasta_file"])
     params:
+        fasta = config["genome"]["fasta_file"], \
         dir = subread_dir, \
-        version = genome_version, \
         qsub = config["qsub"] \
           + " -e " + subread_dir + "index_qsub.err" \
           + " -o " + subread_dir + "index_qsub.out"
-    log: subread_index + ".log"
-    benchmark: subread_index + "_benchmark.json"
+    log: subread_dir + "/index.log"
+    benchmark: subread_dir + "/index_benchmark.json"
     shell: """
 (mkdir -p {params.dir}
-cp {input} {params.dir}{params.version}.fa
-subread-buildindex -o {params.dir}{params.version}  {params.dir}{params.version}.fa) &> {log}
+cp {input} {params.dir}/{params.fasta}
+subread-buildindex -o {params.dir}/{params.fasta}  {params.dir}/{params.fasta}) &> {log}
 """

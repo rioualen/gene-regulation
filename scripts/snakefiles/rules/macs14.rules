@@ -23,17 +23,8 @@ if not "keep_dup" in config["macs14"].keys():
 if not "other_options" in config["macs14"].keys():
     config["macs14"]["other_options"] = ""
 
-## Define paths
-#if not "samples" in config["dir"].keys():
-#    config["dir"]["samples"] = config["dir"]["results"]
-
-#if not "peaks" in config["dir"].keys():
-#    config["dir"]["peaks"] = config["dir"]["results"]
-
 dir_samples =  os.path.join(config["dir"]["base"], config["dir"]["samples"])
-dir_peaks =  os.path.join(config["dir"]["base"], config["dir"]["peaks"])
-
-suffix = "macs14" #-pval" + config["macs14"]["pval"]
+dir_macs14 = os.path.join(config["dir"]["base"], config["dir"]["peaks"], "{treatment}_vs_{control}/macs14")
 
 # Rule
 rule macs14:
@@ -59,10 +50,10 @@ rule macs14:
         treatment = dir_samples + "/{treatment}/{treatment}{preprocess,.*}_sorted_pos.bed",
         control=dir_samples + "/{control}/{control}{preprocess,.*}_sorted_pos.bed"
     output:
-        peaks_bed = dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".bed"
+        peaks_bed = dir_macs14 + "/{treatment}_vs_{control}{preprocess,.*}_macs14.bed"
     params:
-        outdir = dir_peaks + "/{treatment}_vs_{control}/" + suffix,
-        name = "{treatment}_vs_{control}{preprocess,.*}_" + suffix,
+        outdir = dir_macs14,
+        name = "{treatment}_vs_{control}{preprocess,.*}_macs14",
         pval = config["macs14"]["pval"],
         keep_dup = config["macs14"]["keep_dup"],
         mfold = config["macs14"]["mfold"],
@@ -70,16 +61,14 @@ rule macs14:
         other_options = config["macs14"]["other_options"],
         genome_size = config["genome"]["size"],
         qsub=config["qsub"] \
-          + " -e " + dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.err" \
-          + " -o " + dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.out"
-    log: dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".log"
-    benchmark: dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_benchmark.json"
+          + " -e " + dir_macs14 + "/{treatment}_vs_{control}{preprocess,.*}_macs14_qsub.err" \
+          + " -o " + dir_macs14 + "/{treatment}_vs_{control}{preprocess,.*}_macs14_qsub.out"
+    log: dir_macs14 + "/{treatment}_vs_{control}{preprocess,.*}_macs14.log"
+    benchmark: dir_macs14 + "/{treatment}_vs_{control}{preprocess,.*}_macs14_benchmark.json"
     shell: """
 (mkdir -p {params.outdir}
-#cd {params.outdir}
 macs -t {input.treatment} -c {input.control} -f BED -g {params.genome_size} -m {params.mfold} --pvalue {params.pval} --keep-dup {params.keep_dup} --outdir {params.outdir} -n {params.name} --bw {params.bandwidth} {params.other_options}
 mv {params.outdir}/{params.name}_peaks.bed {params.outdir}/{params.name}.bed ;
-#mv {params.name}* {params.outdir} 
 ) &> {log}
 """
 

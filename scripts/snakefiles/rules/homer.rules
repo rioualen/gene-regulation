@@ -29,18 +29,8 @@ if not "P" in config["homer"].keys():
 if not "fdr" in config["homer"].keys():
     config["homer"]["fdr"] = "0.001"
 
-## Define paths
-#if not "samples" in config["dir"].keys():
-#    config["dir"]["samples"] = config["dir"]["results"]
-
-#if not "peaks" in config["dir"].keys():
-#    config["dir"]["peaks"] = config["dir"]["results"]
-
-suffix = "homer" #-fdr" + config["homer"]["fdr"]
-
 dir_samples = os.path.join(config["dir"]["base"], config["dir"]["samples"])
-dir_peaks = os.path.join(config["dir"]["base"], config["dir"]["peaks"])
-genome_file = os.path.join(config["dir"]["base"], config["dir"]["genome"], config["genome"]["fasta_file"])
+dir_homer = os.path.join(config["dir"]["base"], config["dir"]["peaks"], "{treatment}_vs_{control}/homer")
 
 # Rule
 rule homer:
@@ -67,23 +57,23 @@ rule homer:
     """
     input:
         treatment = dir_samples + "/{treatment}/{treatment}{preprocess,.*}_sorted_pos.bed",
-        control=dir_samples + "/{control}/{control}{preprocess,.*}_sorted_pos.bed"
-    output: peaks_bed = dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".bed"
+        control = dir_samples + "/{control}/{control}{preprocess,.*}_sorted_pos.bed"
+    output: peaks_bed = dir_homer + "/{treatment}_vs_{control}{preprocess,.*}_homer.bed"
     params:    # name="{treatment}_vs_{control}_homer",
-        treatment_tag=dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_tag",
-        control_tag=dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{control}_tag",
-        genome=genome_file,
-        style=config["homer"]["style"],
+        treatment_tag = dir_homer + "/{treatment}_tag",
+        control_tag = dir_homer + "/{control}_tag",
+        genome = os.path.join(config["dir"]["base"], config["dir"]["genome"], config["genome"]["fasta_file"]),
+        style = config["homer"]["style"],
         L = config["homer"]["L"],
         P = config["homer"]["P"],
         F = config["homer"]["F"],
         fdr = config["homer"]["fdr"],
         genome_size = config["genome"]["size"],
-        qsub=config["qsub"] \
-          + " -e " + dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.err" \
-          + " -o " + dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.out"
-    log: dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".log"
-    benchmark: dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_benchmark.json"
+        qsub = config["qsub"] \
+          + " -e " + dir_homer + "/{treatment}_vs_{control}{preprocess,.*}_homer_qsub.err" \
+          + " -o " + dir_homer + "/{treatment}_vs_{control}{preprocess,.*}_homer_qsub.out"
+    log: dir_homer + "/{treatment}_vs_{control}{preprocess,.*}_homer.log"
+    benchmark: dir_homer + "/{treatment}_vs_{control}{preprocess,.*}_homer_benchmark.json"
     shell:"""
 (makeTagDirectory {params.treatment_tag} -genome {params.genome} -checkGC {input.treatment} -format bed
 makeTagDirectory {params.control_tag} -genome {params.genome} -checkGC {input.control} -format bed

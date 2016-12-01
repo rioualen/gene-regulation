@@ -26,22 +26,11 @@ if not "threads" in config["bowtie2"].keys():
 if not "max_mismatches" in config["bowtie2"].keys():
     config["bowtie2"]["max_mismatches"] = "0"
 
-# Define paths
 if not "fastq" in config["dir"].keys():
-    sys.exit("You must define a location for the fastq file.")
+    sys.exit("You must define a location for the fastq files.")
 
-#genome_version = config["genome"]["version"]
-#genome_dir = config["dir"]["genome"] + "/"
-#genome_file = genome_dir + config["genome"]["fasta_file"]
-#bowtie2_dir = genome_dir + "bowtie2/"
-#bowtie2_index = bowtie2_dir + genome_version + ".fa"
-
-
-bowtie2_index = os.path.join(config["dir"]["base"], config["dir"]["genome"], "bowtie2", config["genome"]["fasta_file"])
-genome_file = os.path.join(config["dir"]["base"], config["dir"]["genome"], config["genome"]["fasta_file"])
 fastq_dir = os.path.join(config["dir"]["base"], config["dir"]["fastq"])
 sample_dir = os.path.join(config["dir"]["base"], config["dir"]["samples"])
-
 seq_type = config["metadata"]["seq_type"]
 
 # Define input files
@@ -76,7 +65,7 @@ rule bowtie2:
     """
     input:
         reads = bowtie2_inputs, 
-        index = bowtie2_index
+        index = os.path.join(config["dir"]["base"], config["dir"]["genome"], "bowtie2", config["genome"]["fasta_file"])
     output:
         bam = sample_dir + "/{samples}/{prefix}_bowtie2.bam"
     params:

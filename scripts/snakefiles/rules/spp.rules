@@ -13,18 +13,8 @@ if not "spp" in config.keys():
 if not "fdr" in config["spp"].keys():
     config["spp"]["fdr"] = "0.01"
 
-## Define paths
-#if not "samples" in config["dir"].keys():
-#    config["dir"]["samples"] = config["dir"]["results"]
-
-#if not "peaks" in config["dir"].keys():
-#    dir_peaks = config["dir"]["results"]
-
-
 dir_samples =  os.path.join(config["dir"]["base"], config["dir"]["samples"])
-dir_peaks =  os.path.join(config["dir"]["base"], config["dir"]["peaks"])
-
-suffix = "spp"#-fdr" + config["spp"]["fdr"]
+dir_spp = os.path.join(config["dir"]["base"], config["dir"]["peaks"], "{treatment}_vs_{control}/spp")
 
 # Rule
 rule spp:
@@ -45,20 +35,20 @@ rule spp:
         treatment = dir_samples + "/{treatment}/{treatment}{preprocess,.*}_sorted_pos.bam",
         control = dir_samples + "/{control}/{control}{preprocess,.*}_sorted_pos.bam"
     output:
-        peaks_narrowPeak = dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_peaks.narrowPeak",
-        peaks_bed = dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".bed",
-        pdf = dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".crosscorrelation.pdf",
-        sm_density_wig = dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".smoothed.density.wig",
-        enrich_est_wig = dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".enrichment.estimates.wig",
-        peaks_broadPeak = dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".broadPeak",
-        bdg_positions = dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".binding.positions.txt"
+        peaks_narrowPeak = dir_spp + "/{treatment}_vs_{control}{preprocess,.*}_spp_peaks.narrowPeak",
+        peaks_bed = dir_spp + "/{treatment}_vs_{control}{preprocess,.*}_spp.bed",
+        pdf = dir_spp + "/{treatment}_vs_{control}{preprocess,.*}_spp.crosscorrelation.pdf",
+        sm_density_wig = dir_spp + "/{treatment}_vs_{control}{preprocess,.*}_spp.smoothed.density.wig",
+        enrich_est_wig = dir_spp + "/{treatment}_vs_{control}{preprocess,.*}_spp.enrichment.estimates.wig",
+        peaks_broadPeak = dir_spp + "/{treatment}_vs_{control}{preprocess,.*}_spp.broadPeak",
+        bdg_positions = dir_spp + "/{treatment}_vs_{control}{preprocess,.*}_spp.binding.positions.txt"
     params:
         fdr = config["spp"]["fdr"],
         qsub=config["qsub"] \
-          + " -e " + dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.err" \
-          + " -o " + dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.out"
-    log: dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".log"
-    benchmark: dir_peaks + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_benchmark.json"
+          + " -e " + dir_spp + "/{treatment}_vs_{control}{preprocess,.*}_spp_qsub.err" \
+          + " -o " + dir_spp + "/{treatment}_vs_{control}{preprocess,.*}_spp_qsub.out"
+    log: dir_spp + "/{treatment}_vs_{control}{preprocess,.*}_spp.log"
+    benchmark: dir_spp + "/{treatment}_vs_{control}{preprocess,.*}_spp_benchmark.json"
     run:
         R("""
 
