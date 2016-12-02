@@ -1,5 +1,5 @@
 ---
-title: "Installation of RSAT on an Ubuntu device"
+title: "Installation of RSAT under Ubuntu 14.04"
 date: "Dec. 2nd, 2016"
 ---
 Unless stated otherwise, the following commands will be executed as root. 
