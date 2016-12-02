@@ -219,7 +219,9 @@ git config --global user.mail claire.rioualen@inserm.fr
 git config --global user.name "reg-genomics VM user"
 ``` 
 
-### Archive download. /!\\ Check version number/url. /!!!\\ Password?
+** OR **
+
+### Archive download. 
 ```
 export RSAT_DISTRIB=rsat_2016-11-06.tar.gz
 export RSAT_DISTRIB_URL=http://pedagogix-tagc.univ-mrs.fr/download_rsat/${RSAT_DISTRIB}
@@ -228,7 +230,6 @@ export RSAT_DISTRIB_URL=http://pedagogix-tagc.univ-mrs.fr/download_rsat/${RSAT_D
 sudo wget ${RSAT_DISTRIB_URL}
 sudo tar -xpzf ${RSAT_DISTRIB}
 sudo rm -f ${RSAT_DISTRIB}
-sudo df -m > /packages/install_logs/df_$(date +%Y-%m-%d_%H-%M-%S)_rsat_downloaded.txt
 cd ~; ln -fs /packages/rsat rsat
 ```                      
 
