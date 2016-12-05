@@ -1,5 +1,5 @@
 
-# The telomere-binding protein Tbf1 demarcates snoRNA gene promoters in Saccharomyces cerevisiae
+# ChIP-seq study case in *S. cerevisiae*
 
 **Reference**
 
