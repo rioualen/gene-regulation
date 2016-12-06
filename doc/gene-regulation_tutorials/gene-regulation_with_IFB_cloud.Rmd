@@ -98,7 +98,7 @@ ssh -A -p 22 root@192.54.201.124
 
 ## 1.5 Download source data
 
-On the IFB cloud VM, the vDisk is automatically attached and mounted by default under `/root/mydisk`, with a link from your home folder `~/mydisk`. 
+On the IFB cloud VM, the vDisk is automatically attached and mounted by default under `/root/mydisk`, or `~/mydisk`. 
 
 Here we create a folder to store the source data files and download them .
 
