@@ -242,14 +242,10 @@ If you want to manipulate data, you should also create a vDisk following step 1.
 When creating a new instance choose a 10 Go Ubuntu appliance and check the "Create appliance" option:
 
 1. Click *New Instance* button.
-
-**2. Choose appliance "Ubuntu 14.04 IFB-X2GO-10GB" in the drop-down menu. **
-
+2. **Choose appliance "Ubuntu 14.04 IFB-X2GO-10GB" in the drop-down menu. **
 3. Name your VM.
 4. Choose the amount of CPU and RAM to grant the VM (up to 8 CPU, 32 GB RAM).
-
-**5. Check the box *Create appliance*.**
-
+5. **Check the box *Create appliance*.**
 6. Attach the vDisk.
 7. Click *Run*.
 
