@@ -101,7 +101,7 @@ On the IFB cloud VM, the vDisk is automatically attached and mounted by default 
 Here we create a folder to store the source data files and download them .
 
 ```
-ANALYSIS_DIR=~/mydisk/GSE20870-analysis
+ANALYSIS_DIR=${HOME}/mydisk/GSE20870-analysis
 ```
 
 <!--mkdir -p ${ANALYSIS_DIR}/data -->
