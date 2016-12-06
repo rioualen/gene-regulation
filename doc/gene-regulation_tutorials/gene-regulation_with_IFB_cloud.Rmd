@@ -83,8 +83,6 @@ Appliances usually have a limited amount of disk space (up to 10, 20Go). If the 
 5. Attach the vDisk.
 6. Click *Run*.
 
-*add cap.*
-
 7. After a few seconds, you may refresh the page until the newly created instance shows up on the dashboard. Clicking on the ssh mention in the *Access* column will give you the commands to access your virtual machine. 
 
 ![](../../img/x2go_ssh.png)
@@ -103,14 +101,36 @@ On the IFB cloud VM, the vDisk is automatically attached and mounted by default 
 Here we create a folder to store the source data files and download them .
 
 ```
-## Download input reads
-mkdir -p ~/mydisk/GSE20870-analysis/data/GSM521934 
-wget -v --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021358/SRR051929/SRR051929.sra -P ~/mydisk/GSE20870-analysis/data/GSM521934/
-
-## Download ChIP-seq reads
-mkdir -p ~/mydisk/GSE20870-analysis/data/GSM521935
-wget -v --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra -P ~/mydisk/GSE20870-analysis/data/GSM521935/
+ANALYSIS_DIR=~/mydisk/GSE20870-analysis
 ```
+
+<!--mkdir -p ${ANALYSIS_DIR}/data -->
+<!--mkdir -p ${ANALYSIS_DIR}/genome-->
+```
+mkdir -p ${ANALYSIS_DIR}
+cd ${ANALYSIS_DIR}
+ln -s ${HOME}/gene-regulation-2.0 gene-regulation
+```
+
+### Download data
+
+<!--mkdir -p ${ANALYSIS_DIR}/data/GSM521934 ${ANALYSIS_DIR}/data/GSM521935-->
+```
+wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021358/SRR051929/SRR051929.sra -P ${ANALYSIS_DIR}/data/GSM521934
+wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra -P ${ANALYSIS_DIR}/data/GSM521935
+```
+
+### Download reference genome & annotations
+
+```
+wget -nc ftp://ftp.ensemblgenomes.org/pub/fungi/release-30/fasta/saccharomyces_cerevisiae/dna/Saccharomyces_cerevisiae.R64-1-1.30.dna.genome.fa.gz -P ${ANALYSIS_DIR}/genome
+wget -nc ftp://ftp.ensemblgenomes.org/pub/fungi/release-30/gff3/saccharomyces_cerevisiae/Saccharomyces_cerevisiae.R64-1-1.30.gff3.gz -P ${ANALYSIS_DIR}/genome
+wget -nc ftp://ftp.ensemblgenomes.org/pub/fungi/release-30/gtf/saccharomyces_cerevisiae/Saccharomyces_cerevisiae.R64-1-1.30.gtf.gz -P ${ANALYSIS_DIR}/genome
+gunzip ${ANALYSIS_DIR}/genome/*.gz
+```
+
+
+
 
 ## 1.6 Run the workflow
 
