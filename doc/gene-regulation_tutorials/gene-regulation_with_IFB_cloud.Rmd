@@ -112,9 +112,6 @@ mkdir -p ~/mydisk/GSE20870-analysis/data/GSM521935
 wget -v --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra -P ~/mydisk/GSE20870-analysis/data/GSM521935/
 ```
 
-
-Note: the commands above can be adapted to download the data in any other directory. You then need to update the workflow configuration file `gene-regulation/examples/GSE20870/GSE20870.yml`, or create symlinks in the analysis directory. 
-
 ## 1.6 Run the workflow
 
 ```
