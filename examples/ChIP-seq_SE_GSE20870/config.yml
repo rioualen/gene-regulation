@@ -39,6 +39,7 @@
     trimming: "sickle"
     mapping: "bowtie2" # bwa subread-align bowtie "
     peakcalling: "macs2 homer" # macs14 spp swembl"
+    annotation: "intersect closest" # window
     
   fastqc: 
     other_options: ""                                                           # optional (def. empty string)
