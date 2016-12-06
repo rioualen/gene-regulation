@@ -135,9 +135,13 @@ You should now have something like this:
 
 ## 1.6 Run the workflow
 
+You can use the option `-n` to make a dry run. 
+
 ```
-cd  ~/mydisk/GSE20870-analysis/
-ln -s ~/gene-regulation-2.0 gene-regulation
+cd  ${ANALYSIS_DIR}
+snakemake -p -s gene-regulation/scripts/snakefiles/workflows/factor_workflow.py --configfile gene-regulation/examples/GSE20870/GSE20870.yml -n
+```
+```
 snakemake -p -s gene-regulation/scripts/snakefiles/workflows/factor_workflow.py --configfile gene-regulation/examples/GSE20870/GSE20870.yml
 ```
 
@@ -190,6 +194,11 @@ Note: you may need to change your keyboard settings
 
 ## 2.2 Visualize results
 
+The result files should be organized like this: 
+
+![](../../img/results_orga.png)
+
+
 ### FastQC
 
 You can visualize the FastQC results using firefox or any other navigator. Fetch the `html` files located in the sample directories.
@@ -238,14 +247,10 @@ If you want to manipulate data, you should also create a vDisk following step 1.
 When creating a new instance choose a 10 Go Ubuntu appliance and check the "Create appliance" option:
 
 1. Click *New Instance* button.
-
-**2. Choose appliance "Ubuntu 14.04 IFB-X2GO-10GB" in the drop-down menu. **
-
+2. **Choose appliance "Ubuntu 14.04 IFB-X2GO-10GB" in the drop-down menu.**
 3. Name your VM.
 4. Choose the amount of CPU and RAM to grant the VM (up to 8 CPU, 32 GB RAM).
-
-**5. Check the box *Create appliance*.**
-
+5. **Check the box *Create appliance*.**
 6. Attach the vDisk.
 7. Click *Run*.
 
