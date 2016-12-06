@@ -118,6 +118,7 @@ include: os.path.join(RULES, "bam_by_pos.rules")
 include: os.path.join(RULES, "bam_to_bed.rules")
 include: os.path.join(RULES, "bam_stats.rules")
 include: os.path.join(RULES, "bedgraph_to_tdf.rules")
+include: os.path.join(RULES, "bedtools_closest.rules")
 include: os.path.join(RULES, "bedtools_intersect.rules")
 include: os.path.join(RULES, "bedtools_window.rules")
 include: os.path.join(RULES, "bowtie_index.rules")
@@ -226,8 +227,11 @@ if not (("tools" in config.keys()) and ("annotation" in config["tools"].keys()))
     sys.exit("The parameter config['tools']['annotation'] should be specified in the config file.")
 
 DISTANCE = config["tools"]["annotation"].split()
-GENOMIC_FEAT    = expand(expand(PEAKS_DIR + "/{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{peakcaller}}_{{distance}}_annot.bed", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLING_TOOLS, distance=DISTANCE)
-GENE_LIST       = expand(expand(PEAKS_DIR + "/{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{peakcaller}}_{{distance}}_annot_gene_list.tab", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLING_TOOLS, distance=DISTANCE)
+GENOMIC_FEAT    = expand(expand(PEAKS_DIR + "/{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}_{{distance}}_annot.bed", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLING_TOOLS, distance=DISTANCE, aligner=MAPPING_TOOLS, trimmer=TRIMMING_TOOLS)
+
+print(GENOMIC_FEAT)
+
+GENE_LIST       = expand(expand(PEAKS_DIR + "/{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}_{{distance}}_annot_gene_list.tab", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLING_TOOLS, distance=DISTANCE,aligner=MAPPING_TOOLS, trimmer=TRIMMING_TOOLS)
 
 PEAK_MOTIFS     = expand(expand(PEAKS_DIR + "/{treat}_vs_{control}/{{peakcaller}}/peak-motifs/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}_peak-motifs_synthesis.html", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLING_TOOLS, aligner=MAPPING_TOOLS, trimmer=TRIMMING_TOOLS)
 
@@ -255,14 +259,14 @@ rule all:
 #            SORTED_BAM, \
             BAM_STATS, \
 #            SORTED_BAM_BAI, \
-            GENOME_INDEX, \
+#            GENOME_INDEX, \
             GENOME_COV_GZ, \
             GENOME_COV_BW, \
 #            SORTED_BED, \
 #            PEAKS, \
 #            GENOMIC_FEAT, \
             GENE_LIST, \
-            PEAK_MOTIFS, \
+#            PEAK_MOTIFS, \
             IGV, \
             GRAPHICS
 	params: qsub=config["qsub"]
