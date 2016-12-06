@@ -128,8 +128,9 @@ wget -nc ftp://ftp.ensemblgenomes.org/pub/fungi/release-30/gff3/saccharomyces_ce
 wget -nc ftp://ftp.ensemblgenomes.org/pub/fungi/release-30/gtf/saccharomyces_cerevisiae/Saccharomyces_cerevisiae.R64-1-1.30.gtf.gz -P ${ANALYSIS_DIR}/genome
 gunzip ${ANALYSIS_DIR}/genome/*.gz
 ```
+You should now have something like this:
 
-
+![](../../img/data_tuto.png)
 
 
 ## 1.6 Run the workflow
