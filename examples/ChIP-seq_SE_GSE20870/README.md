@@ -1,5 +1,5 @@
 
-# The telomere-binding protein Tbf1 demarcates snoRNA gene promoters in Saccharomyces cerevisiae
+# ChIP-seq study case in *S. cerevisiae*
 
 **Reference**
 
@@ -11,6 +11,14 @@ Mol Cell 2010 May 28;38(4):614-20. PMID: 20513435
 
 http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE20870
 
+## Download Gene-regulation repository
+
+```
+cd
+wget https://github.com/rioualen/gene-regulation/archive/3.0.tar.gz
+tar xvzf 3.0.tar.gz
+```
+
 ## Setup analysis environment
 ```
 ANALYSIS_DIR=$HOME/ChIP-seq_SE_GSE20870
@@ -21,11 +29,13 @@ ANALYSIS_DIR=$HOME/ChIP-seq_SE_GSE20870
 ```
 mkdir -p ${ANALYSIS_DIR}
 cd ${ANALYSIS_DIR}
-git clone https://github.com/rioualen/gene-regulation.git
-
-ln -s ~/Desktop/workspace/gene-regulation gene-regulation
+ln -s ${HOME}/gene-regulation-3.0 gene-regulation
 ```
-<!--git clone https://github.com/rioualen/gene-regulation.git-->
+
+
+<!--git clone https://github.com/rioualen/gene-regulation.git
+ln -s ~/Desktop/workspace/gene-regulation gene-regulation
+-->
 
 ## Download data
 
