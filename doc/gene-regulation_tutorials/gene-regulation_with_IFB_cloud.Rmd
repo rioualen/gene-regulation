@@ -137,7 +137,7 @@ You should now have something like this:
 
 ```
 cd  ${ANALYSIS_DIR}
-snakemake -p -s gene-regulation/scripts/snakefiles/workflows/ChIP-seq_workflow_SE.py --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml
+snakemake -p -s gene-regulation/scripts/snakefiles/workflows/factor_workflow.py --configfile gene-regulation/examples/GSE20870/GSE20870.yml
 ```
 
 Using 4CPU & 8Go of RAM, the workflow took about 12mn to complete. 
