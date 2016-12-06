@@ -136,8 +136,7 @@ You should now have something like this:
 ## 1.6 Run the workflow
 
 ```
-cd  ~/mydisk/GSE20870-analysis/
-ln -s ~/gene-regulation-2.0 gene-regulation
+cd  ${ANALYSIS_DIR}
 snakemake -p -s gene-regulation/scripts/snakefiles/workflows/factor_workflow.py --configfile gene-regulation/examples/GSE20870/GSE20870.yml
 ```
 
