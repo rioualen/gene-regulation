@@ -194,6 +194,11 @@ Note: you may need to change your keyboard settings
 
 ## 2.2 Visualize results
 
+The result files should be organized like this: 
+
+![](../../img/results_orga.png)
+
+
 ### FastQC
 
 You can visualize the FastQC results using firefox or any other navigator. Fetch the `html` files located in the sample directories.
