@@ -219,7 +219,7 @@ rule bam_sorted:
 ```{yaml, eval=FALSE}
 # file: config.yml
   samples: "GSM521934 GSM521935" 
-  outdir: "/home/rioualen/Desktop/workspace/snakemake_howto/results/"
+  outdir: "gene-regulation-1.0/doc/snakemake_tutorial/results/"
   samtools:
     threads: "2"
 ```
