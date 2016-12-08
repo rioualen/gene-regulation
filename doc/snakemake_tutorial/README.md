@@ -58,9 +58,13 @@ sudo make install
 
 ## Rsamtools
 
+```{shell}
+R
+```
 ```{r eval=FALSE}
 source("http://bioconductor.org/biocLite.R")
 biocLite("Rsamtools")
+quit()
 ```
 
 # Demo workflows
