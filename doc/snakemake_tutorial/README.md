@@ -54,6 +54,7 @@ tar xvf samtools-1.3.tar
 cd samtools-1.3
 make
 sudo make install
+cd gene-regulation-1.0/doc/snakemake_tutorial
 ```
 
 ## Rsamtools
