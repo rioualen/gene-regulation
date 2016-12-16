@@ -37,6 +37,8 @@
   tools:
     trimming: "sickle"
     mapping: "bowtie2" # subread-align" # bwa bowtie
+    peakcalling: "macs2"
+    annotation: "intersect"
 
 
   fastqc: 

@@ -38,7 +38,7 @@
 
   tools:
     trimming: ""
-    mapping: "bowtie2" # subread-align"
+    mapping: "bowtie2 subread-align" # tophat"
     diffexpr: "edgeR DESeq2"
 
   bowtie2:

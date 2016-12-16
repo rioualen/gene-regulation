@@ -1,6 +1,12 @@
 ; Sample description file
 ; Organism: Saccharomyces cerevisiae
 ; Experiment type: ChIP-seq
-ID	Condition
-GSM521934	input
-GSM521935	chip
+;
+ID	Condition	ENA_experiment	Scan Name
+GSM521934	input	SRX021359	SRR051930
+GSM521935	chip	SRX021358	SRR051929
+
+
+
+
+
