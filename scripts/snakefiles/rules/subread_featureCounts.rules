@@ -26,11 +26,11 @@ if not "multi_mapping" in config["subread-featureCounts"].keys():
 if not "strand_specificity" in config["subread-featureCounts"].keys():
     config["subread-featureCounts"]["strand_specificity"] = "0"
 
-# Define input files
-def featureCounts_inputs(wildcards):
-    sample_ids = read_table(os.path.join(config["dir"]["base"], config["metadata"]["samples"]))["ID"]
-    bam_files =  expand(SAMPLE_DIR + "/{samples}/{samples}{prefix,.*}.bam", samples=sample_ids, prefix=wildcards.prefix)
-    return bam_files
+## Define input files
+#def featureCounts_inputs(wildcards):
+#    sample_ids = read_table(os.path.join(config["dir"]["base"], config["metadata"]["samples"]))["ID"]
+#    bam_files =  expand(SAMPLE_DIR + "/{samples}/{samples}{prefix,.*}.bam", samples=sample_ids, prefix=wildcards.prefix)
+#    return bam_files
 
 # Rule
 rule subread_featureCounts:

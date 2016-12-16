@@ -73,16 +73,16 @@ rule sartools_DESeq2:
         Claire Rioualen (claire.rioualen@inserm.fr)
     """
     input: 
-        targetFile = "{diffexpr_dir}/{test}_vs_{ref}/SARTools_targetfile.txt"
+        targetFile = "{diffexpr_dir}/{test}_vs_{ref}/{preprocess,.*}SARTools_targetfile.txt"
     output: 
-        report = "{diffexpr_dir}/{test}_vs_{ref}/DESeq2/{test}_vs_{ref}{preprocess,.*}_DESeq2_report.html",
-        gene_list = "{diffexpr_dir}/{test}_vs_{ref}/DESeq2/{test}_vs_{ref}{preprocess,.*}_DESeq2_gene_list.tab"
+        report = "{diffexpr_dir}/{test}_vs_{ref}/DESeq2/{test}_vs_{ref}_{preprocess,.*}DESeq2_report.html",
+        gene_list = "{diffexpr_dir}/{test}_vs_{ref}/DESeq2/{test}_vs_{ref}_{preprocess,.*}DESeq2_gene_list.tab"
     params:
         wd = "{diffexpr_dir}/{test}_vs_{ref}/DESeq2",
-        targetFile = "SARTools_targetfile.txt",
-        rawDir = config["dir"]["base"] + "/" + config["dir"]["samples"],
+        targetFile = "{preprocess,.*}SARTools_targetfile.txt",
+        rawDir = "", #config["dir"]["base"] + "/" + config["dir"]["samples"],
         baseDir = config["dir"]["base"],
-        projectName = "{test}_vs_{ref}{preprocess,.*}_DESeq2",
+        projectName = "{test}_vs_{ref}_{preprocess,.*}DESeq2",
         author = config["author"],
         featuresToRemove = config["DESeq2"]["featuresToRemove"],
         varInt = config["DESeq2"]["varInt"],
@@ -96,10 +96,10 @@ rule sartools_DESeq2:
         typeTrans = config["DESeq2"]["typeTrans"],
         locfunc = config["DESeq2"]["locfunc"],
         qsub = config["qsub"] \
-          + " -e " + "{diffexpr_dir}/{test}_vs_{ref}/DESeq2/{test}_vs_{ref}{preprocess,.*}_DESeq2_qsub.err" \
-          + " -o " + "{diffexpr_dir}/{test}_vs_{ref}/DESeq2/{test}_vs_{ref}{preprocess,.*}_DESeq2_qsub.out"
-    log: "{diffexpr_dir}/{test}_vs_{ref}/DESeq2/{test}_vs_{ref}{preprocess,.*}_DESeq2.log"
-    benchmark: "{diffexpr_dir}/{test}_vs_{ref}/DESeq2/{test}_vs_{ref}{preprocess,.*}_DESeq2_benchmark.json"
+          + " -e " + "{diffexpr_dir}/{test}_vs_{ref}/DESeq2/{test}_vs_{ref}_{preprocess,.*}DESeq2_qsub.err" \
+          + " -o " + "{diffexpr_dir}/{test}_vs_{ref}/DESeq2/{test}_vs_{ref}_{preprocess,.*}DESeq2_qsub.out"
+    log: "{diffexpr_dir}/{test}_vs_{ref}/DESeq2/{test}_vs_{ref}_{preprocess,.*}DESeq2.log"
+    benchmark: "{diffexpr_dir}/{test}_vs_{ref}/DESeq2/{test}_vs_{ref}_{preprocess,.*}DESeq2_benchmark.json"
     run:
         R("""
 

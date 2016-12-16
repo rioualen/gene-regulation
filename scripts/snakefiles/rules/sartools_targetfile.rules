@@ -22,7 +22,7 @@ diffexpr_dir = os.path.join(config["dir"]["base"], config["dir"]["diffexpr"])
 
 # Define input files
 def targetfiles_inputs(wildcards):
-    count_files =  expand(sample_dir + "/{samples}/{samples}_featureCounts.txt", samples=sample_ids)
+    count_files =  expand(sample_dir + "/{samples}/{samples}_{preprocess}featureCounts.txt", samples=sample_ids, preprocess=wildcards.preprocess)
     return count_files
 
 # Rule
@@ -40,20 +40,20 @@ rule sartools_targetfile:
     """
     input: 
         count_files = targetfiles_inputs
-    output: diffexpr_dir + "/{test}_vs_{ref}/SARTools_targetfile.txt"
+    output: diffexpr_dir + "/{test}_vs_{ref}/{preprocess,.*}SARTools_targetfile.txt"
     params:
         qsub = config["qsub"]\
-            + " -e " + diffexpr_dir + "/{test}_vs_{ref}/targetfile_qsub.err"\
-            + " -o " + diffexpr_dir + "/{test}_vs_{ref}/targetfile_qsub.out"
-    log: diffexpr_dir + "/{test}_vs_{ref}/SARTools_targetfile.log"
-    benchmark: diffexpr_dir + "/{test}_vs_{ref}/SARTools_targetfile_benchmark.json"
+            + " -e " + diffexpr_dir + "/{test}_vs_{ref}/{preprocess,.*}targetfile_qsub.err"\
+            + " -o " + diffexpr_dir + "/{test}_vs_{ref}/{preprocess,.*}targetfile_qsub.out"
+    log: diffexpr_dir + "/{test}_vs_{ref}/{preprocess,.*}SARTools_targetfile.log"
+    benchmark: diffexpr_dir + "/{test}_vs_{ref}/{preprocess,.*}SARTools_targetfile_benchmark.json"
     run:
 #        sys.stdout = open('{log}', 'w')
         f = open(output[0], "w+")
         f.write("label\tfiles\tgroup\n")
         for id in range(len(sample_ids)):
             cond = sample_conditions[id]
-            counts = expand(sample_ids[id] + "/" + sample_ids[id] + "_featureCounts.txt")
+            counts = expand(sample_dir + "/" + sample_ids[id] + "/" + sample_ids[id] + "_{preprocess}featureCounts.txt", preprocess=wildcards.preprocess)
             f.write(sample_ids[id] + "\t" + counts[0] + "\t" + cond + "\n")
         f.close()
 #        sys.stdout.close()

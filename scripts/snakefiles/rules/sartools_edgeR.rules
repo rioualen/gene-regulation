@@ -66,16 +66,16 @@ rule sartools_edgeR:
         Claire Rioualen (claire.rioualen@inserm.fr)
     """
     input: 
-        targetFile = "{diffexpr_dir}/{test}_vs_{ref}/SARTools_targetfile.txt"
+        targetFile = "{diffexpr_dir}/{test}_vs_{ref}/{preprocess,.*}SARTools_targetfile.txt"
     output: 
-        report = "{diffexpr_dir}/{test}_vs_{ref}/edgeR/{test}_vs_{ref}{preprocess,.*}_edgeR_report.html",
-        gene_list = "{diffexpr_dir}/{test}_vs_{ref}/edgeR/{test}_vs_{ref}{preprocess,.*}_edgeR_gene_list.tab"
+        report = "{diffexpr_dir}/{test}_vs_{ref}/edgeR/{test}_vs_{ref}_{preprocess,.*}edgeR_report.html",
+        gene_list = "{diffexpr_dir}/{test}_vs_{ref}/edgeR/{test}_vs_{ref}_{preprocess,.*}edgeR_gene_list.tab"
     params:
         wd = "{diffexpr_dir}/{test}_vs_{ref}/edgeR",
-        targetFile = "SARTools_targetfile.txt",
-        rawDir = config["dir"]["base"] + "/" + config["dir"]["samples"],
+        targetFile = "{preprocess,.*}SARTools_targetfile.txt",
+        rawDir = "", #config["dir"]["base"] + "/" + config["dir"]["samples"],
         baseDir = config["dir"]["base"],
-        projectName = "{test}_vs_{ref}{preprocess,.*}_edgeR",
+        projectName = "{test}_vs_{ref}_{preprocess,.*}edgeR",
         author = config["author"],
         featuresToRemove = config["edgeR"]["featuresToRemove"],
         varInt = config["edgeR"]["varInt"],
@@ -87,16 +87,14 @@ rule sartools_edgeR:
         gene_selection = config["edgeR"]["gene_selection"],
         normalizationMethod = config["edgeR"]["normalizationMethod"],
         qsub = config["qsub"] \
-          + " -e " + "{diffexpr_dir}/{test}_vs_{ref}/edgeR/{test}_vs_{ref}{preprocess,.*}_edgeR_qsub.err" \
-          + " -o " + "{diffexpr_dir}/{test}_vs_{ref}/edgeR/{test}_vs_{ref}{preprocess,.*}_edgeR_qsub.out"
-    log: "{diffexpr_dir}/{test}_vs_{ref}/edgeR/{test}_vs_{ref}{preprocess,.*}_edgeR.log"
-    benchmark: "{diffexpr_dir}/{test}_vs_{ref}/edgeR/{test}_vs_{ref}{preprocess,.*}_edgeR_benchmark.json"
+          + " -e " + "{diffexpr_dir}/{test}_vs_{ref}/edgeR/{test}_vs_{ref}_{preprocess,.*}edgeR_qsub.err" \
+          + " -o " + "{diffexpr_dir}/{test}_vs_{ref}/edgeR/{test}_vs_{ref}_{preprocess,.*}edgeR_qsub.out"
+    log: "{diffexpr_dir}/{test}_vs_{ref}/edgeR/{test}_vs_{ref}_{preprocess,.*}edgeR.log"
+    benchmark: "{diffexpr_dir}/{test}_vs_{ref}/edgeR/{test}_vs_{ref}_{preprocess,.*}edgeR_benchmark.json"
     run:
         R("""
 
         rm(list=ls())
-
-        sink("{log}")
 
         library(SARTools)
 

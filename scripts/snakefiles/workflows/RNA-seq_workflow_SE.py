@@ -218,9 +218,10 @@ DIFFEXPR_TOOLS = config["tools"]["diffexpr"].split()
 
 #DEG = expand(DEG_DIR + "/{deg}/{prefix}_{deg}_report.html", prefix=PREFIX, deg=DIFFEXPR_TOOLS)
 
-SARTOOLS_TARGETFILE = expand(DEG_DIR + "/{test}_vs_{ref}/SARTools_targetfile.txt", test=TEST_COND, ref=REFERENCE_COND)
-DEG = expand(expand(DEG_DIR + "/{test}_vs_{ref}/{{deg}}/{test}_vs_{ref}_{{deg}}_report.html", zip, test=TEST_COND, ref=REFERENCE_COND), deg=DIFFEXPR_TOOLS)
+SARTOOLS_TARGETFILE = expand(expand(DEG_DIR + "/{test}_vs_{ref}/{{aligner}}_SARTools_targetfile.txt", test=TEST_COND, ref=REFERENCE_COND), aligner=MAPPING_TOOLS)
+DEG = expand(expand(DEG_DIR + "/{test}_vs_{ref}/{{deg}}/{test}_vs_{ref}_{{aligner}}_{{deg}}_report.html", zip, test=TEST_COND, ref=REFERENCE_COND), deg=DIFFEXPR_TOOLS, aligner=MAPPING_TOOLS)
 
+#        report = "{diffexpr_dir}/{test}_vs_{ref}/edgeR/{test}_vs_{ref}_{aligner}_edgeR_report.html",
 
 #    output: diffexpr_dir + "/{test}_vs_{ref}/SARTools_targetfile.txt"
 
@@ -261,9 +262,9 @@ rule all:
 #            GENOME_COVERAGE_TDF, \
 ##            INFER_TRANSCRIPTS, \
             FEATURE_COUNTS, \
-#            SARTOOLS_TARGETFILE, \
-#            DEG, \
-            GRAPHICS
+            SARTOOLS_TARGETFILE, \
+            DEG, \
+#            GRAPHICS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
