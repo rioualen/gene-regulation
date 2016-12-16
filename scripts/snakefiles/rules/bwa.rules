@@ -61,7 +61,7 @@ rule bwa:
     """
     input:
         reads = bwa_inputs, 
-        index = os.path.join(config["dir"]["base"], config["dir"]["genome"], "bwa", config["genome"]["fasta_file"])
+        index = os.path.join(config["dir"]["genome"], "bwa", config["genome"]["fasta_file"])
     output:
         bam = sample_dir + "/{samples}/{prefix}_bwa.bam"
     params:

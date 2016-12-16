@@ -65,7 +65,7 @@ rule bowtie2:
     """
     input:
         reads = bowtie2_inputs, 
-        index = os.path.join(config["dir"]["base"], config["dir"]["genome"], "bowtie2", config["genome"]["fasta_file"])
+        index = os.path.join(config["dir"]["genome"], "bowtie2", config["genome"]["fasta_file"])
     output:
         bam = sample_dir + "/{samples}/{prefix}_bowtie2.bam"
     params:

@@ -12,8 +12,8 @@ if not "genome" in config["dir"].keys():
     sys.exit("Genome dir must be defined in the dir section of the config file")
 
 # Define paths
-gtf_file = os.path.join(config["dir"]["base"], config["dir"]["genome"], config["genome"]["gtf_file"])
-fasta_file = os.path.join(config["dir"]["base"], config["dir"]["genome"], config["genome"]["fasta_file"])
+gtf_file = os.path.join(config["dir"]["genome"], config["genome"]["gtf_file"])
+fasta_file = os.path.join(config["dir"]["genome"], config["genome"]["fasta_file"])
 
 # Rule
 rule annotate_peaks:

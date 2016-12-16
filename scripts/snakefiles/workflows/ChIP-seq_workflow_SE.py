@@ -62,7 +62,7 @@ include: os.path.join(GENEREG_LIB, "scripts/python_lib/util.py")
 #================================================================#
 
 # Genome & annotations
-GENOME_DIR = os.path.join(config["dir"]["base"], config["dir"]["genome"])
+GENOME_DIR = config["dir"]["genome"]
 GENOME_FASTA = os.path.join(GENOME_DIR, config["genome"]["fasta_file"])
 GENOME_GFF3 = os.path.join(GENOME_DIR, config["genome"]["gff3_file"])
 GENOME_GTF = os.path.join(GENOME_DIR, config["genome"]["gtf_file"])
@@ -267,7 +267,7 @@ rule all:
 #            GENOMIC_FEAT, \
             GENE_LIST, \
 #            PEAK_MOTIFS, \
-            IGV, \
+#            IGV, \
             GRAPHICS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"

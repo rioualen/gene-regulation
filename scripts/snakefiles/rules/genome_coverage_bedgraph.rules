@@ -9,7 +9,7 @@ if not "genome" in config["dir"].keys():
     sys.exit("Genome dir must be defined in the 'dir' section of the config file")
 
 # Define paths
-genome_dir = os.path.join(config["dir"]["base"],config["dir"]["genome"])
+genome_dir = config["dir"]["genome"]
 genome_file = os.path.join(genome_dir, config["genome"]["fasta_file"])
 
 chrom_size = re.sub('\.fa$', '', genome_file) + ".genome"

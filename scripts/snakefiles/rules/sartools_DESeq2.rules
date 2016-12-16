@@ -8,6 +8,9 @@ if not "samples" in config["dir"].keys():
 if not "author" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
+if not "DESeq2" in config.keys():
+    config["DESeq2"] = {}
+
 if not "featuresToRemove" in config["DESeq2"].keys():
     config["DESeq2"]["featuresToRemove"] = "NULL"
 

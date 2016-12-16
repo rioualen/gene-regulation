@@ -66,7 +66,7 @@ rule tophat:
     """
     input:
         reads = tophat_inputs,
-        index = os.path.join(config["dir"]["base"], config["dir"]["genome"], "bowtie2", config["genome"]["fasta_file"])
+        index = os.path.join(config["dir"]["genome"], "bowtie2", config["genome"]["fasta_file"])
     output:
         bam = sample_dir + "/{samples}/{prefix}_tophat.bam"
     params:

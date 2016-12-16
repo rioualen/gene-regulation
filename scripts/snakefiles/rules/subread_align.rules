@@ -77,7 +77,7 @@ rule subread_align:
     """
     input:
         reads = subread_inputs, 
-        index = os.path.join(config["dir"]["base"], config["dir"]["genome"], "subread-align", config["genome"]["fasta_file"])
+        index = os.path.join(config["dir"]["genome"], "subread-align", config["genome"]["fasta_file"])
     output:
         bam = sample_dir + "/{samples}/{prefix}_subread-align.bam"
     params:

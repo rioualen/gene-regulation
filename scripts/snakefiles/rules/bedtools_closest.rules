@@ -20,8 +20,8 @@ if not "genome" in config["dir"].keys():
 #    config["bedtools"][""] = ""
 
 # Define paths
-gff3_file = os.path.join(config["dir"]["base"], config["dir"]["genome"], config["genome"]["gff3_file"])
-fasta_file = os.path.join(config["dir"]["base"], config["dir"]["genome"], config["genome"]["fasta_file"])
+gff3_file = os.path.join(config["dir"]["genome"], config["genome"]["gff3_file"])
+fasta_file = os.path.join(config["dir"]["genome"], config["genome"]["fasta_file"])
 
 
 rule bedtools_closest:

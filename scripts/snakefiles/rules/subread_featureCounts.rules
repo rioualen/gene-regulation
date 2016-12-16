@@ -56,7 +56,7 @@ rule subread_featureCounts:
     """
     input: 
         bam = "{reads}_sorted_pos.bam",
-        gtf = os.path.join(config["dir"]["base"], config["dir"]["genome"], config["genome"]["gtf_file"])
+        gtf = os.path.join(config["dir"]["genome"], config["genome"]["gtf_file"])
     output: "{reads}_featureCounts.txt"          #### !!_" + config["subread-featureCounts"]["feature_type"] + "
     params:
         wd = config["dir"]["base"],

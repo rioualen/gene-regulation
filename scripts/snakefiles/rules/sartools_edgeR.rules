@@ -8,6 +8,9 @@ if not "samples" in config["dir"].keys():
 if not "author" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
+if not "edgeR" in config.keys():
+    config["edgeR"] = {}
+
 if not "featuresToRemove" in config["edgeR"].keys():
     config["edgeR"]["featuresToRemove"] = "NULL"
 
