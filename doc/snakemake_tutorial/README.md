@@ -54,13 +54,18 @@ tar xvf samtools-1.3.tar
 cd samtools-1.3
 make
 sudo make install
+cd gene-regulation-1.0/doc/snakemake_tutorial
 ```
 
 ## Rsamtools
 
+```{shell}
+R
+```
 ```{r eval=FALSE}
 source("http://bioconductor.org/biocLite.R")
 biocLite("Rsamtools")
+quit()
 ```
 
 # Demo workflows
@@ -214,7 +219,7 @@ rule bam_sorted:
 ```{yaml, eval=FALSE}
 # file: config.yml
   samples: "GSM521934 GSM521935" 
-  outdir: "/home/rioualen/Desktop/workspace/snakemake_howto/results/"
+  outdir: "gene-regulation-1.0/doc/snakemake_tutorial/results/"
   samtools:
     threads: "2"
 ```
