@@ -7,7 +7,7 @@ rule index_fasta:
     """
     Index a fasta file by creating a .fai file with Samtools
 
-    Author: Claire Rioualen
+    Copyright: Claire Rioualen
     """
     input: "{genome}"
     output: "{genome}.fai"

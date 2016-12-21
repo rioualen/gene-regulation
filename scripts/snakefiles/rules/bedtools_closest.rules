@@ -40,7 +40,7 @@ rule bedtools_closest:
     Opional parameters:
         config["bedtools"]["window"]
 
-    Author: Claire Rioualen
+    Copyright: Claire Rioualen
     """
 	input: bed = "{regions}.bed", gff3 = gff3_file
 	output: "{regions}_closest_annot.bed"

@@ -9,7 +9,7 @@
     instad of HTSeq (rules defined in file featurecounts.rules) rather
     than htseq.
 
-Authors: Justine Long and Jeanne Cheneby, revised by Jacques van Helden
+Copyright: Justine Long and Jeanne Cheneby, revised by Jacques van Helden
 
 """
 rule htseq_count:

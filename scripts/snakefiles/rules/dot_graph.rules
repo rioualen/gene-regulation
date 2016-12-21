@@ -16,6 +16,8 @@ dir_reports = os.path.join(config["dir"]["base"], config["dir"]["reports"])
 # Rule
 rule dot_graph:
     """This rule generates dot files for snakemake's DAG and rulegraph. 
+
+    Copyright Claire Rioualen
     """
     output: dir_reports + "/{graph}.dot"
     params: snakefile = os.path.join(config["dir"]["base"], workflow.snakefile), configfile = os.path.join(config["dir"]["base"], config["metadata"]["configfile"]), \

@@ -7,7 +7,7 @@ rule getfasta_from_gff:
     The GFF format is imposed by bedtools getfasta, which currently does
     not support the GTF format.
 
-    Author: Jacques van Helden
+    Copyright: Jacques van Helden
 """
         
 

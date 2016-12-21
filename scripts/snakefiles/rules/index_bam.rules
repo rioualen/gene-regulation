@@ -1,3 +1,5 @@
+# Copyright Claire Rioualen
+
 # Set parameters
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")

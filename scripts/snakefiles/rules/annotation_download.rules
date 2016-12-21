@@ -23,6 +23,9 @@ gff3_file = genome_dir + genome_version + ".gff3"
 gtf_file = genome_dir + genome_version + ".gtf"
 
 rule annotation_download:
+    """
+    Copyright Claire Rioualen
+    """
 #    input: "."
     output: gff3_file, gtf_file
     log: genome_dir + "download_annot.log"

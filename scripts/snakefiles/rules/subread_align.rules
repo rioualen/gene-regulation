@@ -72,7 +72,7 @@ rule subread_align:
         config["subread-align"]["max_mismatches"]
         config["subread-align"]["align_options"]
 
-    Contributors: 
+    Copyright: 
         Jacques van Helden, Claire Rioualen
     """
     input:

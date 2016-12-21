@@ -23,7 +23,7 @@ rule fastqc:
     Optional parameters:
         config['fastqc']['other_options']
 
-    Authors: 
+    Copyright: 
         Claire Rioualen, Lucie Khamvongsa & Jacques van Helden
     """
     input: "{reads}.fastq"

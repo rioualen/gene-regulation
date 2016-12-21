@@ -1,5 +1,7 @@
 """Download sra files using srr ids mentioned in samples.tab
 
+Copyright Claire Rioualen
+
 """
 if not (("dir" in config.keys()) and ("reads_source" in config["dir"].keys())):
     sys.exit("The parameter config['genome']['reads_source'] should be specified in the config file.")

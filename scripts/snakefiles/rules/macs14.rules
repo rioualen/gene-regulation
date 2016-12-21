@@ -43,8 +43,7 @@ rule macs14:
         config["macs14"]["mfold"]
         config["macs14"]["other_options"]
 
-    Contributors: 
-        Claire Rioualen, Lucie Khamvongsa
+    Copyright Claire Rioualen, Lucie Khamvongsa
     """
     input:
         treatment = dir_samples + "/{treatment}/{treatment}{preprocess,.*}_sorted_pos.bed",

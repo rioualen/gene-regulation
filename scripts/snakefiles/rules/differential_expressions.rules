@@ -12,7 +12,7 @@ rule edgeR:
        statistics, sorted by significance (p-value of FDR).
     2. A pdf file with various plots. 
 
-Authors: Jeanne Cheneby and Justine Long, partly revised by Jacques van Helden
+Copyright: Jeanne Cheneby and Justine Long, partly revised by Jacques van Helden
 
 Obsolete, to be replaced by new code.
 

@@ -10,6 +10,7 @@ rule bowtie2_download_genome:
     """Download and index the reference genome for the Bowtie2
     read-mapping software from ensembl.
 
+
     """
     # output: sequence = config["dir"]["genome"] + "/" + config["genome"]["sequence"] + ".fa", \
     #         features_gtf = config["dir"]["genome"] + "/" + config["genome"]["features_gtf"] + ".gtf"

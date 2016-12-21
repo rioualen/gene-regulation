@@ -23,6 +23,8 @@ rule blastall:
 
     Where {blast_program} should be replaced by one of the supported
     program options in balstall: blastp, blastn, blastx, tblastn.
+
+    Copyright Jacques van Helden
     """
     input: query="{query}.fa", db_index=config["blastall"]["db"] + ".psi"
     output: hits="{query}_{blast_program}_hits.tsv"

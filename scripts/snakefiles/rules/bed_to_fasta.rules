@@ -16,6 +16,8 @@ rule bed_to_fasta:
 
         config["genome"]["ucsc_id"] identifier of the genome of interest on UCSC genome browser
 
+    Copyright Jacques van Helden, Claire Rioualen
+
 	"""
 	input: "{regions}.bed"
 	output: "{regions}.fasta"

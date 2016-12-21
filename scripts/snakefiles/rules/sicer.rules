@@ -9,7 +9,7 @@ Required parameters:
 Optional parameters:
     ...
 """
-# Contributors: 
+# Copyright: 
 #        Claire Rioualen
 
 # Set defaults params in case they're not defined in config file. 

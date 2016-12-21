@@ -29,7 +29,7 @@ rule genome_coverage_bedgraph:
         config["dir"]["genome"]
         config["genome"]["fasta_file"]
 
-    Contributors: Jacques van Helden, Claire Rioualen
+    Copyright: Jacques van Helden, Claire Rioualen
     """
     input: reads = "{reads}_sorted_pos.bam", chrom_size = chrom_size
     output: "{reads}.bedgraph"

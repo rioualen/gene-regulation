@@ -17,7 +17,7 @@ rule genome_coverage_wig:
     reads and produce a wig file, the recommended format to
     upload coverage-type data as UCSC tracks.
 
-    Author: Jacques van Helden, Claire Rioualen
+    Copyright: Jacques van Helden, Claire Rioualen
     """
     input: "{reads}.bam"
     output: "{reads}.wig"

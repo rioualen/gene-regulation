@@ -12,7 +12,7 @@ rule bam_by_name:
     Required parameters:
         config["qsub"]
 
-    Authors:
+    Copyright:
         Jacques van Helden, Claire Rioualen
     """
     input: "{aligned_reads}.bam"

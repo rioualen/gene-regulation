@@ -1,7 +1,7 @@
 """Rules to count the number of reads in NGS files with different
 formats.
 
-Author: Jacques.van-Helden@univ-amu.fr
+Copyright: Jacques.van-Helden@univ-amu.fr
 
 To do: 
 

@@ -17,7 +17,7 @@ if not "qsub" in config.keys():
 rule genome_coverage_bigwig_normalized:    
     """Uses bamCompare tool from the deepTools suite. 
 
-    Author: Claire Rioualen
+    Copyright: Claire Rioualen
     """
     input: 
 

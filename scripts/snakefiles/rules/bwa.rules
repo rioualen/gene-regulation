@@ -56,7 +56,7 @@ rule bwa:
         config["bwa"]["dir"]
         config["bwa"]["threads"]
 
-    Contributors: 
+    Copyright: 
         Claire Rioualen
     """
     input:

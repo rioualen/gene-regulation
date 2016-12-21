@@ -10,7 +10,7 @@ rule ChIPseeker:
 	ChIP peak annotation, comparison and visualization.
 	Bioinformatics 2015. 31(14): 2382-2383.
 
-    Author: Lucie Khamvongsa
+    Copyright: Lucie Khamvongsa
 
     User manual: https://bioconductor.org/packages/release/bioc/vignettes/ChIPseeker/inst/doc/ChIPseeker.html
     """

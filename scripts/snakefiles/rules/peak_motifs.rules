@@ -28,8 +28,7 @@ rule peak_motifs:
         config['peak-motifs']['tasks']
         config['peak-motifs']['disco']
 
-    Contributors: 
-        Claire Rioualen, Lucie Khamvongsa
+    Copyright Claire Rioualen, Lucie Khamvongsa
     """
     input: "{caller_dir}/{peaks}.fasta"
     output: "{caller_dir}/peak-motifs/{peaks}_peak-motifs_synthesis.html"

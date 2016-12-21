@@ -28,7 +28,7 @@ rule bedtools_window:
     Similar to bedtools intersect, window searches for overlapping features in A and B. 
     However, window adds a specified number (1000, by default) of base pairs upstream 
     and downstream of each feature in A. In effect, this allows features in B that are 
-    “near” features in A to be detected.
+    near features in A to be detected.
 
     More: http://bedtools.readthedocs.io/en/latest/content/tools/window.html
 
@@ -40,7 +40,7 @@ rule bedtools_window:
     Opional parameters:
         config["bedtools"]["window"]
 
-    Author: Claire Rioualen
+    Copyright: Claire Rioualen
     """
 	input: bed = "{regions}.bed", gff3 = gff3_file
 	output: "{regions}_window_annot.bed"

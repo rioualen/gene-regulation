@@ -1,7 +1,7 @@
 rule readnb_from_sam:
     """Count number of reads in a bam-formatted file (binary alignment map, compressed sam).
 
-    Author: Jacques.van-Helden@univ-amu.fr
+    Copyright: Jacques.van-Helden@univ-amu.fr
     """
     input: "{file}.sam"
     output: "{file}_sam_readnb.txt"

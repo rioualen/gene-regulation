@@ -52,7 +52,7 @@ rule bPeaks:
         config["bPeaks"]["windowSize"]
         config["bPeaks"]["windowOverlap"]
 
-    Contributors: 
+    Copyright: 
         Claire Rioualen
     """
     input:

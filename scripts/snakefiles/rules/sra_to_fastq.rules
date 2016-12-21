@@ -14,7 +14,7 @@ rule sra_to_fastq:
         config['dir']['reads_source']
         config['dir']['fastq']
 
-    Contributors: 
+    Copyright: 
         Claire Rioualen
     """
     input: datadir = config['dir']['reads_source'] + "/"

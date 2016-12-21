@@ -69,7 +69,7 @@ rule sartools_DESeq2:
         config["DESeq2"]["typeTrans"]
         config["DESeq2"]["locfunc"]
 
-    Authors: 
+    Copyright: 
         Claire Rioualen (claire.rioualen@inserm.fr)
     """
     input: 

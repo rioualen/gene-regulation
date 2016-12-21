@@ -35,7 +35,7 @@ rule genome_download:
 
     Optional parameters:
 
-    Authors: 
+    Copyright: 
         Claire Rioualen
     """
 #    input: "."

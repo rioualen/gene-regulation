@@ -51,7 +51,7 @@ rule subread_featureCounts:
     Usage: 
         Usage: featureCounts [options] -a <annotation_file> -o <output_file> input_file1 [input_file2] ... 
 
-    Contributors: 
+    Copyright: 
         Claire Rioualen, Jacques van Helden
     """
     input: 

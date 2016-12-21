@@ -12,7 +12,7 @@ rule genome_coverage_bedgraph_strands:
     Required parameters: 
         config["qsub"]
 
-    Contributors: Jacques van Helden, Claire Rioualen
+    Copyright: Jacques van Helden, Claire Rioualen
     """
     input: reads = "{reads}_sorted_pos.bam"
     output: bedg_plus = "{reads}_plus_strand.bedgraph", \

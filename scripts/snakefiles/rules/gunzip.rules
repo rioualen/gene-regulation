@@ -7,7 +7,7 @@ rule gunzip_one_file:
     dependencies on.gz extensions, and/or to send compression jobs to
     a queue.
 
-    Author: Jacques van Helden
+    Copyright: Jacques van Helden
     """
     input: "{file}.fastq.gz"
     output: "{file}.fastq"

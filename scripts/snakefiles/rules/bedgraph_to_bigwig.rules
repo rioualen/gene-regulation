@@ -1,3 +1,5 @@
+# Copyright Claire Rioualen
+
 rule bedgraph_to_bigwig:
     """Convert bedGraph to bigWig format."""
     input: chromizes="", bedgraph="{coverage}.bedgraph"

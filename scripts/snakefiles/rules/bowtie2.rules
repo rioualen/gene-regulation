@@ -60,7 +60,7 @@ rule bowtie2:
         config["bowtie2"]["dir"]
         config["bowtie2"]["threads"]
 
-    Contributors: 
+    Copyright: 
         Claire Rioualen
     """
     input:

@@ -7,7 +7,7 @@ rule gzip:
     dependencies on.gz extensions, and/or to send compression jobs to
     a queue.
 
-    Author: Jacques van Helden
+    Copyright: Jacques van Helden
     """
     input: "{file}"
     output: "{file}.gz"

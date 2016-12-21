@@ -27,7 +27,7 @@ rule bwa_index:
 
     Optional parameters:
 
-    Contributors: 
+    Copyright: 
         Claire Rioualen
     """
     input: os.path.join(config["dir"]["base"], config["dir"]["genome"], config["genome"]["fasta_file"])

@@ -19,7 +19,7 @@ rule getfasta:
         config["dir"]["genome"] 
         config["genome"]["fasta_file"]
 
-    Author: Claire Rioualen
+    Copyright: Claire Rioualen
     """
     input: bed = "{regions}.bed", genome_fasta = fasta_file
     output: "{regions}.fasta"

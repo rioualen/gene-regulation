@@ -29,7 +29,7 @@ rule annotate_peaks:
         config["genome"]["fasta_file"]
         config["genome"]["gtf_file"]
 
-    Author: Claire Rioualen
+    Copyright: Claire Rioualen
     """
     input: 
         bed = "{regions}.bed",

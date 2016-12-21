@@ -6,7 +6,7 @@ rule split_bam_strands:
     """Split a bam file in two separate bam files containing respectively 
     the reads on the plus and minus strand. 
 
-    Author: Jacques van Helden
+    Copyright: Jacques van Helden
     """
     input: "{reads}.bam"
     output: min="{reads}_min.bam", plus="{reads}_plus.bam"

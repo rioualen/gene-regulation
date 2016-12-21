@@ -53,7 +53,7 @@ rule homer:
         config["homer"]["P"]
         config["homer"]["fdr"]
 
-    Author: Claire Rioualen
+    Copyright: Claire Rioualen
     """
     input:
         treatment = dir_samples + "/{treatment}/{treatment}{preprocess,.*}_sorted_pos.bed",

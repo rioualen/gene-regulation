@@ -82,7 +82,7 @@ rule sickle_pe:
         config["sickle"]["qual"]
         config["metadata"]["strands"]
 
-    Authors:
+    Copyright:
         Claire Rioualen, Lucie Khamvongsa
     """
     input: reads = sickle_inputs

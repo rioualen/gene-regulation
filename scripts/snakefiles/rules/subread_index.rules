@@ -30,8 +30,7 @@ rule subread_index:
         config["genome"]["fasta_file"]
     Optional parameters:
 
-    Contributors: 
-        Claire Rioualen, Jacques van Helden
+    Copyright Claire Rioualen, Jacques van Helden
     """
     input: os.path.join(config["dir"]["genome"], config["genome"]["fasta_file"])
     output: subread_index = os.path.join(subread_dir, config["genome"]["fasta_file"])

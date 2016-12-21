@@ -17,7 +17,7 @@ rule genome_coverage_bigwig:
     reads and produce a bigWig file. Uses bamCoverage tool from the
     deepTools suite. 
 
-    Author: Claire Rioualen
+    Copyright: Claire Rioualen
     """
     input: 
         bam = "{reads}_sorted_pos.bam",

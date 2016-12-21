@@ -3,7 +3,7 @@ import pandas as pd
 conditions, and the parameters for edgeR and DESeq2.
 
 
-Authors: Jeanne Cheneby and Justine Long, revised by Jacques van Helden
+Copyright: Jeanne Cheneby and Justine Long, revised by Jacques van Helden
 
 Obsolete.
 

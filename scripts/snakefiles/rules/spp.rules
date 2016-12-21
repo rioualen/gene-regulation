@@ -28,7 +28,7 @@ rule spp:
     Optional parameters:
         config["spp"]["fdr"]
 
-    Contributors: 
+    Copyright: 
         Claire Rioualen
     """
     input:

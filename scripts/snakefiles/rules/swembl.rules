@@ -31,8 +31,7 @@ rule swembl:
         config["swembl"]["x"]
         config["swembl"]["R"]
 
-    Contributors:
-        Claire Rioualen, Lucie Khamvongsa
+    Copyright Claire Rioualen, Lucie Khamvongsa
     """
     input:
         treatment = dir_samples + "/{treatment}/{treatment}{preprocess,.*}_sorted_pos.bed",

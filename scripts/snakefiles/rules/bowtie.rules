@@ -60,8 +60,8 @@ rule bowtie:
         config["bowtie"]["dir"]
         config["bowtie"]["threads"]
 
-    Contributors: 
-        Jacques van Helden, Lucie Khamvongsa, Claire Rioualen
+    Copyright: 
+        Claire Rioualen, Jacques van Helden, Lucie Khamvongsa
     """
     input:
         reads = bowtie_inputs, 

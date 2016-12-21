@@ -1,4 +1,4 @@
-
+# Copyright Claire Rioualen
 rule idr:
 	"""Calculating IDR across replicates. Optimized for SPP peak-caller.
 	

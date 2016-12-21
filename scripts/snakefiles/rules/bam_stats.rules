@@ -11,7 +11,7 @@ rule bam_stats:
     Required parameters:
         config["qsub"]
 
-    Authors: 
+    Copyright: 
         Claire Rioualen
     """
     input: "{reads}_sorted_pos.bam"

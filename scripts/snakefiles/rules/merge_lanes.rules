@@ -49,7 +49,7 @@ rule merge_lanes:
     config["metadata"]["lane_merging"] file indicating the source/merged file names
     config["dir"]["fastq"]          base of the directory containing the fastq files
 
-    Author: Jacques van Helden
+    Copyright: Jacques van Helden
     """
     input: table=config["metadata"]["lane_merging"], \
         source_files=SOURCE_FILES

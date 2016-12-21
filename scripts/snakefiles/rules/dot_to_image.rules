@@ -14,6 +14,8 @@ if not "configfile" in config["metadata"].keys():
 # Rule
 rule dot_to_image:
     """Following rule dot_graph, this rule creates png and pdf outputs for dot graphs from snakemake. 
+
+    Copyright Claire Rioualen
     """
     input: "{graph}.dot"
     output: "{graph}.{ext,(pdf|png)}"
