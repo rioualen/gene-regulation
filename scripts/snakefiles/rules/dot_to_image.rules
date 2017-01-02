@@ -5,12 +5,6 @@ if not "qsub" in config.keys():
 if not "configfile" in config["metadata"].keys():
     sys.exit("The parameter ['metadata']['configfile'] must be defined in the config file")
 
-#if not "results" in config["dir"].keys():
-#    sys.exit("The parameter ['dir']['results'] must be defined in the config file")
-
-#if not "reports" in config["dir"].keys():
-#    config["dir"]["reports"] = config["dir"]["results"];
-
 # Rule
 rule dot_to_image:
     """Following rule dot_graph, this rule creates png and pdf outputs for dot graphs from snakemake. 

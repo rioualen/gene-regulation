@@ -25,13 +25,14 @@ rule sra_to_fastq_split:
     Copyright: 
         Claire Rioualen
     """
-    input: datadir = config["dir"]["reads_source"] + "/"
+#    input: datadir = config["dir"]["reads_source"] + "/"
     output:
         forward = "{fastq}/{sample}/{sample}_" + config["metadata"]["strands"].split()[0] + ".fastq", \
         reverse = "{fastq}/{sample}/{sample}_" + config["metadata"]["strands"].split()[1] + ".fastq"
     log: "{fastq}/{sample}/{sample}_sra-conversion.log"
     benchmark: "{fastq}/{sample}/{sample}_sra-conversion_benchmark.json"
     params: 
+         datadir = config["dir"]["reads_source"],
         forward_strand = config["metadata"]["strands"].split()[0],
         reverse_strand = config["metadata"]["strands"].split()[1],
         qsub = config["qsub"] \
@@ -43,8 +44,8 @@ samples={wildcards.sample}
 for sam in ${{samples[@]}}
 do
     mkdir -p {wildcards.fastq}/$sam
-    echo "Reading $sam directory {input.datadir}$sam..."
-    files=({input.datadir}$sam/*)
+    echo "Reading $sam directory {params.datadir}/$sam..."
+    files=({params.datadir}/$sam/*)
     if [ ${{#files[@]}} -gt 1 ]
     then
         echo "TODO"
@@ -54,10 +55,10 @@ do
 #            base=$(basename $f .sra)
 #            echo "$base"
 #            echo "Converting $base.sra to $base.fastq..."
-#            fastq-dump --outdir {wildcards.fastq}/$sam/ --split-files {input.datadir}$sam/$base.sra ## option -I ?
+#            fastq-dump --outdir {wildcards.fastq}/$sam/ --split-files {params.datadir}/$sam/$base.sra ## option -I ?
 #        done
 #        echo "Merging ${{#files[@]}} together as $sam.fastq."
-#        echo "Cmd: cat ${{files[@]}} > {input.datadir}$sam.fastq"
+#        echo "Cmd: cat ${{files[@]}} > {params.datadir}/$sam.fastq"
 #        files=({wildcards.fastq}/$sam/*)
 #        cat ${{files[@]}} > {wildcards.fastq}/$sam/$sam.fastq
 #        rm ${{files[@]}}
@@ -65,8 +66,8 @@ do
         echo "Case 1 file : ${{files[@]}}"
         base=$(basename ${{files[0]}} .sra)
         echo "Converting $base.sra to $base.fastq..."
-        echo "fastq-dump --outdir {wildcards.fastq}/$sam -I --split-files {input.datadir}$sam/$base.sra"
-        fastq-dump --outdir {wildcards.fastq}/$sam --split-files {input.datadir}$sam/$base.sra ## option -I ?
+        echo "fastq-dump --outdir {wildcards.fastq}/$sam -I --split-files {params.datadir}/$sam/$base.sra"
+        fastq-dump --outdir {wildcards.fastq}/$sam --split-files {params.datadir}/$sam/$base.sra ## option -I ?
         echo "Moving {wildcards.fastq}/$sam/$base"_{params.forward_strand}".fastq and {wildcards.fastq}/$sam/$base"_{params.reverse_strand}".fastq to {wildcards.fastq}/$sam/$sam"_{params.forward_strand}".fastq and {wildcards.fastq}/$sam/$sam"_{params.reverse_strand}".fastq"
         mv  {wildcards.fastq}/$sam/$base"_{params.forward_strand}".fastq {wildcards.fastq}/$sam/$sam"_{params.forward_strand}".fastq
         mv  {wildcards.fastq}/$sam/$base"_{params.reverse_strand}".fastq {wildcards.fastq}/$sam/$sam"_{params.reverse_strand}".fastq

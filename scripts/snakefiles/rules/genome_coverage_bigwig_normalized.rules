@@ -1,4 +1,4 @@
-## En cours
+## Draft
 
 # Set parameters
 if not "qsub" in config.keys():
@@ -38,4 +38,4 @@ rule genome_coverage_bigwig_normalized:
     shell: "bamCoverage -b {input.bam} -o {output} 2> {log}" 
 
 
-bamCompare -b1 treatment.bam -b2 control.bam -o log2ratio.bw
+#bamCompare -b1 treatment.bam -b2 control.bam -o log2ratio.bw

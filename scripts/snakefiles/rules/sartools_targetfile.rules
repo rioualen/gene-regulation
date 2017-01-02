@@ -35,8 +35,7 @@ rule sartools_targetfile:
         config["qsub"]
         config["dir"]["diffexpr"]
 
-    Copyright: 
-        Claire Rioualen
+    Copyright: Claire Rioualen
     """
     input: 
         count_files = targetfiles_inputs

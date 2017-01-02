@@ -2,15 +2,6 @@
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
-#if not "genome" in config["dir"].keys():
-#    sys.exit("Genome directory must be defined in the config file")
-
-#if not "fasta_file" in config["genome"].keys():
-#    sys.exit("Fasta file must be defined in the config file")
-
-#genome_dir = config["dir"]["genome"] + "/"
-#genome_file = genome_dir + config["genome"]["fasta_file"]
-
 # Rule
 rule genome_coverage_bigwig:    
     """Compute genome coverage from a bam-formatted file with aligned

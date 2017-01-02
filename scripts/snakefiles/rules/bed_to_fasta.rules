@@ -1,12 +1,13 @@
 rule bed_to_fasta:
-	"""Fetch sequences from UCSC to obtain a fasta file from a set of
-	genomic coordinates described in a bed file.
+    """Fetch sequences from UCSC to obtain a fasta file from a set of
+    genomic coordinates described in a bed file. Requires RSAT installation. 
+    Alternative is to use getfasta.rules .
 
-	Example: 
-	mkdir -p test/fetch_seq; cd test/fetch_seq; 
-	wget http://pedagogix-tagc.univ-mrs.fr/rsat/demo_files/fetch-sequences_Schmidt_2011_mm9_CEBPA_SWEMBL_R0.12_702peaks.bed; 
-	cd -
-	snakemake --snakefile ${RSAT}/snakemake_files/chip-seq_motifs.py test/fetch_seq/fetch-sequences_Schmidt_2011_mm9_CEBPA_SWEMBL_R0.12_702peaks.fasta
+    Example: 
+    mkdir -p test/fetch_seq; cd test/fetch_seq; 
+    wget http://pedagogix-tagc.univ-mrs.fr/rsat/demo_files/fetch-sequences_Schmidt_2011_mm9_CEBPA_SWEMBL_R0.12_702peaks.bed; 
+    cd -
+    snakemake --snakefile ${RSAT}/snakemake_files/chip-seq_motifs.py test/fetch_seq/fetch-sequences_Schmidt_2011_mm9_CEBPA_SWEMBL_R0.12_702peaks.fasta
 
         Parameters:
 
@@ -16,14 +17,13 @@ rule bed_to_fasta:
 
         config["genome"]["ucsc_id"] identifier of the genome of interest on UCSC genome browser
 
-    Copyright Jacques van Helden, Claire Rioualen
-
-	"""
-	input: "{regions}.bed"
-	output: "{regions}.fasta"
-	params: verbosity = config["rsat"]["verbosity"], \
+    Copyright: Jacques van Helden, Claire Rioualen
+    """
+    input: "{regions}.bed"
+    output: "{regions}.fasta"
+    params: verbosity = config["rsat"]["verbosity"], \
                 genome = config["genome"]["genome_version"], \
                 qsub = config["qsub"] + " -e {regions}_fetchseq_qsub.err -o {regions}_fetchseq_qsub.out"
-	log: "{regions}_fetchseq.log"
-	benchmark: "{regions}_fetchseq_benchmark.json"
-	shell:"""fetch-sequences -v {params.verbosity} -i {input} -header_format galaxy -genome {params.genome} -o {output} 2> {log}"""
+    log: "{regions}_fetchseq.log"
+    benchmark: "{regions}_fetchseq_benchmark.json"
+    shell:"""fetch-sequences -v {params.verbosity} -i {input} -header_format galaxy -genome {params.genome} -o {output} 2> {log}"""

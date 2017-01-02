@@ -62,7 +62,7 @@ rule sartools_edgeR:
         config["edgeR"]["gene_selection"]
         config["edgeR"]["normalizationMethod"]
 
-    Copyright Claire Rioualen (claire.rioualen@inserm.fr)
+    Copyright: Claire Rioualen
     """
     input: 
         targetFile = "{diffexpr_dir}/{test}_vs_{ref}/{preprocess,.*}SARTools_targetfile.txt"

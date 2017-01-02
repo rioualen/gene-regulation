@@ -28,9 +28,3 @@ rule getfasta:
     benchmark: "{regions}_getfasta_benchmark.json"
     shell:"""bedtools getfasta -fi {input.genome_fasta} -bed {input.bed} -fo {output} 2> {log}"""
 
-
-## test if peakfile not empty
-
-# egrep -cv '#|^$' fielname
-
-# what to do if it is?

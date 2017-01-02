@@ -24,8 +24,7 @@ rule bowtie2_index:
 
     Optional parameters:
 
-    Copyright: 
-        Claire Rioualen
+    Copyright: Claire Rioualen
     """
     input: os.path.join(config["dir"]["genome"], config["genome"]["fasta_file"])
     output: os.path.join(bowtie2_dir, config["genome"]["fasta_file"])

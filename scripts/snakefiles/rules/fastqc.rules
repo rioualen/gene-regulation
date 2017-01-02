@@ -10,7 +10,7 @@ if not "other_options" in config["fastqc"].keys():
 
 # Rule
 rule fastqc:
-    """Check the quality of thre reads in a fastq file ({reads}.fastq)
+    """Check the quality of the reads in a fastq or a bam file
     using the program fastQC (quality control). Results are stored in
     folder named '{reads}_fastqc'.
 
@@ -23,8 +23,7 @@ rule fastqc:
     Optional parameters:
         config['fastqc']['other_options']
 
-    Copyright: 
-        Claire Rioualen, Lucie Khamvongsa & Jacques van Helden
+    Copyright: Claire Rioualen, Lucie Khamvongsa & Jacques van Helden
     """
     input: "{reads}.fastq"
     output: "{reads}_fastqc/{sample}_fastqc.html"

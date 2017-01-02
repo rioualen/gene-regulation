@@ -7,7 +7,7 @@ rule genome_coverage_dz:
     """Compute coverage (reads per position) for each position of a
     genome, from a bam-formatted file with aligned reads.
 
-    BEWARE: this rule is usefull for small genomes (Bacteria, Fungi)
+    BEWARE: this rule is useful for small genomes (Bacteria, Fungi)
     but would produce a very big file for Metazoan or Plant genomes.
 
     Copyright: Jacques van Helden

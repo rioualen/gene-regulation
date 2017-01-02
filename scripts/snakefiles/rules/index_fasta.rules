@@ -5,7 +5,7 @@ if not "qsub" in config.keys():
 # Rule
 rule index_fasta:
     """
-    Index a fasta file by creating a .fai file with Samtools
+    Index a fasta file by creating an .fai file with Samtools
 
     Copyright: Claire Rioualen
     """

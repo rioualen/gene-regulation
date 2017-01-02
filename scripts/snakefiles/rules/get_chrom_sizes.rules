@@ -4,7 +4,7 @@ if not "qsub" in config.keys():
 
 # Rule
 rule get_chrom_sizes:
-    """This rule generates a file containg the chrmosome sizes, with file extension *.genome. 
+    """This rule generates a file containg the chromosome sizes, with file extension *.genome. 
     This file is required by a number of bedtools utilities.
 
     Copyright: Claire Rioualen

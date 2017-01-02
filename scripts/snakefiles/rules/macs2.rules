@@ -51,7 +51,7 @@ rule macs2:
         config["macs2"]["other_options"]
         config["macs2"]["type"]
 
-    Copyright Claire Rioualen, Lucie Khamvongsa
+    Copyright: Claire Rioualen, Lucie Khamvongsa
     """
     input:
         treatment = dir_samples + "/{treatment}/{treatment}{preprocess,.*}_sorted_pos.bed",

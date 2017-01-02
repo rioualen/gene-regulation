@@ -30,7 +30,7 @@ rule bwa_index:
     Copyright: 
         Claire Rioualen
     """
-    input: os.path.join(config["dir"]["base"], config["dir"]["genome"], config["genome"]["fasta_file"])
+    input: os.path.join(config["dir"]["genome"], config["genome"]["fasta_file"])
     output: os.path.join(bwa_dir, config["genome"]["fasta_file"])
     params:
         fasta = config["genome"]["fasta_file"], \

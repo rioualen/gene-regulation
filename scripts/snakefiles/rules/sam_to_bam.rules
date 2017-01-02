@@ -1,5 +1,3 @@
-# Copyright Claire Rioualen
-
 # Set parameters
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
@@ -10,6 +8,7 @@ rule sam_to_bam:
     Convert reads from SAM (sequence alignment map) to BAM (binary
     alignment map) format.
 
+    Copyright: Claire Rioualen
     """
     input: sam="{reads}.sam"
     output: bam="{reads}.bam"

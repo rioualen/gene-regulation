@@ -17,7 +17,7 @@ dir_reports = os.path.join(config["dir"]["base"], config["dir"]["reports"])
 rule dot_graph:
     """This rule generates dot files for snakemake's DAG and rulegraph. 
 
-    Copyright Claire Rioualen
+    Copyright: Claire Rioualen, Jacques van Helden
     """
     output: dir_reports + "/{graph}.dot"
     params: snakefile = os.path.join(config["dir"]["base"], workflow.snakefile), configfile = os.path.join(config["dir"]["base"], config["metadata"]["configfile"]), \
@@ -28,7 +28,14 @@ rule dot_graph:
     benchmark: dir_reports + "/{graph}_dot_benchmark.json"
     shell: """
 (snakemake -s {params.snakefile}  --configfile  {params.configfile} --{wildcards.graph} > {output}
-#if {wildcards.graph} == "dag" cat output | perl -pe 's/graph\[/graph\[rankdir='LR', /'  ## TODO
+if [ "{wildcards.graph}" = "dag" ]
+then 
+    echo "this is a dag"
+    cat {output} | perl -pe 's/graph\[/graph\[rankdir='LR', /' > tempfile
+    mv tempfile {output}
+else
+    echo "this is a rulegraph"
+fi 
 sed -n '/digraph/,$p' <{output} > tmp
 mv tmp {output}) &> {log}
 """

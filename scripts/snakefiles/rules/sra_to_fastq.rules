@@ -17,21 +17,21 @@ rule sra_to_fastq:
     Copyright: 
         Claire Rioualen
     """
-    input: datadir = config['dir']['reads_source'] + "/"
+#    input: datadir = config['dir']['reads_source'] + "/"
     output: "{results}/{sample}/{sample}.fastq"
     params: qsub = config["qsub"] + " -q short -e {results}/{sample}/{sample}_sra-conversion_qsub.err -o {results}/{sample}/{sample}_sra-conversion_qsub.out",
         results = config['dir']['fastq'] + "/",
-        samples = "{sample}"
+        datadir = config['dir']['reads_source'],
     log: "{results}/{sample}/{sample}_sra-conversion.log"
     benchmark: "{results}/{sample}/{sample}_sra-conversion_benchmark.json"
     shell:"""
 (echo "SHELL: $SHELL"
-samples={params.samples}
+samples={wildcards.sample}
 for sam in ${{samples[@]}}
 do
     mkdir -p {params.results}$sam
-    echo "Reading $sam directory {input.datadir}$sam..."
-    files=({input.datadir}$sam/*)
+    echo "Reading $sam directory {params.datadir}/$sam..."
+    files=({params.datadir}/$sam/*)
     if [ ${{#files[@]}} -gt 1 ]
     then
         echo "Case 2+ files : ${{files[@]}}"
@@ -40,10 +40,10 @@ do
             base=$(basename $f .sra)
             echo "$base"
             echo "Converting $base.sra to $base.fastq..."
-            fastq-dump --outdir {params.results}$sam/ {input.datadir}$sam/$base.sra
+            fastq-dump --outdir {params.results}$sam/ {params.datadir}/$sam/$base.sra
         done
         echo "Merging ${{#files[@]}} together as $sam.fastq."
-        echo "Cmd: cat ${{files[@]}} > {input.datadir}$sam.fastq"
+        echo "Cmd: cat ${{files[@]}} > {params.datadir}/$sam.fastq"
         files=({params.results}$sam/*)
         cat ${{files[@]}} > {params.results}$sam/$sam.fastq
         rm ${{files[@]}}
@@ -51,7 +51,7 @@ do
         echo "Case 1 file : ${{files[@]}}"
         base=$(basename ${{files[0]}} .sra)
         echo "Converting $base.sra to $base.fastq..."
-        fastq-dump --outdir {params.results}$sam {input.datadir}$sam/$base.sra
+        fastq-dump --outdir {params.results}$sam {params.datadir}/$sam/$base.sra
         echo "Moving {params.results}$sam/$base.fastq to {params.results}$sam/$sam.fastq"
         mv  {params.results}$sam/$base.fastq {params.results}$sam/$sam.fastq
     fi

@@ -1,4 +1,6 @@
 # Copyright Claire Rioualen
+# This is a draft
+
 if not "version" in config["genome"].keys():
     sys.exit("Genome version must be defined in the config file")
 

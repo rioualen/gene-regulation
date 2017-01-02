@@ -13,22 +13,17 @@ if not "fasta_file" in config["genome"].keys():
 if not "genome" in config["dir"].keys():
     sys.exit("Genome dir must be defined in the dir section of the config file")
 
-#if not "bedtools" in config.keys():
-#    config["bedtools"] = {}
-
-#if not "window" in config["bedtools"].keys():
-#    config["bedtools"][""] = ""
-
 # Define paths
 gff3_file = os.path.join(config["dir"]["genome"], config["genome"]["gff3_file"])
 fasta_file = os.path.join(config["dir"]["genome"], config["genome"]["fasta_file"])
-
 
 rule bedtools_closest:
     """
     Similar to intersect, closest searches for overlapping features in A and B. 
     In the event that no feature in B overlaps the current feature in A, closest will report the nearest 
     (that is, least genomic distance from the start or end of A) feature in B. 
+
+    Usage: bedtools closest [OPTIONS] -a <FILE> -b <FILE1, FILE2, ..., FILEN>
 
     More: http://bedtools.readthedocs.io/en/latest/content/tools/closest.html
 
@@ -48,11 +43,4 @@ rule bedtools_closest:
 	benchmark: "{regions}_closest_benchmark.json"
 	params: qsub = config["qsub"] + " -e {regions}_closest_qsub.err -o {regions}_closest_qsub.out"
 	shell:"""bedtools closest -a {input.bed} -b {input.gff3} > {output}"""
-
-
-#bedtools closest [OPTIONS] -a <FILE> \
-#                           -b <FILE1, FILE2, ..., FILEN>
-
-#bedtools closest -a peaks.bed -b Ecoli_K12.gff3
-
 

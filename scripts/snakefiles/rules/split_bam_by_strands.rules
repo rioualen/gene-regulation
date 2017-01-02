@@ -1,3 +1,5 @@
+# Note from Claire: should we use pre-defined paired-end suffixes here?
+
 # Set parameters
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
@@ -9,7 +11,7 @@ rule split_bam_strands:
     Copyright: Jacques van Helden
     """
     input: "{reads}.bam"
-    output: min="{reads}_min.bam", plus="{reads}_plus.bam"
+    output: min="{reads}_min.bam", plus="{reads}_plus.bam" #
     params: qsub = config["qsub"] \
             + " -e {reads}_split_bam_strands_qsub.err " \
             + " -o {reads}_split_bam_strands_qsub.out"

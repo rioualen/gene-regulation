@@ -1,7 +1,7 @@
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
-rule gunzip_one_file:
+rule gunzip:
     """Uncompress a file with the gunzip program. The rule is very simple, but
     is convenient to use in a workflow: it can be used to fix some
     dependencies on.gz extensions, and/or to send compression jobs to
@@ -9,8 +9,8 @@ rule gunzip_one_file:
 
     Copyright: Jacques van Helden
     """
-    input: "{file}.fastq.gz"
-    output: "{file}.fastq"
+    input: "{file}.gz"
+    output: "{file}"
     params: qsub = config["qsub"] + " -e {file}_gunzip_qsub.err -o {file}_gunzip_qsub.out"
     log: "{file}_gunzip.log"
     benchmark: "{file}_gunzip_benchmark.json"
