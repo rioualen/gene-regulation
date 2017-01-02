@@ -32,10 +32,10 @@ Usage:
         --configfile path/to/specific/config_file.yml \
         --force flowcharts
 
-Sequencing type: 	single end
+Sequencing type: single end
 
-Author: 		Claire Rioualen, Jacques van Helden
-Contact: 		claire.rioualen@inserm.fr
+Author: Claire Rioualen, Jacques van Helden
+Contact: claire.rioualen@inserm.fr
 
 """
 
@@ -128,7 +128,6 @@ include: os.path.join(RULES, "bowtie2.rules")
 include: os.path.join(RULES, "bPeaks.rules")
 include: os.path.join(RULES, "bwa_index.rules")
 include: os.path.join(RULES, "bwa.rules")
-include: os.path.join(RULES, "count_reads.rules")
 include: os.path.join(RULES, "dot_graph.rules")
 include: os.path.join(RULES, "dot_to_image.rules")
 include: os.path.join(RULES, "fastqc.rules")
@@ -228,8 +227,6 @@ if not (("tools" in config.keys()) and ("annotation" in config["tools"].keys()))
 
 DISTANCE = config["tools"]["annotation"].split()
 GENOMIC_FEAT    = expand(expand(PEAKS_DIR + "/{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}_{{distance}}_annot.bed", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLING_TOOLS, distance=DISTANCE, aligner=MAPPING_TOOLS, trimmer=TRIMMING_TOOLS)
-
-print(GENOMIC_FEAT)
 
 GENE_LIST       = expand(expand(PEAKS_DIR + "/{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}_{{distance}}_annot_gene_list.tab", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLING_TOOLS, distance=DISTANCE,aligner=MAPPING_TOOLS, trimmer=TRIMMING_TOOLS)
 
