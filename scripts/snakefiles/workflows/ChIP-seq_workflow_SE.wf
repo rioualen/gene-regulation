@@ -254,11 +254,11 @@ rule all:
 #            INDEX, \
 #            MAPPING, \
 #            SORTED_BAM, \
-            BAM_STATS, \
+#            BAM_STATS, \
 #            SORTED_BAM_BAI, \
 #            GENOME_INDEX, \
             GENOME_COV_GZ, \
-            GENOME_COV_BW, \
+#            GENOME_COV_BW, \
 #            SORTED_BED, \
 #            PEAKS, \
 #            GENOMIC_FEAT, \

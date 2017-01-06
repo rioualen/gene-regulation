@@ -122,7 +122,7 @@ include: os.path.join(RULES, "bowtie.rules")
 include: os.path.join(RULES, "bowtie2.rules")
 include: os.path.join(RULES, "bowtie2_index.rules")
 include: os.path.join(RULES, "bowtie_index.rules")
-include: os.path.join(RULES, "count_reads.rules")
+#include: os.path.join(RULES, "count_reads.rules")
 include: os.path.join(RULES, "cufflinks.rules")
 include: os.path.join(RULES, "dot_graph.rules")
 include: os.path.join(RULES, "dot_to_image.rules")
@@ -264,7 +264,7 @@ rule all:
             FEATURE_COUNTS, \
             SARTOOLS_TARGETFILE, \
             DEG, \
-#            GRAPHICS
+            GRAPHICS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
 
