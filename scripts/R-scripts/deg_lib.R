@@ -597,7 +597,7 @@ count.boxplot <- function(count.table,
   
   par(mar=c(5,boxplot.lmargin,4,1)) ## adapt axes
   boxplot(count.table, horizontal=TRUE, col=sample.desc$color,
-          xlab=xlab, names=sample.desc$label,
+          xlab=xlab, names=sample.desc[, sample.label.col],
           main=main, las=1)
   grid(col="grey", lty="solid",ny = 0)
   if (!is.null(plot.file)) {
