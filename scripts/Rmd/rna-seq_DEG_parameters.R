@@ -29,7 +29,7 @@ sample.label.col <- NULL ## Column containing sample labels
 sample.condition.col <- "Condition" ## Column containing sample conditions
 
 ## Design file (pairs of samples to be compared)
-design.file <- "metadata/amira_design.tab"
+design.file <- "gene-regulation/examples/RNA-seq_SE_GSE71562/design.tab"
 
 ## Table containing the counts of reads per gene (rows) for each sample (columns) 
 all.counts.table <- 'results/subread-align_featureCounts.tab'

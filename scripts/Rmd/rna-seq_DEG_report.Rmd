@@ -27,9 +27,10 @@ library("stats4bioinfo") ## Generic library from Jacques van Helden
 library("edgeR", warn.conflicts = FALSE, quietly=TRUE) ## Differential expression with RNA-seq
 library("DESeq2", warn.conflicts = FALSE, quietly=TRUE, verbose=FALSE) ## Differential expression with RNA-seq
 library("limma", warn.conflicts = FALSE, quietly=TRUE) ## Required for vennCounts and vennDiagram
+#library("GenomicFeatures") ## TO CHCK: STILL NEEDED ? For functional enrichment.
 
 required.libraries <- c("RColorBrewer", "gplots")
-#required.libraries <- append(required.libraries, "xlsx")
+#required.libraries <- append(required.libraries, "xlsx") ## THIS REQUIRES JAVA
 for (lib in required.libraries) {
   if (!require(lib, character.only=TRUE)) {
     install.packages(lib)
@@ -37,7 +38,6 @@ for (lib in required.libraries) {
   library(lib, character.only = TRUE)
 }
 
-#library("GenomicFeatures") ## TO CHCK: STILL NEEDED ? For functional enrichment.
 ```
 
 <!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -181,6 +181,10 @@ all.counts.log10 <- log10(all.counts.epsilon)
 
 ```
 
+
+
+
+
 ### Sample-wise statistics
 
 
@@ -276,24 +280,26 @@ The four plots below represent the distributions of counts per gene (X axis) for
 
 par(mfrow=c(2,2))
 
-# par(mar=c(5.1,5.1,4.1,1.1))
+#par(mar=c(5.1,5.1,4.1,1.1))
 # par("mar")
 
 ## Boxplot of raw counts
-count.boxplot(all.counts, stats.per.sample, xlab="Raw counts", 
+count.boxplot(all.counts, sample.desc, 
+              xlab="Raw counts", 
               main="Raw counts per sample")
 
 ## Boxplot of log10-transformed counts
-count.boxplot(all.counts.log10, stats.per.sample, xlab="log10(counts)", 
+count.boxplot(all.counts.log10, sample.desc,  xlab="log10(counts)", 
               main="log10(counts) per sample")
 
 ## Boxplot of CPMs
-count.boxplot(cpms, stats.per.sample, xlab="CPM", 
+count.boxplot(cpms, sample.desc, xlab="CPM", 
               main="CPMs per sample")
 
 ## Boxplot of log10-transformed CPMs
-count.boxplot(cpms.log10, stats.per.sample, xlab="log10(CPM)", 
+count.boxplot(cpms.log10, sample.desc, xlab="log10(CPM)", 
               main="log10(CPMs) per sample")
+
 par(mfrow=c(1,1))
 ```
 
@@ -393,18 +399,110 @@ for (cond in conditions) {
 ```
 
 
+## Gene annotations
+
+
+
+```{r Load gene information from GTF file}
+# setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
+
+################################################################
+## Load gene information from the GTF file 
+## (should be the same as used to count tags per gene)
+if (exists("gtf.file")) {
+  ## Jacques or Lucie, TO DO : check if the method makeTxDbFromGFF allows to get gene names and descriptions.
+  ## In principle it should be possible since this info is in the GTF file. 
+  ## If not, we migh rewite a parser for GTF. 
+  
+  verbose(paste("Loading gene annotations from GTF file: ", gtf.file), 2)
+  #   library(rtracklayer)  # for the import() function
+  #   gr <- import(gtf.file)
+  txdb <- makeTxDbFromGFF(file=file.path(dir.base, gtf.file),
+                          organism=organism.name,
+                          dataSource=gtf.source)
+  #seqlevels(txdb)
+  #   transcripts <- transcriptsBy(txdb, by="gene")
+  #   transcript.table <- as.data.frame(transcripts@unlistData)
+  #   cds <- cdsBy(txdb, by="gene")
+  #   cds.table <- as.data.frame(cds@unlistData)
+  #   exons <- exonsBy(txdb, by="gene")
+  #   exon.table <- as.data.frame(exons@unlistData)
+  all.genes <- genes(txdb)
+  gene.info <- as.data.frame(all.genes)
+  gene.info$name <- gene.info$gene_id
+  gene.info$entrez.id <- NA
+  gene.info$description <- "no description"
+} else {
+  message(paste("No GTF file has been specified"))
+  g <- nrow(all.counts)
+  gene.info <- data.frame("seqnames"=rep(NA, times=g),
+                          "start"=rep(NA, times=g),
+                          "end"=rep(NA, times=g),
+                          "width"=rep(NA, times=g),
+                          "strand"=rep(NA, times=g),
+                          "gene_id"=row.names(all.counts),
+                          "name"=row.names(all.counts),
+                          "entrez.id" = rep(NA, times=g),
+                          "description"=rep("no description", times=g))
+  row.names(gene.info) <- row.names(all.counts)
+}
+# View(gene.info)
+
+
+
+################################################################
+## TEMPORARY: load additional gene information from a tab-delimited file generated with RSAT, 
+## because for bacterial genomes there is no obvious way to obtain EntrezIDs.
+ if ((exists("gene.info.file") && (!is.null(gene.info.file)))) {
+  verbose(paste("Loading gene information from tab-delimited file", gene.info.file))
+  
+  gene.info.rsat <- read.delim(file.path(dir.base, gene.info.file), sep="\t", skip=3, header=1)  
+  ## A bit tricky: we need to discard rows starting with ";", but we cannot use ";" as comment.char since it is found in descriptions and as separator for names
+  comment.lines <- grep(gene.info.rsat[,1], pattern = ";")
+  gene.info.rsat <- gene.info.rsat[-comment.lines,]
+  row.names(gene.info.rsat) <- gene.info.rsat[,1]
+  gene.info.rsat <- gene.info.rsat[row.names(gene.info), ] ## Ensure gene.info.rsat contains same IDs in the same order as gene.info
+  
+  
+  ## Extract additional attributes for the gene.info table
+  gene.info$name <- gene.info.rsat[row.names(gene.info), "name"]
+  gene.info$entrez.id <- gene.info.rsat[row.names(gene.info), 2]
+  gene.info$description <- gene.info.rsat[row.names(gene.info), "description"]
+  gene.info$names <- gene.info.rsat[row.names(gene.info), "names"]
+  # dim(gene.info.rsat)
+  # names(gene.info.rsat)
+  # View(gene.info.rsat)
+} 
+# View(gene.info)
+
+## Export the gene information table to keep a trace of what has been used. 
+gene.info.out <- paste(sep="", prefix["general.file"], "_gene_descriptions.tab")
+verbose(paste(sep="", "\tExporting gene information table: ", gene.info.out), 1)
+write.table(x = gene.info, row.names = FALSE,
+            file = file.path(dir.base, gene.info.out), sep = "\t", quote=FALSE)
+if (export.excel.files) {
+  gene.info.out.xlsx <- paste(sep="", prefix["general.file"], "_gene_descriptions.xlsx")
+  verbose(paste(sep="", "\tExporting gene information table: ", gene.info.out.xlsx), 1)
+  write.xlsx(x = gene.info, row.names = FALSE,
+             file = file.path(dir.base, paste(sep=".", gene.info.out.xlsx)))
+}
+# verbose(paste(sep="", "\tGene info table\t", gene.info.out), 1)
+```
+
+
+
 ## Detection of differentially expressed genes
 
 ### Design
 
-```{r Read the design, warning=FALSE}
+```{r read_design_table, warning=FALSE}
 # setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
 
 ## Read the design file, which indicates the anlayses to be done.
 ## Each row specifies one differential expression analysis, which 
 ## consists in comparing two conditions. 
-verbose(paste("Reading design file: ", design.file), 2)
-design <- read.delim(file.path(dir.base, design.file), sep="\t", 
+message("Reading design file: ", design.file)
+design.table <- read.delim(file.path(dir.base, design.file), sep="\t", 
                      comment=";", header = T, row.names=NULL)
 ```
 
@@ -415,25 +513,25 @@ design <- read.delim(file.path(dir.base, design.file), sep="\t",
 # setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
 
 i <- 1
-comparison.summary <- design ## Initialize a summary table for each DEG analysis
-comparison.summary$prefixes <- paste(sep="_", design$cond1, "vs", design$cond2)
+comparison.summary <- design.table ## Initialize a summary table for each DEG analysis
+comparison.summary$prefixes <- paste(sep="_", design.table[,1], "vs", design.table[,2])
 
-for (i in 1:nrow(design)) {
+for (i in 1:nrow(design.table)) {
   ## Identify samples for the first condition
-  cond1 <- as.vector(design[i,1])  ## First condition for the current comparison
+  cond1 <- as.vector(design.table[i,1])  ## First condition for the current comparison
   samples1 <- sample.ids[sample.conditions == cond1]
    if (length(samples1) < 2) {
      stop(paste("Cannot perform differential analysis. The count table contains less than 2 samples for condition", cond1))
    }
   
   ## Identify samples for the second condition
-  cond2 <- as.vector(design[i,2])  ## Second condition for the current comparison
+  cond2 <- as.vector(design.table[i,2])  ## Second condition for the current comparison
   samples2 <- sample.ids[sample.conditions == cond2]
    if (length(samples2) < 2) {
      stop(paste("Cannot perform differential analysis. The count table contains less than 2 samples for condition", cond2))
    }
   
-  verbose(paste(sep="", "\tDifferential analysis\t", i , "/", nrow(design), "\t", cond1, " vs ", cond2), 1)
+  verbose(paste(sep="", "\tDifferential analysis\t", i , "/", nrow(design.table), "\t", cond1, " vs ", cond2), 1)
   
   ## Create a specific result directory for this differential analysis
   prefix["comparison"] <- comparison.summary$prefixes[i]
@@ -654,6 +752,7 @@ pander(comparison.summary.to.print, style = 'rmarkdown')
 ```
 
 
+
 * * * 
 
 ## Directories and files
@@ -704,95 +803,6 @@ kable(comparison.summary[, c("cond1", "cond2", "dir.analysis.link", "dir.figures
 ```{r job done message}
 message("Job done")
 ```
-
-
-
-```{r Load gene information from GTF file}
-# setwd(dir.main) ## !!!!! I don't understand why I have to reset the working directory at each chunk
-
-################################################################
-## Load gene information from the GTF file 
-## (should be the same as used to count tags per gene)
-if (exists("gtf.file")) {
-  ## Jacques or Lucie, TO DO : check if the method makeTxDbFromGFF allows to get gene names and descriptions.
-  ## In principle it should be possible since this info is in the GTF file. 
-  ## If not, we migh rewite a parser for GTF. 
-  
-  verbose(paste("Loading gene annotations from GTF file: ", gtf.file), 2)
-  #   library(rtracklayer)  # for the import() function
-  #   gr <- import(gtf.file)
-  txdb <- makeTxDbFromGFF(file=file.path(dir.base, gtf.file),
-                          organism=organism.name,
-                          dataSource=gtf.source)
-  #seqlevels(txdb)
-  #   transcripts <- transcriptsBy(txdb, by="gene")
-  #   transcript.table <- as.data.frame(transcripts@unlistData)
-  #   cds <- cdsBy(txdb, by="gene")
-  #   cds.table <- as.data.frame(cds@unlistData)
-  #   exons <- exonsBy(txdb, by="gene")
-  #   exon.table <- as.data.frame(exons@unlistData)
-  all.genes <- genes(txdb)
-  gene.info <- as.data.frame(all.genes)
-  gene.info$name <- gene.info$gene_id
-  gene.info$entrez.id <- NA
-  gene.info$description <- "no description"
-} else {
-  message(paste("No GTF file has been specified"))
-  g <- nrow(all.counts)
-  gene.info <- data.frame("seqnames"=rep(NA, times=g),
-                          "start"=rep(NA, times=g),
-                          "end"=rep(NA, times=g),
-                          "width"=rep(NA, times=g),
-                          "strand"=rep(NA, times=g),
-                          "gene_id"=row.names(all.counts),
-                          "name"=row.names(all.counts),
-                          "entrez.id" = rep(NA, times=g),
-                          "description"=rep("no description", times=g))
-  row.names(gene.info) <- row.names(all.counts)
-}
-# View(gene.info)
-
-
-
-################################################################
-## TEMPORARY: load additional gene information from a tab-delimited file generated with RSAT, 
-## because for bacterial genomes there is no obvious way to obtain EntrezIDs.
- if ((exists("gene.info.file") && (!is.null(gene.info.file)))) {
-  verbose(paste("Loading gene information from tab-delimited file", gene.info.file))
-  
-  gene.info.rsat <- read.delim(file.path(dir.base, gene.info.file), sep="\t", skip=3, header=1)  
-  ## A bit tricky: we need to discard rows starting with ";", but we cannot use ";" as comment.char since it is found in descriptions and as separator for names
-  comment.lines <- grep(gene.info.rsat[,1], pattern = ";")
-  gene.info.rsat <- gene.info.rsat[-comment.lines,]
-  row.names(gene.info.rsat) <- gene.info.rsat[,1]
-  gene.info.rsat <- gene.info.rsat[row.names(gene.info), ] ## Ensure gene.info.rsat contains same IDs in the same order as gene.info
-  
-  
-  ## Extract additional attributes for the gene.info table
-  gene.info$name <- gene.info.rsat[row.names(gene.info), "name"]
-  gene.info$entrez.id <- gene.info.rsat[row.names(gene.info), 2]
-  gene.info$description <- gene.info.rsat[row.names(gene.info), "description"]
-  gene.info$names <- gene.info.rsat[row.names(gene.info), "names"]
-  # dim(gene.info.rsat)
-  # names(gene.info.rsat)
-  # View(gene.info.rsat)
-} 
-# View(gene.info)
-
-## Export the gene information table to keep a trace of what has been used. 
-gene.info.out <- paste(sep="", prefix["general.file"], "_gene_descriptions.tab")
-verbose(paste(sep="", "\tExporting gene information table: ", gene.info.out), 1)
-write.table(x = gene.info, row.names = FALSE,
-            file = file.path(dir.base, gene.info.out), sep = "\t", quote=FALSE)
-if (export.excel.files) {
-  gene.info.out.xlsx <- paste(sep="", prefix["general.file"], "_gene_descriptions.xlsx")
-  verbose(paste(sep="", "\tExporting gene information table: ", gene.info.out.xlsx), 1)
-  write.xlsx(x = gene.info, row.names = FALSE,
-             file = file.path(dir.base, paste(sep=".", gene.info.out.xlsx)))
-}
-# verbose(paste(sep="", "\tGene info table\t", gene.info.out), 1)
-```
-
 
 * * *
 
