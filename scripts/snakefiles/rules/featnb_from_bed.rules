@@ -1,7 +1,14 @@
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
 rule featnb_from_bed:
     """Count number of features in a bed-formatted file.
 
-    Copyright: Jacques.van-Helden@univ-amu.fr
+    Required parameters:
+        config["qsub"]
+
+    Copyright Jacques van Helden
     """
     input: "{file}.bed"
     output: "{file}_bed_nb.txt"

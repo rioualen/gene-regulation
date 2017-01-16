@@ -24,7 +24,7 @@ rule cufflinks:
     the location of detected transcripts.
 
 
-    Copyright: Jacques van Helden, Claire Rioualen
+    Copyright Jacques van Helden, Claire Rioualen
 
     Required parameters:
         config["qsub"]

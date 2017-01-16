@@ -1,5 +1,3 @@
-## TODO configure parameters
-
 # Set parameters
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
@@ -7,15 +5,11 @@ if not "qsub" in config.keys():
 if not "gff3_file" in config["genome"].keys():
     sys.exit("GFF3 file must be defined in the config file")
 
-if not "fasta_file" in config["genome"].keys():
-    sys.exit("fasta file must be defined in the config file")
-
 if not "genome" in config["dir"].keys():
     sys.exit("Genome dir must be defined in the dir section of the config file")
 
 # Define paths
 gff3_file = os.path.join(config["dir"]["genome"], config["genome"]["gff3_file"])
-fasta_file = os.path.join(config["dir"]["genome"], config["genome"]["fasta_file"])
 
 rule bedtools_closest:
     """
@@ -32,10 +26,7 @@ rule bedtools_closest:
         config["dir"]["genome"]
         config["genome"]["gff3_file"]
 
-    Opional parameters:
-        config["bedtools"]["window"]
-
-    Copyright: Claire Rioualen
+    Copyright Claire Rioualen
     """
 	input: bed = "{regions}.bed", gff3 = gff3_file
 	output: "{regions}_closest_annot.bed"

@@ -9,13 +9,13 @@ if not "db" in config["blastall"].keys():
     sys.exit("The parameter config['blastall']['db'] must be defined in the config file")
 
 if not "matrix" in config["blastall"].keys():
-    config['blastall']['matrix'] = "BLOSUM62"
+    config["blastall"]["matrix"] = "BLOSUM62"
 
 if not "expect" in config["blastall"].keys():
-    config['blastall']['expect'] = "1e-5"
+    config["blastall"]["expect"] = "1e-5"
 
 if not "view" in config["blastall"].keys():
-    config['blastall']['view'] = "8"
+    config["blastall"]["view"] = "8"
 
 # Rule
 rule blastall:
@@ -23,6 +23,15 @@ rule blastall:
 
     Where {blast_program} should be replaced by one of the supported
     program options in balstall: blastp, blastn, blastx, tblastn.
+
+    Required parameters:
+        config["qsub"]
+        config["blastall"]["db"]
+
+    Optional parameters:
+        config["blastall"]["matrix"]
+        config["blastall"]["expect"]
+        config["blastall"]["view"]
 
     Copyright Jacques van Helden
     """

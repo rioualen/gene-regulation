@@ -68,10 +68,10 @@ GENOME_GFF3 = os.path.join(GENOME_DIR, config["genome"]["gff3_file"])
 GENOME_GTF = os.path.join(GENOME_DIR, config["genome"]["gtf_file"])
 
 # Samples
-SAMPLE_IDS = read_table(os.path.join(config["dir"]["base"], config["metadata"]["samples"]))['ID']
+SAMPLE_IDS = read_table(config["metadata"]["samples"])['ID']
 
 # Design
-DESIGN = read_table(os.path.join(config["dir"]["base"],config["metadata"]["design"]))
+DESIGN = read_table(config["metadata"]["design"])
 TREATMENT = DESIGN['treatment']
 CONTROL = DESIGN['control']
 
@@ -79,32 +79,32 @@ CONTROL = DESIGN['control']
 if not (("dir" in config.keys()) and ("reads_source" in config["dir"].keys())):
     sys.exit("The parameter config['dir']['reads_source'] should be specified in the config file.")
 else:
-    READS = os.path.join(config["dir"]["base"], config["dir"]["reads_source"])
+    READS = config["dir"]["reads_source"]
 
 if not ("fastq" in config["dir"].keys()):
     sys.exit("The parameter config['dir']['fastq'] should be specified in the config file.")
 else:
-    FASTQ_DIR = os.path.join(config["dir"]["base"], config["dir"]["fastq"])
+    FASTQ_DIR = config["dir"]["fastq"]
 
 if not ("results" in config["dir"].keys()):
     sys.exit("The parameter config['dir']['results'] should be specified in the config file.")
 else:
-    RESULTS_DIR = os.path.join(config["dir"]["base"],config["dir"]["results"])
+    RESULTS_DIR = config["dir"]["results"]
 
 if not ("samples" in config["dir"].keys()):
-    SAMPLE_DIR = os.path.join(config["dir"]["base"],config["dir"]["results"])
+    SAMPLE_DIR = config["dir"]["results"]
 else:
-    SAMPLE_DIR = os.path.join(config["dir"]["base"],config["dir"]["samples"])
+    SAMPLE_DIR = config["dir"]["samples"]
 
 if not ("reports" in config["dir"].keys()):
-    REPORTS_DIR = os.path.join(config["dir"]["base"],config["dir"]["results"])
+    REPORTS_DIR = config["dir"]["results"]
 else:
-    REPORTS_DIR = os.path.join(config["dir"]["base"],config["dir"]["reports"])
+    REPORTS_DIR = config["dir"]["reports"]
 
 if not ("peaks" in config["dir"].keys()):
-    PEAKS_DIR = os.path.join(config["dir"]["base"],config["dir"]["results"])
+    PEAKS_DIR = config["dir"]["results"]
 else:
-    PEAKS_DIR = os.path.join(config["dir"]["base"],config["dir"]["peaks"])
+    PEAKS_DIR = config["dir"]["peaks"]
 
 
 #================================================================#

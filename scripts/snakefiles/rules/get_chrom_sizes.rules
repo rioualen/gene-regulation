@@ -7,7 +7,7 @@ rule get_chrom_sizes:
     """This rule generates a file containg the chromosome sizes, with file extension *.genome. 
     This file is required by a number of bedtools utilities.
 
-    Copyright: Claire Rioualen
+    Copyright Claire Rioualen
     """
     input: "{genome}.fa"
     output: "{genome}.genome"

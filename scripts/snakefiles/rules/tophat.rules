@@ -29,8 +29,11 @@ if not "max_mismatches" in config["tophat"].keys():
 if not "fastq" in config["dir"].keys():
     sys.exit("You must define a location for the fastq file.")
 
-fastq_dir = os.path.join(config["dir"]["base"], config["dir"]["fastq"])
-sample_dir = os.path.join(config["dir"]["base"], config["dir"]["samples"])
+if not "samples" in config["dir"].keys():
+    sys.exit("You must define a location for the sample files.")
+
+fastq_dir = config["dir"]["fastq"]
+sample_dir = config["dir"]["samples"]
 seq_type = config["metadata"]["seq_type"]
 
 # Define input files
@@ -51,11 +54,13 @@ rule tophat:
     rule bowtie2_index).
 
     Required parameters:
+        config["dir"]["fastq"]
+        config["dir"]["samples"]
+        config["metadata"]["seq_type"]
         config["dir"]["genome"]
         config["genome"]["version"]
         config["genome"]["fasta_file"]
         config["qsub"]
-
 
     Optional parameters:
         config["tophat"]["max_mismatches"]

@@ -8,7 +8,7 @@ rule sam_to_bam:
     Convert reads from SAM (sequence alignment map) to BAM (binary
     alignment map) format.
 
-    Copyright: Claire Rioualen
+    Copyright Claire Rioualen
     """
     input: sam="{reads}.sam"
     output: bam="{reads}.bam"

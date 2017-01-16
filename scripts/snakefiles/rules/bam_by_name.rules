@@ -12,8 +12,7 @@ rule bam_by_name:
     Required parameters:
         config["qsub"]
 
-    Copyright:
-        Jacques van Helden, Claire Rioualen
+    Copyright Jacques van Helden, Claire Rioualen
     """
     input: "{aligned_reads}.bam"
     output: "{aligned_reads}_sorted_name.bam"

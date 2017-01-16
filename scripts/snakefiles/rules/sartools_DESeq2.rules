@@ -3,7 +3,10 @@ if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
 if not "samples" in config["dir"].keys():
-    sys.exit("The parameter qsub must be defined in the config file")
+    sys.exit("The sample dir must be defined in the config file")
+
+if not "diffexpr" in config["dir"].keys():
+    sys.exit("The diffexpr dir must be defined in the config file")
 
 if not "author" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
@@ -55,6 +58,7 @@ rule sartools_DESeq2:
         config["qsub"]
         config["author"]
         config["dir"]["samples"]
+        config["dir"]["diffexpr"]
 
     Optional parameters:
         config["DESeq2"]["featuresToRemove"]

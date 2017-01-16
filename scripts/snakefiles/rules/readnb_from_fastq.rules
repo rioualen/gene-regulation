@@ -1,7 +1,14 @@
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
 rule readnb_from_fastq:
     """Count number of reads in a fastq-formatted file (unaligned reads).
     
-    Copyright: Jacques.van-Helden@univ-amu.fr
+    Required parameters:
+        config["qsub"]
+
+    Copyright Jacques van Helden
     """
     input: "{file}.fastq"
     output: "{file}_fastq_readnb.txt"

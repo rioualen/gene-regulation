@@ -25,7 +25,7 @@ rule bedtools_intersect:
         config["dir"]["genome"]
         config["genome"]["gff3_file"]
 
-    Copyright: Claire Rioualen
+    Copyright Claire Rioualen
     """
 	input: bed = "{regions}.bed", gff3 = gff3_file
 	output: "{regions}_intersect_annot.bed"

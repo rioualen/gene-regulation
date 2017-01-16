@@ -8,7 +8,7 @@ rule index_bam:
     Index a bam file by creating a .bai file with Samtools
     The input bam MUST be sorted by position !
 
-    Copyright: Jacques van Helden
+    Copyright Jacques van Helden
     """
     input: "{reads}_sorted_pos.bam"
     output: "{reads}_sorted_pos.bam.bai"

@@ -1,3 +1,5 @@
+# Note Claire: How to deal with strands naming? Cf split_by_strands rule
+
 # Set parameters
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
@@ -12,7 +14,7 @@ rule genome_coverage_bedgraph_strands:
     Required parameters: 
         config["qsub"]
 
-    Copyright: Jacques van Helden, Claire Rioualen
+    Copyright Jacques van Helden, Claire Rioualen
     """
     input: reads = "{reads}_sorted_pos.bam"
     output: bedg_plus = "{reads}_plus_strand.bedgraph", \

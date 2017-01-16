@@ -23,8 +23,14 @@ if not "keep_dup" in config["macs14"].keys():
 if not "other_options" in config["macs14"].keys():
     config["macs14"]["other_options"] = ""
 
-dir_samples =  os.path.join(config["dir"]["base"], config["dir"]["samples"])
-dir_macs14 = os.path.join(config["dir"]["base"], config["dir"]["peaks"], "{treatment}_vs_{control}/macs14")
+if not "samples" in config["dir"].keys():
+    sys.exit("The sample dir must be defined in the config file")
+
+if not "peaks" in config["dir"].keys():
+    sys.exit("The peaks dir must be defined in the config file")
+
+dir_samples = config["dir"]["samples"]
+dir_macs14 = os.path.join(config["dir"]["peaks"], "{treatment}_vs_{control}/macs14")
 
 # Rule
 rule macs14:
@@ -35,6 +41,8 @@ rule macs14:
     Required parameters:
         config["genome"]["size"]
         config["qsub"]
+        config["dir"]["samples"]
+        config["dir"]["peaks"]
 
     Optional parameters:
         config["macs14"]["pval"]

@@ -8,8 +8,7 @@ if not "genome" in config["dir"].keys():
 if not "fasta_file" in config["genome"].keys():
     sys.exit("Fasta file must be defined in the config file")
 
-genome_dir = config["dir"]["genome"] + "/"
-genome_file = genome_dir + config["genome"]["fasta_file"]
+fasta_file = os.path.join(config["dir"]["genome"], config["genome"]["fasta_file"])
 
 # Rule
 rule genome_coverage_wig:    
@@ -17,12 +16,12 @@ rule genome_coverage_wig:
     reads and produce a wig file, the recommended format to
     upload coverage-type data as UCSC tracks.
 
-    Copyright: Jacques van Helden, Claire Rioualen
+    Copyright Jacques van Helden, Claire Rioualen
     """
     input: "{reads}.bam"
     output: "{reads}.wig"
     params: output_prefix = "{reads}",
-            chromsize = re.sub('\.fa$', '', genome_file) + ".genome", 
+            chromsize = re.sub('\.fa$', '', fasta_file) + ".genome", 
             qsub = config["qsub"] + " -e {reads}_bam2wig_qsub.err -o {reads}_bam2wig_qsub.out"
     log:  "{reads}_bam2wig.log"
     benchmark:  "{reads}_bam2wig_benchmark.json"

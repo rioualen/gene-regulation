@@ -2,9 +2,6 @@
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
 
-if not "configfile" in config["metadata"].keys():
-    sys.exit("The parameter ['metadata']['configfile'] must be defined in the config file")
-
 # Rule
 rule dot_to_image:
     """Following rule dot_graph, this rule creates png and pdf outputs for dot graphs from snakemake. 

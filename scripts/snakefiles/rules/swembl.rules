@@ -14,8 +14,14 @@ if not "N" in config["swembl"].keys():
 if not "x" in config["swembl"].keys():
     config["swembl"]["x"] = "1"
 
-dir_samples =  os.path.join(config["dir"]["base"], config["dir"]["samples"])
-dir_swembl = os.path.join(config["dir"]["base"], config["dir"]["peaks"], "{treatment}_vs_{control}/swembl")
+if not "samples" in config["dir"].keys():
+    sys.exit("You must define a location for the sample files.")
+
+if not "peaks" in config["dir"].keys():
+    sys.exit("You must define a location for the peak files.")
+
+dir_samples = config["dir"]["samples"]
+dir_swembl = os.path.join(config["dir"]["peaks"], "{treatment}_vs_{control}/swembl")
 
 # Rule
 rule swembl:
@@ -26,10 +32,13 @@ rule swembl:
 
     Required parameters:
         config["qsub"]
+        config["dir"]["samples"]
+        config["dir"]["peaks"]
 
     Optional parameters:
         config["swembl"]["x"]
         config["swembl"]["R"]
+        config["swembl"]["N"]
 
     Copyright Claire Rioualen, Lucie Khamvongsa
     """

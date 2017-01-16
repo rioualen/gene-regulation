@@ -14,11 +14,11 @@ if not "samples" in config["metadata"].keys():
     sys.exit("The parameter metadata/samples must be defined in the config file")
 
 #samples = read_table(os.path.join(config["dir"]["base"], config["metadata"]["samples"]))
-sample_ids = read_table(os.path.join(config["dir"]["base"], config["metadata"]["samples"]))['ID']
-sample_conditions = read_table(os.path.join(config["dir"]["base"], config["metadata"]["samples"]))['Condition']
+sample_ids = read_table(config["metadata"]["samples"])['ID']
+sample_conditions = read_table(config["metadata"]["samples"])['Condition']
 
-sample_dir = os.path.join(config["dir"]["base"], config["dir"]["samples"])
-diffexpr_dir = os.path.join(config["dir"]["base"], config["dir"]["diffexpr"])
+sample_dir = config["dir"]["samples"]
+diffexpr_dir = config["dir"]["diffexpr"]
 
 # Define input files
 def targetfiles_inputs(wildcards):
@@ -33,9 +33,10 @@ rule sartools_targetfile:
 
     Required parameters:
         config["qsub"]
+        config["dir"]["samples"]
         config["dir"]["diffexpr"]
 
-    Copyright: Claire Rioualen
+    Copyright Claire Rioualen
     """
     input: 
         count_files = targetfiles_inputs

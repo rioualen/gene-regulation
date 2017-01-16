@@ -5,23 +5,25 @@ if not "qsub" in config.keys():
 if not "reads_source" in config["dir"].keys():
     sys.exit("Source directory containing sra files must be defined in the config file")
 
+if not "fastq" in config["dir"].keys():
+    sys.exit("You must define a location for the fastq files.")
+
 # Rule
 rule sra_to_fastq:
     """Converts SRA files in fastq format with SRA toolkit. 
 
     Required parameters:
-        config['qsub']
-        config['dir']['reads_source']
-        config['dir']['fastq']
+        config["qsub"]
+        config["dir"]["reads_source"]
+        config["dir"]["fastq"]
 
-    Copyright: 
-        Claire Rioualen
+    Copyright Claire Rioualen
     """
-#    input: datadir = config['dir']['reads_source'] + "/"
+#    input: datadir = config["dir"]["reads_source"] + "/"
     output: "{results}/{sample}/{sample}.fastq"
     params: qsub = config["qsub"] + " -q short -e {results}/{sample}/{sample}_sra-conversion_qsub.err -o {results}/{sample}/{sample}_sra-conversion_qsub.out",
-        results = config['dir']['fastq'] + "/",
-        datadir = config['dir']['reads_source'],
+        results = config["dir"]["fastq"] + "/",
+        datadir = config["dir"]["reads_source"],
     log: "{results}/{sample}/{sample}_sra-conversion.log"
     benchmark: "{results}/{sample}/{sample}_sra-conversion_benchmark.json"
     shell:"""

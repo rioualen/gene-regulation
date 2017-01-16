@@ -29,8 +29,11 @@ if not "max_mismatches" in config["bowtie"].keys():
 if not "fastq" in config["dir"].keys():
     sys.exit("You must define a location for the fastq file.")
 
-fastq_dir = os.path.join(config["dir"]["base"], config["dir"]["fastq"])
-sample_dir = os.path.join(config["dir"]["base"], config["dir"]["samples"])
+if not "samples" in config["dir"].keys():
+    sys.exit("You must define a location for the sample files.")
+
+fastq_dir = config["dir"]["fastq"]
+sample_dir = config["dir"]["samples"]
 seq_type = config["metadata"]["seq_type"]
 
 # Define input files
@@ -54,14 +57,14 @@ rule bowtie:
         config["genome"]["version"]
         config["genome"]["fasta_file"]
         config["qsub"]
-        config["bowtie"]["max_mismatches"]
+        config["dir"]["fastq"]
+        config["dir"]["samples"]
 
     Optional parameters:
-        config["bowtie"]["dir"]
+        config["bowtie"]["max_mismatches"]
         config["bowtie"]["threads"]
 
-    Copyright: 
-        Claire Rioualen, Jacques van Helden, Lucie Khamvongsa
+    Copyright Claire Rioualen, Jacques van Helden, Lucie Khamvongsa
     """
     input:
         reads = bowtie_inputs, 

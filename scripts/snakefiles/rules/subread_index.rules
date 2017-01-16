@@ -28,6 +28,7 @@ rule subread_index:
         config["dir"]["genome"]
         config["genome"]["version"]
         config["genome"]["fasta_file"]
+
     Optional parameters:
 
     Copyright Claire Rioualen, Jacques van Helden

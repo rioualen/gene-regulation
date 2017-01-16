@@ -26,8 +26,11 @@ if not "threads" in config["bwa"].keys():
 if not "fastq" in config["dir"].keys():
     sys.exit("You must define a location for the fastq file.")
 
-fastq_dir = os.path.join(config["dir"]["base"], config["dir"]["fastq"])
-sample_dir = os.path.join(config["dir"]["base"], config["dir"]["samples"])
+if not "samples" in config["dir"].keys():
+    sys.exit("You must define a location for the samples files.")
+
+fastq_dir = config["dir"]["fastq"]
+sample_dir = config["dir"]["samples"]
 seq_type = config["metadata"]["seq_type"]
 
 # Define input files
@@ -48,6 +51,8 @@ rule bwa:
     rule bwa_index).
 
     Required parameters:
+        config["dir"]["fastq"]
+        config["dir"]["samples"]
         config["genome"]["version"]
         config["genome"]["fasta_file"]
         config["qsub"]
@@ -56,8 +61,7 @@ rule bwa:
         config["bwa"]["dir"]
         config["bwa"]["threads"]
 
-    Copyright: 
-        Claire Rioualen
+    Copyright Claire Rioualen
     """
     input:
         reads = bwa_inputs, 

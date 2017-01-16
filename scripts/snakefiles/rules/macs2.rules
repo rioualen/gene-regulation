@@ -29,16 +29,24 @@ if not "other_options" in config["macs2"].keys():
 if not "type" in config["macs2"].keys():
     config["macs2"]["type"] = "narrow"
 
-dir_samples =  os.path.join(config["dir"]["base"], config["dir"]["samples"])
-dir_macs2 = os.path.join(config["dir"]["base"], config["dir"]["peaks"], "{treatment}_vs_{control}/macs2")
+if not "samples" in config["dir"].keys():
+    sys.exit("The sample dir must be defined in the config file")
+
+if not "peaks" in config["dir"].keys():
+    sys.exit("The peaks dir must be defined in the config file")
+
+dir_samples = config["dir"]["samples"]
+dir_macs2 = os.path.join(config["dir"]["peaks"], "{treatment}_vs_{control}/macs2")
 
 # Rule
 rule macs2:
     """Peak-calling with MACS2.
-    Input: sam, bam, bed... automatically detected by macs' callpeak algorithm. Bed format was used here. 
+    Input: bed
     Output: bed
 
     Required parameters:
+        config["dir"]["samples"]
+        config["dir"]["peaks"]
         config["genome"]["size"]
         config["qsub"]
 
@@ -51,7 +59,7 @@ rule macs2:
         config["macs2"]["other_options"]
         config["macs2"]["type"]
 
-    Copyright: Claire Rioualen, Lucie Khamvongsa
+    Copyright Claire Rioualen, Lucie Khamvongsa
     """
     input:
         treatment = dir_samples + "/{treatment}/{treatment}{preprocess,.*}_sorted_pos.bed",

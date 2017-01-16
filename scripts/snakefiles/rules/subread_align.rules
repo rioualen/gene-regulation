@@ -30,10 +30,10 @@ if not "align_options" in config["subread-align"].keys():
     config["subread-align"]["align_options"] = "-d 50 -D 600"
 
 if not "fastq" in config["dir"].keys():
-    sys.exit("You must define a location for the fastq file.")
+    sys.exit("You must define a location for the fastq files.")
 
-fastq_dir = os.path.join(config["dir"]["base"], config["dir"]["fastq"])
-sample_dir = os.path.join(config["dir"]["base"], config["dir"]["samples"])
+fastq_dir = config["dir"]["fastq"]
+sample_dir = config["dir"]["samples"]
 seq_type = config["metadata"]["seq_type"]
 
 # Define input files depending on whether reads are single-end or paired-ends.
@@ -61,19 +61,21 @@ rule subread_align:
        Acids Research, 41(10):e108
 
     Required parameters:
+        config["dir"]["fastq"]
+        config["dir"]["samples"]
         config["genome"]["version"]
         config["genome"]["fasta_file"]
         config["qsub"]
-        config["subread-align"]["seq_type"]
+        config["metadata"]["seq_type"]
 
     Optional parameters:
         config["subread-align"]["dir"]
         config["subread-align"]["threads"]
         config["subread-align"]["max_mismatches"]
         config["subread-align"]["align_options"]
+        config["subread-align"]["seq_data"]
 
-    Copyright: 
-        Jacques van Helden, Claire Rioualen
+    Copyright Jacques van Helden, Claire Rioualen
     """
     input:
         reads = subread_inputs, 

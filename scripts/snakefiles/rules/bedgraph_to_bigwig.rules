@@ -1,5 +1,12 @@
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
 rule bedgraph_to_bigwig:
     """Convert bedGraph to bigWig format.
+
+    Required parameters:
+        config["qsub"]
 
     Copyright: Claire Rioualen
     """

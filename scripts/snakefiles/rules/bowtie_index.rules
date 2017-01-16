@@ -27,8 +27,7 @@ rule bowtie_index:
 
     Optional parameters:
 
-    Copyright: 
-        Jacques van Helden, Lucie Khamvongsa, Claire Rioualen
+    Copyright Jacques van Helden, Lucie Khamvongsa, Claire Rioualen
     """
     input: os.path.join(config["dir"]["genome"], config["genome"]["fasta_file"])
     output: os.path.join(bowtie_dir, config["genome"]["fasta_file"])

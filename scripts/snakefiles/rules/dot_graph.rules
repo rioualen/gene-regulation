@@ -5,13 +5,10 @@ if not "qsub" in config.keys():
 if not "configfile" in config["metadata"].keys():
     sys.exit("The parameter ['metadata']['configfile'] must be defined in the config file")
 
-if not "results" in config["dir"].keys():
-    sys.exit("The parameter ['dir']['results'] must be defined in the config file")
-
 if not "reports" in config["dir"].keys():
     config["dir"]["reports"] = config["dir"]["results"];
 
-dir_reports = os.path.join(config["dir"]["base"], config["dir"]["reports"])
+dir_reports = config["dir"]["reports"]
 
 # Rule
 rule dot_graph:
@@ -20,8 +17,10 @@ rule dot_graph:
     Copyright: Claire Rioualen, Jacques van Helden
     """
     output: dir_reports + "/{graph}.dot"
-    params: snakefile = os.path.join(config["dir"]["base"], workflow.snakefile), configfile = os.path.join(config["dir"]["base"], config["metadata"]["configfile"]), \
-        qsub=config["qsub"] \
+    params: 
+        snakefile = workflow.snakefile,
+        configfile = config["metadata"]["configfile"], 
+        qsub = config["qsub"] \
           + " -e " + dir_reports + "/{graph}_dot_qsub.err" \
           + " -o " + dir_reports + "/{graph}_dot_qsub.out"
     log: dir_reports + "/{graph}_dot.log"

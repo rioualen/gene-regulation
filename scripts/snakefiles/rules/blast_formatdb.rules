@@ -8,9 +8,10 @@ rule blast_formatdb:
     k-mers of the reference database. This has to be done only once, then
     the DB can be used for multiple searches with blastall.
     
-    Parameters
+    Required parameters:
+        config["qsub"]
     
-    - type (formatdb option -p): sequence type: peptidic (-pT) or nucleic (-pF)
+    ## type (formatdb option -p): sequence type: peptidic (-pT) or nucleic (-pF)
 
     Copyright Jacques van Helden
     """

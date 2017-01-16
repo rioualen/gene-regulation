@@ -23,14 +23,14 @@ if not "windowSize" in config["bPeaks"].keys():
 if not "windowOverlap" in config["bPeaks"].keys():
     config["bPeaks"]["windowOverlap"] = "50"
 
-# Define paths
 if not "samples" in config["dir"].keys():
-    config["dir"]["samples"] = config["dir"]["results"]
+    sys.exit("The sample dir must be defined in the config file")
 
 if not "peaks" in config["dir"].keys():
-    config["dir"]["peaks"] = config["dir"]["results"]
+    sys.exit("The peaks dir must be defined in the config file")
 
-suffix = "bPeaks-log" + config["bPeaks"]["log2FC"]
+dir_samples = config["dir"]["samples"]
+suffix = "bPeaks"
 
 # Rule
 rule bPeaks:
@@ -42,7 +42,8 @@ rule bPeaks:
 
     Required parameters:
         config["qsub"]
-        config["dir"]["r_libs"]
+        config["dir"]["samples"]
+        config["dir"]["peaks"]
 
     Optional parameters:
         config["bPeaks"]["IPcoeff"]
@@ -56,8 +57,8 @@ rule bPeaks:
         Claire Rioualen
     """
     input:
-        treatment = config["dir"]["samples"] + "/{treatment}/{treatment}{preprocess,.*}_sorted_pos.bam", \
-        control=config["dir"]["samples"] + "/{control}/{control}{preprocess,.*}_sorted_pos.bam"
+        treatment = dir_samples + "/{treatment}/{treatment}{preprocess,.*}_sorted_pos.bam", \
+        control = dir_samples + "/{control}/{control}{preprocess,.*}_sorted_pos.bam"
     output: 
         peaks_bed = config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".bed"
     params:

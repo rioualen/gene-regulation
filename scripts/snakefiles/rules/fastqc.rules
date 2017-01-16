@@ -23,7 +23,9 @@ rule fastqc:
     Optional parameters:
         config['fastqc']['other_options']
 
-    Copyright: Claire Rioualen, Lucie Khamvongsa & Jacques van Helden
+    TODO: execute on BAM files
+
+    Copyright Claire Rioualen, Lucie Khamvongsa, Jacques van Helden
     """
     input: "{reads}.fastq"
 #    input: "{reads}.{ext,(bam|fastq)}"

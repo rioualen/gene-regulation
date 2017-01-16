@@ -29,8 +29,14 @@ if not "P" in config["homer"].keys():
 if not "fdr" in config["homer"].keys():
     config["homer"]["fdr"] = "0.001"
 
-dir_samples = os.path.join(config["dir"]["base"], config["dir"]["samples"])
-dir_homer = os.path.join(config["dir"]["base"], config["dir"]["peaks"], "{treatment}_vs_{control}/homer")
+if not "samples" in config["dir"].keys():
+    sys.exit("The sample dir must be defined in the config file")
+
+if not "peaks" in config["dir"].keys():
+    sys.exit("The peaks dir must be defined in the config file")
+
+dir_samples = config["dir"]["samples"]
+dir_homer = os.path.join(config["dir"]["peaks"], "{treatment}_vs_{control}/homer")
 
 # Rule
 rule homer:
@@ -42,7 +48,8 @@ rule homer:
         - a fasta file (see http://homer.salk.edu/homer-fdr{fdr}_peaks/introduction/update.html)          TO be changed
 
     Required parameters:
-    # Set parameters
+        config["dir"]["samples"]
+        config["dir"]["peaks"]
         config["genome"]["fasta_file"]
         config["genome"]["size"]
 
@@ -53,7 +60,7 @@ rule homer:
         config["homer"]["P"]
         config["homer"]["fdr"]
 
-    Copyright: Claire Rioualen
+    Copyright Claire Rioualen
     """
     input:
         treatment = dir_samples + "/{treatment}/{treatment}{preprocess,.*}_sorted_pos.bed",
@@ -62,7 +69,7 @@ rule homer:
     params:    # name="{treatment}_vs_{control}_homer",
         treatment_tag = dir_homer + "/{treatment}_tag",
         control_tag = dir_homer + "/{control}_tag",
-        genome = os.path.join(config["dir"]["base"], config["dir"]["genome"], config["genome"]["fasta_file"]),
+        genome = os.path.join(config["dir"]["genome"], config["genome"]["fasta_file"]),
         style = config["homer"]["style"],
         L = config["homer"]["L"],
         P = config["homer"]["P"],

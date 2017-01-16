@@ -1,3 +1,12 @@
+# Might be out of date
+
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "version" in config["genome"].keys():
+    sys.exit("The parameter genome version must be defined in the config file")
+
 rule bed_to_fasta:
     """Fetch sequences from UCSC to obtain a fasta file from a set of
     genomic coordinates described in a bed file. Requires RSAT installation. 
@@ -9,21 +18,16 @@ rule bed_to_fasta:
     cd -
     snakemake --snakefile ${RSAT}/snakemake_files/chip-seq_motifs.py test/fetch_seq/fetch-sequences_Schmidt_2011_mm9_CEBPA_SWEMBL_R0.12_702peaks.fasta
 
-        Parameters:
+    Required parameters:
+        config["qsub"]
 
-        config["qsub"] : qsub options
-
-        config["rsat"]["verbosity"] verbosity level used for the RSAT program fetch-sequences
-
-        config["genome"]["ucsc_id"] identifier of the genome of interest on UCSC genome browser
-
-    Copyright: Jacques van Helden, Claire Rioualen
+    Copyright Jacques van Helden, Claire Rioualen
     """
     input: "{regions}.bed"
     output: "{regions}.fasta"
-    params: verbosity = config["rsat"]["verbosity"], \
-                genome = config["genome"]["genome_version"], \
-                qsub = config["qsub"] + " -e {regions}_fetchseq_qsub.err -o {regions}_fetchseq_qsub.out"
+    params: 
+        genome = config["genome"]["version"],
+        qsub = config["qsub"] + " -e {regions}_fetchseq_qsub.err -o {regions}_fetchseq_qsub.out"
     log: "{regions}_fetchseq.log"
     benchmark: "{regions}_fetchseq_benchmark.json"
-    shell:"""fetch-sequences -v {params.verbosity} -i {input} -header_format galaxy -genome {params.genome} -o {output} 2> {log}"""
+    shell: "fetch-sequences -i {input} -header_format galaxy -genome {params.genome} -o {output} 2> {log}"

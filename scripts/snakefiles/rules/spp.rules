@@ -1,8 +1,3 @@
-
-#TODO choice between narrow/broad peaks
-#if not "type" in config["spp"].keys():
-#    config["spp"]["type"] = "narrow"
-
 # Set parameters
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
@@ -13,8 +8,11 @@ if not "spp" in config.keys():
 if not "fdr" in config["spp"].keys():
     config["spp"]["fdr"] = "0.01"
 
-dir_samples =  os.path.join(config["dir"]["base"], config["dir"]["samples"])
-dir_spp = os.path.join(config["dir"]["base"], config["dir"]["peaks"], "{treatment}_vs_{control}/spp")
+#if not "type" in config["spp"].keys():
+#    config["spp"]["type"] = "narrow"
+
+dir_samples = config["dir"]["samples"]
+dir_spp = os.path.join(config["dir"]["peaks"], "{treatment}_vs_{control}/spp")
 
 # Rule
 rule spp:
@@ -24,12 +22,13 @@ rule spp:
 
     Required parameters:
         config["qsub"]
+        config["dir"]["samples"]
+        config["dir"]["peaks"]
 
     Optional parameters:
         config["spp"]["fdr"]
 
-    Copyright: 
-        Claire Rioualen
+    Copyright Claire Rioualen
     """
     input:
         treatment = dir_samples + "/{treatment}/{treatment}{preprocess,.*}_sorted_pos.bam",
