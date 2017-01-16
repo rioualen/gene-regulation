@@ -52,6 +52,8 @@ import datetime
 import re
 import pandas as pd
 
+workdir: config["dir"]["base"]
+
 GENEREG_LIB = os.path.join(config["dir"]["base"], config["dir"]["gene_regulation"])
 
 include: os.path.join(GENEREG_LIB, "scripts/python_lib/util.py")
