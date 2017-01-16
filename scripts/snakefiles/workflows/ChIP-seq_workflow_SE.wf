@@ -52,9 +52,11 @@ import datetime
 import re
 import pandas as pd
 
-workdir: config["dir"]["base"]
+wd = os.getcwd()
 
-GENEREG_LIB = os.path.join(config["dir"]["base"], config["dir"]["gene_regulation"])
+#workdir: os.getcwd()
+
+GENEREG_LIB = os.path.join(wd, config["dir"]["gene_regulation"])
 
 include: os.path.join(GENEREG_LIB, "scripts/python_lib/util.py")
 
@@ -115,7 +117,7 @@ else:
 
 RULES = os.path.join(GENEREG_LIB, "scripts/snakefiles/rules")
 
-include: os.path.join(RULES, "annotate_peaks.rules")
+#include: os.path.join(RULES, "annotate_peaks.rules")
 include: os.path.join(RULES, "bam_by_pos.rules")
 include: os.path.join(RULES, "bam_to_bed.rules")
 include: os.path.join(RULES, "bam_stats.rules")
@@ -262,9 +264,9 @@ rule all:
             GENOME_COV_GZ, \
 #            GENOME_COV_BW, \
 #            SORTED_BED, \
-#            PEAKS, \
+            PEAKS, \
 #            GENOMIC_FEAT, \
-            GENE_LIST, \
+#            GENE_LIST, \
 #            PEAK_MOTIFS, \
 #            IGV, \
             GRAPHICS
