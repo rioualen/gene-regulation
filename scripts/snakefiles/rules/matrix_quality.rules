@@ -1,0 +1,65 @@
+# Check/set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "matrix-quality" in config.keys():
+    config["matrix-quality"] = {}
+
+#if not "x" in config["matrix-quality"].keys():
+#    config["matrix-quality"]["x"] = "..."
+
+#if not "y" in config["matrix-quality"].keys():
+#    sys.exit("The parameter matrix-quality/y must be defined in the config file")
+
+def matrix_quality_inputs(wildcards):
+    peak_callers = config["tools"]["peakcalling"]
+    for pc in peak_callers:
+        peak_sequences = "..." + pc + ".fasta"
+    return peak_sequences
+
+# Rule
+rule matrix_quality
+    """Measuring peak enrichment for motifs.
+    Requires at least 2 sets of peaks and 1 motif database. 
+
+    Find out more @ http://embnet.ccg.unam.mx/rsa-tools/help.matrix-quality.html
+
+    Required parameters:
+        config["qsub"]
+        ...
+
+    Optional parameters:
+        ...
+
+    Copyright Claire Rioualen, Jacques van Helden
+    """
+    input: 
+        peakfiles = matrix_quality_inputs,
+        motifs = config["matrix-quality"]["matrix"]
+    output: "{comparison_dir}/matrix-quality..."
+    params:
+        title = config["title"] + " - Motif enrichment of peaks",
+        out_prefix = "{comparison_dir}/matrix-quality...",
+        qsub = config["qsub"] \
+                + " -e {peaks}_qsub.err" \
+                + " -o {peaks}_qsub.out" 
+    log: "{caller_dir}/{peaks}_matrix-quality.log"
+    benchmark: "{caller_dir}/{peaks}_matrix-quality_bench.json"
+shell:"""
+
+peaks = ""
+foreach $pc
+    peaks = peaks + "-seq $pc $pcfasta -plot $pc nwd -perm $pc 0 "
+
+matrix-quality  -v 0 -html_title {params.title} \
+  -ms {input.motifs} \
+  -matrix_format transfac -pseudo 1 \
+  -seq_format fasta \
+
+  $peaks \
+
+  -bgfile $RSAT/public_html/data/genomes/Escherichia_coli_K_12_substr__MG1655_uid57779/oligo-frequencies/1nt_upstream-noorf_Escherichia_coli_K_12_substr__MG1655_uid57779-ovlp-1str.freq.gz \
+  -bg_format oligo-analysis -bg_pseudo 0.01 \
+  -archive -o {params.outdir}
+"""
+
