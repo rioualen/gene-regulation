@@ -8,8 +8,8 @@ if not "gtf_file" in config["genome"].keys():
 if not "genome" in config["dir"].keys():
     sys.exit("Genome directory must be defined in the config file")
 
-if not "base" in config["dir"].keys():
-    sys.exit("Dir base must be defined in the config file")
+#if not "base" in config["dir"].keys():
+#    sys.exit("Dir base must be defined in the config file")
 
 if not "subread-featureCounts" in config.keys():
     config["subread-featureCounts"] = {}
@@ -57,7 +57,7 @@ rule subread_featureCounts:
         gtf = os.path.join(config["dir"]["genome"], config["genome"]["gtf_file"])
     output: "{reads}_featureCounts.txt"          ## _" + config["subread-featureCounts"]["feature_type"] + "
     params:
-        wd = config["dir"]["base"],
+#        wd = config["dir"]["base"],
         attr_type = config["subread-featureCounts"]["attr_type"], 
         feature_type = config["subread-featureCounts"]["feature_type"], 
         multi_mapping = config["subread-featureCounts"]["multi_mapping"], 
@@ -70,7 +70,7 @@ rule subread_featureCounts:
     run:
         shell("featureCounts -a {input.gtf} -o {output} {input.bam} -g {params.attr_type} -t {params.feature_type} -s {params.strand_specificity} {params.multi_mapping} &> {log}")
         R("""
-            setwd("{params.wd}")
+#            setwd("{params.wd}")
             counts <- read.table("{output}", header=TRUE)
             new <- counts[,-which(names(counts) %in% c("Chr", "Start", "End", "Strand", "Length"))]
             write.table(new, file = "{output}", sep="\t", col.names=FALSE, row.names=FALSE)
