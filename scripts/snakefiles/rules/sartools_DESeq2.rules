@@ -85,7 +85,7 @@ rule sartools_DESeq2:
         wd = "{diffexpr_dir}/{test}_vs_{ref}/DESeq2",
         targetFile = "{preprocess,.*}SARTools_targetfile.txt",
         rawDir = "", #config["dir"]["base"] + "/" + config["dir"]["samples"],
-        baseDir = config["dir"]["base"],
+#        baseDir = config["dir"]["base"],
         projectName = "{test}_vs_{ref}_{preprocess,.*}DESeq2",
         author = config["author"],
         featuresToRemove = config["DESeq2"]["featuresToRemove"],
@@ -112,6 +112,8 @@ rule sartools_DESeq2:
         sink("{log}")
 
         library(SARTools)
+
+        baseDir <- getwd()
 
         targetFile <- "{params.targetFile}"
         setwd("{wildcards.diffexpr_dir}/{wildcards.test}_vs_{wildcards.ref}")
@@ -185,7 +187,9 @@ rule sartools_DESeq2:
         up <- as.vector(read.table(paste("tables/", list.files(path = "tables", pattern = "up.txt$")[1], sep=""))[,1])
         down <- as.vector(read.table(paste("tables/", list.files(path = "tables", pattern = "down.txt$")[1], sep=""))[,1])
 
-        setwd("{params.baseDir}")
+#        setwd("{params.baseDir}")
+        setwd(baseDir)
+
 
         gene_list <- c(up[2:length(up)], down[2:length(down)])
         print(gene_list)

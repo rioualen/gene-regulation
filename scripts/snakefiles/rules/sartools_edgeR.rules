@@ -77,7 +77,7 @@ rule sartools_edgeR:
         wd = "{diffexpr_dir}/{test}_vs_{ref}/edgeR",
         targetFile = "{preprocess,.*}SARTools_targetfile.txt",
         rawDir = "", #config["dir"]["base"] + "/" + config["dir"]["samples"],
-        baseDir = config["dir"]["base"],
+#        baseDir = config["dir"]["base"],
         projectName = "{test}_vs_{ref}_{preprocess,.*}edgeR",
         author = config["author"],
         featuresToRemove = config["edgeR"]["featuresToRemove"],
@@ -100,6 +100,8 @@ rule sartools_edgeR:
         rm(list=ls())
 
         library(SARTools)
+
+        baseDir <- getwd()
 
         targetFile <- "{params.targetFile}"
         setwd("{wildcards.diffexpr_dir}/{wildcards.test}_vs_{wildcards.ref}")
@@ -172,7 +174,8 @@ rule sartools_edgeR:
         up <- as.vector(read.table(paste("tables/", list.files(path = "tables", pattern = "up.txt$")[1], sep=""))[,1])
         down <- as.vector(read.table(paste("tables/", list.files(path = "tables", pattern = "down.txt$")[1], sep=""))[,1])
 
-        setwd("{params.baseDir}")
+#        setwd("{params.baseDir}")
+        setwd(baseDir)
 
         gene_list <- c(up[2:length(up)], down[2:length(down)])
         print(gene_list)
