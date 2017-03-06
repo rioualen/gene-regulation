@@ -77,9 +77,9 @@ STRANDS = config["metadata"]["strands"].split()
 SAMPLE_IDS = read_table(config["metadata"]["samples"])['ID']
 
 # Design
-DESIGN = read_table(config["metadata"]["design"])
-TREATMENT = DESIGN['treatment']
-CONTROL = DESIGN['control']
+#DESIGN = read_table(config["metadata"]["design"])
+#TREATMENT = DESIGN['treatment']
+#CONTROL = DESIGN['control']
 
 # Genome & annotations
 GENOME_VER = config["genome"]["version"]
