@@ -47,7 +47,12 @@ if not ("verbosity" in config.keys()):
 verbosity = int(config["verbosity"])
 
 
-GENEREG_LIB = os.path.abspath(config["dir"]["gene_regulation"])
+wd = os.getcwd()
+
+#workdir: os.getcwd()
+
+GENEREG_LIB = os.path.join(wd, config["dir"]["gene_regulation"])
+
 
 # Python includes
 PYTHON = os.path.join(GENEREG_LIB, "scripts/python_lib")
