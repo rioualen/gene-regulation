@@ -208,21 +208,37 @@ if TRIMMING_TOOLS:
 else:
     PREFIX = expand("{aligner}", aligner=MAPPING_TOOLS)
 
-ALIGNMENT=expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}", samples=SAMPLE_IDS, prefix=PREFIX)
+MAPPING         = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}.bam", samples=SAMPLE_IDS, prefix=PREFIX)
 
-MAPPING = expand("{alignment}.bam", alignment=ALIGNMENT)
+SORTED_BAM      = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_sorted_pos.bam", samples=SAMPLE_IDS, prefix=PREFIX)
+SORTED_BAM_BAI  = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_sorted_pos.bam.bai", samples=SAMPLE_IDS, prefix=PREFIX)
+BAM_STATS       = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_bam_stats.txt", samples=SAMPLE_IDS, prefix=PREFIX)
+SORTED_BED      = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_sorted_pos.bed", samples=SAMPLE_IDS, prefix=PREFIX)
 
-SORTED_BAM = expand("{alignment}_sorted_pos.bam", alignment=ALIGNMENT)
-SORTED_BAM_BAI = expand("{alignment}_sorted_pos.bam.bai", alignment=ALIGNMENT)
-BAM_STATS = expand("{alignment}_bam_stats.txt", alignment=ALIGNMENT)
+GENOME_COV      = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}.bedgraph", samples=SAMPLE_IDS, prefix=PREFIX)
+GENOME_COV_GZ   = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}.bedgraph.gz", samples=SAMPLE_IDS, prefix=PREFIX)
+GENOME_COV_TDF  = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}.tdf", samples=SAMPLE_IDS, prefix=PREFIX)
+GENOME_COV_BW   = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}.bw", samples=SAMPLE_IDS, prefix=PREFIX)
+
+GENOME_COV_PLUS = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_plus_strand.bedgraph", samples=SAMPLE_IDS, prefix=PREFIX) 
+GENOME_COV_MINUS= expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_minus_strand.bedgraph", samples=SAMPLE_IDS, prefix=PREFIX) 
+
+
+#ALIGNMENT=expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}", samples=SAMPLE_IDS, prefix=PREFIX)
+
+#MAPPING = expand("{alignment}.bam", alignment=ALIGNMENT)
+
+#SORTED_BAM = expand("{alignment}_sorted_pos.bam", alignment=ALIGNMENT)
+#SORTED_BAM_BAI = expand("{alignment}_sorted_pos.bam.bai", alignment=ALIGNMENT)
+#BAM_STATS = expand("{alignment}_bam_stats.txt", alignment=ALIGNMENT)
 
 #----------------------------------------------------------------#
 # RNA-seq analysis
 #----------------------------------------------------------------#
 
-FEATURE_COUNTS = expand("{alignment}_featureCounts.txt", alignment=ALIGNMENT) ## todo _{feature} , feature=config["subread-featureCounts"]["feature_type"])
+FEATURE_COUNTS = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_featureCounts.txt", samples=SAMPLE_IDS, prefix=PREFIX) ## todo _{feature} , feature=config["subread-featureCounts"]["feature_type"])
 
-INFER_TRANSCRIPTS = expand("{alignment}_cufflinks/transcripts.gtf", alignment=ALIGNMENT)
+INFER_TRANSCRIPTS = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_cufflinks/transcripts.gtf", samples=SAMPLE_IDS, prefix=PREFIX)
 
 if not (("tools" in config.keys()) and ("diffexpr" in config["tools"].keys())):
     sys.exit("The parameter config['tools']['diffexpr'] should be specified in the config file.")
@@ -232,9 +248,15 @@ DIFFEXPR_TOOLS = config["tools"]["diffexpr"].split()
 #SARTOOLS_TARGETFILE = expand(DEG_DIR + "/{prefix}_SARTools_targetfile.txt", prefix=PREFIX)
 #DEG = expand(DEG_DIR + "/{deg}/{prefix}_{deg}_report.html", prefix=PREFIX, deg=DIFFEXPR_TOOLS)
 
+#PEAK_MOTIFS     = expand(expand(PEAKS_DIR + "/{treat}_vs_{control}/{{peakcaller}}/peak-motifs/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}_peak-motifs_synthesis.html", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLING_TOOLS, aligner=MAPPING_TOOLS, trimmer=TRIMMING_TOOLS)
 
-SARTOOLS_TARGETFILE = expand(DEG_DIR + "/{test}_vs_{ref}/SARTools_targetfile.txt", test=TEST_COND, ref=REFERENCE_COND)
-DEG = expand(expand(DEG_DIR + "/{test}_vs_{ref}/{{deg}}/{test}_vs_{ref}_{{deg}}_report.html", zip, test=TEST_COND, ref=REFERENCE_COND), deg=DIFFEXPR_TOOLS)
+#SARTOOLS_TARGETFILE = expand(DEG_DIR + "/{test}_vs_{ref}/SARTools_targetfile.txt", test=TEST_COND, ref=REFERENCE_COND)
+#DEG = expand(expand(DEG_DIR + "/{test}_vs_{ref}/{{deg}}/{test}_vs_{ref}_{{deg}}_report.html", zip, test=TEST_COND, ref=REFERENCE_COND), deg=DIFFEXPR_TOOLS)
+
+SARTOOLS_TARGETFILE = expand(expand(DEG_DIR + "/{test}_vs_{ref}/{{aligner}}_SARTools_targetfile.txt", test=TEST_COND, ref=REFERENCE_COND), aligner=MAPPING_TOOLS)
+DEG = expand(expand(DEG_DIR + "/{test}_vs_{ref}/{{deg}}/{test}_vs_{ref}_{{aligner}}_{{deg}}_report.html", zip, test=TEST_COND, ref=REFERENCE_COND), deg=DIFFEXPR_TOOLS, aligner=MAPPING_TOOLS)
+
+INFER_TRANSCRIPTS = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_cufflinks/transcripts.gtf", samples=SAMPLE_IDS, prefix=PREFIX)
 
 
 ## ----------------------------------------------------------------
@@ -242,13 +264,6 @@ DEG = expand(expand(DEG_DIR + "/{test}_vs_{ref}/{{deg}}/{test}_vs_{ref}_{{deg}}_
 ## ----------------------------------------------------------------
 
 ## TODO
-
-GENOME_COVERAGE = expand("{alignment}.bedgraph", alignment=ALIGNMENT)
-GENOME_COVERAGE_PLUS = expand("{alignment}_plus_strand.bedgraph", alignment=ALIGNMENT)
-GENOME_COVERAGE_MINUS = expand("{alignment}_minus_strand.bedgraph", alignment=ALIGNMENT)
-
-GENOME_COVERAGE_GZ = expand("{alignment}.bedgraph.gz", alignment=ALIGNMENT)
-GENOME_COVERAGE_TDF = expand("{alignment}.tdf", alignment=ALIGNMENT)
 
 
 #================================================================#
@@ -267,13 +282,13 @@ rule all:
             SORTED_BAM, \
             SORTED_BAM_BAI, \
             BAM_STATS, \
-            GENOME_COVERAGE_TDF, \
-            GENOME_COVERAGE_PLUS, \
-            GENOME_COVERAGE_MINUS, \
-##            INFER_TRANSCRIPTS, \
+            GENOME_COV_TDF, \
+            GENOME_COV_PLUS, \
+            GENOME_COV_MINUS, \
+            INFER_TRANSCRIPTS, \
             FEATURE_COUNTS, \
             SARTOOLS_TARGETFILE, \
-#            DEG, \
+            DEG, \
             GRAPHICS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
