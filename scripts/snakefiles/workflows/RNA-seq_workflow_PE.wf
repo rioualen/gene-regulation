@@ -74,14 +74,12 @@ if not (("metadata" in config.keys()) and ("strands" in config["metadata"].keys(
 STRANDS = config["metadata"]["strands"].split()
 
 # Samples
-SAMPLES = read_table(config["metadata"]["samples"])
-SAMPLE_IDS = SAMPLES.iloc[:,0]
-SAMPLE_CONDITIONS = read_table(config["metadata"]["samples"])['Condition']
+SAMPLE_IDS = read_table(config["metadata"]["samples"])['ID']
 
 # Design
-DESIGN = read_table(os.path.join(config["dir"]["base"], config["metadata"]["design"]))
-REFERENCE_COND = DESIGN.iloc[:,0]
-TEST_COND = DESIGN.iloc[:,1]
+DESIGN = read_table(config["metadata"]["design"])
+TREATMENT = DESIGN['treatment']
+CONTROL = DESIGN['control']
 
 # Genome & annotations
 GENOME_VER = config["genome"]["version"]
