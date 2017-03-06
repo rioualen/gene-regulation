@@ -162,16 +162,16 @@ include: os.path.join(RULES, "tophat.rules")
 #================================================================#
 
 ## Data import 
-IMPORT = expand(FASTQ_DIR + "{samples}/{samples}_{strand}.fastq", samples=SAMPLE_IDS, strand=STRANDS)
+IMPORT = expand(FASTQ_DIR + "/{samples}/{samples}_{strand}.fastq", samples=SAMPLE_IDS, strand=STRANDS)
 
 ## Graphics & reports
-GRAPHICS = expand(REPORTS_DIR + "{graph}.png", graph=["dag", "rulegraph"])
+GRAPHICS = expand(REPORTS_DIR + "/{graph}.png", graph=["dag", "rulegraph"])
 
 #----------------------------------------------------------------#
 # Quality control
 #----------------------------------------------------------------#
 
-RAW_QC = expand(FASTQ_DIR + "{samples}/{samples}_{strand}_fastqc/{samples}_{strand}_fastqc.html", samples=SAMPLE_IDS, strand=STRANDS)
+RAW_QC = expand(FASTQ_DIR + "/{samples}/{samples}_{strand}_fastqc/{samples}_{strand}_fastqc.html", samples=SAMPLE_IDS, strand=STRANDS)
 QC = RAW_QC
 
 #----------------------------------------------------------------#
@@ -183,10 +183,10 @@ if not (("tools" in config.keys()) and ("trimming" in config["tools"].keys())):
 
 TRIMMING_TOOLS = config["tools"]["trimming"].split()
 
-TRIMMING = expand(SAMPLE_DIR + "{samples}/{samples}_{trimmer}_{strand}", samples=SAMPLE_IDS, trimmer=TRIMMING_TOOLS, strand=STRANDS)
+TRIMMING = expand(SAMPLE_DIR + "/{samples}/{samples}_{trimmer}_{strand}", samples=SAMPLE_IDS, trimmer=TRIMMING_TOOLS, strand=STRANDS)
 TRIM = expand("{trimming}.fastq", trimming=TRIMMING)
 
-TRIM_QC = expand(FASTQ_DIR + "{samples}/{samples}_{trimmer}_{strand}_fastqc/{samples}_{trimmer}_{strand}_fastqc.html", samples=SAMPLE_IDS, trimmer=TRIMMING_TOOLS, strand=STRANDS)
+TRIM_QC = expand(FASTQ_DIR + "/{samples}/{samples}_{trimmer}_{strand}_fastqc/{samples}_{trimmer}_{strand}_fastqc.html", samples=SAMPLE_IDS, trimmer=TRIMMING_TOOLS, strand=STRANDS)
 
 QC = RAW_QC + TRIM_QC
 
@@ -200,7 +200,7 @@ if not (("tools" in config.keys()) and ("mapping" in config["tools"].keys())):
 
 MAPPING_TOOLS = config["tools"]["mapping"].split()
 
-INDEX = expand(GENOME_DIR + "{aligner}/" + GENOME_VER + ".fa", aligner=MAPPING_TOOLS)
+INDEX = expand(GENOME_DIR + "/{aligner}/" + GENOME_VER + ".fa", aligner=MAPPING_TOOLS)
 
 #MAPPING_TOOLS.append("tophat")
 
@@ -209,7 +209,7 @@ if TRIMMING_TOOLS:
 else:
     PREFIX = expand("{aligner}", aligner=MAPPING_TOOLS)
 
-ALIGNMENT=expand(SAMPLE_DIR + "{samples}/{samples}_{prefix}", samples=SAMPLE_IDS, prefix=PREFIX)
+ALIGNMENT=expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}", samples=SAMPLE_IDS, prefix=PREFIX)
 
 MAPPING = expand("{alignment}.bam", alignment=ALIGNMENT)
 
@@ -230,8 +230,8 @@ if not (("tools" in config.keys()) and ("diffexpr" in config["tools"].keys())):
 
 DIFFEXPR_TOOLS = config["tools"]["diffexpr"].split()
 
-#SARTOOLS_TARGETFILE = expand(DEG_DIR + "{prefix}_SARTools_targetfile.txt", prefix=PREFIX)
-#DEG = expand(DEG_DIR + "{deg}/{prefix}_{deg}_report.html", prefix=PREFIX, deg=DIFFEXPR_TOOLS)
+#SARTOOLS_TARGETFILE = expand(DEG_DIR + "/{prefix}_SARTools_targetfile.txt", prefix=PREFIX)
+#DEG = expand(DEG_DIR + "/{deg}/{prefix}_{deg}_report.html", prefix=PREFIX, deg=DIFFEXPR_TOOLS)
 
 
 SARTOOLS_TARGETFILE = expand(DEG_DIR + "/{test}_vs_{ref}/SARTools_targetfile.txt", test=TEST_COND, ref=REFERENCE_COND)
