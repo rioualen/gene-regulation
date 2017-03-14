@@ -99,27 +99,27 @@ if not os.path.exists(READS):
 if not ("results" in config["dir"].keys()):
     sys.exit("The parameter config['dir']['results'] should be specified in the config file.")
 else:
-    RESULTS_DIR = config["dir"]["results"] + "/"
+    RESULTS_DIR = config["dir"]["results"]
 
 if not ("fastq" in config["dir"].keys()):
     sys.exit("The parameter config['dir']['fastq'] should be specified in the config file.")
 else:
-    FASTQ_DIR = config["dir"]["fastq"] + "/"
+    FASTQ_DIR = config["dir"]["fastq"]
 
 if not ("samples" in config["dir"].keys()):
-    SAMPLE_DIR = config["dir"]["results"] + "/"
+    SAMPLE_DIR = config["dir"]["results"]
 else:
-    SAMPLE_DIR = config["dir"]["samples"] + "/"
+    SAMPLE_DIR = config["dir"]["samples"]
 
 if not ("reports" in config["dir"].keys()):
-    REPORTS_DIR = config["dir"]["results"] + "/"
+    REPORTS_DIR = config["dir"]["results"]
 else:
-    REPORTS_DIR = config["dir"]["reports"] + "/"
+    REPORTS_DIR = config["dir"]["reports"]
 
 if not ("diffexpr" in config["dir"].keys()):
-    DEG_DIR = config["dir"]["results"] + "/"
+    DEG_DIR = config["dir"]["results"]
 else:
-    DEG_DIR = config["dir"]["diffexpr"] + "/"
+    DEG_DIR = config["dir"]["diffexpr"]
 
 
 #================================================================#
@@ -161,7 +161,7 @@ include: os.path.join(RULES, "tophat.rules")
 #================================================================#
 
 ## Data import 
-IMPORT = expand(FASTQ_DIR + "/{samples}/{samples}_{strand}.fastq", samples=SAMPLE_IDS, strand=STRANDS)
+#IMPORT = expand(FASTQ_DIR + "/{samples}/{samples}_{strand}.fastq", samples=SAMPLE_IDS, strand=STRANDS)
 
 ## Graphics & reports
 GRAPHICS = expand(REPORTS_DIR + "/{graph}.png", graph=["dag", "rulegraph"])
@@ -256,7 +256,7 @@ DIFFEXPR_TOOLS = config["tools"]["diffexpr"].split()
 SARTOOLS_TARGETFILE = expand(expand(DEG_DIR + "/{test}_vs_{ref}/{{aligner}}_SARTools_targetfile.txt", test=TEST_COND, ref=REFERENCE_COND), aligner=MAPPING_TOOLS)
 DEG = expand(expand(DEG_DIR + "/{test}_vs_{ref}/{{deg}}/{test}_vs_{ref}_{{aligner}}_{{deg}}_report.html", zip, test=TEST_COND, ref=REFERENCE_COND), deg=DIFFEXPR_TOOLS, aligner=MAPPING_TOOLS)
 
-INFER_TRANSCRIPTS = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_cufflinks/transcripts.gtf", samples=SAMPLE_IDS, prefix=PREFIX)
+#INFER_TRANSCRIPTS = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_cufflinks/transcripts.gtf", samples=SAMPLE_IDS, prefix=PREFIX)
 
 
 ## ----------------------------------------------------------------
@@ -275,7 +275,7 @@ rule all:
 	Run all the required analyses.
 	"""
 	input: \
-            IMPORT, \
+#            IMPORT, \
             QC, \
             INDEX, \
             MAPPING, \
@@ -285,7 +285,6 @@ rule all:
             GENOME_COV_TDF, \
             GENOME_COV_PLUS, \
             GENOME_COV_MINUS, \
-            INFER_TRANSCRIPTS, \
             FEATURE_COUNTS, \
             SARTOOLS_TARGETFILE, \
             DEG, \
