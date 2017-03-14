@@ -23,7 +23,7 @@ diffexpr_dir = config["dir"]["diffexpr"]
 
 # Define input files
 def targetfiles_inputs(wildcards):
-    count_files =  expand(sample_dir + "/{samples}/{samples}_{preprocess}featureCounts.txt", samples=sample_ids, preprocess=wildcards.preprocess)
+    count_files =  expand(sample_dir + "/{samples}/{samples}_{preprocess}.txt", samples=sample_ids, preprocess=wildcards.preprocess)
     return count_files
 
 # Rule
@@ -41,7 +41,7 @@ rule sartools_targetfile:
     """
     input: 
         count_files = targetfiles_inputs
-    output: diffexpr_dir + "/{test}_vs_{ref}/{preprocess,.*}SARTools_targetfile.txt"
+    output: diffexpr_dir + "/{test}_vs_{ref}/{preprocess,.*}_SARTools_targetfile.txt"
     params:
         qsub = config["qsub"]\
             + " -e " + diffexpr_dir + "/{test}_vs_{ref}/{preprocess,.*}targetfile_qsub.err"\
