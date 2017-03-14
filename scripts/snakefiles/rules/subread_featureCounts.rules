@@ -70,7 +70,6 @@ rule subread_featureCounts:
     run:
         shell("featureCounts -a {input.gtf} -o {output} {input.bam} -g {params.attr_type} -t {params.feature_type} -s {params.strand_specificity} {params.multi_mapping} &> {log}")
         R("""
-#            setwd("{params.wd}")
             counts <- read.table("{output}", header=TRUE)
             new <- counts[,-which(names(counts) %in% c("Chr", "Start", "End", "Strand", "Length"))]
             write.table(new, file = "{output}", sep="\t", col.names=FALSE, row.names=FALSE)
