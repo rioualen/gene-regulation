@@ -1,4 +1,5 @@
 import sys
+import os
 
 # Set parameters
 if not "qsub" in config.keys():
@@ -49,11 +50,12 @@ rule sartools_targetfile:
     benchmark: diffexpr_dir + "/{test}_vs_{ref}/{preprocess,.*}SARTools_targetfile_benchmark.json"
     run:
 #        sys.stdout = open('{log}', 'w')
+        cwd = os.getcwd()
         f = open(output[0], "w+")
         f.write("label\tfiles\tgroup\n")
         for id in range(len(sample_ids)):
             cond = sample_conditions[id]
-            counts = expand(sample_dir + "/" + sample_ids[id] + "/" + sample_ids[id] + "_{preprocess}featureCounts.txt", preprocess=wildcards.preprocess)
+            counts = expand(cwd + "/" + sample_dir + "/" + sample_ids[id] + "/" + sample_ids[id] + "_{preprocess}featureCounts.txt", preprocess=wildcards.preprocess)
             f.write(sample_ids[id] + "\t" + counts[0] + "\t" + cond + "\n")
         f.close()
 #        sys.stdout.close()
