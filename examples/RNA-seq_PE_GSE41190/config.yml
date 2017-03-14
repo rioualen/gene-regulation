@@ -29,7 +29,7 @@
     reads_source: "data"                                                       # opt
     fastq: "fastq"                                                                 # required
     genome: "genome"                                                          # required. where to store genomes
-    results: "results_RNA-seq"                                                         # required. dir for all result files that are produced by the pipeline
+    results: "results"                                                         # required. dir for all result files that are produced by the pipeline
     gene_regulation: "gene-regulation"                                         # required. location of the snakemake library
 
     samples: "results/samples"                                # optional. will hold sample treatment (trimming, alignment, QC...).    If not mentioned, will be config["dir"]["results"]
