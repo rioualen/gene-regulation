@@ -187,7 +187,6 @@ rule sartools_DESeq2:
         up <- as.vector(read.table(paste("tables/", list.files(path = "tables", pattern = "up.txt$")[1], sep=""))[,1])
         down <- as.vector(read.table(paste("tables/", list.files(path = "tables", pattern = "down.txt$")[1], sep=""))[,1])
 
-#        setwd("{params.baseDir}")
         setwd(baseDir)
 
 
