@@ -39,7 +39,9 @@
   tools:                                                        # required
     trimming: ""
     mapping: "bowtie2"
+    read_counts: "featureCounts"
     diffexpr: "edgeR DESeq2"
+    infer_transcripts: "cufflinks"
 
   fastqc: 
     other_options: ""                                                           # optional (def. empty string)
