@@ -76,8 +76,7 @@ rule sartools_edgeR:
     params:
         wd = "{diffexpr_dir}/{test}_vs_{ref}/edgeR",
         targetFile = "{preprocess,.*}SARTools_targetfile.txt",
-        rawDir = "", #config["dir"]["base"] + "/" + config["dir"]["samples"],
-#        baseDir = config["dir"]["base"],
+        rawDir = "", 
         projectName = "{test}_vs_{ref}_{preprocess,.*}edgeR",
         author = config["author"],
         featuresToRemove = config["edgeR"]["featuresToRemove"],

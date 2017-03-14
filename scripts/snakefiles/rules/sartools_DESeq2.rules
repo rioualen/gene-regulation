@@ -84,8 +84,7 @@ rule sartools_DESeq2:
     params:
         wd = "{diffexpr_dir}/{test}_vs_{ref}/DESeq2",
         targetFile = "{preprocess,.*}SARTools_targetfile.txt",
-        rawDir = "", #config["dir"]["base"] + "/" + config["dir"]["samples"],
-#        baseDir = config["dir"]["base"],
+        rawDir = "",
         projectName = "{test}_vs_{ref}_{preprocess,.*}DESeq2",
         author = config["author"],
         featuresToRemove = config["DESeq2"]["featuresToRemove"],
