@@ -57,7 +57,6 @@ rule subread_featureCounts:
         gtf = os.path.join(config["dir"]["genome"], config["genome"]["gtf_file"])
     output: "{reads}_featureCounts.txt"          ## _" + config["subread-featureCounts"]["feature_type"] + "
     params:
-#        wd = config["dir"]["base"],
         attr_type = config["subread-featureCounts"]["attr_type"], 
         feature_type = config["subread-featureCounts"]["feature_type"], 
         multi_mapping = config["subread-featureCounts"]["multi_mapping"], 
