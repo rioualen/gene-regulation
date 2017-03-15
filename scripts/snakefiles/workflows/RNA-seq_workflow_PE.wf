@@ -153,6 +153,7 @@ include: os.path.join(RULES, "sickle.rules")
 include: os.path.join(RULES, "sra_to_fastq_split.rules")
 include: os.path.join(RULES, "subread_align.rules")
 include: os.path.join(RULES, "subread_featureCounts.rules")
+include: os.path.join(RULES, "subread_featureCounts_all.rules")
 include: os.path.join(RULES, "subread_index.rules")
 include: os.path.join(RULES, "tophat.rules")
 
@@ -223,25 +224,14 @@ GENOME_COV_BW   = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}.bw", sample
 GENOME_COV_PLUS = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_plus_strand.bedgraph", samples=SAMPLE_IDS, prefix=PREFIX) 
 GENOME_COV_MINUS= expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_minus_strand.bedgraph", samples=SAMPLE_IDS, prefix=PREFIX) 
 
-
-#ALIGNMENT=expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}", samples=SAMPLE_IDS, prefix=PREFIX)
-
-#MAPPING = expand("{alignment}.bam", alignment=ALIGNMENT)
-
-#SORTED_BAM = expand("{alignment}_sorted_pos.bam", alignment=ALIGNMENT)
-#SORTED_BAM_BAI = expand("{alignment}_sorted_pos.bam.bai", alignment=ALIGNMENT)
-#BAM_STATS = expand("{alignment}_bam_stats.txt", alignment=ALIGNMENT)
-
 #----------------------------------------------------------------#
 # Counting features
 #----------------------------------------------------------------#
 
-
 COUNTING_TOOLS = config["tools"]["read_counts"].split()
-FEATURE_COUNTS_PER_SAMPLE = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_{read_counts}.txt", samples=SAMPLE_IDS, prefix=PREFIX, read_counts=COUNTING_TOOLS) ##, feature_type=} , feature=config["subread-featureCounts"]["feature_type"])
-#ALL_FEATURE_COUNTS = 
-
-
+FEATURE_COUNTS_PER_SAMPLE   = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_{read_counts}.txt", samples=SAMPLE_IDS, prefix=PREFIX, read_counts=COUNTING_TOOLS) ##, feature_type=} , feature=config["subread-featureCounts"]["feature_type"])
+ALL_FEATURE_COUNTS          = expand(DEG_DIR + "/{prefix}_{read_counts}_all.txt", prefix=PREFIX, read_counts=COUNTING_TOOLS) ##, feature_type=} , feature=config["subread-featureCounts"]["feature_type"])
+#ALL_FEATURE_COUNTS          = expand(DEG_DIR + "/bowtie2_featureCounts_all.txt") ##, prefix=PREFIX, read_counts=COUNTING_TOOLS) ##, feature_type=} , feature=config["subread-featureCounts"]["feature_type"])
 #----------------------------------------------------------------#
 # DEG analysis
 #----------------------------------------------------------------#
@@ -252,9 +242,7 @@ if not (("tools" in config.keys()) and ("diffexpr" in config["tools"].keys())):
 DIFFEXPR_TOOLS = config["tools"]["diffexpr"].split()
 
 SARTOOLS_TARGETFILE = expand(expand(DEG_DIR + "/{test}_vs_{ref}/{{aligner}}_{{read_counts}}_SARTools_targetfile.txt", test=TEST_COND, ref=REFERENCE_COND), aligner=MAPPING_TOOLS, read_counts=COUNTING_TOOLS)
-DEG = expand(expand(DEG_DIR + "/{test}_vs_{ref}/{{deg}}/{test}_vs_{ref}_{{aligner}}_{{deg}}_report.html", zip, test=TEST_COND, ref=REFERENCE_COND), deg=DIFFEXPR_TOOLS, aligner=MAPPING_TOOLS)
-
-
+DEG = expand(expand(DEG_DIR + "/{test}_vs_{ref}/{{deg}}/{test}_vs_{ref}_{{aligner}}_{{read_counts}}_{{deg}}_report.html", zip, test=TEST_COND, ref=REFERENCE_COND), deg=DIFFEXPR_TOOLS, aligner=MAPPING_TOOLS, read_counts=COUNTING_TOOLS)
 
 #----------------------------------------------------------------#
 # Transcripts search
@@ -262,8 +250,6 @@ DEG = expand(expand(DEG_DIR + "/{test}_vs_{ref}/{{deg}}/{test}_vs_{ref}_{{aligne
 
 TRANSCRIPTS_TOOLS = config["tools"]["infer_transcripts"].split()
 INFER_TRANSCRIPTS = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_{infer_transcripts}/transcripts.gtf", samples=SAMPLE_IDS, prefix=PREFIX, infer_transcripts=TRANSCRIPTS_TOOLS)
-
-
 
 #================================================================#
 #                        Rule all                                #
@@ -285,6 +271,7 @@ rule all:
             GENOME_COV_PLUS, \
             GENOME_COV_MINUS, \
             FEATURE_COUNTS_PER_SAMPLE, \
+            ALL_FEATURE_COUNTS, \
             SARTOOLS_TARGETFILE, \
             DEG, \
 #            INFER_TRANSCRIPTS, \
