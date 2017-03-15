@@ -41,13 +41,13 @@ rule sartools_targetfile:
     """
     input: 
         count_files = targetfiles_inputs
-    output: diffexpr_dir + "/{test}_vs_{ref}/{preprocess,.*}_SARTools_targetfile.txt"
+    output: diffexpr_dir + "/{test}_vs_{ref}/{preprocess}_SARTools_targetfile.txt"
     params:
         qsub = config["qsub"]\
-            + " -e " + diffexpr_dir + "/{test}_vs_{ref}/{preprocess,.*}targetfile_qsub.err"\
-            + " -o " + diffexpr_dir + "/{test}_vs_{ref}/{preprocess,.*}targetfile_qsub.out"
-    log: diffexpr_dir + "/{test}_vs_{ref}/{preprocess,.*}SARTools_targetfile.log"
-    benchmark: diffexpr_dir + "/{test}_vs_{ref}/{preprocess,.*}SARTools_targetfile_benchmark.json"
+            + " -e " + diffexpr_dir + "/{test}_vs_{ref}/{preprocess}_targetfile_qsub.err"\
+            + " -o " + diffexpr_dir + "/{test}_vs_{ref}/{preprocess}_targetfile_qsub.out"
+    log: diffexpr_dir + "/{test}_vs_{ref}/{preprocess}_SARTools_targetfile.log"
+    benchmark: diffexpr_dir + "/{test}_vs_{ref}/{preprocess}_SARTools_targetfile_benchmark.json"
     run:
 #        sys.stdout = open('{log}', 'w')
         cwd = os.getcwd()
@@ -55,7 +55,7 @@ rule sartools_targetfile:
         f.write("label\tfiles\tgroup\n")
         for id in range(len(sample_ids)):
             cond = sample_conditions[id]
-            counts = expand(cwd + "/" + sample_dir + "/" + sample_ids[id] + "/" + sample_ids[id] + "_{preprocess}featureCounts.txt", preprocess=wildcards.preprocess)
+            counts = expand(cwd + "/" + sample_dir + "/" + sample_ids[id] + "/" + sample_ids[id] + "_{preprocess}.txt", preprocess=wildcards.preprocess)
             f.write(sample_ids[id] + "\t" + counts[0] + "\t" + cond + "\n")
         f.close()
 #        sys.stdout.close()
