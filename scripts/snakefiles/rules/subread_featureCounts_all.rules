@@ -1,0 +1,94 @@
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "gtf_file" in config["genome"].keys():
+    sys.exit("GTF file must be defined in the config file")
+
+if not "genome" in config["dir"].keys():
+    sys.exit("Genome directory must be defined in the config file")
+
+#if not "base" in config["dir"].keys():
+#    sys.exit("Dir base must be defined in the config file")
+
+if not "subread-featureCounts" in config.keys():
+    config["subread-featureCounts"] = {}
+
+if not "attr_type" in config["subread-featureCounts"].keys():
+    config["subread-featureCounts"]["attr_type"] = "gene_id"
+
+if not "feature_type" in config["subread-featureCounts"].keys():
+    config["subread-featureCounts"]["feature_type"] = "exon"
+
+if not "multi_mapping" in config["subread-featureCounts"].keys():
+    config["subread-featureCounts"]["multi_mapping"] = ""
+
+if not "strand_specificity" in config["subread-featureCounts"].keys():
+    config["subread-featureCounts"]["strand_specificity"] = "0"
+
+## Define input files
+def featureCounts_inputs(wildcards):
+    sample_ids = read_table(config["metadata"]["samples"])["ID"]
+    bam_files =  expand(SAMPLE_DIR + "/{samples}/{samples}_{preprocess}_sorted_pos.bam", samples=sample_ids, preprocess=wildcards.preprocess)
+    return bam_files
+
+##samples = read_table(os.path.join(config["dir"]["base"], config["metadata"]["samples"]))
+#sample_ids = read_table(config["metadata"]["samples"])['ID']
+#sample_conditions = read_table(config["metadata"]["samples"])['Condition']
+
+#sample_dir = config["dir"]["samples"]
+#diffexpr_dir = config["dir"]["diffexpr"]
+
+## Define input files
+#def targetfiles_inputs(wildcards):
+#    count_files =  expand(sample_dir + "/{samples}/{samples}_{preprocess}.txt", samples=sample_ids, preprocess=wildcards.preprocess)
+#    return count_files
+
+diffexpr_dir = config["dir"]["diffexpr"]
+
+# Rule
+rule subread_featureCounts_all:
+    """featureCounts from the subread toolkit. 
+
+    Required parameters:
+        config["qsub"]
+        config["dir"]["genome"]
+        config["genome"]["gtf_file"]
+
+    Optional parameters:
+        config["subread-featureCounts"]["attr_type"]
+        config["subread-featureCounts"]["feature_type"]
+        config["subread-featureCounts"]["multi_mapping"]
+        config["subread-featureCounts"]["strand_specificity"]
+
+    Usage: 
+        Usage: featureCounts [options] -a <annotation_file> -o <output_file> input_file1 [input_file2] ... 
+
+    Copyright Jacques van Helden, Claire Rioualen
+    """
+    input: 
+        bam = featureCounts_inputs,
+        gtf = os.path.join(config["dir"]["genome"], config["genome"]["gtf_file"])
+    output: 
+        featureCounts_output = diffexpr_dir + "/{preprocess}_featureCounts_all.tab",
+        twocol_output = diffexpr_dir + "/{preprocess}_featureCounts_all.txt"          ## _" + config["subread-featureCounts"]["feature_type"] + "
+    params:
+        attr_type = config["subread-featureCounts"]["attr_type"], 
+        feature_type = config["subread-featureCounts"]["feature_type"], 
+        multi_mapping = config["subread-featureCounts"]["multi_mapping"], 
+        strand_specificity = config["subread-featureCounts"]["strand_specificity"], 
+        qsub = config["qsub"]\
+            + " -e " + diffexpr_dir + "/{preprocess}_featureCounts_qsub.err"\
+            + " -o " + diffexpr_dir + "/{preprocess}_featureCounts_qsub.out"
+    log: diffexpr_dir + "/{preprocess}_featureCounts.log"
+    benchmark: diffexpr_dir + "/{preprocess}_featureCounts_benchmark.json"
+    run:
+        shell("featureCounts -a {input.gtf} -o {output.featureCounts_output} {input.bam} -g {params.attr_type} -t {params.feature_type} -s {params.strand_specificity} {params.multi_mapping} &> {log}")
+        R("""
+            counts <- read.table("{output.featureCounts_output}", header=TRUE)
+            new <- counts[,-which(names(counts) %in% c("Chr", "Start", "End", "Strand", "Length"))]
+            write.table(new, file = "{output.twocol_output}", sep="\t", col.names=TRUE, row.names=FALSE, quote=FALSE)
+        """)
+
+
+
