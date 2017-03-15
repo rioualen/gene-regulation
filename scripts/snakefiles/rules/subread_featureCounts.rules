@@ -55,7 +55,9 @@ rule subread_featureCounts:
     input: 
         bam = "{reads}_sorted_pos.bam",
         gtf = os.path.join(config["dir"]["genome"], config["genome"]["gtf_file"])
-    output: "{reads}_featureCounts.txt"          ## _" + config["subread-featureCounts"]["feature_type"] + "
+    output: 
+        featureCounts_output = "{reads}_featureCounts.tab",
+        twocol_output = "{reads}_featureCounts.txt"          ## _" + config["subread-featureCounts"]["feature_type"] + "
     params:
         attr_type = config["subread-featureCounts"]["attr_type"], 
         feature_type = config["subread-featureCounts"]["feature_type"], 
@@ -67,11 +69,11 @@ rule subread_featureCounts:
     log: "{reads}_featureCounts.log"
     benchmark: "{reads}_featureCounts_benchmark.json"
     run:
-        shell("featureCounts -a {input.gtf} -o {output} {input.bam} -g {params.attr_type} -t {params.feature_type} -s {params.strand_specificity} {params.multi_mapping} &> {log}")
+        shell("featureCounts -a {input.gtf} -o {output.featureCounts_output} {input.bam} -g {params.attr_type} -t {params.feature_type} -s {params.strand_specificity} {params.multi_mapping} &> {log}")
         R("""
-            counts <- read.table("{output}", header=TRUE)
+            counts <- read.table("{output.featureCounts_output}", header=TRUE)
             new <- counts[,-which(names(counts) %in% c("Chr", "Start", "End", "Strand", "Length"))]
-            write.table(new, file = "{output}", sep="\t", col.names=FALSE, row.names=FALSE)
+            write.table(new, file = "{output.twocol_output}", sep="\t", col.names=FALSE, row.names=FALSE, quote=FALSE)
         """)
 
 
