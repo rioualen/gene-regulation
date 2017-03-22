@@ -1,3 +1,36 @@
+#' @title check required libraries for DEG analysis, and install them if required
+#' @author Jacques van Helden (\email{Jacques.van-Helden@@univ-amu.fr})
+#' @param required.libraries a vector contianing the names of required CRAN libraries, which will be installed with install.packages()
+#' @param required.bioconductor a vector containing the required BioConductor libraries, which will be installed with biocLite
+CheckRequiredLibraries <- function (required.libraries, required.bioconductor=NULL) {
+  for (lib in required.libraries) {
+    if (!require(lib, character.only = TRUE)) {
+      install.packages(lib)
+      library(lib, character.only = TRUE)
+    }
+  }
+  
+  for (lib in required.bioconductor) {
+    if (!require(lib, character.only = TRUE)) {
+      ## try http:// if https:// URLs are not supported
+      source("https://bioconductor.org/biocLite.R")
+      biocLite(lib)
+    }
+    if (!require(lib, character.only = TRUE)) {
+      stop("Missing library: ", lib, " could not be installed")
+    }
+  }
+  
+}
+
+#' @title Load parameters and required libraries
+#' @author Jacques van Helden (\email{Jacques.van-Helden@@univ-amu.fr})
+LoadDEGparam <- function (yamlFile) {
+  library(yaml)
+  data -> yaml.load_file("vn.yamloo")
+}
+
+
 #' @title Display messages at a given verbosity level
 #'
 #' @author Jacques van Helden (\email{Jacques.van-Helden@@univ-amu.fr})
@@ -584,6 +617,7 @@ libsize.barplot <- function(stats.per.sample,
 ## Draw boxplots with read counts per genes for each sample
 count.boxplot <- function(count.table, 
                           sample.desc,
+                          sample.label.col=1,
                           xlab="Raw counts",
                           main="Box plots per sample: raw counts",
                           plot.file=NULL) {
@@ -614,14 +648,9 @@ count.correl.heatmap <- function(count.table,
                                  main="Correlation between raw counts",
                                  plot.file=NULL,
                                  log.transform=FALSE, # Perform a log transformation of the values before plotting
-                                 epsilon=0.01, # Add an epsilon to zero values before log transformation, in order to -Inf values
+                                 epsilon=0.1, # Add an epsilon to zero values before log transformation, in order to -Inf values
                                  ...
                                  ) {
-  
-  ## Define a color palette for heatmaps. I like this Red-Blue palette because 
-  ## - it suggests a subjective feeling of warm (high correlation)/cold (low correlation)
-  ## - it can be seen by people suffering from red–green color blindness.
-  cols.heatmap <- rev(colorRampPalette(brewer.pal(9,"RdBu"))(100))
   
   
   ## Adapt boxplot size to the number of samples and label sizes
@@ -634,15 +663,25 @@ count.correl.heatmap <- function(count.table,
   }
   count.cor <- as.matrix(cor(count.table))
   
+  ## Define a color palette for heatmaps. I like this Red-Blue palette because 
+  ## - it suggests a subjective feeling of warm (high correlation)/cold (low correlation)
+  ## - it can be seen by people suffering from red–green color blindness.
+  cols.heatmap <- rev(colorRampPalette(brewer.pal(9,"RdBu"))(100))
+  
+  ## Use a grayscale color  
+#
+  cols.heatmap <- gray.colors(100, start = 1, end = 0, gamma = 3, alpha = NULL)
+
   ## Sample-wise library sizes
   if (!is.null(plot.file)) {
     message("Generating plot", plot.file)
     pdf(file=plot.file, width=8, height=boxplot.height)
   }
   
-  hm <- heatmap.2(count.cor,  scale="none", trace="none", breaks=seq(-1,1,length.out = 101),
+  hm <- heatmap.2(count.cor,  scale="none", trace="none", 
+                  #breaks=c(-1, seq(0,1,length.out = 100)),
                   main=main, margins=c(margin,margin),
-                  col=cols.heatmap, 
+                  col=cols.heatmap,
                   cellnote = signif(digits=2, count.cor),
                   ...
                   )
