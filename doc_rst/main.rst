@@ -35,6 +35,37 @@ a few workflow examples for standard ChIP-seq and RNA-seq analyses.
 **A tutorial on Snakemake** basic usage is available in the doc section:
 ```doc/snakemake_tutorial`` <doc/snakemake_tutorial>`__.
 
+
+User guide and reference
+###########################
+
+
+.. toctree::
+    :numbered:
+    :maxdepth: 2
+
+    installation.rst
+    userguide
+    tutorial
+    pipelines
+    auto_examples/index
+    case_examples
+    developers
+    applications
+    references
+    faqs
+    Changelog
+    glossary
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
+
 Workflow example
 ================
 
