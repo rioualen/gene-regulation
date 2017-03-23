@@ -10,9 +10,12 @@ rule gunzip:
     Copyright Jacques van Helden
     """
     input: "{file}.gz"
+#    input: "{file}.fastq.gz"
+#    output: "{file}.fastq"
+#    output: "{file,((?!\.gz)$)}"
     output: "{file}"
     params: qsub = config["qsub"] + " -e {file}_gunzip_qsub.err -o {file}_gunzip_qsub.out"
     log: "{file}_gunzip.log"
     benchmark: "{file}_gunzip_benchmark.json"
-    shell:"gunzip {input} --keep 2> {log} "
+    shell:"gunzip {input} 2> {log} "
 
