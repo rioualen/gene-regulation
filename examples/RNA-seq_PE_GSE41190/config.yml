@@ -8,7 +8,7 @@
   qsub: "-V -m a -d ."  # qsub options, which should be adapted to the local configuration
   genome:
     organism: "Escherichia coli K12 MG1655"
-    version: "Ecoli_K12"                                                          # required. has to match genome filenames and directories
+    version: "Ecoli_K12"
     size: "4639221"
     fasta_file: "Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.1.21.dna.genome.fa"
     gff3_file: "Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.1.21.gff3"
@@ -25,7 +25,6 @@
     strands: "1 2"
 
   dir:
-    base: "/data/analyses/RNA-seq_PE_GSE41190"                                                                   # required. all paths are determined relatively to this directory. See documentation to know more about the file organization.
     reads_source: "data"                                                       # opt
     fastq: "fastq"                                                                 # required
     genome: "genome"                                                          # required. where to store genomes
@@ -37,14 +36,14 @@
     reports: "results/reports"                                # optional. will hold reports and graphics.                             If not mentioned, will be config["dir"]["results"]
 
   tools:                                                        # required
-    trimming: ""
+    trimming: "sickle"
     mapping: "bowtie2"
     read_counts: "featureCounts"
     diffexpr: "edgeR DESeq2"
     infer_transcripts: "cufflinks"
 
   fastqc: 
-    other_options: ""                                                           # optional (def. empty string)
+    other_options: ""
 
   sickle:
     threshold: "20"                                                             # ... 
