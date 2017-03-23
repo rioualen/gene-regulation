@@ -144,3 +144,27 @@ References
 
 1. Köster, Johannes and Rahmann, Sven. "Snakemake - A scalable
    bioinformatics workflow engine". Bioinformatics 2012.
+
+
+
+User guide and reference
+###########################
+
+
+.. toctree::
+    :numbered:
+    :maxdepth: 2
+
+    getting_started.rst
+    snakemake.rst
+    dependencies.rst
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
+
