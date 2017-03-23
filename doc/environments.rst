@@ -1,7 +1,8 @@
 1. IFB
+-----------
 
-Table of Contents
-=================
+Table of Contents (to be removed)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `IFB cloud utilities <#ifb-cloud-utilities>`__
 
@@ -28,7 +29,7 @@ Table of Contents
    -  `Software installation <#software-installation>`__
 
 IFB cloud utilities
-===================
+~~~~~~~~~~~~~~~~~~~~
 
 .. figure:: ../../img/ifb-logo.png
    :alt: 
@@ -59,7 +60,7 @@ useful links:
 -  `Documentation <http://www.france-bioinformatique.fr/en/cloud/doc-du-cloud>`__
 
 User account creation & configuration
--------------------------------------
+**************************************
 
 -  Using the IFB cloud facilities requires to have a user account.
    Register
@@ -77,10 +78,10 @@ User account creation & configuration
    :alt: 
 
 Using an existing appliance
-===========================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Virtual disk creation
----------------------
+***********************
 
 Appliances usually have a limited amount of disk space (up to 10, 20Go).
 If the instance to be run necessitates disk space, you have to create a
@@ -98,7 +99,7 @@ access data on this disk through SSH.
    :alt: 
 
 Creation of an instance
------------------------
+**************************
 
 1. Click *New Instance* button.
 2. Choose an appliance in the drop-down menu. You may use the filter
@@ -124,10 +125,10 @@ Creation of an instance
    in the *Access* column.
 
 Creation of an appliance
-========================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Creation
---------
+*************
 
 Creating your own appliance can be as simple as instantiating an
 existing one.
@@ -159,16 +160,16 @@ existing one.
        ssh -A -p 22 root@192.54.201.111
 
 Configuration (optional)
-------------------------
+***************************
 
 User account
-~~~~~~~~~~~~
+^^^^^^^^^^^^^^
 
 Create user account and grant it sudo privileges (followed procedure
 `here <https://www.digitalocean.com/community/tutorials/how-to-add-and-delete-users-on-an-ubuntu-14-04-vps>`__).
 
 Shell coloring
-~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^
 
 ::
 
@@ -188,16 +189,16 @@ Fetch following paragraph and uncomment command ``force-color``.
     source ~/.bashrc
 
 Data management
----------------
+**********************
 
 Virtual disk
-~~~~~~~~~~~~
+^^^^^^^^^^^^
 
 By default, if a vDisk has been attached to the VM, it is mounted under
 ``/root/mydisk``.
 
 Transfers
-~~~~~~~~~
+^^^^^^^^^
 
 You can transfer data from your local computer to the VM using commands
 provided under *Access* > ssh:
@@ -214,10 +215,10 @@ Another way is to use rsync:
     rsync -ruptvl ${localfile} root@192.54.201.177:/root/mydisk/
 
 Then...
-=======
+~~~~~~~~~~~~~
 
 Software installation
----------------------
+**************************
 
 Once you're connected to the VM through ``ssh``, you can install any
 program just the way you would do it locally (see tutorials in `this
@@ -267,10 +268,10 @@ toc\_depth: 4 --- -->
     The protocol is based on gene-regulation v2.0
 
 1. Using the Gene-regulation appliance
-======================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1.1 Requirements
-----------------
+************************
 
 **User account creation & configuration**
 
@@ -287,7 +288,7 @@ toc\_depth: 4 --- -->
    through the dashboard.
 
 1.2 Virtual disk creation
--------------------------
+****************************
 
 Appliances usually have a limited amount of disk space (up to 10, 20Go).
 If the instance to be run necessitates disk space, you have to create a
@@ -310,7 +311,7 @@ access data on this disk through SSH.
    <!--\includegraphics[width=250pt]{img/vdisk-x2go.png}-->
 
 1.3 Creation of an instance
----------------------------
+****************************
 
 1. Click *New Instance* button.
 2. Choose appliance "Gene regulation 2.0" in the drop-down menu.
@@ -329,7 +330,7 @@ access data on this disk through SSH.
    :alt: 
 
 1.4 Connection to the device
-----------------------------
+*********************************
 
 Open a terminal on your host computer and type in:
 
@@ -338,7 +339,7 @@ Open a terminal on your host computer and type in:
     ssh -A -p 22 root@192.54.201.124
 
 1.5 Download source data
-------------------------
+****************************
 
 On the IFB cloud VM, the vDisk is automatically attached and mounted by
 default under ``/root/mydisk``, or ``~/mydisk``.
@@ -365,7 +366,7 @@ Here we create a folder to store the source data files and download them
     ln -s ${HOME}/gene-regulation-2.0 gene-regulation
 
 Download data
-~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^
 
 .. raw:: html
 
@@ -377,7 +378,7 @@ Download data
     wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra -P ${ANALYSIS_DIR}/data/GSM521935
 
 Download reference genome & annotations
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -392,7 +393,7 @@ You should now have something like this:
    :alt: 
 
 1.6 Run the workflow
---------------------
+***********************
 
 You can use the option ``-n`` to make a dry run.
 
@@ -413,10 +414,10 @@ Congratulations! You just executed this wonderful workflow:
    :alt: 
 
 2. Visualizing results
-======================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 2.1 Install and run the X2Go client on your host computer
----------------------------------------------------------
+************************************************************
 
 The Virtual Machine created on the IFB cloud doesn't have a graphical
 interface, but it contains the X2GO software. We're gonna use it to
@@ -461,7 +462,7 @@ Note: you may need to change your keyboard settings
 -  Add and/or remove desired keyboards
 
 2.2 Visualize results
----------------------
+*************************
 
 The result files should be organized like this:
 
@@ -469,7 +470,7 @@ The result files should be organized like this:
    :alt: 
 
 FastQC
-~~~~~~
+^^^^^^
 
 You can visualize the FastQC results using firefox or any other
 navigator. Fetch the ``html`` files located in the sample directories.
@@ -492,7 +493,7 @@ navigator. Fetch the ``html`` files located in the sample directories.
    :alt: 
 
 IGV
-~~~
+^^^^^^
 
 You can visualize the peaks by running IGV from the terminal.
 
@@ -515,7 +516,7 @@ You can visualize the peaks by running IGV from the terminal.
    :alt: 
 
 3. Create your own Gene-regulation appliance
-============================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Creating a new appliance from scratch is very similar to using one. You
 have to satisfy the requirements described in part 1.1.
@@ -524,7 +525,7 @@ If you want to manipulate data, you should also create a vDisk following
 step 1.2.
 
 Creation of an instance
------------------------
+****************************
 
 When creating a new instance choose a 10 Go Ubuntu appliance and check
 the "Create appliance" option:
@@ -550,12 +551,12 @@ The new instance should appear in orange bold fonts in the dashboard.
 You can connect to the instance through ``ssh`` as shown in part 1.4.
 
 Installing programs and dependencies
-====================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~éé
 
 Once in the virtual machine, you can install the required programs.
 
 Get the ``gene-regulation`` repository
---------------------------------------
+*******************************************
 
 ::
 
@@ -563,7 +564,7 @@ Get the ``gene-regulation`` repository
     tar zvxf 2.0.tar.gz
 
 Run makefile to install the dependencies
-----------------------------------------
+********************************************
 
 This may take a while (up to 30mn-1h) & source the ``.bashrc`` in order
 to update the ``$PATH`` accordingly.
@@ -588,6 +589,7 @@ other users on the IFB cloud, you should contact an admin: @?
 
 
 2. DOCKER
+-------------
 
 <!-- output: html\_document: fig\_caption: yes highlight: zenburn
 number\_sections: yes theme: cerulean toc: yes toc\_depth: 5
@@ -610,15 +612,15 @@ yes toc: yes toc\_depth: 5 --- -->
     Note: this is a first draft. Tested in Ubuntu 14.04 64bits version.
 
 Get started with Docker!
-========================
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Create a Docker account
------------------------
+************************
 
 Instructions `here <https://docs.docker.com/linux/step_five/>`__.
 
 Install Docker on your local host
----------------------------------
+***************************************
 
 Instructions for a linux install can be found
 `here <https://docs.docker.com/linux/>`__, along with mac and windows
@@ -667,7 +669,7 @@ Switch back to azerty:
 -->
 
 Create shared repositories and download source data
----------------------------------------------------
+*******************************************************
 
 In order to execute the study case GSE20870, you should enter the
 following commands:
@@ -687,7 +689,7 @@ following commands:
     wget -nc ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra -P data/GSM521935
 
 Fetch the Docker image and run it with shared folders
------------------------------------------------------
+********************************************************
 
 ::
 
@@ -698,7 +700,7 @@ You can share as many folders as desired, using this syntax:
 ``-v /path/on/host/:/path/on/docker/``.
 
 Execute the pipeline
---------------------
+***********************
 
 ::
 
@@ -707,32 +709,31 @@ Execute the pipeline
 <!-- # JVH / Mac
 
 Quick tour
-----------
+**************
 
 On Mac OSX
 
 1. Install docker
-~~~~~~~~~~~~~~~~~
 
 ::
 
         https://docs.docker.com/engine/installation/mac/
 
 2. Open the application Docker Quickstart Terminal. This open a new terminal window and launches the docker daemon.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 3. Get the gene-regulation docker
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 docker pull rioualen/gene-regulation:0.3
 
 4. Check the list of docker images available locally
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 docker images
 
 5. Start the gene-regulation image. The option ``-it`` specifies the interactive mode, which is necessary to be able using this VM
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 ::
 
@@ -747,7 +748,7 @@ rights. You can check this easily:
     whoami
 
 6. Check the disks available on this docker
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 ::
 
@@ -758,7 +759,7 @@ the VM. **Beware**: any data stored on this local disk will be lost when
 you shut down the gene-regulation docker.
 
 7. Exit and get back to your gene-regulation container
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 If you exits your shell session, the docker will still be running.
 
@@ -787,7 +788,7 @@ where ``[CONTAINER_IDR]`` must be replaced by the actual ID of the
 running docker container (e.g. ``faff5298ef95``).
 
 8. Shutting down the container
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 We will now shut down this image, and start a new one which will enable
 you to store persistent data.
@@ -797,7 +798,7 @@ you to store persistent data.
     docker stop [CONTAINER_ID]
 
 9. Starting a docker container with a shared folder.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 500 docker pull rioualen/gene-regulation:0.3 501 mkdir -p
 ~/gene-regulation\_data/GSE20870/GSM521934
@@ -812,7 +813,7 @@ rioualen/gene-regulation:0.3 509 docker run -v
 ~/gene-regulation\_data:/data -it rioualen/gene-regulation:0.3 /bin/bash
 
 10. Running the snakemake demo workflow on the docker container
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 ::
 
@@ -829,7 +830,7 @@ rioualen/gene-regulation:0.3 509 docker run -v
 10 snakemake -s scripts/snakefiles/workflows/factor\_workflow.py -p
 
 Questions
----------
+***********
 
 1. Quand on fait un login dans la vm gene--regulation, on entre dans un
    shell basique (pas bash). Est-il possible de configurer docker pour
@@ -843,16 +844,9 @@ Entry point /bin/bash
 
 
 
-3. DOCKER
+3. VBOX
+--------
 
-<!--
-====
-
-title: "Running the gene-regulation pipelines with VirtualBox" author:
-"Claire Rioualen" date: "April 25, 2016" output: html\_document:
-fig\_caption: yes highlight: zenburn number\_sections: yes theme:
-cerulean toc: yes toc\_depth: 5 pdf\_document: fig\_caption: yes
-highlight: zenburn number\_sections: yes toc: yes toc\_depth: 5 --- -->
 
 -  `Creating a virtual machine (VM) <#creating-a-virtual-machine-vm>`__
 
@@ -895,13 +889,13 @@ highlight: zenburn number\_sections: yes toc: yes toc\_depth: 5 --- -->
     v2.0
 
 Creating a virtual machine (VM)
-===============================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Creating a VM under VirtualBox software
----------------------------------------
+********************************************
 
 Requirements
-~~~~~~~~~~~~
+^^^^^^^^^^^^^
 
 **Virtualbox software**
 
@@ -928,10 +922,10 @@ version.
 
     wget http://releases.ubuntu.com/14.04/ubuntu-14.04.4-desktop-amd64.iso
 
---------------
+
 
 Virtual Box configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Before configuring the virtual machine, we need to tell VirtualBox how
 it will enable your local virtual machines to interact with their host
@@ -971,7 +965,7 @@ it will enable your local virtual machines to interact with their host
    :alt: 
 
 Creation of the virtual machine
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 1. Open VirtualBox
 
@@ -1025,7 +1019,7 @@ At this stage, the VM has been created and needs to be configured before
 installing the operating system.
 
 VM configuration
-~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^
 
 In the VirtualBox main window, select the newly created virtual machine,
 and click on the **Settings** button.
@@ -1091,7 +1085,7 @@ access (e.g. using an ethernet card + wi-fi connection).
    <!-- This can raise several errors, if so see dedicated section below.  -->
 
 Operating system installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 -  Welcome
 
@@ -1132,13 +1126,13 @@ host and guest and improve the interactive performance of guest systems.
 Reboot again to see the new display.
 
 Installing programs and dependencies
-====================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Once in the virtual machine, you can install the required programs from
 a terminal.
 
 Get the ``gene-regulation`` repository
---------------------------------------
+****************************************
 
 ::
 
@@ -1152,7 +1146,7 @@ Get the ``gene-regulation`` repository
     git clone https://github.com/rioualen/gene-regulation.git
 
 Run makefile to install all required dependencies
--------------------------------------------------
+**************************************************
 
 This may take a while (30mn to 1h) & source the ``.bashrc`` (it's been
 updated with the ``$PATH`` for newly installed applications).
@@ -1165,7 +1159,7 @@ updated with the ``$PATH`` for newly installed applications).
     source ~/.bashrc
 
 Executing snakemake workflow example
-====================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -1205,10 +1199,10 @@ Congratulations! You just executed this wonderful workflow:
    :alt: 
 
 Visualizing results
-===================
+~~~~~~~~~~~~~~~~~~~~~~
 
 FastQC
-------
+********
 
 You can visualize the FastQC results using firefox or any other
 navigator. Fetch the ``html`` files located in the sample directories.
@@ -1231,7 +1225,7 @@ navigator. Fetch the ``html`` files located in the sample directories.
    :alt: 
 
 IGV
----
+******
 
 You can visualize the peaks by running IGV from the terminal.
 
@@ -1247,7 +1241,7 @@ You can visualize the peaks by running IGV from the terminal.
    :alt: 
 
 Export appliance (todo)
-=======================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The virtual machine created with VirtualBox can be exported and saved as
 an appliance.
@@ -1281,7 +1275,7 @@ The appliance saved can be re-imported later on, on another computer if
 needed.
 
 Import appliance (todo)
-=======================
+~~~~~~~~~~~~~~~~~~~~~~~
 
 In VirtualBox, click menu File > Import appliance > fetch OVA file.
 
@@ -1297,3 +1291,4 @@ VM.
 
 
 4. CONDA
+---------
