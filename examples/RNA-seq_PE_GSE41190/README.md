@@ -30,6 +30,7 @@ git clone https://github.com/rioualen/gene-regulation.git
 ```
 
 ## Download data
+<!-- Old data (still downloadable)
 ```
 mkdir -p ${ANALYSIS_DIR}/data/GSM1010244 ${ANALYSIS_DIR}/data/GSM1010245 ${ANALYSIS_DIR}/data/GSM1010246 ${ANALYSIS_DIR}/data/GSM1010247
 wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX059%2FSRX059774/SRR191809/SRR191809.sra -P ${ANALYSIS_DIR}/data/GSM1010244
@@ -37,9 +38,20 @@ wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/s
 wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX059%2FSRX059767/SRR191812/SRR191812.sra -P ${ANALYSIS_DIR}/data/GSM1010246
 wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX059%2FSRX059767/SRR191812/SRR191812.sra -P ${ANALYSIS_DIR}/data/GSM1010247
 ```
+-->
+
 <!--Note: sample GSM1010247 is oddly formatted, so for we use a trick to run the workflow, by duplicating GSM1010245-->
 <!--wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX116%2FSRX116381/SRR400301/SRR400301.sra -P ${ANALYSIS_DIR}/data/GSM1010247-->
 
+
+
+```
+mkdir -p ${ANALYSIS_DIR}/data/GSM1010244 ${ANALYSIS_DIR}/data/GSM1010245 ${ANALYSIS_DIR}/data/GSM1010246 ${ANALYSIS_DIR}/data/GSM1010247
+wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX/SRX264/SRX2641374/SRR5344681/SRR5344681.sra -P ${ANALYSIS_DIR}/data/GSM1010244
+wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX/SRX264/SRX2641375/SRR5344682/SRR5344682.sra -P ${ANALYSIS_DIR}/data/GSM1010245
+wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX/SRX264/SRX2641376/SRR5344683/SRR5344683.sra -P ${ANALYSIS_DIR}/data/GSM1010246
+wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX/SRX264/SRX2641377/SRR5344684/SRR5344684.sra -P ${ANALYSIS_DIR}/data/GSM1010247
+```
 
 ## Download reference genome & annotations
 ```
