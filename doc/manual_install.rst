@@ -1,5 +1,3 @@
-Manual installation
-================================================================
 
 This manual aims at helping you install the necessary programs and
 dependencies in order to have the snakemake workflows work. It was
