@@ -1,0 +1,222 @@
+"""Generic work flow for the detection of diferentially expressed
+genes from RNA-seq data using paired-ends sequencing type.
+
+This workflow performs the following treatments: 
+
+Under construction: 
+ - convert short read archive files (.sra) into fastq format
+ - read quality control with fastQC
+ - download the reference genome
+ - index the genome for subread-align
+ - read mapping with subread-align (other possible aligners include: bowtie, bowtie2, tophat)
+ - count the reads per gene with subread featureCounts
+ - detection of differentially expressed genes with DESeq2 and/or edgeR using the SARTools package
+
+Parameters are specified in a yaml-formatted configuration file.
+
+Usage:
+    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/rna-seq_workflow_pe.py --configfile gene-regulation/examples/RNA-seq_GSE41190/RNA-seq_GSE41190.yml
+
+    snakemake -p  -c "qsub {params.qsub}" -j 12 \
+        -s gene-regulation/scripts/snakefiles/workflows/rna-seq_workflow_pe.py \
+        --configfile gene-regulation/examples/RNA-seq_GSE41190/RNA-seq_GSE41190.yml \
+        [targets]
+
+Sequencing type: 	paired end
+
+Author: 		Jeanne Cheneby, Justine Long, Lucie Khamvongsa, Claire Rioualen, Jacques van Helden
+Contact: 		Jacques.van-Helden@univ-amu.fr
+
+"""
+
+
+#================================================================#
+#                       Python Imports 
+#================================================================#
+
+from snakemake.utils import R
+import os
+import sys
+import datetime
+import re
+import pandas as pd
+
+wd = os.getcwd()
+
+GENEREG_LIB = os.path.join(wd, config["dir"]["gene_regulation"])
+
+# Python includes
+PYTHON = os.path.join(GENEREG_LIB, "scripts/python_lib")
+include: os.path.join(PYTHON, "util.py")
+
+#================================================================#
+#                      Global variables
+#================================================================#
+
+# Samples
+SAMPLE_IDS = read_table(config["metadata"]["samples"])['ID']
+
+# Design
+DESIGN = read_table(config["metadata"]["design"])
+REFERENCE_COND = DESIGN.iloc[:,0]
+TEST_COND = DESIGN.iloc[:,1]
+
+# Genome & annotations
+GENOME_DIR = config["dir"]["genome"]
+GENOME_FASTA = os.path.join(GENOME_DIR, config["genome"]["fasta_file"])
+GENOME_GFF3 = os.path.join(GENOME_DIR, config["genome"]["gff3_file"])
+GENOME_GTF = os.path.join(GENOME_DIR, config["genome"]["gtf_file"])
+
+
+# Data & results dir
+if not ("results" in config["dir"].keys()):
+    sys.exit("The parameter config['dir']['results'] should be specified in the config file.")
+else:
+    RESULTS_DIR = config["dir"]["results"]
+
+if not ("samples" in config["dir"].keys()):
+    SAMPLE_DIR = config["dir"]["results"]
+else:
+    SAMPLE_DIR = config["dir"]["samples"]
+
+if not ("reports" in config["dir"].keys()):
+    REPORTS_DIR = config["dir"]["results"]
+else:
+    REPORTS_DIR = config["dir"]["reports"]
+
+if not ("diffexpr" in config["dir"].keys()):
+    DEG_DIR = config["dir"]["results"]
+else:
+    DEG_DIR = config["dir"]["diffexpr"]
+
+#================================================================#
+#               Snakemake includes
+#================================================================#
+
+RULES = os.path.join(GENEREG_LIB, "scripts/snakefiles/rules")
+
+include: os.path.join(RULES, "bam_by_pos.rules")
+include: os.path.join(RULES, "bam_stats.rules")
+include: os.path.join(RULES, "bam_to_bed.rules")
+include: os.path.join(RULES, "bedgraph_to_tdf.rules")
+include: os.path.join(RULES, "bowtie.rules")
+include: os.path.join(RULES, "bowtie_index.rules")
+include: os.path.join(RULES, "bowtie2.rules")
+include: os.path.join(RULES, "bowtie2_index.rules")
+include: os.path.join(RULES, "bwa_index.rules")
+include: os.path.join(RULES, "bwa.rules")
+include: os.path.join(RULES, "cufflinks.rules")
+include: os.path.join(RULES, "dot_graph.rules")
+include: os.path.join(RULES, "dot_to_image.rules")
+include: os.path.join(RULES, "genome_coverage_bedgraph.rules")
+include: os.path.join(RULES, "genome_coverage_bedgraph_strands.rules")
+include: os.path.join(RULES, "get_chrom_sizes.rules")
+include: os.path.join(RULES, "index_bam.rules")
+include: os.path.join(RULES, "sartools_DESeq2.rules")
+include: os.path.join(RULES, "sartools_edgeR.rules")
+include: os.path.join(RULES, "sartools_targetfile.rules")
+include: os.path.join(RULES, "subread_align.rules")
+include: os.path.join(RULES, "subread_featureCounts.rules")
+include: os.path.join(RULES, "subread_featureCounts_all.rules")
+include: os.path.join(RULES, "subread_index.rules")
+include: os.path.join(RULES, "tophat.rules")
+
+#================================================================#
+#                         Workflow                               #
+#================================================================#
+
+#----------------------------------------------------------------#
+# Workflow design (TODO)
+#----------------------------------------------------------------#
+
+if not (("tools" in config.keys()) and ("trimming" in config["tools"].keys())):
+    sys.exit("The parameter config['tools']['trimming'] should be specified in the config file. Empty quotes equal to no trimming.")
+
+TRIMMING_TOOLS = config["tools"]["trimming"].split()
+
+if not (("tools" in config.keys()) and ("mapping" in config["tools"].keys())):
+    sys.exit("The parameter config['tools']['mapping'] should be specified in the config file.")
+
+MAPPING_TOOLS = config["tools"]["mapping"].split()
+
+if TRIMMING_TOOLS:
+    PREFIX = expand("{trimmer}_{aligner}", aligner=MAPPING_TOOLS, trimmer=TRIMMING_TOOLS)
+else:
+    PREFIX = expand("{aligner}", aligner=MAPPING_TOOLS)
+
+if not (("tools" in config.keys()) and ("diffexpr" in config["tools"].keys())):
+    sys.exit("The parameter config['tools']['diffexpr'] should be specified in the config file.")
+
+DIFFEXPR_TOOLS = config["tools"]["diffexpr"].split()
+
+#----------------------------------------------------------------#
+# Alignment
+#----------------------------------------------------------------#
+
+INDEX = expand(GENOME_DIR + "/{aligner}/" + config["genome"]["fasta_file"], aligner=MAPPING_TOOLS)
+
+MAPPING         = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}.bam", samples=SAMPLE_IDS, prefix=PREFIX)
+
+SORTED_BAM      = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_sorted_pos.bam", samples=SAMPLE_IDS, prefix=PREFIX)
+SORTED_BAM_BAI  = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_sorted_pos.bam.bai", samples=SAMPLE_IDS, prefix=PREFIX)
+BAM_STATS       = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_bam_stats.txt", samples=SAMPLE_IDS, prefix=PREFIX)
+SORTED_BED      = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_sorted_pos.bed", samples=SAMPLE_IDS, prefix=PREFIX)
+
+GENOME_COV_GZ   = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}.bedgraph.gz", samples=SAMPLE_IDS, prefix=PREFIX)
+GENOME_COV_TDF  = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}.tdf", samples=SAMPLE_IDS, prefix=PREFIX)
+GENOME_COV_BW   = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}.bw", samples=SAMPLE_IDS, prefix=PREFIX)
+GENOME_COV_PLUS = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_plus_strand.bedgraph", samples=SAMPLE_IDS, prefix=PREFIX) 
+GENOME_COV_MINUS= expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_minus_strand.bedgraph", samples=SAMPLE_IDS, prefix=PREFIX) 
+
+ALL_COVERAGE    = GENOME_COV_GZ, GENOME_COV_BW, GENOME_COV_TDF, GENOME_COV_PLUS, GENOME_COV_MINUS
+
+#----------------------------------------------------------------#
+# Counting features
+#----------------------------------------------------------------#
+
+COUNTING_TOOLS = config["tools"]["read_counts"].split()
+FEATURE_COUNTS_PER_SAMPLE   = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_{read_counts}.txt", samples=SAMPLE_IDS, prefix=PREFIX, read_counts=COUNTING_TOOLS) ##, feature_type=} , feature=config["subread-featureCounts"]["feature_type"])
+ALL_FEATURE_COUNTS          = expand(DEG_DIR + "/{prefix}_{read_counts}_all.txt", prefix=PREFIX, read_counts=COUNTING_TOOLS) ##, feature_type=} , feature=config["subread-featureCounts"]["feature_type"])
+
+#----------------------------------------------------------------#
+# DEG analysis
+#----------------------------------------------------------------#
+
+SARTOOLS_TARGETFILE = expand(expand(DEG_DIR + "/{test}_vs_{ref}/{{prefix}}_{{read_counts}}_SARTools_targetfile.txt", test=TEST_COND, ref=REFERENCE_COND), prefix=PREFIX, read_counts=COUNTING_TOOLS)
+DEG = expand(expand(DEG_DIR + "/{test}_vs_{ref}/{{deg}}/{test}_vs_{ref}_{{prefix}}_{{read_counts}}_{{deg}}_report.html", zip, test=TEST_COND, ref=REFERENCE_COND), deg=DIFFEXPR_TOOLS, prefix=PREFIX, read_counts=COUNTING_TOOLS)
+
+#----------------------------------------------------------------#
+# Transcripts search
+#----------------------------------------------------------------#
+
+TRANSCRIPTS_TOOLS = config["tools"]["infer_transcripts"].split()
+INFER_TRANSCRIPTS = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_{infer_transcripts}/transcripts.gtf", samples=SAMPLE_IDS, prefix=PREFIX, infer_transcripts=TRANSCRIPTS_TOOLS)
+
+
+
+## Graphics & reports
+GRAPHICS = expand(REPORTS_DIR + "/RNA-seq_{graph}.{ext}", graph=["dag", "rulegraph"], ext=["png", "pdf", "svg"])
+
+#================================================================#
+#                        Rule all                                #
+#================================================================#
+
+rule all: 
+	"""
+	Run analyses.
+	"""
+	input: 
+#            MAPPING,
+#            SORTED_BAM,
+            SORTED_BAM_BAI,
+#            BAM_STATS,
+#            ALL_COVERAGE,
+#            FEATURE_COUNTS_PER_SAMPLE,
+            ALL_FEATURE_COUNTS,
+#            SARTOOLS_TARGETFILE,
+            DEG,
+            INFER_TRANSCRIPTS,
+            GRAPHICS
+	params: qsub=config["qsub"]
+	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
+

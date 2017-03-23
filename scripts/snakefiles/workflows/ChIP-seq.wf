@@ -61,6 +61,7 @@ GENEREG_LIB = os.path.join(wd, config["dir"]["gene_regulation"])
 include: os.path.join(GENEREG_LIB, "scripts/python_lib/util.py")
 
 
+
 #================================================================#
 #                      Variables
 #================================================================#
@@ -134,8 +135,9 @@ include: os.path.join(RULES, "bwa_index.rules")
 include: os.path.join(RULES, "bwa.rules")
 include: os.path.join(RULES, "dot_graph.rules")
 include: os.path.join(RULES, "dot_to_image.rules")
-include: os.path.join(RULES, "fastqc.rules")
+#include: os.path.join(RULES, "fastqc.rules")
 include: os.path.join(RULES, "genome_coverage_bedgraph.rules")
+include: os.path.join(RULES, "genome_coverage_bedgraph_strands.rules")
 include: os.path.join(RULES, "genome_coverage_bigwig.rules")
 include: os.path.join(RULES, "getfasta.rules")
 include: os.path.join(RULES, "get_chrom_sizes.rules")
@@ -147,9 +149,9 @@ include: os.path.join(RULES, "index_fasta.rules")
 include: os.path.join(RULES, "macs2.rules")
 include: os.path.join(RULES, "macs14.rules")
 include: os.path.join(RULES, "peak_motifs.rules")
-include: os.path.join(RULES, "sickle.rules")
+#include: os.path.join(RULES, "sickle.rules")
 include: os.path.join(RULES, "spp.rules")
-include: os.path.join(RULES, "sra_to_fastq.rules")
+#include: os.path.join(RULES, "sra_to_fastq.rules")
 include: os.path.join(RULES, "subread_index.rules")
 include: os.path.join(RULES, "subread_align.rules")
 include: os.path.join(RULES, "swembl.rules")
@@ -159,18 +161,9 @@ include: os.path.join(RULES, "swembl.rules")
 #                         Workflow                               #
 #================================================================#
 
-## Data import 
-IMPORT = expand(FASTQ_DIR + "/{samples}/{samples}.fastq", samples=SAMPLE_IDS)
-
-## Graphics & reports
-GRAPHICS = expand(REPORTS_DIR + "/{graph}.png", graph=["dag", "rulegraph"])
-
-## Quality report
-RAW_QC = expand(FASTQ_DIR + "/{samples}/{samples}_fastqc/{samples}_fastqc.html", samples=SAMPLE_IDS)
-QC = RAW_QC
 
 #----------------------------------------------------------------#
-# Trimming
+# Workflow design (TODO)
 #----------------------------------------------------------------#
 
 if not (("tools" in config.keys()) and ("trimming" in config["tools"].keys())):
@@ -178,26 +171,26 @@ if not (("tools" in config.keys()) and ("trimming" in config["tools"].keys())):
 
 TRIMMING_TOOLS = config["tools"]["trimming"].split()
 
-TRIMMING = expand(FASTQ_DIR + "/{samples}/{samples}_{trimmer}.fastq", samples=SAMPLE_IDS, trimmer=TRIMMING_TOOLS)
 
-TRIM_QC = expand(FASTQ_DIR + "/{samples}/{samples}_{trimmer}_fastqc/{samples}_{trimmer}_fastqc.html", samples=SAMPLE_IDS, trimmer=TRIMMING_TOOLS)
-QC = RAW_QC + TRIM_QC
-
-#----------------------------------------------------------------#
-# Alignment
-#----------------------------------------------------------------#
 
 if not (("tools" in config.keys()) and ("mapping" in config["tools"].keys())):
     sys.exit("The parameter config['tools']['mapping'] should be specified in the config file.")
 
 MAPPING_TOOLS = config["tools"]["mapping"].split()
 
-INDEX = expand(GENOME_DIR + "/{aligner}/" + config["genome"]["fasta_file"], aligner=MAPPING_TOOLS)
 
+## TODO ##
 if TRIMMING_TOOLS:
     PREFIX = expand("{trimmer}_{aligner}", aligner=MAPPING_TOOLS, trimmer=TRIMMING_TOOLS)
 else:
     PREFIX = expand("{aligner}", aligner=MAPPING_TOOLS)
+
+#----------------------------------------------------------------#
+# Alignment
+#----------------------------------------------------------------#
+
+
+#INDEX = expand(GENOME_DIR + "/{aligner}/" + config["genome"]["fasta_file"], aligner=MAPPING_TOOLS)
 
 MAPPING         = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}.bam", samples=SAMPLE_IDS, prefix=PREFIX)
 
@@ -206,10 +199,13 @@ SORTED_BAM_BAI  = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_sorted_pos.
 BAM_STATS       = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_bam_stats.txt", samples=SAMPLE_IDS, prefix=PREFIX)
 SORTED_BED      = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_sorted_pos.bed", samples=SAMPLE_IDS, prefix=PREFIX)
 
-GENOME_COV      = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}.bedgraph", samples=SAMPLE_IDS, prefix=PREFIX)
 GENOME_COV_GZ   = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}.bedgraph.gz", samples=SAMPLE_IDS, prefix=PREFIX)
 GENOME_COV_TDF  = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}.tdf", samples=SAMPLE_IDS, prefix=PREFIX)
 GENOME_COV_BW   = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}.bw", samples=SAMPLE_IDS, prefix=PREFIX)
+GENOME_COV_PLUS = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_plus_strand.bedgraph", samples=SAMPLE_IDS, prefix=PREFIX) 
+GENOME_COV_MINUS= expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_minus_strand.bedgraph", samples=SAMPLE_IDS, prefix=PREFIX) 
+
+ALL_COVERAGE    = GENOME_COV_GZ, GENOME_COV_BW, GENOME_COV_TDF, GENOME_COV_PLUS, GENOME_COV_MINUS
 
 # ----------------------------------------------------------------
 # Peak-calling
@@ -243,31 +239,31 @@ PEAK_MOTIFS     = expand(expand(PEAKS_DIR + "/{treat}_vs_{control}/{{peakcaller}
 ## Following not yet properly implemented
 IGV = expand(REPORTS_DIR + "/igv_session.xml")
 
+## Graphics & reports
+GRAPHICS = expand(REPORTS_DIR + "/ChIP-seq_{graph}.{ext}", graph=["dag", "rulegraph"], ext=["png", "pdf", "svg"])
+
+
 #================================================================#
 #                        Rule all                                #
 #================================================================#
 
 rule all: 
 	"""
-	Run all the required analyses.
+	Run analyses.
 	"""
 	input: \
-#            IMPORT, \
-            QC, \
-#            TRIMMING, \
-#            INDEX, \
-#            MAPPING, \
-#            SORTED_BAM, \
-#            BAM_STATS, \
-#            SORTED_BAM_BAI, \
-#            GENOME_INDEX, \
-            GENOME_COV_GZ, \
-#            GENOME_COV_BW, \
-#            SORTED_BED, \
-            PEAKS, \
-#            GENOMIC_FEAT, \
-#            GENE_LIST, \
-#            PEAK_MOTIFS, \
+#            MAPPING,
+#            SORTED_BAM,
+#            BAM_STATS,
+#            SORTED_BAM_BAI,
+#            GENOME_INDEX,
+            ALL_COVERAGE,
+#            GENOME_COV_BW,
+#            SORTED_BED,
+            PEAKS,
+#            GENOMIC_FEAT,
+#            GENE_LIST,
+            PEAK_MOTIFS,
 #            IGV, \
             GRAPHICS
 	params: qsub=config["qsub"]
