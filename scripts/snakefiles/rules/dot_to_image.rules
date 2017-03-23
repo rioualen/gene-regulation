@@ -9,7 +9,7 @@ rule dot_to_image:
     Copyright Claire Rioualen
     """
     input: "{graph}.dot"
-    output: "{graph}.{ext,(pdf|png)}"
+    output: "{graph}.{ext,(pdf|png|svg)}"
     params: 
         qsub = config["qsub"] \
             + " -e {graph}_dot_to_{ext}_qsub.err" \
@@ -17,4 +17,3 @@ rule dot_to_image:
     log: "{graph}_dot_to_{ext}.log"
     benchmark: "{graph}_dot_to_{ext}_benchmark.json"
     shell: "dot -T{wildcards.ext} -o {output} {input} &> {log}"
-
