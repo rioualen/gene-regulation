@@ -1,6 +1,3 @@
-Gene Regulation
-===============
-
 Quick start 
 -----------
 
