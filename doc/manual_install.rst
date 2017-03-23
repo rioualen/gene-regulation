@@ -1,108 +1,6 @@
-**\*\*To be revised!\*\***
-
 This manual aims at helping you install the necessary programs and
 dependencies in order to have the snakemake workflows work. It was
 designed for Unix-running computers (Ubuntu, Debian).
-
-In order to install all the tools at once, you can use the makefile
-provided in the distribution (see `complete
-protocol <Gene-regulation_complete_protocol.Rmd>`__, part 2).
-
-To know more about the tools, you can check our
-`wiki <https://github.com/rioualen/gene-regulation/wiki/NGS-tools-&-software>`__.
-
-<!-- Table of Contents =================
-
--  `Pre-requisites in case of virtual machine (VM)
-   development <#pre-requisites-in-case-of-virtual-machine-vm-development>`__
-
-   -  `VM creation <#vm-creation>`__
-   -  `VM customization <#vm-customization>`__
-
--  `General requirements <#general-requirements>`__
-
-   -  `Generic tools <#generic-tools>`__
-   -  `ssh <#ssh>`__
-   -  `rsync <#rsync>`__
-   -  `git <#git>`__
-   -  `zlib <#zlib>`__
-   -  `qsub <#qsub>`__
-   -  `Create bin/ (opt) <#create-bin-opt>`__
-   -  `Edit $PATH <#edit-path>`__
-
--  `Snakemake workflows basic
-   requirements <#snakemake-workflows-basic-requirements>`__
-
-   -  `Python <#python>`__
-   -  `Pandas library <#pandas-library>`__
-   -  `Package rpy2 <#package-rpy2>`__
-   -  `R (to be revised) <#r-to-be-revised>`__
-   -  `Snakemake <#snakemake>`__
-   -  `Graphviz <#graphviz>`__
-
--  `NGS analysis software & tools <#ngs-analysis-software--tools>`__
-
-   -  `File management <#file-management>`__
-   -  `SRA toolkit <#sra-toolkit>`__
-   -  `Samtools <#samtools>`__
-   -  `Bedtools <#bedtools>`__
-   -  `Quality assessment <#quality-assessment>`__
-   -  `FastQC <#fastqc>`__
-   -  `Trimming <#trimming>`__
-   -  `Sickle <#sickle>`__
-   -  `Alignment/mapping <#alignmentmapping>`__
-   -  `BWA <#bwa>`__
-   -  `Bowtie2 <#bowtie2>`__
-   -  `Peak-calling <#peak-calling>`__
-   -  `bPeaks <#bpeaks>`__
-   -  `HOMER <#homer>`__
-   -  `MACS 1.4 <#macs-14>`__
-   -  `MACS2 <#macs2>`__
-   -  `SPP R package (broken) <#spp-r-package-broken>`__
-   -  `SWEMBL <#swembl>`__
-   -  `Motif discovery, motif
-      analysis <#motif-discovery-motif-analysis>`__
-   -  `RSAT suite <#rsat-suite>`__
-
--  `Workpackage 2.6 - Gene
-   regulation <#workpackage-26---gene-regulation>`__
-
-   -  `Cloning the repository <#cloning-the-repository>`__
-   -  `Data transfer/download <#data-transferdownload>`__
-   -  `Running the pipeline <#running-the-pipeline>`__
-
--  `VM export / submission <#vm-export--submission>`__ --> <!-- ###
-   **TODO**
-
--  Include map of possible "bricks" of worflows (like general rulegraph)
-   with each step's requirement/dependencies
--  Include minimum json file config depending on bricks to be used.
-
--  Beware of paths
-
-   -  ~/workspace
-   -  ~/bin
-
--  Test all of this in IFB appliance
-
--  **VBox issues**:
-
-   -  '/etc/init.d/vboxdrv setup' error when restarting
-   -  disparition vboxnet0
-
-**/!\\** attention pour les rsync, notamment si user + root... ssh, ssh
-agent ?
-
--  revoir les install via apt-get car pb de version !
--  mettre la procédure spécifique
--  lister les versions de chaque programme pour un wf qui fonctionne
-
--  dependance mkvtree / rsat
-
--  see differences between ubuntu and lmde (python libs notamment)
--  check mac ?
-
--  check version dependencies and add --version to doc -->
 
 General requirements
 ====================
@@ -753,7 +651,102 @@ See README instead.
    You may need to expand your virtual disk space. For VBox users, see `virtualbox_vm_creation.Rmd`, section XX (VirtualBox hacks and tricks).
    -->
 
-VM export / submission
-======================
 
-See *doc/install\_protocols/export\_appliance.Rmd*...
+
+Comments
+^^^^^^^^
+
+
+Table of Contents
+
+-  `Pre-requisites in case of virtual machine (VM)
+   development <#pre-requisites-in-case-of-virtual-machine-vm-development>`__
+
+   -  `VM creation <#vm-creation>`__
+   -  `VM customization <#vm-customization>`__
+
+-  `General requirements <#general-requirements>`__
+
+   -  `Generic tools <#generic-tools>`__
+   -  `ssh <#ssh>`__
+   -  `rsync <#rsync>`__
+   -  `git <#git>`__
+   -  `zlib <#zlib>`__
+   -  `qsub <#qsub>`__
+   -  `Create bin/ (opt) <#create-bin-opt>`__
+   -  `Edit $PATH <#edit-path>`__
+
+-  `Snakemake workflows basic
+   requirements <#snakemake-workflows-basic-requirements>`__
+
+   -  `Python <#python>`__
+   -  `Pandas library <#pandas-library>`__
+   -  `Package rpy2 <#package-rpy2>`__
+   -  `R (to be revised) <#r-to-be-revised>`__
+   -  `Snakemake <#snakemake>`__
+   -  `Graphviz <#graphviz>`__
+
+-  `NGS analysis software & tools <#ngs-analysis-software--tools>`__
+
+   -  `File management <#file-management>`__
+   -  `SRA toolkit <#sra-toolkit>`__
+   -  `Samtools <#samtools>`__
+   -  `Bedtools <#bedtools>`__
+   -  `Quality assessment <#quality-assessment>`__
+   -  `FastQC <#fastqc>`__
+   -  `Trimming <#trimming>`__
+   -  `Sickle <#sickle>`__
+   -  `Alignment/mapping <#alignmentmapping>`__
+   -  `BWA <#bwa>`__
+   -  `Bowtie2 <#bowtie2>`__
+   -  `Peak-calling <#peak-calling>`__
+   -  `bPeaks <#bpeaks>`__
+   -  `HOMER <#homer>`__
+   -  `MACS 1.4 <#macs-14>`__
+   -  `MACS2 <#macs2>`__
+   -  `SPP R package (broken) <#spp-r-package-broken>`__
+   -  `SWEMBL <#swembl>`__
+   -  `Motif discovery, motif
+      analysis <#motif-discovery-motif-analysis>`__
+   -  `RSAT suite <#rsat-suite>`__
+
+-  `Workpackage 2.6 - Gene
+   regulation <#workpackage-26---gene-regulation>`__
+
+   -  `Cloning the repository <#cloning-the-repository>`__
+   -  `Data transfer/download <#data-transferdownload>`__
+   -  `Running the pipeline <#running-the-pipeline>`__
+
+-  `VM export / submission <#vm-export--submission>`__ --> <!-- ###
+   **TODO**
+
+-  Include map of possible "bricks" of worflows (like general rulegraph)
+   with each step's requirement/dependencies
+-  Include minimum json file config depending on bricks to be used.
+
+-  Beware of paths
+
+   -  ~/workspace
+   -  ~/bin
+
+-  Test all of this in IFB appliance
+
+-  **VBox issues**:
+
+   -  '/etc/init.d/vboxdrv setup' error when restarting
+   -  disparition vboxnet0
+
+**/!\\** attention pour les rsync, notamment si user + root... ssh, ssh
+agent ?
+
+-  revoir les install via apt-get car pb de version !
+-  mettre la procédure spécifique
+-  lister les versions de chaque programme pour un wf qui fonctionne
+
+-  dependance mkvtree / rsat
+
+-  see differences between ubuntu and lmde (python libs notamment)
+-  check mac ?
+
+-  check version dependencies and add --version to doc -->
+
