@@ -44,8 +44,12 @@ User guide and reference
     :maxdepth: 2
 
     getting_started.rst
-    snakemake.rst
+    tutorials.rst
     dependencies.rst
+    environments.rst
+    snakemake.rst
+    other_tools.rst
+    wiki.rst
 
 
 Indices and tables

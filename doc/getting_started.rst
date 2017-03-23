@@ -1,9 +1,26 @@
-France Genomique Workpackage 2.6 - Gene Regulation
-==================================================
+Gene Regulation
+===============
 
-*Claire Rioualen - Sept. 19th, 2016*
+Quick start 
+-----------
 
-This git repository holds shared code for the analysis of Next
-Generation Sequencing data related to gene regulation: ChIP-seq,
-RNA-seq, and related technologies.
+Makefile
+~~~~~~~~
 
+Docker
+~~~~~~
+
+
+Conda
+~~~~~
+
+tobedone
+
+Workflow execution
+~~~~~~~~~~~~~~~~~~
+
+(example)
+
+get gene-reg library
+
+rulegraph
