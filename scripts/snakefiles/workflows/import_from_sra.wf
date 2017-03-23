@@ -1,0 +1,132 @@
+"""
+This workflow is aimed at converting short read archive files (.sra) into fastq/fq.gz format, 
+and thus get a work base that is compatible with subsequent workflows of analysis (ChIP-seq, RNA-seq). 
+
+Parameters are specified in a yaml-formatted configuration file.
+
+Usage:
+    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/import.wf --configfile ...
+
+    snakemake -p  -c "qsub {params.qsub}" -j 12 \
+        -s gene-regulation/scripts/snakefiles/workflows/import.wf \
+        --configfile ... \
+        [targets]
+
+Author:
+    Claire Rioualen
+"""
+
+#================================================================#
+#                       Python Imports 
+#================================================================#
+
+from snakemake.utils import R
+import os
+import sys
+import datetime
+import re
+import pandas as pd
+
+wd = os.getcwd()
+
+GENEREG_LIB = os.path.join(wd, config["dir"]["gene_regulation"])
+
+# Python includes
+PYTHON = os.path.join(GENEREG_LIB, "scripts/python_lib")
+include: os.path.join(PYTHON, "util.py")
+
+#================================================================#
+#               Snakemake includes
+#================================================================#
+
+RULES = os.path.join(GENEREG_LIB, "scripts/snakefiles/rules")
+
+include: os.path.join(RULES, "dot_graph.rules")
+include: os.path.join(RULES, "dot_to_image.rules")
+include: os.path.join(RULES, "gzip.rules")
+#include: os.path.join(RULES, "gunzip.rules")
+
+#================================================================#
+#                      Workflow setup
+#================================================================#
+
+# Check that in and out directories are properly defined
+if not (("dir" in config.keys()) and ("reads_source" in config["dir"].keys())):
+    sys.exit("The parameter config['dir']['reads_source'] should be specified in the config file.")
+else:
+    READS = config["dir"]["reads_source"]
+
+if not ("fastq" in config["dir"].keys()):
+    sys.exit("The parameter config['dir']['fastq'] should be specified in the config file.")
+else:
+    FASTQ_DIR = config["dir"]["fastq"]
+
+if not ("results" in config["dir"].keys()):
+    sys.exit("The parameter config['dir']['results'] should be specified in the config file.")
+if not ("reports" in config["dir"].keys()):
+    REPORTS_DIR = config["dir"]["results"]
+else:
+    REPORTS_DIR = config["dir"]["reports"]
+
+# Get samples IDs
+if not "samples" in config["metadata"].keys():
+    sys.exit("You jave to provide a sample file. See documentation for more specifications.")
+
+SAMPLE_IDS = read_table(config["metadata"]["samples"])['ID']
+
+# Get seq_type
+if not "seq_type" in config["metadata"].keys():
+    sys.exit("Sequencing type (single or paired ends) must be defined in the config file.")
+
+SEQ_TYPE = config["metadata"]["seq_type"]
+
+#----------------------------------------------------------------#
+# Single-end
+#----------------------------------------------------------------#
+
+if (SEQ_TYPE == "se"):
+
+    include: os.path.join(RULES, "sra_to_fastq.rules")
+
+    IMPORT      = expand(FASTQ_DIR + "/{samples}/{samples}.fastq", samples=SAMPLE_IDS)
+    COMPRESS    = expand(FASTQ_DIR + "/{samples}/{samples}.fastq.gz", samples=SAMPLE_IDS)
+
+#----------------------------------------------------------------#
+# Paired-ends
+#----------------------------------------------------------------#
+
+elif (SEQ_TYPE == "pe"):
+    
+    include: os.path.join(RULES, "sra_to_fastq_split.rules")
+
+    if not (("metadata" in config.keys()) and ("strands" in config["metadata"].keys())):
+        sys.exit("The strands suffixes (parameter config['metadata']['strands']) should be specified in the config file for a paired ends analysis.")
+
+    STRANDS     = config["metadata"]["strands"].split()
+
+    IMPORT      = expand(FASTQ_DIR + "/{samples}/{samples}_{strand}.fastq", samples=SAMPLE_IDS, strand=STRANDS)
+    COMPRESS    = expand(FASTQ_DIR + "/{samples}/{samples}_{strand}.fastq.gz", samples=SAMPLE_IDS, strand=STRANDS)
+
+else:
+    sys.exit("Error: invalid 'seq_type parameter'. Must be 'se' or 'pe'")
+
+#----------------------------------------------------------------#
+# Reporting
+#----------------------------------------------------------------#
+
+GRAPHICS = expand(REPORTS_DIR + "/import_to_fastq_{graph}.png", graph=["dag", "rulegraph"])
+
+#================================================================#
+#                        Rule all                                #
+#================================================================#
+
+rule all: 
+	"""
+	Run the workflow.
+	"""
+	input: \
+            IMPORT, \
+            GRAPHICS
+	params: qsub=config["qsub"]
+	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
+
