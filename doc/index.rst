@@ -5,7 +5,7 @@
    
    
 Gene Regulation
-===============
+================================================================
 
 This git repository holds shared code for the analysis of Next
 Generation Sequencing data related to gene regulation: ChIP-seq,
@@ -22,13 +22,13 @@ order to build reproducible and flexible NGS analysis pipelines.
 
 
 Contact
-=======
+----------------------------------------------------------------
 
 -  Claire Rioualen claire.rioualen@inserm.fr
 -  Jacques van Helden Jacques.van-helden@univ-amu.fr
 
 References
-==========
+----------------------------------------------------------------
 
 1. Köster, Johannes and Rahmann, Sven. "Snakemake - A scalable
    bioinformatics workflow engine". Bioinformatics 2012.
@@ -36,12 +36,12 @@ References
 
 
 User guide and reference
-###########################
+----------------------------------------------------------------
 
 
 .. toctree::
     :numbered:
-    :maxdepth: 2
+    :maxdepth: 3
 
     getting_started.rst
     tutorials.rst
@@ -53,7 +53,7 @@ User guide and reference
 
 
 Indices and tables
-==================
+----------------------------------------------------------------
 
 * :ref:`genindex`
 * :ref:`modindex`

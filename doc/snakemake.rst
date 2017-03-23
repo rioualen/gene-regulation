@@ -252,7 +252,7 @@ Workflow 10: Using regular expression in wildcards
 ********************************************************
 
 Other
------
+*****
 
 -  temp()
 -  touch()

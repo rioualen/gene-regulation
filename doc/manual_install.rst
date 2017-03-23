@@ -1,15 +1,18 @@
+Manual installation
+================================================================
+
 This manual aims at helping you install the necessary programs and
 dependencies in order to have the snakemake workflows work. It was
 designed for Unix-running computers (Ubuntu, Debian).
 
 General requirements
-====================
+----------------------------------------------------------------
 
 Generic tools
--------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ssh
-~~~
+****************************************************************
 
 ::
 
@@ -22,7 +25,7 @@ ssh
    -->
 
 rsync
-~~~~~
+****************************************************************
 
 `rsync <https://rsync.samba.org/>`__ is an open source utility that
 provides fast incremental file transfer.
@@ -32,7 +35,7 @@ provides fast incremental file transfer.
     sudo apt-get install rsync
 
 git
-~~~
+****************************************************************
 
 -  Create an account on `GitHub <https://github.com>`__.
 -  Install git on your machine.
@@ -49,7 +52,7 @@ git
     less ~/.ssh/id_rsa.pub
 
 zlib
-~~~~
+****************************************************************
 
 Several tools require this dependency (e.g. sickle, bamtools...).
 
@@ -58,12 +61,12 @@ Several tools require this dependency (e.g. sickle, bamtools...).
     sudo apt-get install libz-dev
 
 qsub
-~~~~
+****************************************************************
 
 **TODO**
 
 Create bin/ and app\_sources/ (opt) TODO
-----------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 While some programs will be installed completely automatically... some
 will not. Here we create a directory that will be used for manual
@@ -77,7 +80,7 @@ installations.
 You might then have to edit your ``$PATH`` manually (see next section).
 
 Edit ``$PATH``
---------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In order to use manually installed programs and make them executable,
 you may have to update your ``$PATH`` environment variable. You can do
@@ -103,7 +106,7 @@ Execute the file to validate the change.
     source ~/.profile
 
 Snakemake workflows basic requirements
-======================================
+----------------------------------------------------------------
 
 .. raw:: html
 
@@ -120,7 +123,7 @@ Snakemake workflows basic requirements
 -  Is running pip/pip3 as sudoer necessary or desirable?
 
 Python
-------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Snakemake requires to have Python 3.3+ installed. If you have installed
 Ubuntu14.04 on your machine by following one of the previous tutorials,
@@ -153,7 +156,7 @@ Not installed natively?
     apt-get install python3.4-dev
 
 Pandas library
-~~~~~~~~~~~~~~
+****************************************************************
 
 This library is used in order to read our data, specifically files
 ``samples.tab`` and ``design.tab``.
@@ -163,7 +166,7 @@ This library is used in order to read our data, specifically files
     pip3 install pandas
 
 Package rpy2
-~~~~~~~~~~~~
+****************************************************************
 
 ::
 
@@ -189,7 +192,7 @@ R
    -->
 
 Snakemake
----------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `Documentation <https://bitbucket.org/snakemake/snakemake/wiki/Documentation>`__
 -  `FAQ <https://bitbucket.org/snakemake/snakemake/wiki/FAQ>`__
@@ -246,7 +249,7 @@ If you want to use Snakemake reports function (optional):
     pip3 install docutils
 
 Graphviz
---------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Snakemake can generate useful graphviz outputs.
 
@@ -255,13 +258,13 @@ Snakemake can generate useful graphviz outputs.
     sudo apt-get install graphviz
 
 NGS analysis software & tools
-=============================
+----------------------------------------------------------------
 
 File management
----------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 SRA toolkit
-~~~~~~~~~~~
+****************************************************************
 
 This toolkit includes a number of programs, allowing the conversion of
 ``*.sra`` files. ``fastq-dump`` translates ``*.sra`` files to
@@ -310,7 +313,7 @@ command, but likely it won't be the most recent release:
       fastq-dump : 2.1.7
 
 Samtools
-~~~~~~~~
+****************************************************************
 
 SAM (Sequence Alignment/Map) format is a generic format for storing
 large nucleotide sequence alignments.
@@ -331,7 +334,7 @@ TODO: install samtools from website, not from apt-get repositories.
    -->
 
 Bedtools
-~~~~~~~~
+****************************************************************
 
 The `bedtools <http://bedtools.readthedocs.org/en/latest/>`__ utilities
 are a swiss-army knife of tools for a wide-range of genomics analysis
@@ -346,10 +349,10 @@ widely-used genomic file formats such as BAM, BED, GFF/GTF, VCF.
 V: v2.17.0 Latest: 2.24.0
 
 Quality assessment
-------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 FastQC
-~~~~~~
+****************************************************************
 
 `FastQC <http://www.bioinformatics.babraham.ac.uk/projects/fastqc/>`__
 aims to provide a simple way to do some quality control checks on raw
@@ -363,10 +366,10 @@ aware before doing any further analysis.
     sudo apt-get install fastqc
 
 Trimming
---------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Sickle
-~~~~~~
+****************************************************************
 
 `Sickle <https://github.com/najoshi/sickle>`__ is a trimming tool which
 better the quality of NGS reads.
@@ -389,10 +392,10 @@ better the quality of NGS reads.
     PATH="$HOME/bin/sickle:$PATH"
 
 Alignment/mapping
------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 BWA
-~~~
+****************************************************************
 
 `BWA <http://bio-bwa.sourceforge.net/>`__ is a software package for
 mapping low-divergent sequences against a large reference genome, such
@@ -413,7 +416,7 @@ as the human genome.
    -->
 
 Bowtie2
-~~~~~~~
+****************************************************************
 
 `General
 documentation <http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml>`__
@@ -434,10 +437,10 @@ documentation <http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml>`__
     unzip bowtie2-2.2.6-linux-x86_64.zip
 
 Peak-calling
-------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 bPeaks
-~~~~~~
+****************************************************************
 
 Peak-caller developped specifically for yeast, can be useful in order to
 process small genomes only.
@@ -445,7 +448,7 @@ process small genomes only.
 **TODO**
 
 HOMER
-~~~~~
+****************************************************************
 
 `Web page <http://homer.salk.edu/>`__
 
@@ -515,7 +518,7 @@ HOMER can also work with custom genomes in FASTA format and gene
 annotations in GTF format.
 
 MACS 1.4
-~~~~~~~~
+****************************************************************
 
 -  `doc <http://liulab.dfci.harvard.edu/MACS/00README.html>`__
 -  `install <http://liulab.dfci.harvard.edu/MACS/INSTALL.html>`__
@@ -532,7 +535,7 @@ MACS 1.4
 **NB** deb package wouldn't work with python 2.7, asks for python 2.6.
 
 MACS2
-~~~~~
+****************************************************************
 
 -  `MACS2 web page <https://github.com/taoliu/MACS/>`__
 
@@ -553,7 +556,7 @@ MACS2
    -->
 
 SPP R package (broken)
-~~~~~~~~~~~~~~~~~~~~~~
+****************************************************************
 
 ::
 
@@ -605,56 +608,19 @@ SWEMBL
 **TODO**
 
 Motif discovery, motif analysis
--------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 RSAT suite
-~~~~~~~~~~
+****************************************************************
 
 See `doc/install\_protocols
 section <https://github.com/rioualen/gene-regulation/blob/master/doc/install_protocols/install_rsat_ubuntu14.04.Rmd>`__.
 Beware, this manuel might be deprecated.
 
-Workpackage 2.6 - Gene regulation
-=================================
-
-Cloning the repository
-----------------------
-
-::
-
-    cd ~/workspace
-    git clone git@github.com:rioualen/gene-regulation.git
-
-Data transfer/download
-----------------------
-
-**TODO**
-
-Depends whether installing a VM or testing FG workflows locally.
-
-Running the pipeline
---------------------
-
-::
-
-    cd ~/workspace/gene-regulation
-
-**TODO** Update
-
-See README instead.
-
-.. raw:: html
-
-   <!--
-   ## Increase virtual disk space
-
-   You may need to expand your virtual disk space. For VBox users, see `virtualbox_vm_creation.Rmd`, section XX (VirtualBox hacks and tricks).
-   -->
 
 
-
-Comments
-^^^^^^^^
+Bazar à trier
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Table of Contents
