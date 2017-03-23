@@ -1,0 +1,187 @@
+"""
+Quality control pipeline for fastq/fastq.gz/bam data.
+
+Parameters are specified in a yaml-formatted configuration file.
+
+Usage:
+    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/quality_control.wf --configfile ...
+
+    snakemake -p  -c "qsub {params.qsub}" -j 12 \
+        -s gene-regulation/scripts/snakefiles/workflows/quality_control.wf \
+        --configfile ... \
+        [targets]
+
+Sequencing type: 	paired end
+
+Author:
+    Claire Rioualen
+
+"""
+
+"""
+This workflow is aimed at converting short read archive files (.sra) into fastq/fq.gz format, 
+and thus get a work base that is compatible with subsequent workflows of analysis (ChIP-seq, RNA-seq). 
+
+Parameters are specified in a yaml-formatted configuration file.
+
+Usage:
+    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/import.wf --configfile ...
+
+    snakemake -p  -c "qsub {params.qsub}" -j 12 \
+        -s gene-regulation/scripts/snakefiles/workflows/import.wf \
+        --configfile ... \
+        [targets]
+
+Author:
+    Claire Rioualen
+"""
+
+#================================================================#
+#                       Python Imports 
+#================================================================#
+
+from snakemake.utils import R
+import os
+import sys
+import datetime
+import re
+import pandas as pd
+
+wd = os.getcwd()
+
+GENEREG_LIB = os.path.join(wd, config["dir"]["gene_regulation"])
+
+# Python includes
+PYTHON = os.path.join(GENEREG_LIB, "scripts/python_lib")
+include: os.path.join(PYTHON, "util.py")
+
+#================================================================#
+#               Snakemake includes
+#================================================================#
+
+RULES = os.path.join(GENEREG_LIB, "scripts/snakefiles/rules")
+
+include: os.path.join(RULES, "dot_graph.rules")
+include: os.path.join(RULES, "dot_to_image.rules")
+include: os.path.join(RULES, "fastqc.rules")
+include: os.path.join(RULES, "gzip.rules")
+include: os.path.join(RULES, "sickle.rules")
+#include: os.path.join(RULES, "gunzip.rules")
+
+#================================================================#
+#                      Workflow setup
+#================================================================#
+
+# Check that directories are properly defined
+if not ("fastq" in config["dir"].keys()):
+    sys.exit("The parameter config['dir']['fastq'] should be specified in the config file.")
+else:
+    FASTQ_DIR = config["dir"]["fastq"]
+
+if not ("results" in config["dir"].keys()):
+    sys.exit("The parameter config['dir']['results'] should be specified in the config file.")
+if not ("reports" in config["dir"].keys()):
+    REPORTS_DIR = config["dir"]["results"]
+else:
+    REPORTS_DIR = config["dir"]["reports"]
+
+# Get samples IDs
+if not "samples" in config["metadata"].keys():
+    sys.exit("You jave to provide a sample file. See documentation for more specifications.")
+
+SAMPLE_IDS = read_table(config["metadata"]["samples"])['ID']
+
+# Get seq_type
+if not "seq_type" in config["metadata"].keys():
+    sys.exit("Sequencing type (single or paired ends) must be defined in the config file.")
+
+SEQ_TYPE = config["metadata"]["seq_type"]
+
+if (SEQ_TYPE == "pe"):
+    if not (("metadata" in config.keys()) and ("strands" in config["metadata"].keys())):
+        sys.exit("The strands suffixes (parameter config['metadata']['strands']) should be specified in the config file for a paired ends analysis.")
+
+    STRANDS     = config["metadata"]["strands"].split()
+
+#----------------------------------------------------------------#
+# FastQC
+#----------------------------------------------------------------#
+
+#----------------------------------------------------------------#
+# Single-end
+#----------------------------------------------------------------#
+
+if (SEQ_TYPE == "se"):
+    RAW_QC = expand(FASTQ_DIR + "/{samples}/{samples}_fastqc/{samples}_fastqc.html", samples=SAMPLE_IDS)
+
+#----------------------------------------------------------------#
+# Paired-ends
+#----------------------------------------------------------------#
+
+elif (SEQ_TYPE == "pe"):
+    RAW_QC = expand(FASTQ_DIR + "/{samples}/{samples}_{strand}_fastqc/{samples}_{strand}_fastqc.html", samples=SAMPLE_IDS, strand=STRANDS)
+
+
+else:
+    sys.exit("Error: invalid 'seq_type parameter'. Must be 'se' or 'pe'")
+
+QC = RAW_QC
+
+#----------------------------------------------------------------#
+# Trimming
+#----------------------------------------------------------------#
+
+if not (("tools" in config.keys()) and ("trimming" in config["tools"].keys())):
+    sys.exit("The parameter config['tools']['trimming'] should be specified in the config file. Empty quotes equal to no trimming.")
+
+TRIMMING_TOOLS = config["tools"]["trimming"].split()
+
+if (len(TRIMMING_TOOLS) != 0):
+
+    #----------------------------------------------------------------#
+    # Single-end
+    #----------------------------------------------------------------#
+
+    if (SEQ_TYPE == "se"):
+
+        TRIMMING    = expand(FASTQ_DIR + "/{samples}/{samples}_{trimmer}.fastq", samples=SAMPLE_IDS, trimmer=TRIMMING_TOOLS)
+        TRIM_QC     = expand(FASTQ_DIR + "/{samples}/{samples}_{trimmer}_fastqc/{samples}_{trimmer}_fastqc.html", samples=SAMPLE_IDS, trimmer=TRIMMING_TOOLS)
+
+    #----------------------------------------------------------------#
+    # Paired-ends
+    #----------------------------------------------------------------#
+
+    elif (SEQ_TYPE == "pe"):
+
+        if not (("metadata" in config.keys()) and ("strands" in config["metadata"].keys())):
+            sys.exit("The strands suffixes (parameter config['metadata']['strands']) should be specified in the config file for a paired ends analysis.")
+
+        STRANDS     = config["metadata"]["strands"].split()
+
+        TRIMMING    = expand(FASTQ_DIR + "/{samples}/{samples}_{trimmer}_{strand}.fastq", samples=SAMPLE_IDS, trimmer=TRIMMING_TOOLS, strand=STRANDS)
+        TRIM_QC     = expand(FASTQ_DIR + "/{samples}/{samples}_{trimmer}_{strand}_fastqc/{samples}_{trimmer}_{strand}_fastqc.html", samples=SAMPLE_IDS, trimmer=TRIMMING_TOOLS, strand=STRANDS)
+
+    else:
+        sys.exit("Error: invalid 'seq_type parameter'. Must be 'se' or 'pe'")
+
+    QC = RAW_QC + TRIM_QC
+
+#----------------------------------------------------------------#
+# Reporting
+#----------------------------------------------------------------#
+
+GRAPHICS = expand(REPORTS_DIR + "/quality_control_{graph}.{ext}", graph=["dag", "rulegraph"], ext=["png", "svg"])
+
+#================================================================#
+#                        Rule all                                #
+#================================================================#
+
+rule all: 
+	"""
+	Run the workflow.
+	"""
+	input: \
+            QC, \
+            GRAPHICS
+	params: qsub=config["qsub"]
+	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
