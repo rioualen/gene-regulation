@@ -1,13 +1,23 @@
-1. RSAT install manual, OLD, to be updated / hopefully replaced with apt-get 
+Other tools
+------------
+
+
+RSAT install manual
+~~~~~~~~~~~~~~~~~~~
+
+NB: OLD, to be updated / hopefully replaced with apt-get 
+
 
 Unless stated otherwise, the following commands will be executed as
 root.
 
+!!! Experimented users only !!!
+
 1. First steps
-==============
+***************
 
 Set the locales manually if needed.
------------------------------------
+
 
 ::
 
@@ -18,7 +28,7 @@ Set the locales manually if needed.
     sudo dpkg-reconfigure locales
 
 Check date & time, and adjust your timezone if needed.
-------------------------------------------------------
+
 
 ::
 
@@ -29,7 +39,7 @@ Check date & time, and adjust your timezone if needed.
     dpkg-reconfigure tzdata
 
 Create RSAT directory. It must be readable by all users (in particular by the apache user).
--------------------------------------------------------------------------------------------
+
 
 ::
 
@@ -37,7 +47,7 @@ Create RSAT directory. It must be readable by all users (in particular by the ap
     cd /packages
 
 Check the installation device. This should give sda1 or vda1?
--------------------------------------------------------------
+
 
 ::
 
@@ -45,10 +55,10 @@ Check the installation device. This should give sda1 or vda1?
     echo ${DEVICE}
 
 2. Packages installation
-========================
+************************
 
 Update apt-get.
----------------
+
 
 ::
 
@@ -56,7 +66,7 @@ Update apt-get.
     apt-get --quiet --assume-yes upgrade
 
 Packages to be installed.
--------------------------
+
 
 ::
 
@@ -105,7 +115,7 @@ Packages to be installed.
     "
 
 Perl modules.
--------------
+
 
 ::
 
@@ -137,7 +147,7 @@ Perl modules.
     "
 
 Install the apt-get libraries.
-------------------------------
+
 
 ::
 
@@ -152,7 +162,7 @@ Install the apt-get libraries.
     done
 
 Package to be installed in an interactive mode.
------------------------------------------------
+
 
 ::
 
@@ -166,14 +176,14 @@ Package to be installed in an interactive mode.
    -  Select keymap from full list
 
 Specific treatment for some Python libraries.
----------------------------------------------
+
 
 ::
 
     sudo apt-get --quiet --assume-yes build-dep python-numpy python-scipy
 
 To free space, remove apt-get packages that are no longer required. /?\\
-------------------------------------------------------------------------
+
 
 ::
 
@@ -181,7 +191,7 @@ To free space, remove apt-get packages that are no longer required. /?\\
     apt-get --quiet --assume-yes  clean
 
 3. Python libraries installation
-================================
+***********************************
 
 ::
 
@@ -190,12 +200,12 @@ To free space, remove apt-get packages that are no longer required. /?\\
     pip install httplib2
 
 4. Apache Web server configuration
-==================================
+***********************************
 
 **/!\\** Manual interventions needed here.
 
 Activate CGI module.
---------------------
+
 
 ::
 
@@ -205,7 +215,7 @@ Uncomment the following line:
 ``Include conf-available/serve-cgi-bin.conf``.
 
 To avoid puzzling warning at apache start, set ServerName globally.
--------------------------------------------------------------------
+
 
 ::
 
@@ -214,7 +224,7 @@ To avoid puzzling warning at apache start, set ServerName globally.
 Add the following line at the end of the file: ``ServerName localhost``.
 
 Add CGI script.
----------------
+
 
 ::
 
@@ -227,7 +237,7 @@ classical bioinformatics files. ``AddType text/plain .fasta``
 ``AddType text/plain .bed``.
 
 Adapt the PHP parameters.
--------------------------
+
 
 ::
 
@@ -237,7 +247,7 @@ Modify the following parameters: ``post_max_size = 100M`` and
 ``upload_max_filesize=100M``.
 
 Activate cgi scripts. Found `here <http://www.techrepublic.com/blog/diy-it-guy/diy-enable-cgi-on-your-apache-server/>`__.
--------------------------------------------------------------------------------------------------------------------------
+
 
 ::
 
@@ -250,7 +260,7 @@ You can check whether apache server was successfully configured and
 started by opening a web connection to ``http://{IP}``.
 
 5. RSAT distribution
-====================
+**********************
 
 **/!\\ Note:** The git distribution requires an account at the ENS git
 server, which is currently only possible for RSAT developing team. In
@@ -259,7 +269,7 @@ users who don't have an account on the RSAT git server, the code can be
 downloaded as a tar archive from the Web site.
 
 Create RSAT directory.
-----------------------
+
 
 ::
 
@@ -268,7 +278,7 @@ Create RSAT directory.
     export RSAT=/packages/rsat
 
 Git repository cloning.
------------------------
+
 
 ::
 
@@ -279,7 +289,7 @@ Git repository cloning.
 \*\* OR \*\*
 
 Archive download.
------------------
+
 
 ::
 
@@ -294,10 +304,10 @@ Archive download.
     cd ~; ln -fs /packages/rsat rsat
 
 6. RSAT configuration
-=====================
+*********************
 
 Run the configuration script, to specify the environment variables.
--------------------------------------------------------------------
+
 
 ::
 
@@ -374,28 +384,28 @@ Which options to specify?
    -->
 
 Load the (updated) RSAT environment variables.
-----------------------------------------------
+
 
 ::
 
     source RSAT_config.bashrc
 
 Check that the RSAT environment variable has been properly configured.
-----------------------------------------------------------------------
+
 
 ::
 
     echo ${RSAT}
 
 Initialise RSAT folders
------------------------
+
 
 ::
 
     make -f makefiles/init_rsat.mk init
 
 7. Perl modules for RSAT
-========================
+*************************
 
 ::
 
@@ -409,7 +419,7 @@ Initialise RSAT folders
     cpan> quit
 
 Get the list of Perl modules to be installed.
----------------------------------------------
+
 
 ::
 
@@ -422,14 +432,14 @@ Get the list of Perl modules to be installed.
     echo "Missing Perl modules:     ${MISSING_PERL_MODULES}"
 
 Install the missing Perl modules.
----------------------------------
+
 
 ::
 
     make -f makefiles/install_rsat.mk perl_modules_install PERL_MODULES="${MISSING_PERL_MODULES}"
 
 Check once more if all required Perl modules have been correctly installed.
----------------------------------------------------------------------------
+
 
 ::
 
@@ -440,7 +450,7 @@ Note: Object::InsideOut always displays "Fail", whereas it is OK during
 installation.
 
 8. Configure RSAT web server
-============================
+****************************
 
 ::
 
@@ -449,14 +459,14 @@ installation.
     apache2ctl restart
 
 RSAT Web server URL
--------------------
+
 
 ::
 
     echo $RSAT_WWW
 
 If the value is "auto", get the URL as follows:
------------------------------------------------
+
 
 ::
 
@@ -466,10 +476,10 @@ If the value is "auto", get the URL as follows:
     echo $RSAT_WWW
 
 9. Other
-========
+********
 
 compile RSAT programs written in C
-----------------------------------
+
 
 ::
 
@@ -477,14 +487,14 @@ compile RSAT programs written in C
     export INSTALL_ROOT_DIR=/packages/
 
 Install some third-party programs required by some RSAT scripts.
-----------------------------------------------------------------
+
 
 ::
 
     make -f makefiles/install_software.mk install_ext_apps
 
 Mkvtree licence / Vmatch
-------------------------
+
 
 Get a licence `here <http://www.vmatch.de/>`__
 
@@ -495,7 +505,7 @@ Alternately, you can copy-paste from another RSAT device...
     rsync -ruptvl /packages/rsat/bin/vmatch.lic root@<IP>:/packages/rsat/bin/
 
 10. Data management
-===================
+*******************
 
 ::
 
@@ -508,7 +518,7 @@ Alternately, you can copy-paste from another RSAT device...
     cd $RSAT
 
 Install model organisms, required for some of the Web tools.
-------------------------------------------------------------
+
 
 ::
 
@@ -516,17 +526,17 @@ Install model organisms, required for some of the Web tools.
     download-organism -v 1 -org Drosophila_melanogaster
 
 Get the list of organisms supported on your computer.
------------------------------------------------------
+
 
 ::
 
     supported-organisms
 
 11. Install selected R librairies
-=================================
+************************************
 
 Packages required for some RSAT scripts.
-----------------------------------------
+
 
 ::
 
@@ -539,10 +549,10 @@ Packages required for some RSAT scripts.
 NB: second only if git repo
 
 12. Testing RSAT & external programs
-====================================
+************************************
 
 Test a simple Perl script that does not require for organisms to be installed.(OK)
-----------------------------------------------------------------------------------
+
 
 ::
 
@@ -550,21 +560,21 @@ Test a simple Perl script that does not require for organisms to be installed.(O
     random-seq -l 100
 
 Test a simple python script that does not require organisms to be installed.(OK)
---------------------------------------------------------------------------------
+
 
 ::
 
     random-motif -l 10 -c 0.90
 
 Test vmatch
------------
+
 
 ::
 
     random-seq -l 100 | purge-sequence
 
 seqlogo
--------
+
 
 ::
 
@@ -572,7 +582,7 @@ seqlogo
     seqlogo
 
 weblogo 3
----------
+
 
 ::
 
@@ -580,7 +590,7 @@ weblogo 3
     weblogo --help
 
 ghostscript
------------
+
 
 ::
 
@@ -588,7 +598,7 @@ ghostscript
     gs --version
 
 Check that the model genomes have been correctly installed
-----------------------------------------------------------
+
 
 ::
 
@@ -596,7 +606,7 @@ Check that the model genomes have been correctly installed
     retrieve-seq -org Saccharomyces_cerevisiae -all -from 0 -to +2 | oligo-analysis -l 3 -1str -return occ,freq -sort
 
 13. Configure the SOAP/WSDL Web services
-========================================
+*****************************************
 
 Check the URL of the web services (RSAT\_WS). By default, the server
 addresses the WS requests to itself (http://localhost/rsat) because web
@@ -609,7 +619,7 @@ services are used for multi-tierd architecture of some Web tools
     #echo $RSAT_WS
 
 Get the current IP address
---------------------------
+
 
 ::
 
@@ -618,35 +628,35 @@ Get the current IP address
     export  RSAT_WS=http://${IP}/rsat/
 
 Initialize the Web services stub
---------------------------------
+
 
 ::
 
     make -f makefiles/init_rsat.mk ws_init RSAT_WS=${RSAT_WS}
 
 After this, re-generate the web services stubb, with the following command
---------------------------------------------------------------------------
+
 
 ::
 
     make -f makefiles/init_rsat.mk ws_stub RSAT_WS=${RSAT_WS}
 
 Test the local web services OK
-------------------------------
+
 
 ::
 
     make -f makefiles/init_rsat.mk ws_stub_test
 
 Test RSAT Web services (local and remote) without using the SOAP/WSDL stubb (direct parsing of the remote WSDL file)
---------------------------------------------------------------------------------------------------------------------
+
 
 ::
 
     make -f makefiles/init_rsat.mk ws_nostub_test
 
 Test the program supported-organisms-server, which relies on Web services without stub
---------------------------------------------------------------------------------------
+
 
 ::
 
@@ -655,7 +665,7 @@ Test the program supported-organisms-server, which relies on Web services withou
     supported-organisms-server -url http://rsat-tagc.univ-mrs.fr/ | wc
 
 Tests on the Web site
----------------------
+
 
 Run the demo of the following tools (**to redo**)
 
@@ -671,27 +681,27 @@ Run the demo of the following tools (**to redo**)
    (blast tables).
 
 14. Install the cluster management system (torque, qsub, ...)
-=============================================================
+*************************************************************
 
 Check the number of core (processors)
--------------------------------------
+
 
 ::
 
     grep ^processor /proc/cpuinfo
 
 Check RAM
----------
+
 
 ::
 
     grep MemTotal /proc/meminfo
 
 Install Sun Grid Engine (SGE) job scheduler
--------------------------------------------
+
 
 Beware, before installing the grid engine we need to modify manually the file ``/etc/hosts``
---------------------------------------------------------------------------------------------
+
 
 ::
 
@@ -734,10 +744,10 @@ Take all default parameters BUT for the SGE master parameter, type
 Test that jobs can be sent to the job scheduler.
 
 15. OPTIONAL
-============
+***************
 
 Install some software tools for NGS analysis.
----------------------------------------------
+
 
 ::
 
@@ -745,7 +755,7 @@ Install some software tools for NGS analysis.
     make -f makefiles/install_software.mk install_meme
 
 Ganglia: tool to monitor a cluster (or single machine)
-------------------------------------------------------
+
 
 `Link. <https://www.digitalocean.com/community/tutorials/introduction-to-ganglia-on-ubuntu-14-04>`__
 
@@ -758,9 +768,10 @@ Ganglia: tool to monitor a cluster (or single machine)
 
 
 2. GALAXY SERVER SETUP ? check google drive
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Downloading Galaxy code
-=======================
+***********************
 
 We followed the instructions from the Galaxy Web site:
 
@@ -771,13 +782,13 @@ https://github.com/galaxyproject/galaxy/ cd galaxy ## Go th the galaxy
 directory
 
 Check out the master branch, recommended for production server
-==============================================================
+****************************************************************
 
 | git checkout -b master origin/master
 | git pull ## Just in case, we are already up-to-date \`\`\`
 
 Configure the Galaxy server (and get python modules if required)
-================================================================
+*****************************************************************
 
 We first edit the config file to chooe a specific port for Galaxy
 
@@ -793,7 +804,7 @@ admin\_users=admin1@address.fr,admin2@univbazar.fr,admin3@gmail.com port
 over the network allow\_user\_deletion = True
 
 Configuring the Apache server on RSAT
-=====================================
+***************************************
 
 Activate the Apache module rewrite.load
 
@@ -824,7 +835,7 @@ Restart the Apache server.
 ``{r eval=FALSE} sudo service apache2 restart``
 
 Starting the galaxy server
-==========================
+**************************
 
 ``{r eval=FALSE} sh run.sh``
 
@@ -833,11 +844,11 @@ On our internal network, the server becomes available at the address:
 http://192.168.1.6:8082
 
 Registrating
-============
+****************
 
 -  open a connection to the Galaxy server
 -  In the Galaxy menu, run the command **User -> Register**. Enter the
    same email address as you declared as admin users.
 
 Install Galaxy modules
-======================
+**********************

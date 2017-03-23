@@ -1,8 +1,12 @@
+Wiki
+----
+
+
 Versioning, code sharing
-========================
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 GitHub
-------
+******
 
 `Link <http://github.com>`__
 
@@ -11,25 +15,25 @@ A few more links:
 **TODO**
 
 SourceForge
------------
+***********
 
 `Link <http://sourceforge.net>`__
 
 BitBucket
----------
+**********
 
 `Link <http://bitbucket.org/>`__
 
 SourcesSup Renater
-------------------
+******************
 
 `Link <http://sourcesup.renater.fr>`__
 
 How to...
----------
+~~~~~~~~~~
 
 Find answers to probably-already-asked questions?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+****************************************************
 
 Check out these Q & A sites:
 
@@ -44,7 +48,7 @@ For questions related to computing problems:
 -  `Super User <http://superuser.com/>`__
 
 Get the best out of quality control?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*************************************
 
 -  `QC Fail Sequencing <https://sequencing.qcfail.com/>`__
 
@@ -52,7 +56,7 @@ Get the best out of quality control?
    interpretation <http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/3%20Analysis%20Modules/>`__
 
 Download and install the SPP peak-caller?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*******************************************
 
 I've struggled with this one so I'll leave a few notes here:
 
@@ -96,12 +100,12 @@ In unix shell:
     sudo R CMD INSTALL spp_1.11.tar.gz
 
 Find the exact size of genomes of model organisms?
---------------------------------------------------
+***************************************************
 
 -  `Link <http://users.rcn.com/jkimball.ma.ultranet/BiologyPages/G/GenomeSizes.html>`__
 
 File formats
-============
+~~~~~~~~~~~~
 
 *NB* Should be merged with glossary section?
 
@@ -135,7 +139,7 @@ A list of formats maintained by the
    (`more <http://www.1000genomes.org/wiki/Analysis/Variant%20Call%20Format/vcf-variant-call-format-version-41>`__).
 
 French Bioinformatics Institute (IFB)
-=====================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The `IFB cloud <http://cloud.france-bioinformatique.fr>`__ proposes many
 services such as:
@@ -147,7 +151,7 @@ services such as:
 `Documentation <http://www.france-bioinformatique.fr/?q=fr/core/cellule-infrastructure/documentation-cloud>`__
 
 Glossary
-========
+~~~~~~~~~
 
 We define hereafter a series of abbreviations, terms and concepts which
 appear recurrently in the litterature about NGS analysis. This document
@@ -158,10 +162,10 @@ Other resources:
 -  `link <https://github.com/fidelram/deepTools/wiki/Glossary>`__
 
 A
--
+*
 
 B
--
+*
 
 -  **bam (file format):** compressed sam
    (`more <http://bioinformatics.oxfordjournals.org/content/25/16/2078.full.pdf>`__).
@@ -174,7 +178,7 @@ B
    adapting the alpha threshold rather than correcting the **p-value**.
 
 C
--
+*
 
 -  **ChIP-exo:**
 -  **ChIP-seq:**
@@ -184,12 +188,12 @@ C
 -  **Core:**
 
 D
--
+*
 
 -  **DEG/Differentially Expressed Gene:**
 
 E
--
+*
 
 -  **e-value (E):** indicates the number of false positives expected by
    chance, for a given threshold of **p-value**. It is a number that can
@@ -206,7 +210,7 @@ of tests). It is thus not a p-value, since probabilities are by
 definition comprized between 0 and 1.
 
 F
--
+*
 
 -  **Family-wise error rate (FWER):** indicates the probability to
    observe at least one false positive among the multiple tests.
@@ -222,7 +226,7 @@ FWER = P(FP >= 1)
    false positive among them.
 
 G
--
+*
 
 -  **genome (file format):**
 -  **genomic input:**
@@ -238,10 +242,10 @@ G
    samples related to the same publication or thematics).
 
 H
--
+*
 
 I
--
+*
 
 -  **input:** Pour le peak-calling, le mot "input" est utilisé dans un
    sens tout à fait particulier, pour désigner un jeu de séquences
@@ -250,13 +254,13 @@ I
    génomique (actuellement le plus généralement utilisé) et le mock.
 
 J
--
+*
 
 K
--
+*
 
 L
--
+*
 
 -  **Library:** Terme utilisé de façon parfois ambiguë selon le contxte.
    Les biologistes se réfèrent à une librairie d'ADN pour désigner ...
@@ -267,7 +271,7 @@ L
    regroupant une série de fonctions et procédures.
 
 M
--
+*
 
 -  **m:** number of tests in a multiple-testing schema (e.g. number of
    genes in differential expression analysis).
@@ -295,16 +299,16 @@ M
    **FWER**, **FDR**).
 
 N
--
+*
 
 -  **Negative control:**
 -  **Next Generation Sequencing:**
 
 O
--
+*
 
 P
--
+*
 
 -  **p-value (P):** the **nominal p-value** is the p-value attached to
    one particular element in a series of multiple tests. For example, in
@@ -326,12 +330,12 @@ ways.
    position (`more <http://samtools.sourceforge.net/pileup.shtml>`__).
 
 Q
--
+*
 
 -  **q-value:**
 
 R
--
+*
 
 -  **RAM:**
 -  **Raw read:** non-aligned read.
@@ -343,7 +347,7 @@ R
 -  **RNA-seq:**
 
 S
--
+*
 
 -  **sam (file format):** aligned reads
    (`more <http://bioinformatics.oxfordjournals.org/content/25/16/2078.full.pdf>`__).
@@ -357,35 +361,38 @@ S
    `documentation <www.ncbi.nlm.nih.gov/books/NBK56913/#search.each_srx_entry_in_the_entrez_sra>`__.
 
 T
--
+*
 
 U
--
+*
 
 V
--
+*
 
 -  **vcf (file format):** variant call format
    (`more <http://www.1000genomes.org/wiki/Analysis/Variant%20Call%20Format/vcf-variant-call-format-version-41>`__).
 -  **Virtual machine:**
 
 W
--
+*
 
 -  **wig (file format):** coverage / density of some signal along genome
    (`more <http://genome.ucsc.edu/goldenPath/help/wiggle.html>`__).
 
 X
--
+*
 
 Y
--
+*
 
 Z
--
+*
+
+Statistics and NGS
+~~~~~~~~~~~~~~~~~~~
 
 Abbreviations
--------------
+**************
 
 +----------------+------------------------------------+
 | Abbreviation   | Meaning                            |
@@ -401,7 +408,7 @@ Abbreviations
 +----------------+------------------------------------+
 
 Symbols
--------
+********
 
 +-------------+-----------------------------------------------------------------------------------------------------------+
 | Symbol      | Meaning                                                                                                   |
@@ -413,13 +420,13 @@ Symbols
 | :math:`E`   | e-value                                                                                                   |
 +-------------+-----------------------------------------------------------------------------------------------------------+
 
---------------
+
 
 Multiple testing corrections
-----------------------------
+*****************************
 
 The problem with multiple tests
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The **multiple testing** problem arises from the application of a given
 statistical test to a large number of cases. For example, in
@@ -432,10 +439,10 @@ positive indicated by the nominal p-value will be challenged for each
 element.
 
 P-value and derived multiple testing corrections
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 P-value (nominal p-value)
-~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The **nominal p-value** is the p-value attached to one particular
 element in a series of multiple tests. For example, in differential
@@ -445,10 +452,10 @@ observation *under the null hypothesis*, i.e. in the absence of
 regulation.
 
 Bonferroni correction
-~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 E-value
-~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The **e-value** indicates the number of false positives expected by
 chance, for a given threshold of p-value.
@@ -465,7 +472,7 @@ Note that the e-value is a positive number ranging from :math:`0` to
 probabilities are by definition comprized between 0 and 1.
 
 Family-wise error rate (FWER)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The Family-Wise Error Rate (**FWER**) indicates the probability to
 observe at least one false positive among the multiple tests.
@@ -473,7 +480,7 @@ observe at least one false positive among the multiple tests.
 :math:`FWER = P(FP >= 1)`
 
 False Discovery Rate (FDR)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The **False Discovery Rate** (**FDR**) indicates the expected proportion
 of false positives *among the cases declared positive*. For example, if
@@ -482,7 +489,7 @@ an FDR threshold of 0.05, we should expect to have
 :math:`0.05 \cdot 200=10` false positive among them.
 
 What is an adjusted p-value?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 An **adjusted p-value** is a statistics derived from the nominal p-value
 in order to correct for the effects of multiple testing.
@@ -499,10 +506,11 @@ not actual "adjusted p-values".
 The most usual correction is the FDR, which can be estimated in various
 ways.
 
---------------
+NGS tools and software
+~~~~~~~~~~~~~~~~~~~~~~
 
 NGS analysis tools
-==================
+*********************
 
 This list is far from exhaustive. You can find other lists:
 
@@ -515,10 +523,10 @@ This list is far from exhaustive. You can find other lists:
 -  Elixir's `Tools and Data Services Registry <https://bio.tools/>`__
 
 Quality assessment
-------------------
+^^^^^^^^^^^^^^^^^^
 
 FastQC
-~~~~~~
+
 
 `Link <http://www.bioinformatics.babraham.ac.uk/projects/fastqc/>`__
 
@@ -539,7 +547,7 @@ The main functions of FastQC are:
    running the interactive application
 
 Trimming
---------
+^^^^^^^^^^
 
 The quality of the reads generated by high-throughput sequencing
 technologies tend to decrease at their ends. Trimming consists in
@@ -547,7 +555,7 @@ cutting out theses ends, and thus better the quality of reads before the
 mapping.
 
 Sickle
-~~~~~~
+
 
 `Link <https://github.com/najoshi/sickle>`__
 
@@ -558,10 +566,10 @@ removed. Sickle takes into account three different types of read
 quality: Illumina, Solexa, Sanger.
 
 Cutadapt
-~~~~~~~~
+
 
 Alignment/mapping
------------------
+^^^^^^^^^^^^^^^^^
 
 *note* find that presentation explaining the difference between the 2 of
 em
@@ -581,7 +589,7 @@ qualité de l'alignement, et plus les analyses ultérieures seront de
 qualité.
 
 BWA
-~~~
+
 
 `Link <http://bio-bwa.sourceforge.net/>`__
 
@@ -592,42 +600,42 @@ Durbin R. (2009). Fast and accurate short read alignment with
 Burrows-Wheeler Transform. Bioinformatics, 25:1754-60.
 
 Bowtie
-~~~~~~
+
 
 Others
-~~~~~~
+
 
 A list on
 `Wikipedia <https://en.wikipedia.org/wiki/List_of_sequence_alignment_software>`__
 
 Peak-calling
-------------
+^^^^^^^^^^^^
 
 **TODO** section à étoffer, voir protocole d'install snakemake.
 
 MACS14/MACS2
-~~~~~~~~~~~~
+
 
 SWEMBL
-~~~~~~
+
 
 HOMER (findPeaks)
-~~~~~~~~~~~~~~~~~
+
 
 SPP
-~~~
+
 
 bPeaks
-~~~~~~
+
 
 SICER
-~~~~~
+
 
 Motif analysis
---------------
+^^^^^^^^^^^^^^
 
 Regulatory Sequence Analysis Tools (RSAT)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 `Link <http://rsat.eu/>`__
 
@@ -641,7 +649,7 @@ l'analyse de données de ChIP-seq.
 More: see the tutorials section in ``resources.md``.
 
 MEME
-~~~~
+
 
 `Link <http://meme.ebi.edu.au/meme/doc/meme-chip.html>`__
 
@@ -652,23 +660,23 @@ développée par l'équipe de Tim Bailey. Inclut des outils spécifiques
 pour l'analyse de données de ChIP-seq.
 
 File conversion
----------------
+^^^^^^^^^^^^^^^^
 
 SamTools
-~~~~~~~~
+
 
 `Link <http://samtools.sourceforge.net/>`__
 
 BamTools
-~~~~~~~~
+
 
 BedTools
-~~~~~~~~
+
 
 `Link <http://bedtools.readthedocs.org/en/latest/>`__
 
 SRA Toolkit
-~~~~~~~~~~~
+
 
 `Documentation <http://www.ncbi.nlm.nih.gov/Traces/sra/?view=toolkit_doc>`__
 
@@ -685,7 +693,7 @@ files.
    guide <http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=toolkit_doc&f=std>`__
 
 Miscellaneous
--------------
+^^^^^^^^^^^^^
 
 -  `MICSA <http://bioinfo-out.curie.fr/software.html>`__: peak-calling &
    motifs discovery
@@ -703,16 +711,16 @@ Miscellaneous
 -  ...
 
 Resources
-=========
+~~~~~~~~~~~
 
 Research articles
------------------
+******************
 
 Protocols
----------
+***************
 
 ChIP-seq guidelines
--------------------
+************************
 
 -  `Bailey et al.,
    2013 <http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003326>`__.
@@ -724,10 +732,10 @@ ChIP-seq guidelines
    consortia.
 
 Tutorials
----------
+************
 
 French
-~~~~~~
+^^^^^^
 
 -  `Thomas-Chollier et al.
    2012 <http://www.nature.com/nprot/journal/v7/n8/full/nprot.2012.088.html>`__.
@@ -740,25 +748,25 @@ French
    tutorial <http://bioinfo-fr.net/lanalyse-de-donnees-rna-seq-mode-demploi>`__
 
 English
-~~~~~~~
+^^^^^^^^^
 
 -  `Galaxy tutorial <https://wiki.galaxyproject.org/Learn>`__
 
 Databases
----------
+****************
 
 -  `Wikipedia
    list <https://en.wikipedia.org/wiki/List_of_biological_databases>`__
 
 Sequencing technologies
-=======================
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 cf slides
 
 Virtualization
-==============
+~~~~~~~~~~~~~~~
 
 ...
 
 Workflow development tools
-==========================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
