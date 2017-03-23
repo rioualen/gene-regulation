@@ -8,8 +8,8 @@ if not "reads_source" in config["dir"].keys():
 if not "fastq" in config["dir"].keys():
     sys.exit("You must define a location for the fastq files.")
 
-if not "strands" in config["metadata"].keys():
-    sys.exit("Strands suffixes must be defined in the config file")
+#if not "strands" in config["metadata"].keys():
+#    sys.exit("Strands suffixes must be defined in the config file")
 
 # Rule
 rule sra_to_fastq_split:
