@@ -1,0 +1,219 @@
+
+"""Generic work< flow for the analysis of ChIP-seq data for the binding
+of transcription factors.
+
+
+This workflow performs the following treatments: 
+
+ - read mapping
+ - peak-calling with alternate peak-calling programs
+( - motif discovery)
+
+The details are specified in a yaml-formatted configuration file.
+
+Usage:
+
+1. Run in command line mode
+
+    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/factor_workflow.py 
+        --configfile path/to/specific/config_file.yml \
+        [targets]
+
+2. Send tasks to qsub job scheduler
+
+    snakemake -p -c "qsub {params.qsub}" -j 12 \
+        -s gene-regulation/scripts/snakefiles/workflows/ChIP-seq_workflow_PE.wf \
+        --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml \
+        [targets]
+
+3. Generate flowcharts:
+
+    snakemake -p -s scripts/snakefiles/workflows/ChIP-seq_workflow_PE.wf \
+        --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml \
+        --force flowcharts
+
+Sequencing type: 	single end
+
+Author: 		Claire Rioualen, Jacques van Helden
+Contact: 		claire.rioualen@inserm.fr
+
+"""
+
+#================================================================#
+#                       Python Imports 
+#================================================================#
+
+from snakemake.utils import R
+import os
+import sys
+import datetime
+import re
+import pandas as pd
+
+GENEREG_LIB = os.path.abspath(config["dir"]["gene_regulation"])
+
+# Python includes
+PYTHON = os.path.join(GENEREG_LIB, "scripts/python_lib")
+include: os.path.join(PYTHON, "util.py")
+
+#================================================================#
+#                      Global variables
+#================================================================#
+
+# Samples
+SAMPLE_IDS = read_table(config["metadata"]["samples"])['ID']
+SAMPLE_CONDITIONS = read_table(config["metadata"]["samples"])['Condition']
+
+# Genome & annotations
+GENOME_DIR = config["dir"]["genome"]
+GENOME_FASTA = os.path.join(GENOME_DIR, config["genome"]["fasta_file"])
+GENOME_GFF3 = os.path.join(GENOME_DIR, config["genome"]["gff3_file"])
+GENOME_GTF = os.path.join(GENOME_DIR, config["genome"]["gtf_file"])
+
+# Design
+DESIGN = read_table(config["metadata"]["design"])
+TREATMENT = DESIGN['treatment']
+CONTROL = DESIGN['control']
+
+if not ("results" in config["dir"].keys()):
+    sys.exit("The parameter config['dir']['results'] should be specified in the config file.")
+else:
+    RESULTS_DIR = config["dir"]["results"]
+
+if not ("fastq" in config["dir"].keys()):
+    sys.exit("The parameter config['dir']['fastq'] should be specified in the config file.")
+else:
+    FASTQ_DIR = config["dir"]["fastq"]
+
+if not ("samples" in config["dir"].keys()):
+    SAMPLE_DIR = config["dir"]["results"]
+else:
+    SAMPLE_DIR = config["dir"]["samples"]
+
+if not ("reports" in config["dir"].keys()):
+    REPORTS_DIR = config["dir"]["results"]
+else:
+    REPORTS_DIR = config["dir"]["reports"]
+
+if not ("peaks" in config["dir"].keys()):
+    PEAKS_DIR = config["dir"]["results"]
+else:
+    PEAKS_DIR = config["dir"]["peaks"]
+
+#================================================================#
+#               Snakemake includes
+#================================================================#
+
+RULES = os.path.join(GENEREG_LIB, "scripts/snakefiles/rules")
+
+include: os.path.join(RULES, "bam_by_pos.rules")
+include: os.path.join(RULES, "bam_to_bed.rules")
+include: os.path.join(RULES, "bam_stats.rules")
+include: os.path.join(RULES, "bowtie_index.rules")
+include: os.path.join(RULES, "bowtie.rules")
+include: os.path.join(RULES, "bowtie2_index.rules")
+include: os.path.join(RULES, "bowtie2.rules")
+include: os.path.join(RULES, "bPeaks.rules")
+include: os.path.join(RULES, "bwa_index.rules")
+include: os.path.join(RULES, "bwa.rules")
+include: os.path.join(RULES, "count_reads.rules")
+include: os.path.join(RULES, "dot_graph.rules")
+include: os.path.join(RULES, "dot_to_image.rules")
+include: os.path.join(RULES, "genome_coverage_bedgraph.rules")
+include: os.path.join(RULES, "getfasta.rules")
+include: os.path.join(RULES, "get_chrom_sizes.rules")
+include: os.path.join(RULES, "gzip.rules")
+include: os.path.join(RULES, "homer.rules")
+include: os.path.join(RULES, "igv_session.rules")
+include: os.path.join(RULES, "macs2.rules")
+include: os.path.join(RULES, "macs14.rules")
+include: os.path.join(RULES, "peak_motifs.rules")
+include: os.path.join(RULES, "spp.rules")
+include: os.path.join(RULES, "subread_index.rules")
+include: os.path.join(RULES, "subread.rules")
+include: os.path.join(RULES, "swembl.rules")
+
+#================================================================#
+#                         Workflow                               #
+#================================================================#
+
+#----------------------------------------------------------------#
+# Alignment
+#----------------------------------------------------------------#
+
+if not (("tools" in config.keys()) and ("mapping" in config["tools"].keys())):
+    sys.exit("The parameter config['tools']['mapping'] should be specified in the config file.")
+
+MAPPING_TOOLS = config["tools"]["mapping"].split()
+
+if TRIMMING_TOOLS:
+    PREFIX = expand("{trimmer}_{aligner}", aligner=MAPPING_TOOLS, trimmer=TRIMMING_TOOLS)
+else:
+    PREFIX = expand("{aligner}", aligner=MAPPING_TOOLS)
+
+MAPPING         = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}.bam", samples=SAMPLE_IDS, prefix=PREFIX)
+
+SORTED_BAM      = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_sorted_pos.bam", samples=SAMPLE_IDS, prefix=PREFIX)
+SORTED_BAM_BAI  = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_sorted_pos.bam.bai", samples=SAMPLE_IDS, prefix=PREFIX)
+BAM_STATS       = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_bam_stats.txt", samples=SAMPLE_IDS, prefix=PREFIX)
+SORTED_BED      = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_sorted_pos.bed", samples=SAMPLE_IDS, prefix=PREFIX)
+
+GENOME_COV      = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}.bedgraph", samples=SAMPLE_IDS, prefix=PREFIX)
+GENOME_COV_GZ   = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}.bedgraph.gz", samples=SAMPLE_IDS, prefix=PREFIX)
+GENOME_COV_TDF  = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}.tdf", samples=SAMPLE_IDS, prefix=PREFIX)
+GENOME_COV_BW   = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}.bw", samples=SAMPLE_IDS, prefix=PREFIX)
+
+GENOME_COV_PLUS = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_plus_strand.bedgraph", samples=SAMPLE_IDS, prefix=PREFIX) 
+GENOME_COV_MINUS= expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_minus_strand.bedgraph", samples=SAMPLE_IDS, prefix=PREFIX) 
+
+# ----------------------------------------------------------------
+# Peak-calling
+# ----------------------------------------------------------------
+
+if not (("tools" in config.keys()) and ("peakcalling" in config["tools"].keys())):
+    sys.exit("The parameter config['tools']['peakcalling'] should be specified in the config file.")
+
+PEAKCALLING_TOOLS = config["tools"]["peakcalling"].split()
+PEAKS       = expand(expand(PEAKS_DIR + "/{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}.bed", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLING_TOOLS, aligner=MAPPING_TOOLS, trimmer=TRIMMING_TOOLS)
+GET_FASTA   = expand(expand(PEAKS_DIR + "/{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}.fasta", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLING_TOOLS, aligner=MAPPING_TOOLS, trimmer=TRIMMING_TOOLS)
+
+# ----------------------------------------------------------------
+# Peak annotation
+# ----------------------------------------------------------------
+
+if not (("tools" in config.keys()) and ("annotation" in config["tools"].keys())):
+    sys.exit("The parameter config['tools']['annotation'] should be specified in the config file.")
+
+DISTANCE = config["tools"]["annotation"].split()
+GENOMIC_FEAT    = expand(expand(PEAKS_DIR + "/{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}_{{distance}}_annot.bed", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLING_TOOLS, distance=DISTANCE, aligner=MAPPING_TOOLS, trimmer=TRIMMING_TOOLS)
+
+GENE_LIST       = expand(expand(PEAKS_DIR + "/{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}_{{distance}}_annot_gene_list.tab", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLING_TOOLS, distance=DISTANCE,aligner=MAPPING_TOOLS, trimmer=TRIMMING_TOOLS)
+
+PEAK_MOTIFS     = expand(expand(PEAKS_DIR + "/{treat}_vs_{control}/{{peakcaller}}/peak-motifs/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}_peak-motifs_synthesis.html", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLING_TOOLS, aligner=MAPPING_TOOLS, trimmer=TRIMMING_TOOLS)
+
+# ----------------------------------------------------------------
+# Visualization & reports
+# ----------------------------------------------------------------
+
+## Following not yet properly implemented
+IGV = expand(REPORTS_DIR + "/igv_session.xml")
+GRAPHICS = expand(REPORTS_DIR + "{graph}.{ext}", graph=["dag", "rulegraph"], ext=["png", "pdf"])
+
+
+#================================================================#
+#                        Rule all                                #
+#================================================================#
+
+rule all: 
+	"""
+	Run analyses.
+	"""
+	input: 
+        BAM_STATS,
+        GENOME_COVERAGE_GZ,
+        PEAKS_TO_GENES,
+        PEAKS,
+        #PEAK_MOTIFS,
+        GRAPHICS
+	params: qsub=config["qsub"]
+	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"

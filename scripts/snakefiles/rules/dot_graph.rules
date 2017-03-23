@@ -8,7 +8,7 @@ if not "configfile" in config["metadata"].keys():
 if not "reports" in config["dir"].keys():
     config["dir"]["reports"] = config["dir"]["results"];
 
-dir_reports = config["dir"]["reports"]
+#dir_reports = config["dir"]["reports"]
 
 # Rule
 rule dot_graph:
@@ -16,17 +16,17 @@ rule dot_graph:
 
     Copyright: Claire Rioualen, Jacques van Helden
     """
-    output: dir_reports + "/{graph}.dot"
+    output: "{path}{graph,(rulegraph|dag)}.dot"
     params: 
         snakefile = workflow.snakefile,
-        configfile = config["metadata"]["configfile"], 
+        configfile = config["metadata"]["configfile"],  #snakemake.config, #
         qsub = config["qsub"] \
-          + " -e " + dir_reports + "/{graph}_dot_qsub.err" \
-          + " -o " + dir_reports + "/{graph}_dot_qsub.out"
-    log: dir_reports + "/{graph}_dot.log"
-    benchmark: dir_reports + "/{graph}_dot_benchmark.json"
+          + " -e {path}{graph}_dot_qsub.err" \
+          + " -o {path}{graph}_dot_qsub.out"
+    log: "{path}{graph}_dot.log"
+    benchmark: "{path}{graph}_dot_benchmark.json"
     shell: """
-(snakemake -s {params.snakefile}  --configfile  {params.configfile} --{wildcards.graph} > {output}
+(snakemake -s {params.snakefile}  --configfile {params.configfile} --{wildcards.graph} > {output}
 if [ "{wildcards.graph}" = "dag" ]
 then 
     echo "this is a dag"

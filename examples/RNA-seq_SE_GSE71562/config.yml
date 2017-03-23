@@ -40,6 +40,8 @@
     trimming: ""
     mapping: "bowtie2 subread-align" # tophat"
     diffexpr: "edgeR DESeq2"
+    read_counts: "featureCounts"
+    infer_transcripts: "cufflinks"
 
   bowtie2:
     max_mismatches: "1"
