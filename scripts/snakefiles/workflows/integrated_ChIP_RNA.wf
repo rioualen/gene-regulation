@@ -7,8 +7,6 @@ It requires to use Snakemake 3.8.1+
 Command to run the combined workflow is currently:
     snakemake -s gene-regulation/scripts/snakefiles/workflows/combined_ChIP-seq_RNA-seq.py -p --configfile gene-regulation/examples/Combined_ChIP-seq_RNA-seq --nolock
 
-I have yet to understand exactly just why I need to use this nolock option.
-
 Author:
     Claire Rioualen
 """
