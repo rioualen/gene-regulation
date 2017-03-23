@@ -598,7 +598,7 @@ not a problem of R version anyway
 libboost libraries ? apt-get install libboost-all-dev -->
 
 SWEMBL
-~~~~~~
+****************************************************************
 
 -  `SWEMBL beginner's
    manual <http://www.ebi.ac.uk/~swilder/SWEMBL/beginners.html>`__

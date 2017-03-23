@@ -1,9 +1,9 @@
 Wiki
-----
+================================================================
 
 
 Versioning, code sharing
-~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------------------------------
 
 GitHub
 ******
@@ -30,7 +30,7 @@ SourcesSup Renater
 `Link <http://sourcesup.renater.fr>`__
 
 How to...
-~~~~~~~~~~
+----------------------------------------------------------------
 
 Find answers to probably-already-asked questions?
 ****************************************************
@@ -105,7 +105,7 @@ Find the exact size of genomes of model organisms?
 -  `Link <http://users.rcn.com/jkimball.ma.ultranet/BiologyPages/G/GenomeSizes.html>`__
 
 File formats
-~~~~~~~~~~~~
+----------------------------------------------------------------
 
 *NB* Should be merged with glossary section?
 
@@ -139,7 +139,7 @@ A list of formats maintained by the
    (`more <http://www.1000genomes.org/wiki/Analysis/Variant%20Call%20Format/vcf-variant-call-format-version-41>`__).
 
 French Bioinformatics Institute (IFB)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------------------------------
 
 The `IFB cloud <http://cloud.france-bioinformatique.fr>`__ proposes many
 services such as:
@@ -151,7 +151,7 @@ services such as:
 `Documentation <http://www.france-bioinformatique.fr/?q=fr/core/cellule-infrastructure/documentation-cloud>`__
 
 Glossary
-~~~~~~~~~
+----------------------------------------------------------------
 
 We define hereafter a series of abbreviations, terms and concepts which
 appear recurrently in the litterature about NGS analysis. This document
@@ -389,7 +389,7 @@ Z
 *
 
 Statistics and NGS
-~~~~~~~~~~~~~~~~~~~
+----------------------------------------------------------------
 
 Abbreviations
 **************
@@ -507,7 +507,7 @@ The most usual correction is the FDR, which can be estimated in various
 ways.
 
 NGS tools and software
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------------------------------
 
 NGS analysis tools
 *********************
@@ -711,7 +711,7 @@ Miscellaneous
 -  ...
 
 Resources
-~~~~~~~~~~~
+----------------------------------------------------------------
 
 Research articles
 ******************
@@ -759,14 +759,14 @@ Databases
    list <https://en.wikipedia.org/wiki/List_of_biological_databases>`__
 
 Sequencing technologies
-~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------------------------------
 
 cf slides
 
 Virtualization
-~~~~~~~~~~~~~~~
+----------------------------------------------------------------
 
 ...
 
 Workflow development tools
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------------------------------

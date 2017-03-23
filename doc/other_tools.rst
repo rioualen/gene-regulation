@@ -1,9 +1,9 @@
 Other tools
-------------
+================================================================
 
 
 RSAT install manual
-~~~~~~~~~~~~~~~~~~~
+----------------------------------------------------------------
 
 NB: OLD, to be updated / hopefully replaced with apt-get 
 
@@ -13,8 +13,8 @@ root.
 
 !!! Experimented users only !!!
 
-1. First steps
-***************
+First steps
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Set the locales manually if needed.
 
@@ -54,8 +54,8 @@ Check the installation device. This should give sda1 or vda1?
     DEVICE=`df -h / | grep '/dev'| awk '{print $1}' | perl -pe 's/\/dev\///'`
     echo ${DEVICE}
 
-2. Packages installation
-************************
+Packages installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Update apt-get.
 
@@ -190,8 +190,8 @@ To free space, remove apt-get packages that are no longer required. /?\\
     apt-get --quiet --assume-yes  autoremove
     apt-get --quiet --assume-yes  clean
 
-3. Python libraries installation
-***********************************
+Python libraries installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -199,8 +199,8 @@ To free space, remove apt-get packages that are no longer required. /?\\
     pip install fisher
     pip install httplib2
 
-4. Apache Web server configuration
-***********************************
+Apache Web server configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **/!\\** Manual interventions needed here.
 
@@ -259,8 +259,8 @@ Activate cgi scripts. Found `here <http://www.techrepublic.com/blog/diy-it-guy/d
 You can check whether apache server was successfully configured and
 started by opening a web connection to ``http://{IP}``.
 
-5. RSAT distribution
-**********************
+RSAT distribution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **/!\\ Note:** The git distribution requires an account at the ENS git
 server, which is currently only possible for RSAT developing team. In
@@ -303,8 +303,8 @@ Archive download.
     sudo rm -f ${RSAT_DISTRIB}
     cd ~; ln -fs /packages/rsat rsat
 
-6. RSAT configuration
-*********************
+RSAT configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Run the configuration script, to specify the environment variables.
 
@@ -404,8 +404,8 @@ Initialise RSAT folders
 
     make -f makefiles/init_rsat.mk init
 
-7. Perl modules for RSAT
-*************************
+Perl modules for RSAT
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -449,8 +449,8 @@ Check once more if all required Perl modules have been correctly installed.
 Note: Object::InsideOut always displays "Fail", whereas it is OK during
 installation.
 
-8. Configure RSAT web server
-****************************
+Configure RSAT web server
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -475,8 +475,8 @@ If the value is "auto", get the URL as follows:
     export RSAT_WWW=http://${IP}/rsat/
     echo $RSAT_WWW
 
-9. Other
-********
+Other
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 compile RSAT programs written in C
 
@@ -504,8 +504,8 @@ Alternately, you can copy-paste from another RSAT device...
 
     rsync -ruptvl /packages/rsat/bin/vmatch.lic root@<IP>:/packages/rsat/bin/
 
-10. Data management
-*******************
+Data management
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -532,8 +532,8 @@ Get the list of organisms supported on your computer.
 
     supported-organisms
 
-11. Install selected R librairies
-************************************
+Install selected R librairies
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Packages required for some RSAT scripts.
 
@@ -548,8 +548,8 @@ Packages required for some RSAT scripts.
 
 NB: second only if git repo
 
-12. Testing RSAT & external programs
-************************************
+Testing RSAT & external programs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Test a simple Perl script that does not require for organisms to be installed.(OK)
 
@@ -605,8 +605,8 @@ Check that the model genomes have been correctly installed
     # Retrieve all the start codons and count oligonucleotide frequencies (most should be ATG).
     retrieve-seq -org Saccharomyces_cerevisiae -all -from 0 -to +2 | oligo-analysis -l 3 -1str -return occ,freq -sort
 
-13. Configure the SOAP/WSDL Web services
-*****************************************
+Configure the SOAP/WSDL Web services
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Check the URL of the web services (RSAT\_WS). By default, the server
 addresses the WS requests to itself (http://localhost/rsat) because web
@@ -680,8 +680,8 @@ Run the demo of the following tools (**to redo**)
 -  footprint-discovery to check the tools depending on homology tables
    (blast tables).
 
-14. Install the cluster management system (torque, qsub, ...)
-*************************************************************
+Install the cluster management system (torque, qsub, ...)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Check the number of core (processors)
 
@@ -743,8 +743,8 @@ Take all default parameters BUT for the SGE master parameter, type
 
 Test that jobs can be sent to the job scheduler.
 
-15. OPTIONAL
-***************
+OPTIONAL
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Install some software tools for NGS analysis.
 
@@ -767,11 +767,11 @@ Ganglia: tool to monitor a cluster (or single machine)
 
 
 
-2. GALAXY SERVER SETUP ? check google drive
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+GALAXY server setup (to be updated)
+----------------------------------------------------------------
 
 Downloading Galaxy code
-***********************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We followed the instructions from the Galaxy Web site:
 
@@ -782,13 +782,13 @@ https://github.com/galaxyproject/galaxy/ cd galaxy ## Go th the galaxy
 directory
 
 Check out the master branch, recommended for production server
-****************************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 | git checkout -b master origin/master
 | git pull ## Just in case, we are already up-to-date \`\`\`
 
 Configure the Galaxy server (and get python modules if required)
-*****************************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We first edit the config file to chooe a specific port for Galaxy
 
@@ -804,7 +804,7 @@ admin\_users=admin1@address.fr,admin2@univbazar.fr,admin3@gmail.com port
 over the network allow\_user\_deletion = True
 
 Configuring the Apache server on RSAT
-***************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Activate the Apache module rewrite.load
 
@@ -835,7 +835,7 @@ Restart the Apache server.
 ``{r eval=FALSE} sudo service apache2 restart``
 
 Starting the galaxy server
-**************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``{r eval=FALSE} sh run.sh``
 
@@ -844,11 +844,11 @@ On our internal network, the server becomes available at the address:
 http://192.168.1.6:8082
 
 Registrating
-****************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  open a connection to the Galaxy server
 -  In the Galaxy menu, run the command **User -> Register**. Enter the
    same email address as you declared as admin users.
 
 Install Galaxy modules
-**********************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

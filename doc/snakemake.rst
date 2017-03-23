@@ -1,35 +1,35 @@
 Snakemake
-------------
+================================================================
+
+This tutorial was developed assuming a unix-like architecture (Ubuntu
+14.04).
 
 Introduction
-~~~~~~~~~~~~
+----------------------------------------------------------------
 
 Snakemake concepts
-********************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  Inspired by GNU Make: system of **rules** & **targets**
 -  A rule is the *recipe* for a target
 -  Rules are combined by *matching their inputs and outputs*
 
 Installation
-********************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: {shell}
 
     sudo apt-get -y install python3-pip
     sudo pip3 install snakemake
 
-Disclaimer
-~~~~~~~~~~~~~~
 
-This tutorial was developed assuming a unix-like architecture (Ubuntu
-14.04).
+
 
 Downloads for practical exercises
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------------------------------
 
 Ubuntu libraries
-********************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: {shell}
 
@@ -42,7 +42,7 @@ Ubuntu libraries
     sudo pip3 install pyyaml                                    # Config management (5-6)
 
 Tuto material
-********************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: {shell}
 
@@ -51,7 +51,7 @@ Tuto material
     cd gene-regulation-1.0/doc/snakemake_tutorial
 
 Samtools
-********************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: {shell}
 
@@ -64,7 +64,7 @@ Samtools
     cd gene-regulation-1.0/doc/snakemake_tutorial
 
 Rsamtools
-********************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: {shell}
 
@@ -73,10 +73,10 @@ Rsamtools
 ``{r eval=FALSE} source("http://bioconductor.org/biocLite.R") biocLite("Rsamtools") quit()``
 
 Demo workflows
-~~~~~~~~~~~~~~
+----------------------------------------------------------------
 
 Workflow 1: Rules and targets
-********************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  Only the first **rule** is executed by default
 -  Rule ``all`` defines the **target**
@@ -95,7 +95,7 @@ In the terminal:
     snakemake -s workflow1/workflow1.py
 
 Workflow 2: Introducing wildcards
-********************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  **Wildcards** can replace variables
 -  Workflow applies to list of files or samples
@@ -116,7 +116,7 @@ In the terminal:
     snakemake -s workflow2/workflow2.py
 
 Workflow 3: Keywords
-********************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  Rules can use a variety of **keywords**
 -  An exhaustive list can be found
@@ -138,7 +138,7 @@ In the terminal:
     snakemake -s workflow3/workflow3.py
 
 Workflow 4: Combining rules
-********************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  Dependencies are handled implicitly, by matching filenames
 -  Commands can be executed by keywords ``run`` or ``shell``
@@ -165,7 +165,7 @@ In the terminal:
     snakemake -s workflow4/workflow4.py
 
 Workflow 5: Configuration file
-********************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  Can be in ``json`` or in ``yml`` format
 -  Acessible through the global variable **config**
@@ -197,7 +197,7 @@ In the terminal:
     snakemake -s workflow5/workflow5.py
 
 Workflow 6: Separated files
-********************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  The keyword ``include`` is used to import rules
 
@@ -224,7 +224,7 @@ In the terminal:
     snakemake -s workflow6/workflow6.py
 
 Workflow 7: The keyword Ruleorder todo
-********************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 <!-- - ...
 
@@ -243,23 +243,23 @@ rule bam\_sorted: input: "{file}.bam" output: "{file}\_sorted.bam" run:
 R(""" library(Rsamtools) sortBam("{input}", "{output}") """) \`\`\` -->
 
 Workflow 8: Combining wildcards with zip
-********************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Workflow 9: Combining wildcards selectively
-********************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Workflow 10: Using regular expression in wildcards
-********************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Other
-*****
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  temp()
 -  touch()
 -  target/all
 
 Bonus: generating flowcharts
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------------------------------
 
 .. code:: {shell}
 
@@ -269,10 +269,10 @@ Bonus: generating flowcharts
 |Direct Acyclic Graph (DAG)| |Rulegraph|
 
 More on snakemake...
-~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------------------------------
 
 Documentation
-********************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `Manual <https://bitbucket.org/snakemake/snakemake/wiki/Documentation>`__
 -  `FAQ <https://bitbucket.org/snakemake/snakemake/wiki/FAQ>`__
@@ -283,7 +283,7 @@ Documentation
    <!--[![Snakemake](https://img.shields.io/badge/snakemake-≥3.5.2-brightgreen.svg?style=flat-square)](http://snakemake.bitbucket.org)-->
 
 Installation
-********************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: {shell}
 
@@ -291,7 +291,7 @@ Installation
     pip3 install snakemake
 
 Reference
-********************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Köster, Johannes and Rahmann, Sven. "Snakemake - A scalable
 bioinformatics workflow engine". Bioinformatics 2012.
