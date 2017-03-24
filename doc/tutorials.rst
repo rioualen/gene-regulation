@@ -6,7 +6,7 @@ Initial setup
 ----------------------------------------------------------------
 
 Gene-regulation library
-****************************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For each study presented here we're creating a link to the gene-regulation library, 
 previously downloaded in section "Quick start". 
@@ -16,7 +16,7 @@ for later analyses. *
 
 
 Genome directory
-****************************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We chose to define a permanent location for genome downloads, then 
 create symlinks for study cases. 
