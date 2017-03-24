@@ -4,27 +4,28 @@ Quick start
 Assumes dependencies are handled properly cf dedicated section
 
 
-Cloning the repository
+Getting the library
 ----------------------------------------------------------------
 
 ::
 
-    cd ~/workspace
-    git clone git@github.com:rioualen/gene-regulation.git
+    wget .../gene-regulation-4.0.tar.gz
 
 Data transfer/download
 ----------------------------------------------------------------
 
 **TODO**
 
-Depends whether installing a VM or testing FG workflows locally.
+fastq file organization
+
+genome files
 
 Running the pipeline
 ----------------------------------------------------------------
 
 ::
 
-    cd ~/workspace/gene-regulation
+    ...
 
 **TODO** Update
 
