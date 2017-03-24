@@ -3,6 +3,8 @@ Gene-regulation library
 
 The library contains snakefiles, python libraries, R scripts...
 
+Workflows use *metadata*...
+
 Snakemake files (snakefiles)
 ----------------------------------------------------------------
 
@@ -16,21 +18,20 @@ Workflows are combinations of rules that serve a specific purpose:
 sequencing data quality check, ChIP-seq peaks analysis...
 
 
-Workflows
+Workflows (.wf)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 File extension: *.wf
 
 *document .wf files and include the doc here*
 
-Rules
+Rules (.rules)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-File extension: *.rules
 
 *document .rules files and include the doc here*
 
-Python scripts
+Python scripts (.py)
 ----------------------------------------------------------------
 
 *document said python scripts and include the doc here*
@@ -45,3 +46,16 @@ Configuration files (yaml)
 ----------------------------------------------------------------
 
 *document examples of config and include the doc here*
+
+
+R markdown files (.Rmd)
+----------------------------------------------------------------
+
+*document files and include the doc here*
+
+Tabulated files (.tab)
+----------------------------------------------------------------
+
+samples.tab
+
+design.tab

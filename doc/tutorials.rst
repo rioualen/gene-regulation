@@ -146,14 +146,8 @@ Execute workflow
 Workflow RNA-seq DEG
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-41190
-****************************************************************
-
 Study case for the development of a Bacterial RNA-seq workflow
-==============================================================
-
-Data source
------------
+****************************************************************
 
 **Reference**
 
@@ -167,14 +161,14 @@ binding. PLoS Genet 2013 Jun;9(6):e1003565. PMID:
 `GSE41190 <http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE41190>`__
 
 File organisation
------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Short read files (.sra) are stored in sample-specific folders named
 data/source/[GSM\_ID]. In this dataset, there is a single run per
 sample, and thus a single sra file per GSM ID.
 
 Setup analysis environment
---------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -187,7 +181,7 @@ Setup analysis environment
     <!--TODO: replace with tar.gz download of gene-regulation-v3.0-->
 
 Download data
--------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 <!-- Old data (still downloadable)
 
@@ -218,7 +212,7 @@ ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX116%2F
     wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX/SRX264/SRX2641377/SRR5344684/SRR5344684.sra -P ${ANALYSIS_DIR}/data/GSM1010247
 
 Download reference genome & annotations
----------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -228,30 +222,24 @@ Download reference genome & annotations
     gunzip ${ANALYSIS_DIR}/genome/*.gz
 
 Execute workflow
-----------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ::
 
     snakemake -s ${ANALYSIS_DIR}/gene-regulation/scripts/snakefiles/workflows/RNA-seq_workflow_PE.py -p -j 5 --configfile ${ANALYSIS_DIR}/gene-regulation/examples/RNA-seq_PE_GSE41190/config.yml
 
-Rulegraph
----------
 
 .. figure:: rulegraph.png
    :alt: 
 
-71562
-*****
-
 Study case for the development of a Bacterial RNA-seq workflow
-==============================================================
+****************************************************************
+
 
 We show here how to run a template workflow for the detection of
 differentially expressed genes in the bacteria *Escherichia coli K12*
 submittted to a change from anaerobic to aerobic conditions.
 
-Data
-----
 
 **Reference**
 
@@ -259,14 +247,14 @@ GEO series:
 `GSE71562 <http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE71562>`__
 
 File organisation
------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Short read files (.sra) are stored in sample-specific folders named
 data/source/[GSM\_ID]. In this dataset, there is a single run per
 sample, and thus a single sra file per GSM ID.
 
 Setup analysis environment
---------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 We will create a specific folder for the analysis of this series, and
 include in the same folder a clone of the *gene-regulation* repository,
@@ -285,7 +273,7 @@ between the code and the results.
     <!--TODO: replace with tar.gz download of gene-regulation-v3.0-->
 
 Download data
--------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 We download the short read files from the SRA dtabase. Beware, the sra
 files require 3Gb.
@@ -309,7 +297,7 @@ files require 3Gb.
     wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX/SRX112/SRX1125299/SRR2135680/SRR2135680.sra -P ${ANALYSIS_DIR}/data/GSM1838513
 
 Download reference genome & annotations
----------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 We download the reference genome sequence and annotations.
 
@@ -325,15 +313,13 @@ We download the reference genome sequence and annotations.
     gunzip ${ANALYSIS_DIR}/genome/*.gz
 
 Execute workflow
-----------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ::
 
     cd ${ANALYSIS_DIR}
     snakemake -s gene-regulation/scripts/snakefiles/workflows/RNA-seq_workflow_SE.wf -p -j 5 --configfile ${ANALYSIS_DIR}/gene-regulation/examples/RNA-seq_SE_GSE71562/config.yml
 
-Rulegraph
----------
 
 .. figure:: rulegraph.png
    :alt: 
