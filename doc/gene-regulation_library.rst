@@ -8,14 +8,14 @@ Workflows use *metadata*...
 Snakemake files (snakefiles)
 ----------------------------------------------------------------
 
-We distinguish two different types of snakefiles, but technically they're 
+We use two different types of snakefiles, but technically they're 
 the same type of files. 
 
 We have designed the rules as single operations to be combined 
 however one wants.
 
 Workflows are combinations of rules that serve a specific purpose: 
-sequencing data quality check, ChIP-seq peaks analysis...
+quality check of sequencing data, ChIP-seq peaks analysis...
 
 
 Workflows (.wf)
