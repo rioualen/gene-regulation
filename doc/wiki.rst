@@ -1,6 +1,7 @@
-Wiki
+Wiki NGS & Bioinformatics
 ================================================================
 
+*This section is to be completely re-organized*
 
 Versioning, code sharing
 ----------------------------------------------------------------
