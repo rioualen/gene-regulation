@@ -30,6 +30,9 @@ create symlinks for study cases.
 ChIP-seq study case in *S. cerevisiae*
 ----------------------------------------------------------------
 
+Presentation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 **Description**
 
 *todo*
@@ -159,6 +162,9 @@ Workflow execution
 
 Genome-scale analysis of *Escherichia coli* FNR
 ----------------------------------------------------------------
+
+Presentation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Description**
 
