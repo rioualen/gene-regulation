@@ -44,6 +44,7 @@ User guide and reference
     :maxdepth: 3
 
     getting_started.rst
+    gene-regulation_library.rst
     tutorials.rst
     dependencies.rst
     environments.rst
