@@ -309,15 +309,12 @@ Assumes you dispose of fastq files.
 Requirements
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Assuming you have followed section 3.1 "Initial setup", you should 
+have defined a location for the genome files and the Genre-reegulation 
+library. 
+
 Fastq file organization
 ****************************************************************
-
-Ref genome(s)
-****************************************************************
-
-Gene-reg library
-****************************************************************
-
 
 Metadata
 ****************************************************************
