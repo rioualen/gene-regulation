@@ -36,8 +36,13 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
+    'sphinx.ext.napoleon',
 ]
 #extensions = []
+
+#napoleon_google_docstring = False
+#napoleon_use_param = False
+#napoleon_use_ivar = True
 
 #extensions = ['sphinx.ext.autodoc', 'sphinxcontrib.napoleon']
 
