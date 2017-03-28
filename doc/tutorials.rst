@@ -170,6 +170,8 @@ Presentation
 
 *todo*
 
+*maybe I should find another dataset with chip/rna, for this one is a little too big to process for a tuto*
+
 **Reference**
 
 Myers KS, Yan H, Ong IM, Chung D et al. Genome-scale analysis of

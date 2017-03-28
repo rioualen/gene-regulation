@@ -31,6 +31,8 @@ Rules (.rules)
 
 *document .rules files and include the doc here*
 
+.. include:: ../scripts/snakefiles/rules/bowtie.rules
+
 Python scripts (.py)
 ----------------------------------------------------------------
 
