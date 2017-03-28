@@ -556,17 +556,17 @@ calc.stats.per.sample <- function(sample.descriptions,
   stats.per.sample <- cbind(  
     sample.desc[names(count.table), ],
     data.frame(
-      "zeros" = apply(all.counts == 0, 2, sum, na.rm=TRUE), ## Number of genes with 0 counts
-      "detected" = apply(all.counts > 0, 2, sum, na.rm=TRUE), ## Number of genes counted at least once
-      "sum" = apply(all.counts, 2, sum, na.rm=TRUE), ## Sum of all counts for the sample
-      "mean" = apply(all.counts, 2, mean, na.rm=TRUE), ## Mean counts per gene
-      "min" = apply(all.counts, 2, min, na.rm=TRUE), ## Min counts per gene 
-      "perc05" = apply(all.counts, 2, quantile, probs=0.05, na.rm=TRUE), ## 5th percentile
-      "perc25" = apply(all.counts, 2, quantile, probs=0.25, na.rm=TRUE), ## 25th percentile
-      "median" = apply(all.counts, 2, median, na.rm=TRUE), ## median (percentile 50)
-      "perc75" = apply(all.counts, 2, quantile, probs=0.75, na.rm=TRUE), ## percentile 75
-      "perc95" = apply(all.counts, 2, quantile, probs=0.95, na.rm=TRUE), ## percentile 95
-      "max" = apply(all.counts, 2, max, na.rm=TRUE) ## Max counts per gene
+      "zeros" = apply(count.table == 0, 2, sum, na.rm=TRUE), ## Number of genes with 0 counts
+      "detected" = apply(count.table > 0, 2, sum, na.rm=TRUE), ## Number of genes counted at least once
+      "sum" = apply(count.table, 2, sum, na.rm=TRUE), ## Sum of all counts for the sample
+      "mean" = apply(count.table, 2, mean, na.rm=TRUE), ## Mean counts per gene
+      "min" = apply(count.table, 2, min, na.rm=TRUE), ## Min counts per gene 
+      "perc05" = apply(count.table, 2, quantile, probs=0.05, na.rm=TRUE), ## 5th percentile
+      "perc25" = apply(count.table, 2, quantile, probs=0.25, na.rm=TRUE), ## 25th percentile
+      "median" = apply(count.table, 2, median, na.rm=TRUE), ## median (percentile 50)
+      "perc75" = apply(count.table, 2, quantile, probs=0.75, na.rm=TRUE), ## percentile 75
+      "perc95" = apply(count.table, 2, quantile, probs=0.95, na.rm=TRUE), ## percentile 95
+      "max" = apply(count.table, 2, max, na.rm=TRUE) ## Max counts per gene
     )
   )
   stats.per.sample$max.sum.ratio <- stats.per.sample$max / stats.per.sample$sum
@@ -576,8 +576,8 @@ calc.stats.per.sample <- function(sample.descriptions,
   ## Count number and the fraction of samples with counts below the mean. 
   ## This shows the impact of very large counts: in some samples, 
   ## 85% of the samples have a value below the mean (i.e. the mean is at the percentile 85 !)
-  stats.per.sample$below.mean <- apply(t(all.counts) < stats.per.sample$mean, 1, sum, na.rm=TRUE)
-  stats.per.sample$fract.below.mean <- stats.per.sample$below.mean/nrow(all.counts)
+  stats.per.sample$below.mean <- apply(t(count.table) < stats.per.sample$mean, 1, sum, na.rm=TRUE)
+  stats.per.sample$fract.below.mean <- stats.per.sample$below.mean/nrow(count.table)
   # View(stats.per.sample)
   
   return(stats.per.sample)
@@ -716,13 +716,13 @@ sample.description.plots <- function (sample.desc,
   
   ## Boxplot of raw counts
   plot.files["sample_boxplot_counts"] <- file.path(dir.figures, paste(sep = "", "sample_boxplots_counts.pdf"))
-  count.boxplot(all.counts, stats.per.sample, 
+  count.boxplot(count.table, stats.per.sample, 
                 xlab="Raw counts", main="Box plots per sample: raw counts",
                 plot.file=plot.files["sample_boxplot_counts"])
 
   ## Boxplot of log10-transformed counts
   plot.files["sample_boxplot_counts_log10"] <- file.path(dir.figures, paste(sep = "", "sample_boxplots_counts_log10.pdf"))
-  count.boxplot(all.counts.log10, stats.per.sample, 
+  count.boxplot(count.table.log10, stats.per.sample, 
                 xlab="log10(counts)", main="Box plots per sample: log10(counts)",
                 plot.file=plot.files["sample_boxplot_counts_log10"])
 
@@ -743,7 +743,7 @@ sample.description.plots <- function (sample.desc,
 
   ## Draw sample correlation heatmaps for the raw read counts
   plot.files["sample_correl_heatmap_counts"] <- paste(sep="", prefix["general.file"],"_sample_correl_heatmap_counts.pdf")
-  count.correl.heatmap(all.counts, plot.file=plot.files["sample_correl_heatmap_counts"])
+  count.correl.heatmap(count.table, plot.file=plot.files["sample_correl_heatmap_counts"])
 #   hm <- heatmap.2(,  scale="none", trace="none", 
 #                   main="Correlation between raw counts", margins=c(8,8),
 #                   col=cols.heatmap) #, breaks=seq(-1,1,2/length(cols.heatmap)))
@@ -774,13 +774,13 @@ sample.description.plots <- function (sample.desc,
     verbose("Drawing generic plots from the whole count table", 1)
     
     ## Plot the impact of the normalization factor (library sum , median or percentile 75)
-    plot.file <- file.path(dir.DEG, paste(sep = "", "CPM_libsum_vs_median_vs_perc75.png"))
+    plot.file <- file.path(dir.diffexpr, paste(sep = "", "CPM_libsum_vs_median_vs_perc75.png"))
     plot.files["CPM_libsum_vs_median_vs_perc75"] <- plot.file
     message("Generating plot", plot.file)
     png(file= plot.file, width=1000, height=1000)
-    cols.counts <- as.data.frame(matrix(sample.desc$color, nrow=nrow(all.counts), ncol=ncol(all.counts), byrow = TRUE))
-    colnames(cols.counts) <- names(all.counts)
-    rownames(cols.counts) <- rownames(all.counts)
+    cols.counts <- as.data.frame(matrix(sample.desc$color, nrow=nrow(count.table), ncol=ncol(count.table), byrow = TRUE))
+    colnames(cols.counts) <- names(count.table)
+    rownames(cols.counts) <- rownames(count.table)
     plot(data.frame("libsum" = as.vector(as.matrix(cpms.libsum)),
                     "median" = as.vector(as.matrix(cpms.median)),
                     "perc75" = as.vector(as.matrix(cpms.perc75))),
@@ -788,7 +788,7 @@ sample.description.plots <- function (sample.desc,
     quiet <- dev.off()
     
     ## Plot some sample-wise statistics
-    plot.file <- file.path(dir.DEG, paste(sep = "", "sample_statistics_plots.pdf"))
+    plot.file <- file.path(dir.diffexpr, paste(sep = "", "sample_statistics_plots.pdf"))
     plot.files["sample_statistics_plots"] <- plot.file
     message("Generating plot", plot.file)
     pdf(file=plot.file, width=10, height=10)
