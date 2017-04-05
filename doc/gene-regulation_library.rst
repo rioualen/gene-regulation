@@ -1,20 +1,24 @@
 Gene-regulation library
 ================================================================
 
-The library contains snakefiles, python libraries, R scripts...
+The library contains a variety of files, including scripts and 
+configuration files. 
 
-Workflows use *metadata*...
+You can find a description of these hereafter.
 
 Snakemake files (snakefiles)
 ----------------------------------------------------------------
 
-We use two different types of snakefiles, but technically they're 
-the same type of files. 
+Snakefiles are based on the scripting language Python 3, and use a specific syntax.
 
-We have designed the rules as single operations to be combined 
+For organization purpose, we have distinguished two types 
+of Snakefiles: 
+
+* Rules are typically "bricks" to build workflows with. 
+Eache rule corresponds to a specific operation.
 however one wants.
 
-Workflows are combinations of rules that serve a specific purpose: 
+* Workflows are combinations of rules that serve a specific purpose: 
 quality check of sequencing data, ChIP-seq peaks analysis...
 
 
@@ -23,41 +27,51 @@ Workflows (.wf)
 
 File extension: *.wf
 
-*document .wf files and include the doc here*
+*todo*
 
 Rules (.rules)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-*document .rules files and include the doc here*
-
-.. include:: ../scripts/snakefiles/rules/bowtie.rules
+*todo*
 
 Python scripts (.py)
 ----------------------------------------------------------------
 
-*document said python scripts and include the doc here*
+*todo*
 
 R scripts
 ----------------------------------------------------------------
 
-*document said R scripts and include the doc here*
+*todo*
 
 
 Configuration files (yaml)
 ----------------------------------------------------------------
 
-*document examples of config and include the doc here*
+*todo*
 
 
 R markdown files (.Rmd)
 ----------------------------------------------------------------
 
-*document files and include the doc here*
+*todo*
 
 Tabulated files (.tab)
 ----------------------------------------------------------------
 
-samples.tab
+We use tabulated files in order to define and describe the samples 
+to be processed in the workflows. 
 
-design.tab
+Examples of these files are available in the *examples* folder of the 
+library. 
+
+Sample description files (samples.tab)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*todo*
+
+Experimental design files (design.tab)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*todo*

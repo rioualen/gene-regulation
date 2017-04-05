@@ -11,8 +11,9 @@ Gene-regulation library
 For each study presented here we're creating a link to the gene-regulation library, 
 previously downloaded in section "Quick start". 
 
-*note to self: it might be better to use a copy of the library, in order to ensure consistency 
-for later analyses. *
+Note: if you're using a clone of the library, 
+you might want to make a copy of it, in order to ensure consistency 
+for later analyses.
 
 
 Genome directory
@@ -117,6 +118,7 @@ The purpose of this workflow is to perform quality check with FastQC (*link to w
 If needed, trimming can be performed using the tool Sickle (*link to website and wiki*).
 
 ::
+
     cd ${ANALYSIS_DIR}
 
 *show file arborescence*
@@ -145,6 +147,7 @@ and "Download data", and "Download genome and annotation" for the dataset GSE208
 You must have run at least the workflow "import_from_sra', and optionally the workflow "quality_control". 
 
 ::
+
     cd ${ANALYSIS_DIR}
 
 Workflow execution
@@ -168,14 +171,12 @@ Presentation
 
 **Description**
 
-*todo*
-
-*maybe I should find another dataset with chip/rna, for this one is a little too big to process for a tuto*
+*Note: this dataset should be replaced soon by a smaller one*
 
 **Reference**
 
 Myers KS, Yan H, Ong IM, Chung D et al. Genome-scale analysis of
-escherichia coli FNR reveals complex features of transcription factor
+Escherichia coli FNR reveals complex features of transcription factor
 binding. PLoS Genet 2013 Jun;9(6):e1003565. PMID:
 `23818864 <http://www.ncbi.nlm.nih.gov/pubmed/23818864>`__
 
@@ -199,6 +200,7 @@ Setup analysis environment
 ****************************************************************
 
 ::
+
     ANALYSIS_DIR=${HOME}/Integrated_analysis
 
 
@@ -216,7 +218,7 @@ Setup analysis environment
     ln -s ${GENOME_DIR} ${ANALYSIS_DIR_CHIP}/genome
     CONFIG_CHIP=${ANALYSIS_DIR_CHIP}/gene-regulation/examples/ChIP-seq_SE_GSE41187/config.yml
 
-Download data ChIP-seq
+Download ChIP-seq data 
 ****************************************************************
 
 ::
@@ -249,7 +251,7 @@ Setup analysis environment
     ln -s ${GENOME_DIR} ${ANALYSIS_DIR_RNA}/genome
     CONFIG_RNA=${ANALYSIS_DIR_RNA}/gene-regulation/examples/RNA-seq_PE_GSE41190/config.yml
 
-Download data RNA-seq
+Download RNA-seq data
 ****************************************************************
 
 ::
@@ -280,11 +282,6 @@ Workflow 'integrated_ChIP_RNA'
 *todo*
 
 
-Study case for the development of a Bacterial RNA-seq workflow
-----------------------------------------------------------------
-
-*NB: this is a duplicate RNA-seq study case, maybe it shoudl be removed from the distrib*
-
 
 *Study case yet to find*
 ----------------------------------------------------------------
@@ -303,26 +300,25 @@ Workflow orthologs
 
 *todo after we revise the Glossine dataset analysis*
 
-Run with your own data *TODO*
+Running Gene-regulation workflows on your own data
 ----------------------------------------------------------------
-
-Assumes you dispose of fastq files.
 
 Requirements
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Assuming you have followed section 3.1 "Initial setup", you should 
-have defined a location for the genome files and the Genre-reegulation 
+have defined a location for the genome files and the Gene-regulation 
 library. 
 
-Fastq file organization
+Besides, you shoud dispose of you own fastq files.
+
+*TODO*
+
+Fastq files organization
 ****************************************************************
 
 Metadata
 ****************************************************************
-
-workflow.wf or custom
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 samples.tab
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -332,6 +328,10 @@ design.tab
 
 
 config.yml
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+workflow.wf
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
