@@ -872,7 +872,7 @@ have to satisfy the requirements described in part 1.1.
 If you want to manipulate data, you should also create a vDisk following
 step 1.2.
 
-Creation of an instance
+Creation of an *appliance*
 ****************************************************************
 
 When creating a new instance choose a 10 Go Ubuntu appliance and check
@@ -899,7 +899,7 @@ The new instance should appear in orange bold fonts in the dashboard.
 You can connect to the instance through ``ssh`` as shown in part 1.4.
 
 Installing programs and dependencies
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+****************************************************************
 
 Once in the virtual machine, you can install the required programs.
 
