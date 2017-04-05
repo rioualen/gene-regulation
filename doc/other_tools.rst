@@ -1,8 +1,8 @@
-Other tools
+Other tools (*to be updated*)
 ================================================================
 
 
-RSAT install manual
+RSAT installation manual
 ----------------------------------------------------------------
 
 NB: OLD, to be updated / hopefully replaced with apt-get 
@@ -767,7 +767,7 @@ Ganglia: tool to monitor a cluster (or single machine)
 
 
 
-GALAXY server setup (to be updated)
+Galaxy server setup 
 ----------------------------------------------------------------
 
 Downloading Galaxy code

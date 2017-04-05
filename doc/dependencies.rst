@@ -264,6 +264,8 @@ However, since it's an older version, it can cause problems of dependencies.
 
 We recommend installing it manually: 
 
+::
+
     cd $HOME/app_sources
     wget --no-clobber http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.5.zip
     unzip -o fastqc_v0.11.5.zip
@@ -476,6 +478,14 @@ Several possibilities, none of which have I had the courage to retry lately.
     wget -nc http://compbio.med.harvard.edu/Supplements/ChIP-seq/spp_1.11.tar.gz
     sudo R CMD INSTALL spp_1.11.tar.gz
 
+- Using git (I haven't tried this one but it looks more recent) (see `github page <https://github.com/hms-dbmi/spp>`__)
+
+::
+
+    require(devtools)
+    devtools::install_github('hms-dbmi/spp', build_vignettes = FALSE)
+
+
 I also wrote a little protocol a while ago. 
 Here's the procedure on Ubuntu 14.04, in this very order:
 
@@ -683,17 +693,19 @@ Conda
 
 *This section has to be written*
 
- conda install -c bioconda sickle=0.5 
- conda install -c bioconda bowtie=1.2.0 
- conda install -c bioconda bowtie2=2.3.0 
- conda install -c bioconda subread=1.5.0.post3 
- conda install -c bioconda tophat=2.1.1 
- conda install -c bioconda bwa=0.7.15 
- conda install -c bioconda fastqc=0.11.5 
- conda install -c bioconda macs2=2.1.1.20160309 
- conda install -c bioconda homer=4.8.3 
- conda install -c bioconda bedtools=2.26.0 
- conda install -c bioconda samtools=1.3.1 
- conda install -c bioconda bamtools=2.4.0 
+::
+
+    conda install -c bioconda sickle=0.5 
+    conda install -c bioconda bowtie=1.2.0 
+    conda install -c bioconda bowtie2=2.3.0 
+    conda install -c bioconda subread=1.5.0.post3 
+    conda install -c bioconda tophat=2.1.1 
+    conda install -c bioconda bwa=0.7.15 
+    conda install -c bioconda fastqc=0.11.5 
+    conda install -c bioconda macs2=2.1.1.20160309 
+    conda install -c bioconda homer=4.8.3 
+    conda install -c bioconda bedtools=2.26.0 
+    conda install -c bioconda samtools=1.3.1 
+    conda install -c bioconda bamtools=2.4.0 
 
 

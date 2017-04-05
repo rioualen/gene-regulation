@@ -17,7 +17,7 @@ Snakemake concepts
 Installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: {shell}
+::
 
     sudo apt-get -y install python3-pip
     sudo pip3 install snakemake
@@ -31,7 +31,7 @@ Downloads for practical exercises
 Ubuntu libraries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: {shell}
+::
 
     sudo apt-get -y install zlib1g-dev                          # samtools (1-6)
     sudo apt-get -y install libncurses5-dev libncursesw5-dev    # samtools (1-6)
@@ -44,7 +44,7 @@ Ubuntu libraries
 Tuto material
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: {shell}
+::
 
     wget https://github.com/rioualen/gene-regulation/archive/1.0.tar.gz
     tar xvzf 1.0.tar.gz
@@ -53,7 +53,7 @@ Tuto material
 Samtools
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: {shell}
+::
 
     wget -nc http://sourceforge.net/projects/samtools/files/samtools/1.3/samtools-1.3.tar.bz2
     bunzip2 -f samtools-1.3.tar.bz2
@@ -66,7 +66,7 @@ Samtools
 Rsamtools
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: {shell}
+::
 
     R
 
@@ -90,7 +90,7 @@ rule sam\_to\_bam: input: "GSM521934.sam" output: "GSM521934.bam" shell:
 
 In the terminal:
 
-.. code:: {shell}
+::
 
     snakemake -s workflow1/workflow1.py
 
@@ -111,7 +111,7 @@ rule sam\_to\_bam: input: "{file}.sam" output: "{file}.bam" shell:
 
 In the terminal:
 
-.. code:: {shell}
+::
 
     snakemake -s workflow2/workflow2.py
 
@@ -133,7 +133,7 @@ view -bS --threads {params.threads} {input} > {output}) > {log}" \`\`\`
 
 In the terminal:
 
-.. code:: {shell}
+::
 
     snakemake -s workflow3/workflow3.py
 
@@ -160,7 +160,7 @@ R(""" library(Rsamtools) sortBam("{input}", "{output}") """) \`\`\`
 
 In the terminal:
 
-.. code:: {shell}
+::
 
     snakemake -s workflow4/workflow4.py
 
@@ -192,7 +192,7 @@ R(""" library(Rsamtools) sortBam("{input}", "{output}") """) \`\`\`
 
 In the terminal:
 
-.. code:: {shell}
+::
 
     snakemake -s workflow5/workflow5.py
 
@@ -219,7 +219,7 @@ SAMPLES) \`\`\`
 
 In the terminal:
 
-.. code:: {shell}
+::
 
     snakemake -s workflow6/workflow6.py
 
@@ -261,7 +261,7 @@ Other
 Bonus: generating flowcharts
 ----------------------------------------------------------------
 
-.. code:: {shell}
+::
 
     snakemake -s workflow6/workflow6.py --dag | dot -Tpng -o d.png
     snakemake -s workflow6/workflow6.py --rulegraph | dot -Tpng -o r.png
@@ -285,7 +285,7 @@ Documentation
 Installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: {shell}
+::
 
     apt-get install python3-pip
     pip3 install snakemake
