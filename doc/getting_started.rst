@@ -1,4 +1,4 @@
-Quick start 
+Getting started
 ================================================================
 
 The above commands and tutorials are designed for a Unix environment, 

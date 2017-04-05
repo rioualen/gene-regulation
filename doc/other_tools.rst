@@ -1,4 +1,4 @@
-Other tools (*to be updated*)
+Other manuals (*to be updated*)
 ================================================================
 
 
