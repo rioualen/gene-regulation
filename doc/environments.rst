@@ -615,52 +615,10 @@ program just the way you would do it locally (see tutorials in `this
 directory <https://github.com/rioualen/gene-regulation/tree/master/doc/install_protocols>`__
 for instance).
 
-IFB bis et ter
-
-<!--output: html\_document: fig\_caption: yes highlight: zenburn
-number\_sections: yes theme: cerulean toc: yes toc\_depth: 4 toc\_float:
-yes pdf\_document: fig\_caption: yes highlight: zenburn
-number\_sections: yes toc: yes toc\_depth: 4 word\_document: toc: yes
-toc\_depth: 4 --- -->
-
--  `1. Using the Gene-regulation
-   appliance <#1-using-the-gene-regulation-appliance>`__
-
-   -  `1.1 Requirements <#11-requirements>`__
-   -  `1.2 Virtual disk creation <#12-virtual-disk-creation>`__
-   -  `1.3 Creation of an instance <#13-creation-of-an-instance>`__
-   -  `1.4 Connection to the device <#14-connection-to-the-device>`__
-   -  `1.5 Download source data <#15-download-source-data>`__
-   -  `1.6 Execute workflow <#16-execute-workflow>`__
-
--  `2. Visualizing results <#2-visualizing-results>`__
-
-   -  `2.1 Install and run the X2Go client on your host
-      computer <#21-install-and-run-the-x2go-client-on-your-host-computer>`__
-   -  `2.2 Visualize results <#22-visualize-results>`__
-
-      -  `FastQC <#fastqc>`__
-      -  `IGV <#igv>`__
-
--  `3. Create your own Gene-regulation
-   appliance <#3-create-your-own-gene-regulation-appliance>`__
-
-   -  `Creation of an instance <#creation-of-an-instance>`__
-   -  `Installing programs and
-      dependencies <#installing-programs-and-dependencies>`__
-   -  `Get the ``gene-regulation``
-      repository <#get-the-gene-regulation-repository>`__
-   -  `Run makefile to install the
-      dependencies <#run-makefile-to-install-the-dependencies>`__
-
-    Notes: This protocol was developed on a Unix computer, with the OS
-    LMDE. The virtual machines are developed with the Ubuntu 14.04 OS.
-    The protocol is based on gene-regulation v2.0
-
-1. Using the Gene-regulation appliance
+Using the Gene-regulation appliance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-1.1 Requirements
+Requirements
 ****************************************************************
 
 **User account creation & configuration**
@@ -677,7 +635,7 @@ toc\_depth: 4 --- -->
    settings <https://cloud.france-bioinformatique.fr/cloud/profile/>`__,
    through the dashboard.
 
-1.2 Virtual disk creation
+Virtual disk creation
 ****************************************************************
 
 Appliances usually have a limited amount of disk space (up to 10, 20Go).
@@ -700,7 +658,7 @@ access data on this disk through SSH.
 
    <!--\includegraphics[width=250pt]{img/vdisk-x2go.png}-->
 
-1.3 Creation of an instance
+Creation of an instance
 ****************************************************************
 
 1. Click *New Instance* button.
@@ -719,7 +677,7 @@ access data on this disk through SSH.
 .. figure:: ../../img/x2go_ssh.png
    :alt: 
 
-1.4 Connection to the device
+Connection to the device
 ****************************************************************
 
 Open a terminal on your host computer and type in:
@@ -728,7 +686,7 @@ Open a terminal on your host computer and type in:
 
     ssh -A -p 22 root@192.54.201.124
 
-1.5 Download source data
+Download source data
 ****************************************************************
 
 On the IFB cloud VM, the vDisk is automatically attached and mounted by
@@ -782,7 +740,7 @@ You should now have something like this:
 .. figure:: ../../img/data_tuto.png
    :alt: 
 
-1.6 Run the workflow
+Run the workflow
 ****************************************************************
 
 You can use the option ``-n`` to make a dry run.
@@ -803,10 +761,10 @@ Congratulations! You just executed this wonderful workflow:
 .. figure:: ../../img/rule.png
    :alt: 
 
-2. Visualizing results
+Visualizing results
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-2.1 Install and run the X2Go client on your host computer
+Install and run the X2Go client on your host computer
 ****************************************************************
 
 The Virtual Machine created on the IFB cloud doesn't have a graphical
@@ -851,7 +809,7 @@ Note: you may need to change your keyboard settings
 -  Click on tab **Layouts**
 -  Add and/or remove desired keyboards
 
-2.2 Visualize results
+Visualize results
 ****************************************************************
 
 The result files should be organized like this:
@@ -905,7 +863,7 @@ You can visualize the peaks by running IGV from the terminal.
 .. figure:: ../../img/igv.png
    :alt: 
 
-3. Create your own Gene-regulation appliance
+Create your own Gene-regulation appliance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Creating a new appliance from scratch is very similar to using one. You
