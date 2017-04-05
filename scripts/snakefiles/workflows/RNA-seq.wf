@@ -58,8 +58,10 @@ SAMPLE_IDS = read_table(config["metadata"]["samples"])['ID']
 
 # Design
 DESIGN = read_table(config["metadata"]["design"])
-REFERENCE_COND = DESIGN.iloc[:,0]
-TEST_COND = DESIGN.iloc[:,1]
+REFERENCE_COND = read_table(config["metadata"]["design"])['Reference']
+TEST_COND = read_table(config["metadata"]["design"])['Test']
+#REFERENCE_COND = DESIGN.iloc[:,0]
+#TEST_COND = DESIGN.iloc[:,1]
 
 # Genome & annotations
 GENOME_DIR = config["dir"]["genome"]

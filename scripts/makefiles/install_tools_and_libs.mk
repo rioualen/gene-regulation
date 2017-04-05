@@ -58,7 +58,7 @@ usage:
 
 CRAN_PACK_LIST='XML', 'bPeaks', 'caTools', 'VennDiagram', 'devtools'
 BIOC_PACK_LIST='affy', 'biomaRt', 'Rsamtools', 'genefilter', 'GenomicFeatures', 'edgeR', 'DESeq2'
-PUB_KEY=51716619E084DAB9 F7B8CEA6056E8E56
+PUB_KEY=51716619E084DAB9 F7B8CEA6056E8E56 06F90DE5381BA480
 
 BEDOPS_VER=2.4.19
 BEDTOOLS_VER=2.24.0
@@ -193,7 +193,7 @@ R: R_installation R_lib Rstudio
 # ================================================================
 
 # ----------------------------------------------------------------
-# File management tools
+# General tools
 # ----------------------------------------------------------------
 
 samtools:
@@ -233,6 +233,10 @@ deeptools:
 	cd deepTools && \
 	python setup.py install
 
+## Picard tools todo
+#! Java 8 required
+#https://github.com/broadinstitute/picard/releases/download/2.9.0/picard.jar
+#create $PICARD env
 
 # ----------------------------------------------------------------
 # Quality assessment & trimming
@@ -379,6 +383,7 @@ ngs_tools: \
 # Visualization
 # ================================================================
 
+# switch to java 8? I recall having an issue with v9, maybe in IGV?
 java9:
 	echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections
 	echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-selections

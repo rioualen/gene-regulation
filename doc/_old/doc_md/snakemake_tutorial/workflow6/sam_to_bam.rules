@@ -1,0 +1,8 @@
+rule sam_to_bam:
+    input: "{file}.sam"
+    output: "{file}.bam"
+    params: threads = config["samtools"]["threads"]
+    log: "{file}.log"
+    benchmark: "{file}.json"
+    shell: "(samtools view -bS --threads {params.threads} {input} > {output}) > {log}"
+
