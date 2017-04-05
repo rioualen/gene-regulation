@@ -70,7 +70,12 @@ Rsamtools
 
     R
 
-``{r eval=FALSE} source("http://bioconductor.org/biocLite.R") biocLite("Rsamtools") quit()``
+::
+
+
+    source("http://bioconductor.org/biocLite.R")
+    biocLite("Rsamtools")
+    quit()``
 
 Demo workflows
 ----------------------------------------------------------------
@@ -82,11 +87,16 @@ Workflow 1: Rules and targets
 -  Rule ``all`` defines the **target**
 -  Rule ``sam_to_bam`` automatically produces the target
 
-\`\`\`{python, eval=FALSE} # file: workflow1.py rule all: input:
-"GSM521934.bam"
+::
 
-rule sam\_to\_bam: input: "GSM521934.sam" output: "GSM521934.bam" shell:
-"samtools view {input} > {output}" \`\`\`
+    # file: workflow1.py 
+    rule all: 
+        input: "GSM521934.bam"
+
+    rule sam_to_bam: 
+        input: "GSM521934.sam" 
+        output: "GSM521934.bam" 
+        shell: "samtools view {input} > {output}" 
 
 In the terminal:
 
@@ -101,13 +111,18 @@ Workflow 2: Introducing wildcards
 -  Workflow applies to list of files or samples
 -  Use of the **expand** function
 
-\`\`\`{python, eval=FALSE} # file: workflow2.py SAMPLES = ["GSM521934",
-"GSM521935"]
+::
 
-rule all: input: expand("{sample}.bam", sample = SAMPLES)
+    # file: workflow2.py 
+    SAMPLES = ["GSM521934", "GSM521935"]
 
-rule sam\_to\_bam: input: "{file}.sam" output: "{file}.bam" shell:
-"samtools view {input} > {output}" \`\`\`
+    rule all: 
+        input: expand("{sample}.bam", sample = SAMPLES)
+
+    rule sam_to_bam: 
+        input: "{file}.sam" 
+        output: "{file}.bam" 
+        shell: "samtools view {input} > {output}"
 
 In the terminal:
 
@@ -122,14 +137,21 @@ Workflow 3: Keywords
 -  An exhaustive list can be found
    `here <https://bitbucket.org/snakemake/snakemake/wiki/Documentation#markdown-header-grammar>`__
 
-\`\`\`{python, eval=FALSE} # file: workflow3.py SAMPLES = ["GSM521934",
-"GSM521935"]
+::
 
-rule all: input: expand("{sample}.bam", sample = SAMPLES)
+    # file: workflow3.py
+    SAMPLES = ["GSM521934", "GSM521935"]
 
-rule sam\_to\_bam: input: "{file}.sam" output: "{file}.bam" params:
-threads = 2 log: "{file}.log" benchmark: "{file}.json" shell: "(samtools
-view -bS --threads {params.threads} {input} > {output}) > {log}" \`\`\`
+    rule all: 
+        input: expand("{sample}.bam", sample = SAMPLES)
+
+    rule sam_to_bam: 
+        input: "{file}.sam" 
+        output: "{file}.bam" 
+        params:
+            threads = 2 log: "{file}.log" 
+        benchmark: "{file}.json" 
+        shell: "(samtools view -bS --threads {params.threads} {input} > {output}) > {log}"
 
 In the terminal:
 
@@ -144,19 +166,33 @@ Workflow 4: Combining rules
 -  Commands can be executed by keywords ``run`` or ``shell``
 -  Several languages: ``R``, ``bash``, ``python``
 
-\`\`\`{python, eval=FALSE} # file: workflow4.py from snakemake.utils
-import R
+::
 
-SAMPLES = ["GSM521934", "GSM521935"]
+    # file: workflow4.py 
+    from snakemake.utils
+    import R
 
-rule all: input: expand("{sample}\_sorted.bam", sample = SAMPLES)
+    SAMPLES = ["GSM521934", "GSM521935"]
 
-rule sam\_to\_bam: input: "{file}.sam" output: "{file}.bam" params:
-threads = 2 log: "{file}.log" benchmark: "{file}.json" shell: "(samtools
-view -bS --threads {params.threads} {input} > {output}) > {log}"
+    rule all: 
+        input: expand("{sample}_sorted.bam", sample = SAMPLES)
 
-rule bam\_sorted: input: "{file}.bam" output: "{file}\_sorted.bam" run:
-R(""" library(Rsamtools) sortBam("{input}", "{output}") """) \`\`\`
+    rule sam_to_bam: 
+        input: "{file}.sam" 
+        output: "{file}.bam" 
+        params:
+            threads = 2 log: "{file}.log" 
+        benchmark: "{file}.json" 
+        shell: "(samtools view -bS --threads {params.threads} {input} > {output}) > {log}"
+
+    rule bam_sorted: 
+        input: "{file}.bam" 
+        output: "{file}\_sorted.bam" 
+        run:
+            R(""" 
+            library(Rsamtools) 
+            sortBam("{input}", "{output}") 
+            """)
 
 In the terminal:
 
@@ -170,25 +206,44 @@ Workflow 5: Configuration file
 -  Can be in ``json`` or in ``yml`` format
 -  Acessible through the global variable **config**
 
-\`\`\`{python, eval=FALSE} # file: workflow5.py from snakemake.utils
-import R
+::
 
-configfile: "config.yml"
+    # file: workflow5.py 
+    from snakemake.utils
+    import R
 
-SAMPLES = config["samples"].split() OUTDIR = config["outdir"]
+    configfile: "config.yml"
 
-rule all: input: expand(OUTDIR + "{sample}\_sorted.bam", sample =
-SAMPLES)
+    SAMPLES = config["samples"].split() OUTDIR = config["outdir"]
 
-rule sam\_to\_bam: input: "{file}.sam" output: "{file}.bam" params:
-threads = config["samtools"]["threads"] log: "{file}.log" benchmark:
-"{file}.json" shell: "(samtools view -bS --threads {params.threads}
-{input} > {output}) > {log}"
+    rule all: 
+        input: expand(OUTDIR + "{sample}_sorted.bam", sample = SAMPLES)
 
-rule bam\_sorted: input: "{file}.bam" output: "{file}\_sorted.bam" run:
-R(""" library(Rsamtools) sortBam("{input}", "{output}") """) \`\`\`
+    rule sam_to_bam: 
+        input: "{file}.sam" 
+        output: "{file}.bam" 
+        params:
+            threads = config["samtools"]["threads"] 
+        log: "{file}.log" 
+        benchmark: "{file}.json" 
+        shell: "(samtools view -bS --threads {params.threads} {input} > {output}) > {log}"
 
-``{yaml, eval=FALSE} # file: config.yml   samples: "GSM521934 GSM521935"    outdir: "gene-regulation-1.0/doc/snakemake_tutorial/results/"   samtools:     threads: "2"``
+    rule bam_sorted: 
+        input: "{file}.bam" 
+        output: "{file}_sorted.bam" 
+        run:
+            R(""" 
+            library(Rsamtools) 
+            sortBam("{input}", "{output}") 
+            """)
+
+::
+
+    # file: config.yml   
+    samples: "GSM521934 GSM521935"    
+    outdir: "gene-regulation-1.0/doc/snakemake_tutorial/results/"
+    samtools:     
+        threads: "2"
 
 In the terminal:
 
@@ -201,21 +256,49 @@ Workflow 6: Separated files
 
 -  The keyword ``include`` is used to import rules
 
-\`\`\`{python, eval=FALSE} # file: workflow6.py from snakemake.utils
-import R
+::
 
-configfile: "config.yml"
+    # file: workflow6.py 
 
-SAMPLES = config["samples"].split() OUTDIR = config["outdir"]
+    from snakemake.utils
+    import R
 
-include: "sam\_to\_bam.rules" include: "bam\_sorted.rules"
+    configfile: "config.yml"
 
-rule all: input: expand(OUTDIR + "{sample}\_sorted.bam", sample =
-SAMPLES) \`\`\`
+    SAMPLES = config["samples"].split() 
+    OUTDIR = config["outdir"]
 
-``{python, eval=FALSE} # file: sam_to_bam.rules rule sam_to_bam:     input: "{file}.sam"     output: "{file}.bam"     params: threads = config["samtools"]["threads"]     log: "{file}.log"     benchmark: "{file}.json"     shell: "(samtools view -bS --threads {params.threads} {input} > {output}) > {log}"``
+    include: "sam_to_bam.rules" 
+    include: "bam_sorted.rules"
 
-``{python, eval=FALSE} # file: bam_sorted.rules rule bam_sorted:     input: "{file}.bam"     output: "{file}_sorted.bam"     run:         R("""         library(Rsamtools)         sortBam("{input}", "{output}")         """)``
+    rule all: 
+        input: expand(OUTDIR + "{sample}_sorted.bam", sample = SAMPLES)
+
+::
+
+    # file: sam_to_bam.rules 
+
+    rule sam_to_bam: 
+        input: "{file}.sam" 
+        output: "{file}.bam" 
+        params: 
+            threads = config["samtools"]["threads"] 
+        log: "{file}.log" 
+        benchmark: "{file}.json" 
+        shell: "(samtools view -bS --threads {params.threads} {input} > {output}) > {log}"
+
+::
+
+    # file: bam_sorted.rules 
+
+    rule bam_sorted: 
+        input: "{file}.bam" 
+        output: "{file}_sorted.bam" 
+        run: 
+            R(""" 
+            library(Rsamtools) 
+            sortBam("{input}", "{output}") 
+            """)
 
 In the terminal:
 
@@ -225,22 +308,6 @@ In the terminal:
 
 Workflow 7: The keyword Ruleorder todo
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-<!-- - ...
-
-\`\`\`{python, eval=FALSE} # file: workflow4.py from snakemake.utils
-import R
-
-SAMPLES = ["GSM521934", "GSM521935"]
-
-rule all: input: expand("{sample}\_sorted.bam", sample = SAMPLES)
-
-rule sam\_to\_bam: input: "{file}.sam" output: "{file}.bam" params:
-threads = 2 log: "{file}.log" benchmark: "{file}.json" shell: "(samtools
-view -bS --threads {params.threads} {input} > {output}) > {log}"
-
-rule bam\_sorted: input: "{file}.bam" output: "{file}\_sorted.bam" run:
-R(""" library(Rsamtools) sortBam("{input}", "{output}") """) \`\`\` -->
 
 Workflow 8: Combining wildcards with zip
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -266,7 +333,7 @@ Bonus: generating flowcharts
     snakemake -s workflow6/workflow6.py --dag | dot -Tpng -o d.png
     snakemake -s workflow6/workflow6.py --rulegraph | dot -Tpng -o r.png
 
-|Direct Acyclic Graph (DAG)| |Rulegraph|
+*include img*
 
 More on snakemake...
 ----------------------------------------------------------------
@@ -278,9 +345,6 @@ Documentation
 -  `FAQ <https://bitbucket.org/snakemake/snakemake/wiki/FAQ>`__
 -  `Forum <https://groups.google.com/forum/#!forum/snakemake>`__
 
-.. raw:: html
-
-   <!--[![Snakemake](https://img.shields.io/badge/snakemake-≥3.5.2-brightgreen.svg?style=flat-square)](http://snakemake.bitbucket.org)-->
 
 Installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -296,5 +360,4 @@ Reference
 Köster, Johannes and Rahmann, Sven. "Snakemake - A scalable
 bioinformatics workflow engine". Bioinformatics 2012.
 
-.. |Direct Acyclic Graph (DAG)| image:: img/dag.png
-.. |Rulegraph| image:: img/rulegraph.png
+
