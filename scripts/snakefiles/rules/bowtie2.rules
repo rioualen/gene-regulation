@@ -85,7 +85,7 @@ rule bowtie2:
             shell("bowtie2 -x {input.index} -1 " + input.reads[0] + " -2 " + input.reads[1] + " -S {params.sam} --phred33 -N {params.max_mismatches} --threads {params.threads} 2> {log}")
         elif (seq_type == "se"):
             shell("bowtie2 -x {input.index} -U {input.reads} -S {params.sam} --threads {params.threads} --phred33 -N {params.max_mismatches} 2> {log}")
-        shell("samtools view -b -S {params.sam} > {output.bam} 2> {log}")
+        shell("samtools view -b -S {params.sam} > {output.bam}")
         shell("rm {params.sam}")
 
 
