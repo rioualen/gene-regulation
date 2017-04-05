@@ -34,15 +34,28 @@ ChIP-seq study case in *S. cerevisiae*
 Presentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Description**
-
-*todo*
-
 **Reference**
 
 Preti M, Ribeyre C, Pascali C, Bosio MC et al. The telomere-binding
 protein Tbf1 demarcates snoRNA gene promoters in Saccharomyces
 cerevisiae. Mol Cell 2010 May 28;38(4):614-20. PMID: 20513435
+
+**Abstract**
+
+Small nucleolar RNAs (snoRNAs) play a key role in ribosomal RNA biogenesis, 
+yet factors controlling their expression are unknown. We found that 
+the majority of Saccharomyces snoRNA promoters display an aRCCCTaa sequence motif 
+at the upstream border of a TATA-containing nucleosome-free region. 
+Genome-wide ChIP-seq analysis showed that these motifs are bound by Tbf1, 
+a telomere-binding protein known to recognize mammalian-like T(2)AG(3) 
+repeats at subtelomeric regions. Tbf1 has over 100 additional promoter targets, 
+including several other genes involved in ribosome biogenesis and the TBF1 gene itself. 
+Tbf1 is required for full snoRNA expression, yet it does not influence 
+nucleosome positioning at snoRNA promoters. In contrast, Tbf1 contributes to 
+nucleosome exclusion at non-snoRNA promoters, where it selectively colocalizes 
+with the Tbf1-interacting zinc-finger proteins Vid22 and Ygr071c. 
+Our data show that, besides the ribosomal protein gene regulator Rap1, 
+a second telomere-binding protein also functions as a transcriptional regulator linked to yeast ribosome biogenesis.
 
 **Access link**
 
@@ -115,7 +128,7 @@ This workflow can be run after the workflow 'import_from_sra', or directly on pr
 
 The purpose of this workflow is to perform quality check with FastQC (*link to website and wiki*). 
 
-If needed, trimming can be performed using the tool Sickle (*link to website and wiki*).
+Optionally, trimming can be performed using the tool Sickle (*link to website and wiki*).
 
 ::
 

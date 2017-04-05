@@ -1,6 +1,8 @@
 Dependencies
 ================================================================
 
+*Note: this section needs to be refreshed*
+
 Manual installation
 ----------------------------------------------------------------
 
@@ -65,7 +67,7 @@ qsub
 
 
 
-Create bin/ and app\_sources/ (opt) TODO
+Create bin/ and app\_sources/ (optional)
 ****************************************************************
 
 While some programs will be installed completely automatically, others 
@@ -90,13 +92,13 @@ so by editing the ``~/.profile`` file.
 
     nano ~/.profile
 
-Fetch this paragraph and add your new tool:
+Fetch this paragraph and add the path to manually installed executables:
 
 ::
 
     # set PATH so it includes user's private bin if it exists
     if [ -d "$HOME/bin" ] ; then
-        PATH="$HOME/bin/sickle:$PATH"
+        PATH="$HOME/bin:$PATH"
     fi
 
 Execute the file to validate the change.
@@ -142,8 +144,8 @@ Not installed natively?
 Pandas library
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This library is used in order to read tab-delimited files (see files
-``samples.tab`` and ``design.tab``).
+This library is used in order to read tab-delimited files used in the workflows 
+(see files ``samples.tab`` and ``design.tab``).
 
 ::
 
@@ -167,12 +169,10 @@ R
 Snakemake
 ****************************************************************
 
--  `Documentation <https://bitbucket.org/snakemake/snakemake/wiki/Documentation>`__
+-  `Documentation <http://snakemake.readthedocs.io>`__
 -  `FAQ <https://bitbucket.org/snakemake/snakemake/wiki/FAQ>`__
 -  `Forum <https://groups.google.com/forum/#!forum/snakemake>`__
--  More: see
-   `wiki/informatics <https://github.com/rioualen/gene-regulation/blob/master/doc/wiki-fg/informatics.md>`__
-   section.
+-  See also Snakemake section for tutorials. 
 
 Now you have installed Python 3 and pip3 (see previous section), you can
 install snakemake safely.
@@ -247,9 +247,28 @@ provides a modular set of analyses which you can use to give a quick
 impression of whether your data has any problems of which you should be
 aware before doing any further analysis.
 
+Links:
+
+-  `QC Fail Sequencing <https://sequencing.qcfail.com/>`__
+
+-  `FastQC results
+   interpretation <http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/3%20Analysis%20Modules/>`__
+
+FastQC is available from linux repositories:
+
 ::
 
     sudo apt-get install fastqc
+
+However, since it's an older version, it can cause problems of dependencies. 
+
+We recommend installing it manually: 
+
+    cd $HOME/app_sources
+    wget --no-clobber http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.5.zip
+    unzip -o fastqc_v0.11.5.zip
+    chmod +x FastQC/fastqc
+    ln -s -f $HOME/app_sources/FastQC/fastqc $HOME/bin/fastqc
 
 Trimming
 ****************************************************************
@@ -260,22 +279,19 @@ Sickle
 `Sickle <https://github.com/najoshi/sickle>`__ is a trimming tool which
 better the quality of NGS reads.
 
--  Pre-requisite: install ``zlib`` (see section 1.1.4).
--  Clone the git repository into your bin (see section 1.2) and run
+-  Pre-requisite: install ``zlib`` (*link to section*).
+-  Clone the git repository into your bin (*link to section*) and run
    ``make``.
 
 ::
 
-    cd $HOME/bin
-    git clone https://github.com/najoshi/sickle.git
-    cd sickle
-    make
+    cd $HOME/app_sources
+    git clone https://github.com/najoshi/sickle.git 
+    cd sickle 
+    make 
+    cp sickle $HOME/bin
 
--  Add sickle to your ``$PATH`` (see section 1.3).
 
-::
-
-    PATH="$HOME/bin/sickle:$PATH"
 
 Alignment/mapping
 ****************************************************************
@@ -289,17 +305,24 @@ as the human genome.
 
 -  `Manual <http://bio-bwa.sourceforge.net/bwa.shtml>`__
 
+-  `Publication <http://www.ncbi.nlm.nih.gov/pubmed/19451168>`__ 
+
+Li H. and Durbin R. (2009). Fast and accurate short read alignment with Burrows-Wheeler Transform. Bioinformatics, 25:1754-60.
+
 ::
 
     sudo apt-get install bwa
 
-.. raw:: html
+Bowtie
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-   <!--
-   V: 0.7.5a-r405
+::
 
-   Latest : 0.7.12
-   -->
+    cd $HOME/app_sources
+    wget --no-clobber http://downloads.sourceforge.net/project/bowtie-bio/bowtie/$(BOWTIE1_VER)/bowtie-$(BOWTIE1_VER)-linux-x86_64.zip
+    unzip bowtie-$(BOWTIE1_VER)-linux-x86_64.zip
+    cp `find bowtie-$(BOWTIE1_VER)/ -maxdepth 1 -executable -type f` $HOME/bin
+
 
 Bowtie2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -309,18 +332,15 @@ documentation <http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml>`__
 
 `Instructions <http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#obtaining-bowtie-2>`__
 
--  Download package
-   `here <https://sourceforge.net/projects/bowtie-bio/files/bowtie2/>`__
--  Move package to your personnal bin/
--  Unzip
--  Add to $PATH (see section 1.3)
--  There you go!
+`Downloads <https://sourceforge.net/projects/bowtie-bio/files/bowtie2/>`__
 
 ::
 
-    cd ~/bin
+    cd $HOME/app_sources
     wget http://sourceforge.net/projects/bowtie-bio/files/bowtie2/2.2.6/bowtie2-2.2.6-linux-x86_64.zip
     unzip bowtie2-2.2.6-linux-x86_64.zip
+    p `find bowtie2-$(BOWTIE2_VER)/ -maxdepth 1 -executable -type f` $HOME/bin
+
 
 Peak-calling
 ****************************************************************
@@ -328,10 +348,17 @@ Peak-calling
 bPeaks
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+`Web page <http://bpeaks.gene-networks.net/>`__
+
 Peak-caller developped specifically for yeast, can be useful in order to
 process small genomes only.
 
-**TODO**
+Available as an R library.
+
+::
+
+    install.packages("bPeaks")
+    library(bPeaks)
 
 HOMER
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -343,17 +370,11 @@ instructions <http://homer.salk.edu/homer/introduction/install.html>`__
 
 ::
 
+    mkdir $HOME/app_sources/homer
+    cd $HOME/app_sources/homer
     wget "http://homer.salk.edu/homer/configureHomer.pl"
-    mkdir $HOME/bin/HOMER
-    mv configureHomer.pl $HOME/bin/HOMER
-    cd $HOME/bin/HOMERcd $HOME/bin/HOMER
     perl configureHomer.pl -install homer
-
-Add to path (see section 1.3)
-
-::
-
-    PATH="$HOME/bin/HOMER/bin:$PATH"
+    cp `find $HOME/app_sources/homer/bin -maxdepth 1 -executable -type f` $HOME/bin
 
 The basic Homer installation does not contain any sequence data. To
 download sequences for use with HOMER, use the configureHomer.pl script.
@@ -406,84 +427,96 @@ annotations in GTF format.
 MACS 1.4
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
--  `doc <http://liulab.dfci.harvard.edu/MACS/00README.html>`__
--  `install <http://liulab.dfci.harvard.edu/MACS/INSTALL.html>`__
+-  `Documentation <http://liulab.dfci.harvard.edu/MACS/00README.html>`__
+-  `Installation manual <http://liulab.dfci.harvard.edu/MACS/INSTALL.html>`__
 
 ::
 
-    cd $HOME/bin
-    wget "https://github.com/downloads/taoliu/MACS/MACS-1.4.2-1.tar.gz"
-    tar -xvzf MACS-1.4.2-1.tar.gz
-    cd MACS-1.4.2
+    cd $HOME/app_sources
+    wget "https://github.com/downloads/taoliu/MACS/MACS-1.4.3.tar.gz"
+    tar -xvzf MACS-1.4.3.tar.gz
+    cd MACS-1.4.3
     sudo python setup.py install
     macs14 --version
 
-**NB** deb package wouldn't work with python 2.7, asks for python 2.6.
 
 MACS2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
--  `MACS2 web page <https://github.com/taoliu/MACS/>`__
+-  `Webpage <https://github.com/taoliu/MACS/>`__
 
 ::
 
     sudo apt-get install python-numpy
     sudo pip install MACS2
 
-.. raw:: html
 
-   <!--
-   Marche pas?
-   ```
-   $ git clone https://github.com/taoliu/MACS.git
-   # pip install MACS2
-   ...
-   ```
-   -->
-
-SPP R package (broken)
+SPP R package
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-::
+This one might be a little but tricky (euphemism).
 
-    install.packages("caTools")
-    install.packages("spp")
+Several possibilities, none of which have I had the courage to retry lately. 
 
-<!--
+- In R
 
 ::
 
     source("http://bioconductor.org/biocLite.R")
     biocLite("spp")
-    > install.packages("spp")
+    install.packages("caTools")
+    install.packages("spp")
+
+- In commandline
 
 ::
 
-    R CMD INSTALL spp_1.10.tar.gz
+    apt-get install libboost-all-dev
+    cd $HOME/app_sources
+    wget -nc http://compbio.med.harvard.edu/Supplements/ChIP-seq/spp_1.11.tar.gz
+    sudo R CMD INSTALL spp_1.11.tar.gz
 
-...
+I also wrote a little protocol a while ago. 
+Here's the procedure on Ubuntu 14.04, in this very order:
+
+In unix shell:
 
 ::
 
-    sudo su
-    echo "deb http://www.stats.bris.ac.uk/R/bin/linux/ubuntu precise/" >> /etc/apt/sources.list
-    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+    # unix libraries
     apt-get update
-    apt-get upgrade
+    apt-get -y install r-base
+    apt-get -y install libboost-dev zlibc zlib1g-dev
+
+In R shell:
 
 ::
 
-    wget "https://cran.r-project.org/src/base/R-3/R-3.2.2.tar.gz"
-    tar -xf rm R-3.2.2.tar.gz
-    rm R-3.2.2.tar.gz
-    cd rm R-3.2.2
-    ./configure
+    # Rsamtools
+    source("http://bioconductor.org/biocLite.R")
+    biocLite("Rsamtools")
 
-doesn't work on VM
+In unix shell:
 
-not a problem of R version anyway
+::
 
-libboost libraries ? apt-get install libboost-all-dev -->
+    # spp
+    wget http://compbio.med.harvard.edu/Supplements/ChIP-seq/spp_1.11.tar.gz
+    sudo R CMD INSTALL spp_1.11.tar.gz
+
+A few links:
+
+-  Download page can be found
+   `here <http://compbio.med.harvard.edu/Supplements/ChIP-seq/>`__,
+   better chose version ``1.11``.
+-  SPP requires the Bioconductor library
+   `Rsamtools <https://bioconductor.org/packages/release/bioc/html/Rsamtools.html>`__
+   to be installed beforehand.
+-  Unix packages ``gcc`` and ``libboost`` (or equivalents) must be
+   installed.
+-  You can find a few more notes
+   `here <http://seqanswers.com/forums/archive/index.php/t-22653.html>`__.
+-  Good luck!
 
 SWEMBL
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -491,7 +524,18 @@ SWEMBL
 -  `SWEMBL beginner's
    manual <http://www.ebi.ac.uk/~swilder/SWEMBL/beginners.html>`__
 
-**TODO**
+::
+
+    cd $HOME/app_sources
+    wget "http://www.ebi.ac.uk/~swilder/SWEMBL/SWEMBL.3.3.1.tar.bz2"
+    bunzip2 -f SWEMBL.3.3.1.tar.bz2
+    tar xvf SWEMBL.3.3.1.tar
+    rm SWEMBL.3.3.1.tar
+    chown -R ubuntu-user SWEMBL.3.3.1
+    cd SWEMBL.3.3.1
+    make
+
+It seems there could be issues with C flags. To be investigated. 
 
 Motif discovery, motif analysis
 ****************************************************************
@@ -499,9 +543,7 @@ Motif discovery, motif analysis
 RSAT suite
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-See `doc/install\_protocols
-section <https://github.com/rioualen/gene-regulation/blob/master/doc/install_protocols/install_rsat_ubuntu14.04.Rmd>`__.
-Beware, this manuel might be deprecated.
+*see dedicated section*
 
 Miscellaneous
 ****************************************************************
@@ -525,25 +567,12 @@ or issue the following commands:
 
 ::
 
-    cd ~/bin
-    wget "http://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.5.2/sratoolkit.2.5.2-ubuntu64.tar.gz"
-    tar -xvzf sratoolkit.2.5.2-ubuntu64.tar.gz
-    rm sratoolkit.2.5.2-ubuntu64.tar.gz
+    cd $HOME/app_sources
+    wget -nc http://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.5.2/sratoolkit.2.5.2-ubuntu64.tar.gz
+    tar xzf sratoolkit.2.5.2-ubuntu64.tar.gz
+    cp `find sratoolkit.2.5.2-ubuntu64/bin -maxdepth 1 -executable -type l` $HOME/bin
 
-Add to path (cf section 1.3):
-
-::
-
-    PATH="$HOME/bin/sratoolkit.2.5.2-ubuntu64/bin:$PATH"
-
-Check version:
-
-::
-
-    fastq-dump --version
-      fastq-dump : 2.5.2
-
-You should be able to install SRA toolkit simply by issuing this
+You can also install SRA toolkit simply by issuing this
 command, but likely it won't be the most recent release:
 
 ::
@@ -564,17 +593,15 @@ large nucleotide sequence alignments.
 `SAMtools <http://samtools.sourceforge.net/>`__ provides several tools
 to process such files.
 
-TODO: install samtools from website, not from apt-get repositories.
+::
 
-.. raw:: html
-
-   <!--
-   ```
-   sudo apt-get install samtools
-   ```
-   V: 0.1.19
-   Latest: 1.2
-   -->
+    cd $HOME/app_sources
+    wget --no-clobber http://sourceforge.net/projects/samtools/files/samtools/1.3/samtools-1.3.tar.bz2
+    bunzip2 -f samtools-1.3.tar.bz2
+    tar xvf samtools-1.3.tar
+    cd samtools-1.3
+    make 
+    sudo make install
 
 Bedtools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -589,114 +616,84 @@ widely-used genomic file formats such as BAM, BED, GFF/GTF, VCF.
 
     sudo apt-get install bedtools
 
-V: v2.17.0 Latest: 2.24.0
+or get the latest version:
+
+::
+
+    cd $HOME/app_sources
+    wget --no-clobber https://github.com/arq5x/bedtools2/releases/download/v2.24.0/bedtools-2.24.0.tar.gz
+    tar xvfz bedtools-2.24.0.tar.gz
+    cd bedtools2
+    make
+    sudo make install
 
 
-Bazar à trier
-^^^^^^^^^^^^^^^^^^^^^^^^
 
+Bedops
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Table of Contents
+::
 
--  `Pre-requisites in case of virtual machine (VM)
-   development <#pre-requisites-in-case-of-virtual-machine-vm-development>`__
+    cd $HOME/app_sources
+    wget -nc https://github.com/bedops/bedops/releases/download/v2.4.19/bedops_linux_x86_64-v2.4.19.tar.bz2
+    tar jxvf bedops_linux_x86_64-v2.4.19.tar.bz2
+    mkdir bedops
+    mv bin bedops
+    cp bedops/bin/* $HOME/bin
 
-   -  `VM creation <#vm-creation>`__
-   -  `VM customization <#vm-customization>`__
+Deeptools
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
--  `General requirements <#general-requirements>`__
+::
 
-   -  `Generic tools <#generic-tools>`__
-   -  `ssh <#ssh>`__
-   -  `rsync <#rsync>`__
-   -  `git <#git>`__
-   -  `zlib <#zlib>`__
-   -  `qsub <#qsub>`__
-   -  `Create bin/ (opt) <#create-bin-opt>`__
-   -  `Edit $PATH <#edit-path>`__
+    cd $HOME/app_sources
+    git clone https://github.com/fidelram/deepTools
+    cd deepTools
+    python setup.py install
 
--  `Snakemake workflows basic
-   requirements <#snakemake-workflows-basic-requirements>`__
+Picard tools 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-   -  `Python <#python>`__
-   -  `Pandas library <#pandas-library>`__
-   -  `Package rpy2 <#package-rpy2>`__
-   -  `R (to be revised) <#r-to-be-revised>`__
-   -  `Snakemake <#snakemake>`__
-   -  `Graphviz <#graphviz>`__
-
--  `NGS analysis software & tools <#ngs-analysis-software--tools>`__
-
-   -  `File management <#file-management>`__
-   -  `SRA toolkit <#sra-toolkit>`__
-   -  `Samtools <#samtools>`__
-   -  `Bedtools <#bedtools>`__
-   -  `Quality assessment <#quality-assessment>`__
-   -  `FastQC <#fastqc>`__
-   -  `Trimming <#trimming>`__
-   -  `Sickle <#sickle>`__
-   -  `Alignment/mapping <#alignmentmapping>`__
-   -  `BWA <#bwa>`__
-   -  `Bowtie2 <#bowtie2>`__
-   -  `Peak-calling <#peak-calling>`__
-   -  `bPeaks <#bpeaks>`__
-   -  `HOMER <#homer>`__
-   -  `MACS 1.4 <#macs-14>`__
-   -  `MACS2 <#macs2>`__
-   -  `SPP R package (broken) <#spp-r-package-broken>`__
-   -  `SWEMBL <#swembl>`__
-   -  `Motif discovery, motif
-      analysis <#motif-discovery-motif-analysis>`__
-   -  `RSAT suite <#rsat-suite>`__
-
--  `Workpackage 2.6 - Gene
-   regulation <#workpackage-26---gene-regulation>`__
-
-   -  `Cloning the repository <#cloning-the-repository>`__
-   -  `Data transfer/download <#data-transferdownload>`__
-   -  `Running the pipeline <#running-the-pipeline>`__
-
--  `VM export / submission <#vm-export--submission>`__ --> <!-- ###
-   **TODO**
-
--  Include map of possible "bricks" of worflows (like general rulegraph)
-   with each step's requirement/dependencies
--  Include minimum json file config depending on bricks to be used.
-
--  Beware of paths
-
-   -  ~/workspace
-   -  ~/bin
-
--  Test all of this in IFB appliance
-
--  **VBox issues**:
-
-   -  '/etc/init.d/vboxdrv setup' error when restarting
-   -  disparition vboxnet0
-
-**/!\\** attention pour les rsync, notamment si user + root... ssh, ssh
-agent ?
-
--  revoir les install via apt-get car pb de version !
--  mettre la procédure spécifique
--  lister les versions de chaque programme pour un wf qui fonctionne
-
--  dependance mkvtree / rsat
-
--  see differences between ubuntu and lmde (python libs notamment)
--  check mac ?
-
--  check version dependencies and add --version to doc -->
+*todo*
 
 
 
 Makefile
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------------------------------
 
+*Has to be revised*
 
+The Gene-regulation library comprises a makefile that can install most of the 
+dependencies described in the previous section. 
+
+It currently allows running the following workflows:
+
+- import_from_sra.wf
+- quality_control.wf
+- ChIP-seq.wf
+
+::
+
+    cd $GENE_REG_PATH
+    make -f gene-regulation/scripts/makefiles/install_tools_and_libs.mk all
+    source ~/.bashrc
 
 Conda
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------------------------------
+
+*This section has to be written*
+
+ conda install -c bioconda sickle=0.5 
+ conda install -c bioconda bowtie=1.2.0 
+ conda install -c bioconda bowtie2=2.3.0 
+ conda install -c bioconda subread=1.5.0.post3 
+ conda install -c bioconda tophat=2.1.1 
+ conda install -c bioconda bwa=0.7.15 
+ conda install -c bioconda fastqc=0.11.5 
+ conda install -c bioconda macs2=2.1.1.20160309 
+ conda install -c bioconda homer=4.8.3 
+ conda install -c bioconda bedtools=2.26.0 
+ conda install -c bioconda samtools=1.3.1 
+ conda install -c bioconda bamtools=2.4.0 
 
 

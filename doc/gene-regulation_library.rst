@@ -14,12 +14,9 @@ Snakefiles are based on the scripting language Python 3, and use a specific synt
 For organization purpose, we have distinguished two types 
 of Snakefiles: 
 
-* Rules are typically "bricks" to build workflows with. 
-Eache rule corresponds to a specific operation.
-however one wants.
+* Rules are typically "bricks" to build workflows with. Each rule corresponds to a specific operation.
 
-* Workflows are combinations of rules that serve a specific purpose: 
-quality check of sequencing data, ChIP-seq peaks analysis...
+* Workflows are combinations of rules that serve a specific purpose: quality check of sequencing data, ChIP-seq peaks analysis...
 
 
 Workflows (.wf)
