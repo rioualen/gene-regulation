@@ -1,7 +1,7 @@
 Getting started
 ================================================================
 
-The above commands and tutorials are designed for a Unix environment, 
+The commands and tutorials below are designed for a Unix environment, 
 and were tested under the OS Linux Mint Debian Edition (LMDE). 
 
 They assume that the gene-regulation library is downloaded or cloned 
