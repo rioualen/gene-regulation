@@ -59,6 +59,7 @@ wd = os.getcwd()
 GENEREG_LIB = os.path.join(wd, config["dir"]["gene_regulation"])
 
 include: os.path.join(GENEREG_LIB, "scripts/python_lib/util.py")
+include: os.path.join(GENEREG_LIB, "scripts/python_lib/igv_session.py")
 
 
 
@@ -135,7 +136,7 @@ include: os.path.join(RULES, "bwa_index.rules")
 include: os.path.join(RULES, "bwa.rules")
 include: os.path.join(RULES, "dot_graph.rules")
 include: os.path.join(RULES, "dot_to_image.rules")
-#include: os.path.join(RULES, "fastqc.rules")
+include: os.path.join(RULES, "fastqc.rules")
 include: os.path.join(RULES, "genome_coverage_bedgraph.rules")
 include: os.path.join(RULES, "genome_coverage_bedgraph_strands.rules")
 include: os.path.join(RULES, "genome_coverage_bigwig.rules")
@@ -193,6 +194,7 @@ else:
 #INDEX = expand(GENOME_DIR + "/{aligner}/" + config["genome"]["fasta_file"], aligner=MAPPING_TOOLS)
 
 MAPPING         = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}.bam", samples=SAMPLE_IDS, prefix=PREFIX)
+MAPPING_QC      = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_bam_fastqc/{samples}_{prefix}_fastqc.html", samples=SAMPLE_IDS, prefix=PREFIX)
 
 SORTED_BAM      = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_sorted_pos.bam", samples=SAMPLE_IDS, prefix=PREFIX)
 SORTED_BAM_BAI  = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_sorted_pos.bam.bai", samples=SAMPLE_IDS, prefix=PREFIX)
@@ -205,7 +207,7 @@ GENOME_COV_BW   = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}.bw", sample
 GENOME_COV_PLUS = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_plus_strand.bedgraph", samples=SAMPLE_IDS, prefix=PREFIX) 
 GENOME_COV_MINUS= expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_minus_strand.bedgraph", samples=SAMPLE_IDS, prefix=PREFIX) 
 
-ALL_COVERAGE    = GENOME_COV_GZ, GENOME_COV_BW, GENOME_COV_TDF, GENOME_COV_PLUS, GENOME_COV_MINUS
+ALL_COVERAGE    = GENOME_COV_GZ, GENOME_COV_BW, GENOME_COV_PLUS, GENOME_COV_MINUS
 
 # ----------------------------------------------------------------
 # Peak-calling
@@ -236,11 +238,12 @@ PEAK_MOTIFS     = expand(expand(PEAKS_DIR + "/{treat}_vs_{control}/{{peakcaller}
 # Visualization & reports
 # ----------------------------------------------------------------
 
-## Following not yet properly implemented
-IGV = expand(REPORTS_DIR + "/igv_session.xml")
+## Snakemake flowcharts
+GRAPHICS = expand(REPORTS_DIR + "/flowcharts/ChIP-seq_{graph}.{ext}", graph=["dag", "rulegraph"], ext=["png", "pdf", "svg"])
 
-## Graphics & reports
-GRAPHICS = expand(REPORTS_DIR + "/ChIP-seq_{graph}.{ext}", graph=["dag", "rulegraph"], ext=["png", "pdf", "svg"])
+## Following not yet properly implemented
+igv_session("igv_session.xml", genome=GENOME_FASTA, gff3=GENOME_GFF3, gtf=GENOME_GTF, peaks=PEAKS, coverage=GENOME_COV_GZ)
+
 
 
 #================================================================#
@@ -252,7 +255,8 @@ rule all:
 	Run analyses.
 	"""
 	input: \
-#            MAPPING,
+            MAPPING,
+            MAPPING_QC,
 #            SORTED_BAM,
 #            BAM_STATS,
 #            SORTED_BAM_BAI,
