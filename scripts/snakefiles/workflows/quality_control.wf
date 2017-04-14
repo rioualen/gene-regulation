@@ -112,14 +112,14 @@ if (SEQ_TYPE == "pe"):
 #----------------------------------------------------------------#
 
 if (SEQ_TYPE == "se"):
-    RAW_QC = expand(FASTQ_DIR + "/{samples}/{samples}_fastqc/{samples}_fastqc.html", samples=SAMPLE_IDS)
+    RAW_QC = expand(FASTQ_DIR + "/{samples}/{samples}_fastq_fastqc/{samples}_fastqc.html", samples=SAMPLE_IDS)
 
 #----------------------------------------------------------------#
 # Paired-ends
 #----------------------------------------------------------------#
 
 elif (SEQ_TYPE == "pe"):
-    RAW_QC = expand(FASTQ_DIR + "/{samples}/{samples}_{strand}_fastqc/{samples}_{strand}_fastqc.html", samples=SAMPLE_IDS, strand=STRANDS)
+    RAW_QC = expand(FASTQ_DIR + "/{samples}/{samples}_{strand}_fastq_fastqc/{samples}_{strand}_fastqc.html", samples=SAMPLE_IDS, strand=STRANDS)
 
 
 else:
@@ -145,7 +145,7 @@ if (len(TRIMMING_TOOLS) != 0):
     if (SEQ_TYPE == "se"):
 
         TRIMMING    = expand(FASTQ_DIR + "/{samples}/{samples}_{trimmer}.fastq", samples=SAMPLE_IDS, trimmer=TRIMMING_TOOLS)
-        TRIM_QC     = expand(FASTQ_DIR + "/{samples}/{samples}_{trimmer}_fastqc/{samples}_{trimmer}_fastqc.html", samples=SAMPLE_IDS, trimmer=TRIMMING_TOOLS)
+        TRIM_QC     = expand(FASTQ_DIR + "/{samples}/{samples}_{trimmer}_fastq_fastqc/{samples}_{trimmer}_fastqc.html", samples=SAMPLE_IDS, trimmer=TRIMMING_TOOLS)
 
     #----------------------------------------------------------------#
     # Paired-ends
@@ -159,7 +159,7 @@ if (len(TRIMMING_TOOLS) != 0):
         STRANDS     = config["metadata"]["strands"].split()
 
         TRIMMING    = expand(FASTQ_DIR + "/{samples}/{samples}_{trimmer}_{strand}.fastq", samples=SAMPLE_IDS, trimmer=TRIMMING_TOOLS, strand=STRANDS)
-        TRIM_QC     = expand(FASTQ_DIR + "/{samples}/{samples}_{trimmer}_{strand}_fastqc/{samples}_{trimmer}_{strand}_fastqc.html", samples=SAMPLE_IDS, trimmer=TRIMMING_TOOLS, strand=STRANDS)
+        TRIM_QC     = expand(FASTQ_DIR + "/{samples}/{samples}_{trimmer}_{strand}_fastq_fastqc/{samples}_{trimmer}_{strand}_fastqc.html", samples=SAMPLE_IDS, trimmer=TRIMMING_TOOLS, strand=STRANDS)
 
     else:
         sys.exit("Error: invalid 'seq_type parameter'. Must be 'se' or 'pe'")
@@ -170,7 +170,7 @@ if (len(TRIMMING_TOOLS) != 0):
 # Reporting
 #----------------------------------------------------------------#
 
-GRAPHICS = expand(REPORTS_DIR + "/quality_control_{graph}.{ext}", graph=["dag", "rulegraph"], ext=["png", "svg"])
+GRAPHICS = expand(REPORTS_DIR + "/flowcharts/quality_control_{graph}.{ext}", graph=["dag", "rulegraph"], ext=["png", "svg"])
 
 #================================================================#
 #                        Rule all                                #
