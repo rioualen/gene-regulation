@@ -181,13 +181,14 @@ Workflow 4: Combining rules
         input: "{file}.sam" 
         output: "{file}.bam" 
         params:
-            threads = 2 log: "{file}.log" 
+            threads = 2 
+        log: "{file}.log" 
         benchmark: "{file}.json" 
         shell: "(samtools view -bS --threads {params.threads} {input} > {output}) > {log}"
 
     rule bam_sorted: 
         input: "{file}.bam" 
-        output: "{file}\_sorted.bam" 
+        output: "{file}_sorted.bam" 
         run:
             R(""" 
             library(Rsamtools) 
@@ -214,7 +215,8 @@ Workflow 5: Configuration file
 
     configfile: "config.yml"
 
-    SAMPLES = config["samples"].split() OUTDIR = config["outdir"]
+    SAMPLES = config["samples"].split() 
+    OUTDIR = config["outdir"]
 
     rule all: 
         input: expand(OUTDIR + "{sample}_sorted.bam", sample = SAMPLES)
