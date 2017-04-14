@@ -197,7 +197,7 @@ INFER_TRANSCRIPTS = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_{infer_tr
 
 
 ## Graphics & reports
-GRAPHICS = expand(REPORTS_DIR + "/RNA-seq_{graph}.{ext}", graph=["dag", "rulegraph"], ext=["png", "pdf", "svg"])
+GRAPHICS = expand(REPORTS_DIR + "/flowcharts/RNA-seq_{graph}.{ext}", graph=["dag", "rulegraph"], ext=["png", "pdf", "svg"])
 
 #================================================================#
 #                        Rule all                                #

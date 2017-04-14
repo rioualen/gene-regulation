@@ -114,7 +114,7 @@ else:
 # Reporting
 #----------------------------------------------------------------#
 
-GRAPHICS = expand(REPORTS_DIR + "/import_to_fastq_{graph}.png", graph=["dag", "rulegraph"])
+GRAPHICS = expand(REPORTS_DIR + "/flowcharts/import_to_fastq_{graph}.png", graph=["dag", "rulegraph"])
 
 #================================================================#
 #                        Rule all                                #
