@@ -23,7 +23,6 @@
     seq_type: "se"                                                                                  # required
 
   dir:
-    base: "/data/analyses/ChIP-seq_SE_GSE41187"                                                     # required. ALL DIRECTORIES SHOULD BE SPECIFIED RELATIVE TO THE BASE DIRECTORY
     reads_source: "data"                                                                            # required. dir containing raw data organized in sub directories named after the samples
     fastq: "fastq"
     genome: "genome"                                                                                # required. where to store genomes
@@ -40,12 +39,12 @@
     peakcalling: "macs2"
     annotation: "intersect"
 
-
   fastqc: 
     other_options: ""                                                           # optional (def. empty string)
 
   sickle:
-    threshold: "20"                                                             # ... 
+    qual_threshold: "20"                                                             # ... 
+    length_threshold: "20"                                                             # ... 
 
   macs14:
     pval: "0.00001"                                                             # opt, to be tested (def. 0.00001)

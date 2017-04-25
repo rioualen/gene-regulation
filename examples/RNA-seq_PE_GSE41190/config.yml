@@ -46,7 +46,8 @@
     other_options: ""
 
   sickle:
-    threshold: "20"                                                             # ... 
+    qual_threshold: "20"                                                             # ... 
+    length_threshold: "20"                                                             # ... 
 
   bowtie2:
     max_mismatches: "1"

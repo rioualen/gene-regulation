@@ -25,7 +25,6 @@
     seq_type: "se"
 
   dir:
-    base: "/data/analyses/RNA-seq_SE_GSE71562"                                                              # required. all paths are determined relatively to this directory. See documentation to know more about the file organization.
     reads_source: "data"                                                                                    # required. dir containing raw data organized in sub directories named after the samples
     fastq: "fastq"
     genome: "genome"                                                                                        # required. where to store genomes
