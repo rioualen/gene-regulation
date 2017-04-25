@@ -12,10 +12,10 @@
     organism: "Saccharomyces cerevisiae"
     size: "12500000"                                                                                        # required. if using macs2, macs14, homer...
     version: "sacCer2"                                                                                      # required. has to match genome filenames and directories
-    fasta_file: "Saccharomyces_cerevisiae.R64-1-1.30.dna.genome.fa"
+    fasta_file: "sacCer1.fa"
     gff3_file: "Saccharomyces_cerevisiae.R64-1-1.30.gff3"
     gtf_file: "Saccharomyces_cerevisiae.R64-1-1.30.gtf"
-
+#    fasta_url: "http://hgdownload.soe.ucsc.edu/goldenPath/sacCer1/bigZips/chromFa.zip"
 
   metadata:
     samples: "gene-regulation/examples/ChIP-seq_SE_GSE20870/samples.tab"                                    # required. has to contain at least sample ids
@@ -24,7 +24,6 @@
     seq_type: "se"
 
   dir:
-#    base: "."                                                             # required. ALL DIRECTORIES SHOULD BE SPECIFIED RELATIVE TO THE BASE DIRECTORY
     reads_source: "data"                                                                                    # required. dir containing raw data organized in sub directories named after the samples
     fastq: "fastq"
     genome: "genome"                                                                                        # required. where to store genomes
@@ -36,16 +35,22 @@
     reports: "results/reports"                                                                              # optional. will hold reports and graphics.                             If not mentioned, will be config["dir"]["results"]
 
   tools:
-    trimming: "sickle"
-    mapping: "bowtie2" # bwa subread-align bowtie"
-    peakcalling: "macs2 homer" # macs14 spp swembl"
+    trimming: "sickle cutadapt bbduk"
+    mapping: "bowtie2 subread-align" # bowtie"
+    peakcalling: "macs2 swembl" # macs14 spp swembl"
     annotation: "intersect" # window closest"
-    
-  fastqc: 
-    other_options: ""                                                           # optional (def. empty string)
 
   sickle:
-    threshold: "20"                                                             # optional (def. 20)
+    qual_threshold: "20"                                                             # ... 
+    length_threshold: "20"                                                             # ... 
+
+  cutadapt:
+    qual_threshold: "20"                                                             # ... 
+    length_threshold: "20"                                                             # ... 
+
+  bbduk:
+    qual_threshold: "20"                                                             # ... 
+    length_threshold: "20"                                                             # ... 
 
   bwa: 
     threads: "10"                                                               # optional. number of threads to speed up calculations (def. 1)
@@ -53,6 +58,10 @@
   bowtie2:
     threads: "10"                                                               # optional. number of threads to speed up calculations (def. 1)
     max_mismatches: "1"                                                         # optional (def. 0)
+
+  subread-align:
+    threads: "10"                                                               # optional. number of threads to speed up calculations (def. 1)
+    max_mismatches: "3"                                                         # optional (def. 3)
 
   macs14:
     pval: "0.00001"                                                             # optional (def. 0.00001)
@@ -69,16 +78,16 @@
     other_options: "--call-summits"                                             # optional can include --call-summits, --broad...
 
   swembl:
-    R: "0.05"                                                                   # optional (def. 0)
-    N: "1000000"
-    x: "1.2"                                                                    # optional (def. 1)
+    R: "0.5"                                                                   # optional (def. 0)
+#    N: "1000000"
+#    x: "1.2"                                                                    # optional (def. 1)
 
   homer: 
     style: "factor"                                                             # optional (def. factor), can be factor, histone, groseq, tss, dnase, super, mC (beware of output filenames)
     F: "2"                                                                      # optional (def. 4)
     L: "2"                                                                      # optional (def. 4)
-    P: "0.01"                                                                   # optional (def. 0.0001)
-    fdr: "0.01"                                                                 # optional (def. 0.001)
+    P: "0.05"                                                                   # optional (def. 0.0001)
+    fdr: "0.05"                                                                 # optional (def. 0.001)
 
   spp: 
     fdr: "0.01"                                                                 # optional (def. 0.01)
