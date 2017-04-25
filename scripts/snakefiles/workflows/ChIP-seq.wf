@@ -144,7 +144,6 @@ include: os.path.join(RULES, "getfasta.rules")
 include: os.path.join(RULES, "get_chrom_sizes.rules")
 include: os.path.join(RULES, "gzip.rules")
 include: os.path.join(RULES, "homer.rules")
-include: os.path.join(RULES, "igv_session.rules")
 include: os.path.join(RULES, "index_bam.rules")
 include: os.path.join(RULES, "index_fasta.rules")
 include: os.path.join(RULES, "macs2.rules")
@@ -201,6 +200,7 @@ SORTED_BAM_BAI  = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_sorted_pos.
 BAM_STATS       = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_bam_stats.txt", samples=SAMPLE_IDS, prefix=PREFIX)
 SORTED_BED      = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_sorted_pos.bed", samples=SAMPLE_IDS, prefix=PREFIX)
 
+GENOME_COV_BDG  = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}.bedgraph", samples=SAMPLE_IDS, prefix=PREFIX)
 GENOME_COV_GZ   = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}.bedgraph.gz", samples=SAMPLE_IDS, prefix=PREFIX)
 GENOME_COV_TDF  = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}.tdf", samples=SAMPLE_IDS, prefix=PREFIX)
 GENOME_COV_BW   = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}.bw", samples=SAMPLE_IDS, prefix=PREFIX)
@@ -241,9 +241,10 @@ PEAK_MOTIFS     = expand(expand(PEAKS_DIR + "/{treat}_vs_{control}/{{peakcaller}
 ## Snakemake flowcharts
 GRAPHICS = expand(REPORTS_DIR + "/flowcharts/ChIP-seq_{graph}.{ext}", graph=["dag", "rulegraph"], ext=["png", "pdf", "svg"])
 
-## Following not yet properly implemented
-igv_session("igv_session.xml", genome=GENOME_FASTA, gff3=GENOME_GFF3, gtf=GENOME_GTF, peaks=PEAKS, coverage=GENOME_COV_GZ)
-
+## IGV
+## gene-regulation/scripts/python/igv_session.py - under developemment
+xml_file = REPORTS_DIR + "/igv_session.xml"
+igv_session(xml_file, genome=GENOME_FASTA, gff3=GENOME_GFF3, gtf=GENOME_GTF, peaks=PEAKS, coverage=GENOME_COV_GZ)
 
 
 #================================================================#
@@ -258,17 +259,19 @@ rule all:
             MAPPING,
             MAPPING_QC,
 #            SORTED_BAM,
-#            BAM_STATS,
+            BAM_STATS,
 #            SORTED_BAM_BAI,
 #            GENOME_INDEX,
             ALL_COVERAGE,
-#            GENOME_COV_BW,
 #            SORTED_BED,
             PEAKS,
 #            GENOMIC_FEAT,
 #            GENE_LIST,
-            PEAK_MOTIFS,
-#            IGV, \
+#            PEAK_MOTIFS,
             GRAPHICS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
+
+
+
+
