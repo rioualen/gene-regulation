@@ -1,0 +1,81 @@
+# Drafted from sickle.rules, currently working only for single end data
+
+# Set defaults params
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "seq_type" in config["metadata"].keys():
+    sys.exit("Sequencing type (single or paired ends) must be defined in the config file")
+
+if config["metadata"]["seq_type"] == "pe" and not "strands" in config["metadata"].keys():
+    sys.exit("The param 'seq_type' must be defined when analysing paired end data")
+
+if not "bbduk" in config.keys():
+    config["bbduk"] = {}
+
+if not "threshold" in config["bbduk"].keys():
+    config["bbduk"]["threshold"] = "20"
+
+if not "qual" in config["bbduk"].keys():
+    config["bbduk"]["qual"] = "sanger"
+
+if not "fastq" in config["dir"].keys():
+    sys.exit("config['dir']['fastq'] must be in the config file.")
+
+fastq_dir = config["dir"]["fastq"]
+
+seq_type = config["metadata"]["seq_type"]
+
+if (seq_type == "pe"):
+    strands = config["metadata"]["strands"].split()
+#elif (seq_type == "se"):
+#    strands = ["empty1","empty2"]       ## This is a temp workaround to the fact that it's not possible to have conditional outputs - 3 files are produced even in single-end settings
+
+# Define input files
+def bbduk_inputs(wildcards):
+    if (seq_type == "pe"):
+        reads = expand("{fastq_dir}/{samples}/{samples}_{strand}.fastq", strand=strands, samples=wildcards.samples, fastq_dir=fastq_dir)
+    elif (seq_type == "se"):
+        reads = expand("{fastq_dir}/{samples}/{samples}.fastq", samples=wildcards.samples, fastq_dir=fastq_dir)
+    else:
+        sys.exit("Error: invalid seq_type parameter. Must be 'se' or 'pe'")
+    return reads
+
+rule bbduk:
+    """Trim one a single end raw reads file with bbduk.
+
+    Required parameters:
+        config["qsub"]
+        config["metadata"]["seq_type"]
+
+    Optional parameters:
+        config["bbduk"]["length_threshold"]
+        config["bbduk"]["qual_threshold"]
+        config["metadata"]["strands"]
+
+    Authors:
+        Claire Rioualen, Lucie Khamvongsa
+    """
+    input: reads = bbduk_inputs
+    output:
+#        forward = config["dir"]["fastq"] + "/{samples}/{samples}_bbduk_" + strands[0] + ".fastq",
+#        reverse = config["dir"]["fastq"] + "/{samples}/{samples}_bbduk_" + strands[1] + ".fastq",
+        config["dir"]["fastq"] + "/{samples}/{samples}_bbduk.fastq"
+    params:
+        qual_threshold = config["bbduk"]["qual_threshold"],
+        length_threshold = config["bbduk"]["length_threshold"],
+        temp_output = config["dir"]["fastq"] + "/{samples}/{samples}_trimmed.fq",
+        outdir = config["dir"]["fastq"] + "/{samples}",
+        qsub = config['qsub'] \
+            + " -e "+ config["dir"]["fastq"] + "/{samples}/{samples}_bbduk_qsub.err" \
+            + " -o "+ config["dir"]["fastq"] + "/{samples}/{samples}_bbduk_qsub.out"
+    log: config["dir"]["fastq"] + "/{samples}/{samples}_bbduk.log"
+    benchmark: config["dir"]["fastq"] + "/{samples}/{samples}_bbduk_benchmark.json"
+    run:
+#        if (seq_type == "pe"):
+#            shell("bbduk pe --pe-file1 " + input.reads[0] + " --pe-file2 " + input.reads[1] + " --qual-type {params.qual_type} --qual-threshold {params.threshold} --output-pe1 {output.forward} --output-pe2 {output.reverse} --output-single {output.single} 2> {log}")
+        if (seq_type == "se"):
+            shell("bbduk -Xmx1g in={input} out={output} qtrim=rl trimq={params.qual_threshold} ml={params.length_threshold} &> {log}")
+
+
+ 
