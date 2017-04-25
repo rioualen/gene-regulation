@@ -12,7 +12,10 @@ if not "sickle" in config.keys():
     config["sickle"] = {}
 
 if not "threshold" in config["sickle"].keys():
-    config["sickle"]["threshold"] = "20"
+    config["sickle"]["qual_threshold"] = "20"
+
+if not "threshold" in config["sickle"].keys():
+    config["sickle"]["length_threshold"] = "20"
 
 if not "qual" in config["sickle"].keys():
     config["sickle"]["qual"] = "sanger"
@@ -47,8 +50,9 @@ rule sickle:
         config["metadata"]["seq_type"]
 
     Optional parameters:
-        config["sickle"]["threshold"]
-        config["sickle"]["qual"]
+        config["sickle"]["qual_threshold"]
+        config["sickle"]["length_threshold"]
+        config["sickle"]["qual_type"]
         config["metadata"]["strands"]
 
     Authors:
@@ -60,7 +64,8 @@ rule sickle:
         reverse = config["dir"]["fastq"] + "/{samples}/{samples}_sickle_" + strands[1] + ".fastq",
         single = config["dir"]["fastq"] + "/{samples}/{samples}_sickle.fastq"
     params:
-        threshold = config["sickle"]["threshold"],
+        qual_threshold = config["sickle"]["qual_threshold"],
+        length_threshold = config["sickle"]["length_threshold"],
         qual_type = config["sickle"]["qual"],
         qsub = config['qsub'] \
             + " -e "+ config["dir"]["fastq"] + "/{samples}/{samples}_sickle_qsub.err" \
@@ -71,5 +76,5 @@ rule sickle:
         if (seq_type == "pe"):
             shell("sickle pe --pe-file1 " + input.reads[0] + " --pe-file2 " + input.reads[1] + " --qual-type {params.qual_type} --qual-threshold {params.threshold} --output-pe1 {output.forward} --output-pe2 {output.reverse} --output-single {output.single} 2> {log}")
         elif (seq_type == "se"):
-            shell("sickle se --fastq-file {input} --qual-type {params.qual_type} --qual-threshold {params.threshold} --output-file {output.single} &> {log}")
+            shell("sickle se --fastq-file {input} --qual-type {params.qual_type} --qual-threshold {params.qual_threshold} --length-threshold {params.length_threshold} --output-file {output.single} &> {log}")
             shell("touch {output.forward} {output.reverse}")
