@@ -66,6 +66,8 @@ include: os.path.join(RULES, "dot_to_image.rules")
 include: os.path.join(RULES, "fastqc.rules")
 include: os.path.join(RULES, "gzip.rules")
 include: os.path.join(RULES, "sickle.rules")
+include: os.path.join(RULES, "cutadapt.rules")
+include: os.path.join(RULES, "bbduk.rules")
 #include: os.path.join(RULES, "gunzip.rules")
 
 #================================================================#
