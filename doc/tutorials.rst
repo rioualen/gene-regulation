@@ -83,7 +83,7 @@ Setup analysis environment
     cd ${ANALYSIS_DIR}
     ln -s ${GENE_REG_PATH} gene-regulation
     ln -s ${GENOME_DIR}/sacCer2 genome
-    CONFIG=${ANALYSIS_DIR}/gene-regulation/examples/ChIP-seq_SE_GSE41187/config.yml
+    CONFIG=${ANALYSIS_DIR}/gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml
 
 Download data
 ****************************************************************
