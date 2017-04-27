@@ -173,7 +173,7 @@ Workflow execution
 
 *add figure*
 
-.. figure:: rulegraph.png
+.. figure:: ../examples/ChIP-seq_SE_GSE20870/rulegraph.png
    :alt: 
 
 
