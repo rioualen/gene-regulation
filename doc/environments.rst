@@ -487,18 +487,15 @@ access data on this disk through SSH.
 .. figure:: ../img/create_vDisk.png
    :alt: 
 
-Using an existing appliance
+Creating an instance of an existing appliance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Creation of an instance
-****************************************************************
 
 1. Click *New Instance* button.
 2. Choose an appliance in the drop-down menu. You may use the filter
    menu in order to look for a specific tool.
 3. Name your VM.
-4. Choose the amount of CPU and RAM to grant the VM (up to 8 CPU, 32 GB
-   RAM).
+4. Choose the amount of CPU and RAM to grant the VM.
 5. Attach the vDisk.
 6. Click *Run*.
 
@@ -515,12 +512,16 @@ Creation of an instance
 
 8. If the appliance has an HTTP interface, a link will also be provided
    in the *Access* column.
+   
+9. Connect to your VM by commandline.
+
+::
+
+    # Replace XXX by the IP of your instance
+    ssh -A -p 22 root@192.54.201.XXX
 
 Creation of an appliance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Creation
-****************************************************************
 
 Creating your own appliance can be as simple as instantiating an
 existing one.
@@ -530,8 +531,7 @@ existing one.
    6.7 IFB-20G (2016-01)**.
 3. Name your instance.
 4. Check **Create appliance**.
-5. Choose the amount of CPU and RAM to grant the VM (up to 8 CPU, 32 GB
-   RAM).
+5. Choose the amount of CPU and RAM to grant the VM.
 6. Attach the vDisk.
 7. Click *Run*.
 
@@ -549,19 +549,59 @@ existing one.
 
    ::
 
-       ssh -A -p 22 root@192.54.201.111
+       # Replace XXX by the IP of your instance
+       ssh -A -p 22 root@192.54.201.XXX
+
+First connection to the instance
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Data management
+****************************************************************
+
+Virtual disk
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+By default, if a vDisk has been attached to the VM, it is mounted under
+``/root/mydisk``.
+
+Transfers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+You can transfer data from your local computer to the VM using commands
+provided under *Access* > ssh:
+
+::
+
+    # Replace XXX by the IP of your instance
+    scp -P 22 ${localfile} root@192.54.201.XXX:
+    sftp -oPort=22 root@192.54.201.XXX
+
+Another way is to use rsync:
+
+::
+
+    # Replace XXX by the IP of your instance
+    rsync -ruptvl ${localfile} root@192.54.201.XXX:/root/mydisk/
+
+Software installation
+****************************************************************
+
+Once you're connected to the VM through ``ssh``, you can install any
+program just the way you would do it locally (see tutorials in `this
+directory <https://github.com/rioualen/gene-regulation/tree/master/doc/install_protocols>`__
+for instance).
 
 Configuration (optional)
 ****************************************************************
 
 User account
-^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Create user account and grant it sudo privileges (followed procedure
 `here <https://www.digitalocean.com/community/tutorials/how-to-add-and-delete-users-on-an-ubuntu-14-04-vps>`__).
 
 Shell coloring
-^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -580,42 +620,6 @@ Fetch following paragraph and uncomment command ``force-color``.
 
     source ~/.bashrc
 
-Data management
-****************************************************************
-
-Virtual disk
-^^^^^^^^^^^^
-
-By default, if a vDisk has been attached to the VM, it is mounted under
-``/root/mydisk``.
-
-Transfers
-^^^^^^^^^
-
-You can transfer data from your local computer to the VM using commands
-provided under *Access* > ssh:
-
-::
-
-    scp -P 22 ${localfile} root@192.54.201.111:
-    sftp -oPort=22 root@192.54.201.111
-
-Another way is to use rsync:
-
-::
-
-    rsync -ruptvl ${localfile} root@192.54.201.177:/root/mydisk/
-
-Then...
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Software installation
-****************************************************************
-
-Once you're connected to the VM through ``ssh``, you can install any
-program just the way you would do it locally (see tutorials in `this
-directory <https://github.com/rioualen/gene-regulation/tree/master/doc/install_protocols>`__
-for instance).
 
 Using the Gene-regulation appliance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
