@@ -467,11 +467,10 @@ User account creation & configuration
 .. figure:: ../img/dashboard.png
    :alt: 
 
-Using an existing appliance
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 Virtual disk creation
-****************************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Appliances usually have a limited amount of disk space (up to 10, 20Go).
 If the instance to be run necessitates disk space, you have to create a
@@ -487,6 +486,9 @@ access data on this disk through SSH.
 
 .. figure:: ../img/create_vDisk.png
    :alt: 
+
+Using an existing appliance
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Creation of an instance
 ****************************************************************
