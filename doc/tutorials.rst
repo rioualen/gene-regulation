@@ -286,7 +286,7 @@ Workflow execution
     snakemake -s ${ANALYSIS_DIR_RNA}/gene-regulation/scripts/snakefiles/workflows/RNA-seq_workflow_PE.py -p --configfile ${CONFIG_RNA}
 
 
-.. figure:: rulegraph.png
+.. figure:: ../examples/RNA-seq_PE_GSE41190/rulegraph.png
    :alt: 
 
 
