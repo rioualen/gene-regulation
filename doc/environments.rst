@@ -487,7 +487,7 @@ access data on this disk through SSH.
 .. figure:: ../img/create_vDisk.png
    :alt: 
 
-Creating an instance of an existing appliance
+Creation of an instance from an existing appliance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -591,7 +591,7 @@ program just the way you would do it locally (see tutorials in `this
 directory <https://github.com/rioualen/gene-regulation/tree/master/doc/install_protocols>`__
 for instance).
 
-Configuration (optional)
+Configuration
 ****************************************************************
 
 User account
