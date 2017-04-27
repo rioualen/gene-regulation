@@ -21,7 +21,7 @@ Creating a VM under VirtualBox software
 ****************************************************************
 
 Requirements
-^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Virtualbox software**
 
@@ -51,7 +51,7 @@ version.
 
 
 Virtual Box configuration
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Before configuring the virtual machine, we need to tell VirtualBox how
 it will enable your local virtual machines to interact with their host
@@ -81,13 +81,13 @@ it will enable your local virtual machines to interact with their host
       -  *Lower Address Bound:* 192.168.56.101
       -  *Upper Address Bound:* 192.168.56.254
 
-.. figure:: ../../img/vbox_network.png
+.. figure:: ../img/vbox_network.png
    :alt: 
 
-.. figure:: ../../img/vbox_network_adapter.png
+.. figure:: ../img/vbox_network_adapter.png
    :alt: 
 
-.. figure:: ../../img/vbox_network_DHCP.png
+.. figure:: ../img/vbox_network_DHCP.png
    :alt: 
 
 Creation of the virtual machine
@@ -321,7 +321,7 @@ Executing snakemake workflow example
 
 Congratulations! You just executed this wonderful workflow:
 
-.. figure:: ../../img/rule.png
+.. figure:: ../img/rule.png
    :alt: 
 
 Visualizing results
@@ -347,7 +347,7 @@ navigator. Fetch the ``html`` files located in the sample directories.
        firefox ~/GSE20870-analysis/results/samples/GSM521934/GSM521934_sickle-se-q20_fastqc/GSM521934_sickle-se-q20_fastqc.html
        firefox ~/GSE20870-analysis/results/samples/GSM521935/GSM521935_sickle-se-q20_fastqc/GSM521935_sickle-se-q20_fastqc.html
 
-.. figure:: ../../img/vbox_fastqc.png
+.. figure:: ../img/vbox_fastqc.png
    :alt: 
 
 IGV
@@ -363,7 +363,7 @@ You can visualize the peaks by running IGV from the terminal.
    ``~/GSE20870-analysis/results/peaks/igv_session.xml``.
 -  You may need to adjust the panel sizes.
 
-.. figure:: ../../img/igv.png
+.. figure:: ../img/igv.png
    :alt: 
 
 Export appliance (todo)
@@ -421,7 +421,7 @@ IFB cloud
 IFB cloud utilities
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. figure:: ../../img/ifb-logo.png
+.. figure:: ../img/ifb-logo.png
    :alt: 
 
 The French Bioinformatics Institute (IFB) cloud provides users with a
@@ -464,7 +464,7 @@ User account creation & configuration
    settings <https://cloud.france-bioinformatique.fr/cloud/profile/>`__,
    through the dashboard.
 
-.. figure:: ../../img/dashboard.png
+.. figure:: ../img/dashboard.png
    :alt: 
 
 Using an existing appliance
@@ -485,7 +485,7 @@ access data on this disk through SSH.
 2. Enter a size (whole number equating to the amount of Go needed).
 3. Name it.
 
-.. figure:: ../../img/create_vDisk.png
+.. figure:: ../img/create_vDisk.png
    :alt: 
 
 Creation of an instance
@@ -500,7 +500,7 @@ Creation of an instance
 5. Attach the vDisk.
 6. Click *Run*.
 
-.. figure:: ../../img/create_instance.png
+.. figure:: ../img/create_instance.png
    :alt: 
 
 7. After a few seconds, you may refresh the page until the newly created
@@ -508,7 +508,7 @@ Creation of an instance
    the *Access* column will give you the commands to access your virtual
    machine.
 
-.. figure:: ../../img/ssh.png
+.. figure:: ../img/ssh.png
    :alt: 
 
 8. If the appliance has an HTTP interface, a link will also be provided
@@ -533,14 +533,14 @@ existing one.
 6. Attach the vDisk.
 7. Click *Run*.
 
-.. figure:: ../../img/create_appliance.png
+.. figure:: ../img/create_appliance.png
    :alt: 
 
 8. Refresh the page. Your instance should appear in orange because of
    the creation mode you selected. You can now click on the **ssh**
    column to see the ssh parameters. It should look like this:
 
-.. figure:: ../../img/ubuntu_create.png
+.. figure:: ../img/ubuntu_create.png
    :alt: 
 
 9. Connect to your VM by commandline.
@@ -651,7 +651,7 @@ access data on this disk through SSH.
 3. Name it (e.g. ``GSE20870-10Gb``, the ID of the Gene Expression
    Omnibus series that will be stored on the virtual drive).
 
-.. figure:: ../../img/vdisk-x2go.png
+.. figure:: ../img/vdisk-x2go.png
    :alt: 
 
 .. raw:: html
@@ -674,7 +674,7 @@ Creation of an instance
    the *Access* column will give you the commands to access your virtual
    machine.
 
-.. figure:: ../../img/x2go_ssh.png
+.. figure:: ../img/x2go_ssh.png
    :alt: 
 
 Connection to the device
@@ -737,7 +737,7 @@ Download reference genome & annotations
 
 You should now have something like this:
 
-.. figure:: ../../img/data_tuto.png
+.. figure:: ../img/data_tuto.png
    :alt: 
 
 Run the workflow
@@ -758,7 +758,7 @@ Using 4CPU & 8Go of RAM, the workflow took about 12mn to complete.
 
 Congratulations! You just executed this wonderful workflow:
 
-.. figure:: ../../img/rule.png
+.. figure:: ../img/rule.png
    :alt: 
 
 Visualizing results
@@ -789,18 +789,18 @@ create a distant desktop to visualize the results from the host machine.
 
 2. Create a new session using the Mate desktop.
 
-.. figure:: ../../img/x2goclient_session_create.png
+.. figure:: ../img/x2goclient_session_create.png
    :alt: 
 
 3. The session now appears on the right panel. Just click it to lauch
    it!
 
-.. figure:: ../../img/x2go_launch_session.png
+.. figure:: ../img/x2go_launch_session.png
    :alt: 
 
 4. You should be now on the virtual desktop!
 
-.. figure:: ../../img/mate_term.png
+.. figure:: ../img/mate_term.png
    :alt: 
 
 Note: you may need to change your keyboard settings
@@ -814,7 +814,7 @@ Visualize results
 
 The result files should be organized like this:
 
-.. figure:: ../../img/results_orga.png
+.. figure:: ../img/results_orga.png
    :alt: 
 
 FastQC
@@ -837,7 +837,7 @@ navigator. Fetch the ``html`` files located in the sample directories.
        firefox /root/mydisk/GSE20870-analysis/results/samples/GSM521934/GSM521934_sickle-se-q20_fastqc/GSM521934_sickle-se-q20_fastqc.html
        firefox /root/mydisk/GSE20870-analysis/results/samples/GSM521935/GSM521935_sickle-se-q20_fastqc/GSM521935_sickle-se-q20_fastqc.html
 
-.. figure:: ../../img/x2go_fastqc.png
+.. figure:: ../img/x2go_fastqc.png
    :alt: 
 
 IGV
@@ -860,7 +860,7 @@ You can visualize the peaks by running IGV from the terminal.
    ``/root/mydisk/GSE20870-analysis/reports/peaks/igv_session.xml``.
 -  You may need to adjust the panel sizes.
 
-.. figure:: ../../img/igv.png
+.. figure:: ../img/igv.png
    :alt: 
 
 Create your own Gene-regulation appliance
@@ -888,12 +888,12 @@ the "Create appliance" option:
 6. Attach the vDisk.
 7. Click *Run*.
 
-.. figure:: ../../img/create_appliance.png
+.. figure:: ../img/create_appliance.png
    :alt: 
 
 The new instance should appear in orange bold fonts in the dashboard.
 
-.. figure:: ../../img/ubuntu_create.png
+.. figure:: ../img/ubuntu_create.png
    :alt: 
 
 You can connect to the instance through ``ssh`` as shown in part 1.4.
@@ -979,7 +979,7 @@ You can test whether docker works properly:
 
     docker run hello-world
 
-.. figure:: ../../img/docker_hello.png
+.. figure:: ../img/docker_hello.png
    :alt: 
 
 NB: it seems qwerty keyboard keeps popping up after docker install.

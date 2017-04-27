@@ -45,8 +45,8 @@ User guide and reference
 
     getting_started.rst
     gene-regulation_library.rst
-    tutorials.rst
     dependencies.rst
+    tutorials.rst
     environments.rst
     snakemake.rst
     other_tools.rst
