@@ -317,14 +317,14 @@ Workflow orthologs
 Running Gene-regulation workflows on your own data
 ----------------------------------------------------------------
 
-Requirements
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Gene-regulation library & genome data
+****************************************************************
 
 Assuming you have followed section "Initial setup", you should 
 have defined a location for the genome files and the Gene-regulation 
 library. 
 
-Hereafter is a sugesstion for the organization of your files.
+Hereafter is a suggestion for the organization of your files.
 
 ::
 
@@ -345,23 +345,47 @@ Fastq files organization
 ****************************************************************
 
 This tutorial assumes you dispose of your own fastq files. 
-We recommand that your organise your samples in separate folders, 
+We recommend that your organise your samples in separate folders, 
 and name both fastq files and their parent directories accordingly. 
 
 
 .. figure:: ../img/fastq_orga.png
    :alt: 
 
+If ytou have paired-ends samples, they should be in the same 
+directory and distinguished using a suffix of any sort.
+
+.. figure:: ../img/fastq_dir_pe.png
+   :alt: 
+
 
 Metadata
 ****************************************************************
 
+Running the workflows provided by the Gene-regulation library 
+requires the use of three configuration files. 
+
 samples.tab
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Column "ID" is mandatory, and content should match files
+This file should contain, at least, one column named "ID", that 
+should contain sample names matching those defined in the previous section. 
+In the case of an RNA-seq analysis, it should also contain a column "Condition", 
+which will define groups of comparison (see design file in the section below).
 
-.. figure:: ../img/samples_file.png
+All the samples will be processed in the same manner. You can prevent certain 
+samples from being processed by commenting the corresponding lines with a ";" 
+at the beginning of the line. 
+
+RNA-seq sample groups should contain at least 2 sampples. 
+
+You can add any other relevant information related to samples in other 
+tab-separated columns. 
+
+.. figure:: ../img/samples_file_ChIP.png
+   :alt: 
+
+.. figure:: ../img/samples_file_RNA.png
    :alt: 
 
 
@@ -369,8 +393,13 @@ Column "ID" is mandatory, and content should match files
 design.tab
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-colnames have to be respected. 
-contents should be either samples IDs (chip) or groups  (RNA)
+The purpose of this file is to determine which samples should be processed 
+together. In a ChIP-seq analysis, it will be used to define which ChIP samples should be 
+compared with which inputs. In an RNA-seq experiment, it defines the conditions to be compared 
+against each pther. 
+
+Column names should be respected. 
+
 
 .. figure:: ../img/design_file_ChIP.png
    :alt: 
@@ -383,8 +412,29 @@ contents should be either samples IDs (chip) or groups  (RNA)
 config.yml
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Directories should match : genome, gene-regu, fastq
-Genome filenames
+You can find examples of configuration files in the examples section of 
+the gene-regulation directory. 
+
+Directories should be defined relative to the working directory 
+defined in the beginning: genome, gene-regulation, fastq, etc. 
+Same goes for configuration files.
+
+Genome filenames should be mentionned as they appear in the defined genome 
+directory. 
+
+Genome size should be filled in, as well as the sequencing type: 
+"se" for single-end data, and "pe" for paired-ends data. 
+In the case of paired-ends data, suffixes should be mentioned and should match 
+the filenames. 
+
+
+The minimum of configuration should look like this:
+
+.. figure:: ../img/config_file_required.png
+   :alt: 
+
+All the parameters related to the tools used are optional, and the default 
+parameters of each program will be used when they're not set in the configfile. 
 
 .. figure:: ../img/config_file_chip.png
    :alt: 
@@ -393,5 +443,20 @@ Genome filenames
 
 workflow.wf
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If your directory now looks like this, you should be ready to run a worflow!
+
+
+
+.. figure:: ../img/file_orga_ready.png
+   :alt: 
+
+
+::
+
+    cd ${ANALYSIS_DIR}
+    snakemake -s gene-regulation/scripts/snakefiles/workflows/quality_control.wf --config-file metadata/config.yml -pn
+    snakemake -s gene-regulation/scripts/snakefiles/workflows/ChIP-seq.wf --config-file metadata/config.yml -pn
+
 
 
