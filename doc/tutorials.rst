@@ -320,16 +320,36 @@ Running Gene-regulation workflows on your own data
 Requirements
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Assuming you have followed section 3.1 "Initial setup", you should 
+Assuming you have followed section "Initial setup", you should 
 have defined a location for the genome files and the Gene-regulation 
 library. 
 
-Besides, you shoud dispose of you own fastq files.
+Hereafter is a sugesstion for the organization of your files.
 
-*TODO*
+    ANALYSIS_DIR=/your/directory
+    mkdir -p ${ANALYSIS_DIR}
+    cd ${ANALYSIS_DIR}
+    ln -s ${GENE_REG_PATH} gene-regulation
+    ln -s ${GENOME_DIR} genome
+
+Your directory should look like this:
+
+
+.. figure:: ../img/analysis_dir_example.png
+   :alt: 
+
 
 Fastq files organization
 ****************************************************************
+
+This tutorial assumes you dispose of your own fastq files. 
+We recommand that your organise your samples in separate folders, 
+and name both fastq files and their parent directories accordingly. 
+
+
+.. figure:: ../img/fastq_orga.png
+   :alt: 
+
 
 Metadata
 ****************************************************************
@@ -337,12 +357,36 @@ Metadata
 samples.tab
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Column "ID" is mandatory, and content should match files
+
+.. figure:: ../img/samples_file.png
+   :alt: 
+
+
+
 design.tab
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+colnames have to be respected. 
+contents should be either samples IDs (chip) or groups  (RNA)
+
+.. figure:: ../img/design_file_ChIP.png
+   :alt: 
+
+.. figure:: ../img/design_file_RNA.png
+   :alt: 
+
 
 
 config.yml
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Directories should match : genome, gene-regu, fastq
+Genome filenames
+
+.. figure:: ../img/config_file_chip.png
+   :alt: 
+
 
 
 workflow.wf
