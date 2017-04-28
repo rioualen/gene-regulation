@@ -761,7 +761,7 @@ It currently allows running the following workflows:
 ::
 
     cd $GENE_REG_PATH
-    make -f gene-regulation/scripts/makefiles/install_tools_and_libs.mk all
+    make -f scripts/makefiles/install_tools_and_libs.mk all
     source ~/.bashrc
 
 Conda
