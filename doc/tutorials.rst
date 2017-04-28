@@ -326,6 +326,8 @@ library.
 
 Hereafter is a sugesstion for the organization of your files.
 
+::
+
     ANALYSIS_DIR=/your/directory
     mkdir -p ${ANALYSIS_DIR}
     cd ${ANALYSIS_DIR}
