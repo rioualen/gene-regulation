@@ -768,10 +768,10 @@ Congratulations! You just executed this wonderful workflow:
    :alt: 
 
 Visualizing results
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+****************************************************************
 
 Install and run the X2Go client on your host computer
-****************************************************************
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The Virtual Machine created on the IFB cloud doesn't have a graphical
 interface, but it contains the X2GO software. We're gonna use it to
@@ -816,15 +816,15 @@ Note: you may need to change your keyboard settings
 -  Add and/or remove desired keyboards
 
 Visualize results
-****************************************************************
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The result files should be organized like this:
 
 .. figure:: ../img/results_orga.png
    :alt: 
 
-FastQC
-^^^^^^
+**FastQC**
+
 
 You can visualize the FastQC results using firefox or any other
 navigator. Fetch the ``html`` files located in the sample directories.
@@ -846,8 +846,7 @@ navigator. Fetch the ``html`` files located in the sample directories.
 .. figure:: ../img/x2go_fastqc.png
    :alt: 
 
-IGV
-^^^^^^
+**IGV**
 
 You can visualize the peaks by running IGV from the terminal.
 
