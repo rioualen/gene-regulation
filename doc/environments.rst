@@ -668,10 +668,9 @@ Creation of an instance
 ****************************************************************
 
 1. Click *New Instance* button.
-2. Choose appliance "Gene regulation 2.0" in the drop-down menu.
+2. Choose appliance "Gene regulation 4.0" in the drop-down menu.
 3. Name your VM.
-4. Choose the amount of CPU and RAM to grant the VM (up to 8 CPU, 32 GB
-   RAM).
+4. Choose the amount of CPU and RAM to grant the VM.
 5. Attach the vDisk.
 6. Click *Run*.
 
@@ -690,7 +689,8 @@ Open a terminal on your host computer and type in:
 
 ::
 
-    ssh -A -p 22 root@192.54.201.124
+    # Replace XXX by the IP of your instance
+    ssh -A -p 22 root@192.54.201.XXX
 
 Download source data
 ****************************************************************
@@ -717,7 +717,7 @@ Here we create a folder to store the source data files and download them
 
     mkdir -p ${ANALYSIS_DIR}
     cd ${ANALYSIS_DIR}
-    ln -s ${HOME}/gene-regulation-2.0 gene-regulation
+    ln -s ${HOME}/gene-regulation-4.0 gene-regulation
 
 Download data
 ^^^^^^^^^^^^^^^^
@@ -789,7 +789,7 @@ create a distant desktop to visualize the results from the host machine.
    <!--2. Copy your ssh key to the authorized keys of the virtual machine. (**à revoir !!**)
 
    ```
-   cat $HOME/.ssh/id_rsa.pub | ssh root@192.54.201.124 "cat >> .ssh/authorized_keys"
+   cat $HOME/.ssh/id_rsa.pub | ssh root@192.54.201.XXX "cat >> .ssh/authorized_keys"
    ```
    -->
 
