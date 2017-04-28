@@ -58,7 +58,8 @@ usage:
 
 CRAN_PACK_LIST='XML', 'bPeaks', 'caTools', 'VennDiagram', 'devtools'
 BIOC_PACK_LIST='affy', 'biomaRt', 'Rsamtools', 'genefilter', 'GenomicFeatures', 'edgeR', 'DESeq2'
-PUB_KEY=51716619E084DAB9 F7B8CEA6056E8E56 06F90DE5381BA480
+PUB_KEY=""
+#PUB_KEY=51716619E084DAB9 F7B8CEA6056E8E56 06F90DE5381BA480
 
 BEDOPS_VER=2.4.19
 BEDTOOLS_VER=2.24.0
@@ -149,7 +150,7 @@ add_packages:
 R_installation:
 	sudo echo "deb http://cran.univ-lyon1.fr/bin/linux/ubuntu trusty/" >> /etc/apt/sources.list
 	sudo apt-get update
-	sudo apt-get -y install r-base r-base-dev libcurl4-openssl-dev libxml2-dev
+	sudo apt-get --force-yes install r-base r-base-dev libcurl4-openssl-dev libxml2-dev
 	echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);" >> ~/.Rprofile
 
 
