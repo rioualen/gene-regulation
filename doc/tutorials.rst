@@ -318,7 +318,7 @@ Running Gene-regulation workflows on your own data
 ----------------------------------------------------------------
 
 Gene-regulation library & genome data
-****************************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Assuming you have followed section "Initial setup", you should 
 have defined a location for the genome files and the Gene-regulation 
@@ -342,7 +342,7 @@ Your directory should look like this:
 
 
 Fastq files organization
-****************************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This tutorial assumes you dispose of your own fastq files. 
 We recommend that your organise your samples in separate folders, 
@@ -352,7 +352,7 @@ and name both fastq files and their parent directories accordingly.
 .. figure:: ../img/fastq_orga.png
    :alt: 
 
-If ytou have paired-ends samples, they should be in the same 
+If you have paired-ends samples, they should be in the same 
 directory and distinguished using a suffix of any sort.
 
 .. figure:: ../img/fastq_dir_pe.png
@@ -360,13 +360,13 @@ directory and distinguished using a suffix of any sort.
 
 
 Metadata
-****************************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Running the workflows provided by the Gene-regulation library 
 requires the use of three configuration files. 
 
 samples.tab
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+****************************************************************
 
 This file should contain, at least, one column named "ID", that 
 should contain sample names matching those defined in the previous section. 
@@ -391,7 +391,7 @@ tab-separated columns.
 
 
 design.tab
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+****************************************************************
 
 The purpose of this file is to determine which samples should be processed 
 together. In a ChIP-seq analysis, it will be used to define which ChIP samples should be 
@@ -410,7 +410,7 @@ Column names should be respected.
 
 
 config.yml
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+****************************************************************
 
 You can find examples of configuration files in the examples section of 
 the gene-regulation directory. 
@@ -442,7 +442,7 @@ parameters of each program will be used when they're not set in the configfile.
 
 
 workflow.wf
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+****************************************************************
 
 If your directory now looks like this, you should be ready to run a worflow!
 
