@@ -18,9 +18,6 @@ if not "samples" in config["metadata"].keys():
 sample_ids = read_table(config["metadata"]["samples"])['ID']
 sample_conditions = read_table(config["metadata"]["samples"])['Condition']
 
-ref_id = read_table(config["metadata"]["design"])['Reference']
-test_id = 
-
 sample_dir = config["dir"]["samples"]
 diffexpr_dir = config["dir"]["diffexpr"]
 
