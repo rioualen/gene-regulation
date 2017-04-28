@@ -58,8 +58,7 @@ usage:
 
 CRAN_PACK_LIST='XML', 'bPeaks', 'caTools', 'VennDiagram', 'devtools'
 BIOC_PACK_LIST='affy', 'biomaRt', 'Rsamtools', 'genefilter', 'GenomicFeatures', 'edgeR', 'DESeq2'
-PUB_KEY=""
-#PUB_KEY=51716619E084DAB9 F7B8CEA6056E8E56 06F90DE5381BA480
+PUB_KEY=51716619E084DAB9 F7B8CEA6056E8E56 06F90DE5381BA480
 
 BEDOPS_VER=2.4.19
 BEDTOOLS_VER=2.24.0
@@ -184,7 +183,7 @@ python:
 	sudo pip install pyBigWig
 
 
-ubuntu_packages: add_pub_key add_repos add_packages
+ubuntu_packages: add_repos add_packages
 
 R: R_installation R_lib Rstudio
 
