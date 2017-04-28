@@ -396,7 +396,7 @@ design.tab
 The purpose of this file is to determine which samples should be processed 
 together. In a ChIP-seq analysis, it will be used to define which ChIP samples should be 
 compared with which inputs. In an RNA-seq experiment, it defines the conditions to be compared 
-against each pther. 
+against each other. 
 
 Column names should be respected. 
 
@@ -424,8 +424,8 @@ directory.
 
 Genome size should be filled in, as well as the sequencing type: 
 "se" for single-end data, and "pe" for paired-ends data. 
-In the case of paired-ends data, suffixes should be mentioned and should match 
-the filenames. 
+In the case of paired-ends data, suffixes (parameter "strands") 
+should be mentioned and should match the filenames (minus the "_"). 
 
 
 The minimum of configuration should look like this:
@@ -436,13 +436,13 @@ The minimum of configuration should look like this:
 All the parameters related to the tools used are optional, and the default 
 parameters of each program will be used when they're not set in the configfile. 
 
-.. figure:: ../img/config_file_chip.png
+.. figure:: ../img/config_file_optional.png
    :alt: 
 
 
 
-workflow.wf
-****************************************************************
+Running a workflow
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If your directory now looks like this, you should be ready to run a worflow!
 
