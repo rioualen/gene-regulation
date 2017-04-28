@@ -13,8 +13,8 @@ Download Gene-regulation
 ::
 
     cd ${HOME}
-    wget --no-clobber https://github.com/rioualen/gene-regulation/archive/v4.0.tar.gz 
-    tar xvzf v4.0.tar.gz
+    wget --no-clobber https://github.com/rioualen/gene-regulation/archive/4.0.tar.gz 
+    tar xvzf 4.0.tar.gz
     GENE_REG_PATH=${HOME}/gene-regulation-4.0
 
 Clone Gene-regulation
