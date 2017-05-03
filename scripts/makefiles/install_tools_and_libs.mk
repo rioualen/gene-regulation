@@ -350,6 +350,14 @@ homer:
 	perl configureHomer.pl -install homer && \
 	cp `find $(SOURCE_DIR)/homer/bin -maxdepth 1 -executable -type f` $(BIN_DIR)
 
+## TODO
+#source("https://bioconductor.org/biocLite.R")
+#biocLite("mosaics")
+
+##install.packages("devtools")
+#library(devtools)
+#install_github("dongjunchung/dpeak")
+
 # ----------------------------------------------------------------
 # RNA-seq analysis
 # ----------------------------------------------------------------
@@ -403,7 +411,8 @@ igv_tools:
 	cd $(SOURCE_DIR) && \
 	wget --no-clobber http://data.broadinstitute.org/igv/projects/downloads/igvtools_$(IGVTOOLS_VER).zip  && \
 	unzip igvtools_$(IGVTOOLS_VER).zip && \
-	ln -s -f $(SOURCE_DIR)/IGVTools/igvtools $(BIN_DIR)/igvtools
+	ln -s -f $(SOURCE_DIR)/IGVTools/igvtools $(BIN_DIR)/igvtools \
+	ln -s -f $(SOURCE_DIR)/IGVTools/igvtools.jar $(BIN_DIR)/igvtools.jar
 
 visualization: java9 igv igv_tools
 
