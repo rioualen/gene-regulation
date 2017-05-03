@@ -1,0 +1,107 @@
+# Set parameters
+if not "qsub" in config.keys():
+    sys.exit("The parameter qsub must be defined in the config file")
+
+if not "size" in config["genome"].keys():
+    sys.exit("The parameter genome size must be defined in the config file")
+
+if not "mosaics" in config.keys():
+    config["mosaics"] = {}
+
+if not "FDR" in config["mosaics"].keys():
+    config["mosaics"]["FDR"] = "0.05"
+
+if not "frag_len" in config["mosaics"].keys():
+    config["mosaics"]["frag_len"] = "200"
+
+if not "bin_size" in config["mosaics"].keys():
+    config["mosaics"]["bin_size"] = "200"
+
+if not "type" in config["mosaics"].keys():
+    config["mosaics"]["type"] = "narrow"
+
+if not "samples" in config["dir"].keys():
+    sys.exit("The sample dir must be defined in the config file")
+
+if not "peaks" in config["dir"].keys():
+    sys.exit("The peaks dir must be defined in the config file")
+
+dir_samples = config["dir"]["samples"]
+dir_mosaics = os.path.join(config["dir"]["peaks"], "{treatment}_vs_{control}/mosaics")
+
+# Rule
+rule mosaics:
+    """Peak-calling with mosaics.
+    Input: bed
+    Output: bed
+
+    Required parameters:
+        config["dir"]["samples"]
+#        config["genome"]["size"]
+        config["qsub"]
+
+    Optional parameters:
+        config["mosaics"]["FDR"]
+        config["mosaics"]["frag_len"]
+        config["mosaics"]["bin_size"]
+        config["mosaics"]["type"]
+
+    Author Claire Rioualen, Mishael Sanchez-Perez
+    """
+    input:
+        treatment = dir_samples + "/{treatment}/{treatment}{preprocess,.*}_sorted_pos.bed",
+        control = dir_samples + "/{control}/{control}{preprocess,.*}_sorted_pos.bed"
+    output:
+        peaks = dir_mosaics + "/{treatment}_vs_{control}{preprocess,.*}_mosaics_peaks." + config["mosaics"]["type"] + "Peak",
+        peaks_bed = dir_mosaics + "/{treatment}_vs_{control}{preprocess,.*}_mosaics.bed"
+    params:
+        outdir = dir_mosaics,
+        ## TODO
+        #nCore
+        #peak_type
+        FDR = config["mosaics"]["FDR"],
+        frag_len = config["mosaics"]["frag_len"],
+        bin_size = config["mosaics"]["bin_size"],
+        bin_treatment = dir_mosaics + "/{treatment}{preprocess,.*}_sorted_pos.bed_fragL" + config["mosaics"]["frag_len"] + "_bin" + config["mosaics"]["bin_size"] + ".txt",
+        bin_control = dir_mosaics + "/{control}{preprocess,.*}_sorted_pos.bed_fragL" + config["mosaics"]["frag_len"] + "_bin" + config["mosaics"]["bin_size"] + ".txt",
+        qsub = config["qsub"] \
+          + " -e " + dir_mosaics + "/{treatment}_vs_{control}{preprocess,.*}_mosaics_qsub.err" \
+          + " -o " + dir_mosaics + "/{treatment}_vs_{control}{preprocess,.*}_mosaics_qsub.out"
+    log: dir_mosaics + "/{treatment}_vs_{control}{preprocess,.*}_mosaics.log"
+    benchmark: dir_mosaics + "/{treatment}_vs_{control}{preprocess,.*}_mosaics_benchmark.json"
+
+    run:
+        R("""
+
+
+library("mosaics")
+
+constructBins(  "{input.treatment}",  fileFormat="bed", outfileLoc="{params.outdir}",
+                byChr=FALSE, useChrfile=FALSE, chrfile=NULL, excludeChr=NULL,
+                PET=FALSE, fragLen={params.frag_len}, binSize={params.bin_size}, capping=0 )
+
+constructBins(  "{input.control}",  fileFormat="bed", outfileLoc="{params.outdir}",
+                byChr=FALSE, useChrfile=FALSE, chrfile=NULL, excludeChr=NULL,
+                PET=FALSE, fragLen={params.frag_len}, binSize={params.bin_size}, capping=0 )
+
+fileName <- c("{params.bin_treatment}", "{params.bin_control}")
+
+bin <- readBins( type=c("chip","input"), fileName=fileName )
+fit <- mosaicsFit( bin, analysisType="IO", bgEst="automatic" )
+peak <- mosaicsPeak( fit, signalModel="2S", FDR={params.FDR}, maxgap=400, minsize=36, thres=10 )  ###
+peak <- extractReads( peak,
+    "{input.treatment}", chipFileFormat="bed", chipPET=FALSE, chipFragLen={params.frag_len},
+    "{input.control}", controlFileFormat="bed", controlPET=FALSE, controlFragLen={params.frag_len}, parallel=FALSE, nCore=8 )
+
+peak  <-  findSummit(peak, parallel=FALSE,  nCore=8  )
+#export(  peak,  type="txt",  filename="fnr_bowtie2_1.txt"  )
+export(  peak,  type="bed",  filename="{output.peaks_bed}"  )
+#export(  peak,  type="gff",  filename="fnr_bowtie2_1.gff"  )
+export(  peak,  type="narrowPeak",  filename="{output.peaks}")
+
+
+""")
+
+
+
+
