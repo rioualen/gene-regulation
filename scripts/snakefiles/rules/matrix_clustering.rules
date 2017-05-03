@@ -6,7 +6,7 @@ if not "matrix-clustering" in config.keys():
     config["matrix-clustering"] = {}
 
 # Rule
-rule peak_motifs:
+rule matrix_clustering:
     """Motif discovery using the peak-motifs pipeline.
 
     Find out more @ http://floresta.eead.csic.es/rsat/help.peak-motifs.html
@@ -17,7 +17,7 @@ rule peak_motifs:
     Optional parameters:
         ...
 
-    Copyright Claire Rioualen, Lucie Khamvongsa
+    Copyright Claire Rioualen
     """
     input: "{caller_dir}/{peaks}.fasta"
     output: "{caller_dir}/peak-motifs/{peaks}_peak-motifs_synthesis.html"
