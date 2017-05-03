@@ -5,6 +5,12 @@ if not "qsub" in config.keys():
 if not "matrix-quality" in config.keys():
     config["matrix-quality"] = {}
 
+if not "background" in config["matrix-quality"].keys():
+    sys.exit("The parameter matrix-quality/background must be defined in the config file")
+
+if not "motifs" in config["matrix-quality"].keys():
+    sys.exit("The parameter matrix-quality/motifs must be defined in the config file")
+
 #if not "x" in config["matrix-quality"].keys():
 #    config["matrix-quality"]["x"] = "..."
 
@@ -26,6 +32,7 @@ rule matrix_quality
 
     Required parameters:
         config["qsub"]
+        config["matrix-quality"]["background"]
         ...
 
     Optional parameters:
@@ -40,6 +47,7 @@ rule matrix_quality
     params:
         title = config["title"] + " - Motif enrichment of peaks",
         out_prefix = "{comparison_dir}/matrix-quality...",
+        background = config["matrix-quality"]["background"],
         qsub = config["qsub"] \
                 + " -e {peaks}_qsub.err" \
                 + " -o {peaks}_qsub.out" 
@@ -58,7 +66,7 @@ matrix-quality  -v 0 -html_title {params.title} \
 
   $peaks \
 
-  -bgfile $RSAT/public_html/data/genomes/Escherichia_coli_K_12_substr__MG1655_uid57779/oligo-frequencies/1nt_upstream-noorf_Escherichia_coli_K_12_substr__MG1655_uid57779-ovlp-1str.freq.gz \
+  -bgfile {params.background} \
   -bg_format oligo-analysis -bg_pseudo 0.01 \
   -archive -o {params.outdir}
 """
