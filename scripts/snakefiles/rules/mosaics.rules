@@ -94,11 +94,11 @@ peak <- extractReads( peak,
     "{input.control}", controlFileFormat="bed", controlPET=FALSE, controlFragLen={params.frag_len}, parallel=FALSE, nCore=8 )
 
 peak  <-  findSummit(peak, parallel=FALSE,  nCore=8  )
-#export(  peak,  type="txt",  filename="fnr_bowtie2_1.txt"  )
 export(  peak,  type="bed",  filename="{output.peaks_bed}"  )
-#export(  peak,  type="gff",  filename="fnr_bowtie2_1.gff"  )
 export(  peak,  type="narrowPeak",  filename="{output.peaks}")
 
+#export(  peak,  type="txt",  filename="fnr_bowtie2_1.txt"  )
+#export(  peak,  type="gff",  filename="fnr_bowtie2_1.gff"  )
 
 """)
 
