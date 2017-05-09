@@ -267,8 +267,8 @@ Executing snakemake workflow example
 
     ## Create a base directory for the analysis
 
-    export ANALYSIS_DIR="$HOME/ChIP-seq_SE_GSM20870"
-    mkdir $ANALYSIS_DIR
+    export ANALYSIS_DIR="${HOME}/ChIP-seq_SE_GSM20870"
+    mkdir ${ANALYSIS_DIR}
 
 ::
 
