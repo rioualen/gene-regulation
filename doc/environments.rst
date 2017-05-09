@@ -322,15 +322,15 @@ navigator. Fetch the ``html`` files located in the sample directories.
 
    ::
 
-       firefox ~/ChIP-seq_SE_GSE20870/results/samples/GSM521934/GSM521934_fastqc/GSM521934_fastqc.html
-       firefox ~/ChIP-seq_SE_GSE20870/results/samples/GSM521935/GSM521935_fastqc/GSM521935_fastqc.html
+       firefox ~/ChIP-seq_SE_GSE20870/fastq/GSM521934/GSM521934_fastqc/GSM521934_fastqc.html
+       firefox ~/ChIP-seq_SE_GSE20870/fastq/GSM521935/GSM521935_fastqc/GSM521935_fastqc.html
 
 -  After trimming:
 
    ::
 
-       firefox ~/ChIP-seq_SE_GSE20870/results/samples/GSM521934/GSM521934_sickle-se-q20_fastqc/GSM521934_sickle-se-q20_fastqc.html
-       firefox ~/ChIP-seq_SE_GSE20870/results/samples/GSM521935/GSM521935_sickle-se-q20_fastqc/GSM521935_sickle-se-q20_fastqc.html
+       firefox ~/ChIP-seq_SE_GSE20870/fastq/GSM521934/GSM521934_sickle-se-q20_fastqc/GSM521934_sickle-se-q20_fastqc.html
+       firefox ~/ChIP-seq_SE_GSE20870/fastq/GSM521935/GSM521935_sickle-se-q20_fastqc/GSM521935_sickle-se-q20_fastqc.html
 
 .. figure:: ../img/vbox_fastqc.png
    :alt: 
@@ -818,15 +818,15 @@ navigator. Fetch the ``html`` files located in the sample directories.
 
    ::
 
-       firefox /root/mydisk/ChIP-seq_SE_GSE20870/results/samples/GSM521934/GSM521934_fastqc/GSM521934_fastqc.html
-       firefox /root/mydisk/ChIP-seq_SE_GSE20870/results/samples/GSM521935/GSM521935_fastqc/GSM521935_fastqc.html
+       firefox /root/mydisk/ChIP-seq_SE_GSE20870/fastq/GSM521934/GSM521934_fastqc/GSM521934_fastqc.html
+       firefox /root/mydisk/ChIP-seq_SE_GSE20870/fastq/GSM521935/GSM521935_fastqc/GSM521935_fastqc.html
 
 -  After trimming:
 
    ::
 
-       firefox /root/mydisk/ChIP-seq_SE_GSE20870/results/samples/GSM521934/GSM521934_sickle-se-q20_fastqc/GSM521934_sickle-se-q20_fastqc.html
-       firefox /root/mydisk/ChIP-seq_SE_GSE20870/results/samples/GSM521935/GSM521935_sickle-se-q20_fastqc/GSM521935_sickle-se-q20_fastqc.html
+       firefox /root/mydisk/ChIP-seq_SE_GSE20870/fastq/GSM521934/GSM521934_sickle-se-q20_fastqc/GSM521934_sickle-se-q20_fastqc.html
+       firefox /root/mydisk/ChIP-seq_SE_GSE20870/fastq/GSM521935/GSM521935_sickle-se-q20_fastqc/GSM521935_sickle-se-q20_fastqc.html
 
 .. figure:: ../img/x2go_fastqc.png
    :alt: 
