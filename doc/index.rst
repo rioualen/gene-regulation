@@ -49,9 +49,9 @@ User guide and reference
     tutorials.rst
     environments.rst
     snakemake.rst
-    other_tools.rst
     wiki.rst
 
+..    other_tools.rst
 
 Indices and tables
 ----------------------------------------------------------------

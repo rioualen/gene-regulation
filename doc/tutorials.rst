@@ -9,7 +9,7 @@ Gene-regulation library
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For each study presented here we're creating a link to the gene-regulation library, 
-previously downloaded in section "Quick start". 
+previously downloaded in section `Getting started <http://gene-regulation.readthedocs.io/en/latest/getting_started.html>`__. 
 
 Note: if you're using a clone of the library, 
 you might want to make a copy of it, in order to ensure consistency 
