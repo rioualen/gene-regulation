@@ -139,6 +139,7 @@ between the guest and the host.
 
 -  Select the tab *Advanced*
 -  Set *Shared clipboard* to *Bidirectional*
+-  Set *Drag'n Drop* to *Bidirectional*
 
 **Storage**
 
@@ -299,13 +300,13 @@ Executing snakemake workflow example
 
 Congratulations! You just executed these wonderful workflows:
 
-.. figure:: ../img/rulegraph_import.png
+.. figure:: ../img/import_to_fatsq_rulegraph.png
    :alt: 
 
-.. figure:: ../img/rulegraph_quality.png
+.. figure:: ../img/quality_control_rulegraph.png
    :alt: 
 
-.. figure:: ../img/rulegraph_ChIP.png
+.. figure:: ../img/ChIP-seq_rulegraph.png
    :alt: 
 
 Visualizing results
