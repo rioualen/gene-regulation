@@ -1,15 +1,13 @@
 Virtual environments
 ==================================================================
 
-How to run Gene-regulation workflows in virtual environments: tutorials. 
+Tutorials on how to run Gene-regulation workflows in virtual environments.
 
 These protocols were developed on a Unix computer, with the OS
 LMDE and a 64-bit architecture. The virtual machines are developed
 with the Ubuntu 14.04 OS. 
 
-*Based on gene-regulation v2.0*
-
-*has to be refreshed*
+Last update: 17/05/09
 
 VirtualBox
 ----------------------------------------------------------------
@@ -41,12 +39,12 @@ VirtualBox extension pack can be requested (eg. for handling USB2.0, see
 
 **Ubuntu image**
 
-In this tutorial we used Ubuntu 14.04.4, latest long-term supported
+In this tutorial we used Ubuntu 14.04.5, latest long-term supported
 version.
 
 ::
 
-    wget http://releases.ubuntu.com/14.04/ubuntu-14.04.4-desktop-amd64.iso
+    wget http://releases.ubuntu.com/14.04/ubuntu-14.04.5-desktop-amd64.iso
 
 
 
@@ -111,25 +109,9 @@ Creation of the virtual machine
 
 -  Hard drive file type: *VDI* (VirtualBox Disk Image).
 
-.. raw:: html
-
-   <!--
-   - Hard drive file type: *VMDK* (Virtual Machine Disk). 
-
-       I chose this option because it ensures a wider compatibility with other OS and Virtual Machine management systems. 
-
-          Another potential advantage of VMDK is that it enables to split virtualdisks in files <=2Gb, which is convenient to store them on FAT partitions. 
-   -->
-
 -  Storage on physical hard drive
 
    -  Select *Dynamically allocated*
-
-.. raw:: html
-
-   <!--
-       - Activate the option *Split into files less than 2Gb*, which allows to store the VM on FAT partitions for Windows host machines.
-   -->
 
 -  File location and size
 
@@ -161,7 +143,7 @@ between the guest and the host.
 **Storage**
 
 Click on the **Empty** disc icon in the storage tree. Select the disc
-icon on the right and fetch the downloaded ``.iso`` image(see
+icon on the right and fetch the downloaded ``.iso`` image (see
 **Requirements**). Click on *OK*.
 
 **Network**
@@ -190,7 +172,7 @@ access (e.g. using an ethernet card + wi-fi connection).
    -  check *Enable Network Adapter*
    -  Attached to: *Host-only Adapter*
    -  Name: *vboxnet0* (this network must have been created beforehand,
-      see section 1.2.3)
+      see above)
 
 -  click on the tab *Adapter 2*,
 
@@ -204,11 +186,7 @@ access (e.g. using an ethernet card + wi-fi connection).
    -  Name: choose an option corresponding to the actual internet
       connection of the host machine (e.g. ethernet cable, Wi-Fi, ...).
 
-**You can now start the VM. **
-
-.. raw:: html
-
-   <!-- This can raise several errors, if so see dedicated section below.  -->
+**You can now start the VM.**
 
 Operating system installation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -263,11 +241,10 @@ Get the ``gene-regulation`` repository
 ::
 
     cd
-    wget --no-clobber https://github.com/rioualen/gene-regulation/archive/2.0.tar.gz -P
-    tar zvxf 2.0.tar.gz
+    wget --no-clobber https://github.com/rioualen/gene-regulation/archive/4.0.tar.gz -P
+    tar zvxf 4.0.tar.gz
 
 ::
-
     cd
     git clone https://github.com/rioualen/gene-regulation.git
 
