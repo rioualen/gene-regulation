@@ -6,7 +6,7 @@ Initial setup
 ----------------------------------------------------------------
 
 Gene-regulation library
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For each study presented here we're creating a link to the gene-regulation library, 
 previously downloaded in section `Getting started <http://gene-regulation.readthedocs.io/en/latest/getting_started.html>`__. 
@@ -17,7 +17,7 @@ for later analyses.
 
 
 Genome directory
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We chose to define a permanent location for genome downloads, then 
 create symlinks for study cases. 
@@ -32,7 +32,7 @@ ChIP-seq study case in *S. cerevisiae*
 ----------------------------------------------------------------
 
 Presentation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Reference**
 
@@ -321,6 +321,12 @@ Assuming you have followed section "Initial setup", you should
 have defined a location for the genome files and the Gene-regulation 
 library. 
 
+You should dispose of 3 files related to your reference genome:
+
+- a fasta file
+- a gff3 annotation file
+- a gtf annotation file
+
 Hereafter is a suggestion for the organization of your files.
 
 ::
@@ -329,7 +335,7 @@ Hereafter is a suggestion for the organization of your files.
     mkdir -p ${ANALYSIS_DIR}
     cd ${ANALYSIS_DIR}
     ln -s ${GENE_REG_PATH} gene-regulation
-    ln -s ${GENOME_DIR} genome
+    ln -s ${GENOME_DIR}/my_genome_dir genome
 
 Your directory should look like this:
 
@@ -380,10 +386,10 @@ You can add any other relevant information related to samples in other
 tab-separated columns. 
 
 .. figure:: ../img/samples_file_ChIP.png
-   :alt: 
+   :alt: ChIP-seq example
 
 .. figure:: ../img/samples_file_RNA.png
-   :alt: 
+   :alt: RNA-seq example
 
 
 
