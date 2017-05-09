@@ -256,7 +256,7 @@ rule all:
 	Run analyses.
 	"""
 	input: \
-            MAPPING,
+#            MAPPING,
             MAPPING_QC,
 #            SORTED_BAM,
             BAM_STATS,

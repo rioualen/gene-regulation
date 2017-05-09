@@ -300,7 +300,7 @@ Executing snakemake workflow example
 
 Congratulations! You just executed these wonderful workflows:
 
-.. figure:: ../img/import_to_fatsq_rulegraph.png
+.. figure:: ../img/import_to_fastq_rulegraph.png
    :alt: 
 
 .. figure:: ../img/quality_control_rulegraph.png
