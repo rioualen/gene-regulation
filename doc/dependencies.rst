@@ -1,8 +1,6 @@
 Dependencies
 ================================================================
 
-*Note: this section needs to be refreshed*
-
 Manual installation
 ----------------------------------------------------------------
 
@@ -747,8 +745,6 @@ Other
 Makefile
 ----------------------------------------------------------------
 
-*Has to be revised*
-
 The Gene-regulation library comprises a makefile that can install most of the 
 dependencies described in the previous section. 
 
@@ -767,7 +763,8 @@ It currently allows running the following workflows:
 Conda
 ----------------------------------------------------------------
 
-*This section has to be written*
+A number of dependencies of Gene-regulation can be installed through a Conda environment. 
+This list is not exhaustive. 
 
 ::
 

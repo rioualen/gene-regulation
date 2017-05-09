@@ -103,7 +103,8 @@ Workflow 'import_from_sra'
 The purpose of this workflow is to convert .sra files to .fastq files. 
 The .sra format (Short Read Archive) is used by the GEO database, but 
 for downstream analyses we need to dispose of fastq-formatted files. 
-*insert link to glossary section about file formats*
+You can check out the `glossary
+<http://gene-regulation.readthedocs.io/en/latest/wiki.html#glossary>`_ to find out more about file formats. 
 
 It order to run it, you must have followed sections "Setup analysis environment" 
 and "Download data" for the dataset GSE20870. 
@@ -125,11 +126,12 @@ Workflow 'quality_control'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This workflow can be run after the workflow 'import_from_sra', or directly on properly-organized fastq files 
-(see following section if you dispose of your own data).
+(see `this section
+<http://gene-regulation.readthedocs.io/en/latest/tutorials.html#running-gene-regulation-workflows-on-your-own-data>`_ if you dispose of your own data).
 
-The purpose of this workflow is to perform quality check with FastQC (*link to website and wiki*). 
+The purpose of this workflow is to perform quality check with `FastQC https://www.bioinformatics.babraham.ac.uk/projects/fastqc/`_. 
 
-Optionally, trimming can be performed using the tool Sickle (*link to website and wiki*).
+Optionally, trimming can be performed using the tools `Sickle <https://github.com/najoshi/sickle>`_. or `Cutadapt <http://cutadapt.readthedocs.io/en/stable/>`_.
 
 ::
 
@@ -151,30 +153,154 @@ Workflow 'ChIP-seq'
 
 This workflows performs:
  - mapping with various algorithms;
- - genome coverage in different formats (*see glossary*);
+ - genome coverage in different formats (check out our `glossary
+<http://gene-regulation.readthedocs.io/en/latest/wiki.html#glossary>`_);
  - peak-calling with various algorithms;
- - motifs search with suite RSAT (*ref*).
+ - motifs search using the `RSAT suite <rsat.eu>`_. 
 
-It order to run it, you must have followed sections "Setup analysis environment" 
-and "Download data", and "Download genome and annotation" for the dataset GSE20870. 
+It order to run it, you must have followed sections "Setup analysis environment",
+ "Download data", and "Download genome and annotation" for the dataset GSE20870. 
 
 You must have run at least the workflow "import_from_sra', and optionally the workflow "quality_control". 
 
-::
-
-    cd ${ANALYSIS_DIR}
 
 Workflow execution
 ****************************************************************
 
 ::
 
+    cd ${ANALYSIS_DIR}
     snakemake -s ${ANALYSIS_DIR}/gene-regulation/scripts/snakefiles/workflows/ChIP-seq.wf -p --configfile ${CONFIG}
 
-*add figure*
+*rulegraph + screencap*
 
-.. figure:: ../examples/ChIP-seq_SE_GSE20870/rulegraph.png
+
+Deciphering Fur transcriptional regulatory network
+----------------------------------------------------------------
+
+Presentation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Reference**
+
+Seo SW, Kim D, Latif H, O'Brien EJ et al. 
+Deciphering Fur transcriptional regulatory network highlights its complex role beyond iron metabolism in Escherichia coli. 
+Nat Commun 2014 Sep 15;5:4910. PMID: 25222563 <https://www.ncbi.nlm.nih.gov/pubmed/25222563>`__
+
+## ChIP
+mkdir GSE54899_ChIP/data GSE54899_ChIP/data/GSM1326335 GSE54899_ChIP/data/GSM1326336 
+wget -nc ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX/SRX469/SRX469826/SRR1168121/SRR1168121.sra -P GSE54899_ChIP/data/GSM1326335
+wget -nc ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX/SRX469/SRX469827/SRR1168122/SRR1168122.sra -P GSE54899_ChIP/data/GSM1326336
+
+
+## RNA
+GSE54900_RNA/data/GSM1326347 GSE54900_RNA/data/GSM1326348
+
+wget -nc ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX/SRX469/SRX469838/SRR1168133/SRR1168133.sra
+wget -nc ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX/SRX469/SRX469839/SRR1168134/SRR1168134.sra
+wget -nc ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX/SRX469/SRX469842/SRR1168137/SRR1168137.sra
+wget -nc ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX/SRX469/SRX469843/SRR1168138/SRR1168138.sra
+
+**GEO series**
+
+- ChIP-seq: `GSE41187 <http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE41187>`__
+- RNA-seq: `GSE41190 <http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE41190>`__
+
+Download reference genome & annotations
+****************************************************************
+
+::
+
+    mkdir ${GENOME_DIR}/Ecoli-K12
+    wget -nc ftp://ftp.ensemblgenomes.org/pub/release-21/bacteria/fasta/bacteria_22_collection/escherichia_coli_str_k_12_substr_mg1655/dna/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.1.21.dna.genome.fa.gz -P ${GENOME_DIR}/Ecoli-K12
+    wget -nc ftp://ftp.ensemblgenomes.org/pub/release-21/bacteria/gff3/bacteria_22_collection/escherichia_coli_str_k_12_substr_mg1655/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.1.21.gff3.gz -P ${GENOME_DIR}/Ecoli-K12
+    wget -nc ftp://ftp.ensemblgenomes.org/pub/release-21/bacteria/gtf/bacteria_22_collection/escherichia_coli_str_k_12_substr_mg1655/Escherichia_coli_str_k_12_substr_mg1655.GCA_000005845.1.21.gtf.gz -P ${GENOME_DIR}/Ecoli-K12
+    gunzip ${GENOME_DIR}/Ecoli-K12/*.gz
+
+Setup analysis environment
+****************************************************************
+
+::
+
+    ANALYSIS_DIR=${HOME}/Integrated_analysis
+
+
+Workflow 'ChIP-seq'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Setup analysis environment
+****************************************************************
+
+::
+
+    ANALYSIS_DIR_CHIP=${ANALYSIS_DIR}/ChIP-seq_GSE41187
+    mkdir -p ${ANALYSIS_DIR_CHIP} 
+    ln -s ${GENE_REG_PATH} ${ANALYSIS_DIR_CHIP}/gene-regulation
+    ln -s ${GENOME_DIR} ${ANALYSIS_DIR_CHIP}/genome
+    CONFIG_CHIP=${ANALYSIS_DIR_CHIP}/gene-regulation/examples/ChIP-seq_SE_GSE41187/config.yml
+
+Download ChIP-seq data 
+****************************************************************
+
+::
+
+    mkdir -p ${ANALYSIS_DIR_CHIP}/data/GSM1010224 ${ANALYSIS_DIR_CHIP}/data/GSM1010219 ${ANALYSIS_DIR_CHIP}/data/GSM1010220
+    wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX189%2FSRX189778/SRR576938/SRR576938.sra -P ${ANALYSIS_DIR_CHIP}/data/GSM1010224
+    wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX189%2FSRX189773/SRR576933/SRR576933.sra -P ${ANALYSIS_DIR_CHIP}/data/GSM1010219
+    wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX/SRX189/SRX189774/SRR576934/SRR576934.sra -P ${ANALYSIS_DIR_CHIP}/data/GSM1010220
+
+Workflow execution
+****************************************************************
+
+::
+
+    snakemake -s ${ANALYSIS_DIR_CHIP}/gene-regulation/scripts/snakefiles/workflows/import_to_fastq.wf -p --configfile ${CONFIG_CHIP}
+    snakemake -s ${ANALYSIS_DIR_CHIP}/gene-regulation/scripts/snakefiles/workflows/quality_control.wf -p --configfile ${CONFIG_CHIP}
+    snakemake -s ${ANALYSIS_DIR_CHIP}/gene-regulation/scripts/snakefiles/workflows/ChIP-seq.wf -p --configfile ${CONFIG_CHIP}
+
+Workflow 'RNA-seq' DEG
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Setup analysis environment
+****************************************************************
+
+::
+
+    ANALYSIS_DIR_RNA=${ANALYSIS_DIR}/RNA-seq_GSE41190
+    mkdir ${ANALYSIS_DIR_RNA}
+    ln -s ${GENE_REG_PATH} ${ANALYSIS_DIR_RNA}/gene-regulation
+    ln -s ${GENOME_DIR} ${ANALYSIS_DIR_RNA}/genome
+    CONFIG_RNA=${ANALYSIS_DIR_RNA}/gene-regulation/examples/RNA-seq_PE_GSE41190/config.yml
+
+Download RNA-seq data
+****************************************************************
+
+::
+
+    mkdir -p ${ANALYSIS_DIR_RNA}/data/GSM1010244 ${ANALYSIS_DIR_RNA}/data/GSM1010245 ${ANALYSIS_DIR_RNA}/data/GSM1010246 ${ANALYSIS_DIR_RNA}/data/GSM1010247
+    wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX/SRX264/SRX2641374/SRR5344681/SRR5344681.sra -P ${ANALYSIS_DIR_RNA}/data/GSM1010244
+    wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX/SRX264/SRX2641375/SRR5344682/SRR5344682.sra -P ${ANALYSIS_DIR_RNA}/data/GSM1010245
+    wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX/SRX264/SRX2641376/SRR5344683/SRR5344683.sra -P ${ANALYSIS_DIR_RNA}/data/GSM1010246
+    wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX/SRX264/SRX2641377/SRR5344684/SRR5344684.sra -P ${ANALYSIS_DIR_RNA}/data/GSM1010247
+
+Workflow execution
+****************************************************************
+
+::
+
+    snakemake -s ${ANALYSIS_DIR_RNA}/gene-regulation/scripts/snakefiles/workflows/import_to_fastq.wf -p --configfile ${CONFIG_RNA}
+    snakemake -s ${ANALYSIS_DIR_RNA}/gene-regulation/scripts/snakefiles/workflows/quality_control.wf -p --configfile ${CONFIG_RNA}
+    snakemake -s ${ANALYSIS_DIR_RNA}/gene-regulation/scripts/snakefiles/workflows/RNA-seq_workflow_PE.py -p --configfile ${CONFIG_RNA}
+
+
+.. figure:: ../examples/RNA-seq_PE_GSE41190/rulegraph.png
    :alt: 
+
+
+Workflow 'integrated_ChIP_RNA'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*todo*
 
 
 Genome-scale analysis of *Escherichia coli* FNR
