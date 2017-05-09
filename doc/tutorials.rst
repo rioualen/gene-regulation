@@ -387,9 +387,11 @@ tab-separated columns.
 
 .. figure:: ../img/samples_file_ChIP.png
    :alt: ChIP-seq example
+   :name: ChIP-seq example
 
 .. figure:: ../img/samples_file_RNA.png
    :alt: RNA-seq example
+   :name: RNA-seq example
 
 
 
