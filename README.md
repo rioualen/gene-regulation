@@ -5,7 +5,7 @@ This git repository holds shared code for the analysis of Next
 Generation Sequencing data related to gene regulation: ChIP-seq,
 RNA-seq, and related technologies. 
 
-A full documentation can be found [here](http://gene-regulation.readthedocs.io).
+**A full documentation can be found on [Read The Docs](http://gene-regulation.readthedocs.io).**
 
 We have chosen to use the [Snakemake workflow management system](https://bitbucket.org/snakemake/snakemake/wiki/Home)[1] 
 in order to build reproducible and flexible NGS analysis pipelines.
