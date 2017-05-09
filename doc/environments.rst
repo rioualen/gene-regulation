@@ -241,12 +241,11 @@ Get the ``gene-regulation`` repository
 ::
 
     cd
-    wget --no-clobber https://github.com/rioualen/gene-regulation/archive/4.0.tar.gz -P
+    wget --no-clobber https://github.com/rioualen/gene-regulation/archive/4.0.tar.gz 
     tar zvxf 4.0.tar.gz
 
-::
-    cd
-    git clone https://github.com/rioualen/gene-regulation.git
+..    cd
+..    git clone https://github.com/rioualen/gene-regulation.git
 
 Run makefile to install all required dependencies
 ****************************************************************
@@ -257,7 +256,7 @@ updated with the ``$PATH`` for newly installed applications).
 ::
 
     cd
-    #make -f gene-regulation-2.0/scripts/makefiles/install_tools_and_libs.mk all
+    ln -s gene-regulation-4.0 gene-regulation
     make -f gene-regulation/scripts/makefiles/install_tools_and_libs.mk all
     source ~/.bashrc
 
