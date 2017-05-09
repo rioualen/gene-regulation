@@ -1,0 +1,14 @@
+rule md5sum:
+    """Compute the md5sum signature for a given file, which enables to
+    check the consistency of its content after transfer. 
+
+    Note: md5sum is recommended for submitting NGS data to GEO.
+
+    """
+    input: "{file}"
+    output: "{file}.md5sum"
+    params: qsub = config["qsub"] + " -e {file}_md5sum_qsub.err -o {file}_md5sum_qsub.out"
+    log: "{file}_md5sum.log"
+    benchmark: "{file}_md5sum_benchmark.json"
+    shell:"md5sum {input} > {output} 2> {log} "
+
