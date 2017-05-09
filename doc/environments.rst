@@ -292,12 +292,20 @@ Executing snakemake workflow example
     ## Execute workflow
 
     cd ${ANALYSIS_DIR}
-    ln -s  $HOME/gene-regulation
-    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/ChIP-seq_workflow_SE.py --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml
+    ln -s  ${HOME}/gene-regulation
+    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/import_from_sra.wf --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml
+    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/quality_control.wf --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml
+    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/ChIP-seq.wf --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml
 
-Congratulations! You just executed this wonderful workflow:
+Congratulations! You just executed these wonderful workflows:
 
-.. figure:: ../img/rule.png
+.. figure:: ../img/rulegraph_import.png
+   :alt: 
+
+.. figure:: ../img/rulegraph_quality.png
+   :alt: 
+
+.. figure:: ../img/rulegraph_ChIP.png
    :alt: 
 
 Visualizing results
