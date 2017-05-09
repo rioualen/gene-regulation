@@ -374,7 +374,7 @@ All the samples will be processed in the same manner. You can prevent certain
 samples from being processed by commenting the corresponding lines with a ";" 
 at the beginning of the line. 
 
-RNA-seq sample groups should contain at least 2 sampples. 
+RNA-seq sample groups should contain at least 2 samples. 
 
 You can add any other relevant information related to samples in other 
 tab-separated columns. 
