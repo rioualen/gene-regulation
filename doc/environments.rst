@@ -294,9 +294,9 @@ Executing snakemake workflow example
 
     cd ${ANALYSIS_DIR}
     ln -s  ${HOME}/gene-regulation
-    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/import_from_sra.wf --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml
-    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/quality_control.wf --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml
-    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/ChIP-seq.wf --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml
+    snakemake -p --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml -s gene-regulation/scripts/snakefiles/workflows/import_from_sra.wf
+    snakemake -p --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml -s gene-regulation/scripts/snakefiles/workflows/quality_control.wf
+    snakemake -p --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml -s gene-regulation/scripts/snakefiles/workflows/ChIP-seq.wf
 
 Congratulations! You just executed these wonderful workflows:
 
@@ -322,15 +322,15 @@ navigator. Fetch the ``html`` files located in the sample directories.
 
    ::
 
-       firefox ~/GSE20870-analysis/results/samples/GSM521934/GSM521934_fastqc/GSM521934_fastqc.html
-       firefox ~/GSE20870-analysis/results/samples/GSM521935/GSM521935_fastqc/GSM521935_fastqc.html
+       firefox ~/ChIP-seq_SE_GSE20870/results/samples/GSM521934/GSM521934_fastqc/GSM521934_fastqc.html
+       firefox ~/ChIP-seq_SE_GSE20870/results/samples/GSM521935/GSM521935_fastqc/GSM521935_fastqc.html
 
 -  After trimming:
 
    ::
 
-       firefox ~/GSE20870-analysis/results/samples/GSM521934/GSM521934_sickle-se-q20_fastqc/GSM521934_sickle-se-q20_fastqc.html
-       firefox ~/GSE20870-analysis/results/samples/GSM521935/GSM521935_sickle-se-q20_fastqc/GSM521935_sickle-se-q20_fastqc.html
+       firefox ~/ChIP-seq_SE_GSE20870/results/samples/GSM521934/GSM521934_sickle-se-q20_fastqc/GSM521934_sickle-se-q20_fastqc.html
+       firefox ~/ChIP-seq_SE_GSE20870/results/samples/GSM521935/GSM521935_sickle-se-q20_fastqc/GSM521935_sickle-se-q20_fastqc.html
 
 .. figure:: ../img/vbox_fastqc.png
    :alt: 
@@ -345,7 +345,7 @@ You can visualize the peaks by running IGV from the terminal.
     igv
 
 -  Click "File" > "Open session..." and chose the file
-   ``~/GSE20870-analysis/results/peaks/igv_session.xml``.
+   ``~/ChIP-seq_SE_GSE20870/results/peaks/igv_session.xml``.
 -  You may need to adjust the panel sizes.
 
 .. figure:: ../img/igv.png
@@ -688,7 +688,7 @@ Here we create a folder to store the source data files and download them
 
 ::
 
-    ANALYSIS_DIR=${HOME}/mydisk/GSE20870-analysis
+    ANALYSIS_DIR=${HOME}/mydisk/ChIP-seq_SE_GSE20870
 
 .. raw:: html
 
@@ -818,15 +818,15 @@ navigator. Fetch the ``html`` files located in the sample directories.
 
    ::
 
-       firefox /root/mydisk/GSE20870-analysis/results/samples/GSM521934/GSM521934_fastqc/GSM521934_fastqc.html
-       firefox /root/mydisk/GSE20870-analysis/results/samples/GSM521935/GSM521935_fastqc/GSM521935_fastqc.html
+       firefox /root/mydisk/ChIP-seq_SE_GSE20870/results/samples/GSM521934/GSM521934_fastqc/GSM521934_fastqc.html
+       firefox /root/mydisk/ChIP-seq_SE_GSE20870/results/samples/GSM521935/GSM521935_fastqc/GSM521935_fastqc.html
 
 -  After trimming:
 
    ::
 
-       firefox /root/mydisk/GSE20870-analysis/results/samples/GSM521934/GSM521934_sickle-se-q20_fastqc/GSM521934_sickle-se-q20_fastqc.html
-       firefox /root/mydisk/GSE20870-analysis/results/samples/GSM521935/GSM521935_sickle-se-q20_fastqc/GSM521935_sickle-se-q20_fastqc.html
+       firefox /root/mydisk/ChIP-seq_SE_GSE20870/results/samples/GSM521934/GSM521934_sickle-se-q20_fastqc/GSM521934_sickle-se-q20_fastqc.html
+       firefox /root/mydisk/ChIP-seq_SE_GSE20870/results/samples/GSM521935/GSM521935_sickle-se-q20_fastqc/GSM521935_sickle-se-q20_fastqc.html
 
 .. figure:: ../img/x2go_fastqc.png
    :alt: 
@@ -847,7 +847,7 @@ You can visualize the peaks by running IGV from the terminal.
     igv
 
 -  Click "File" > "Open session..." and chose the file
-   ``/root/mydisk/GSE20870-analysis/reports/peaks/igv_session.xml``.
+   ``/root/mydisk/ChIP-seq_SE_GSE20870/reports/peaks/igv_session.xml``.
 -  You may need to adjust the panel sizes.
 
 .. figure:: ../img/igv.png
@@ -995,7 +995,7 @@ following commands:
 
 ::
 
-    export ANALYSIS_DIR=~/GSE20870-analysis
+    export ANALYSIS_DIR=~/ChIP-seq_SE_GSE20870
     mkdir $ANALYSIS_DIR
     cd $ANALYSIS_DIR
 
@@ -1013,7 +1013,7 @@ Fetch the Docker image and run it with shared folders
 ::
 
     docker pull rioualen/gene-regulation:2.0
-    docker run -v $ANALYSIS_DIR:~/GSE20870-analysis -it rioualen/gene-regulation:2.0 /bin/bash
+    docker run -v $ANALYSIS_DIR:~/ChIP-seq_SE_GSE20870 -it rioualen/gene-regulation:2.0 /bin/bash
 
 You can share as many folders as desired, using this syntax:
 ``-v /path/on/host/:/path/on/docker/``.
