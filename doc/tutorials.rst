@@ -183,10 +183,6 @@ Genome-scale analysis of *Escherichia coli* FNR
 Presentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Description**
-
-*Note: this dataset should be replaced soon by a smaller one*
-
 **Reference**
 
 Myers KS, Yan H, Ong IM, Chung D et al. Genome-scale analysis of
@@ -228,8 +224,8 @@ Setup analysis environment
 
     ANALYSIS_DIR_CHIP=${ANALYSIS_DIR}/ChIP-seq_GSE41187
     mkdir -p ${ANALYSIS_DIR_CHIP} 
-    ln -s ${GENE_REG_PATH} ${ANALYSIS_DIR_CHIP}/gene-regulation
-    ln -s ${GENOME_DIR} ${ANALYSIS_DIR_CHIP}/genome
+    ln -s ${GENE_REG_PATH} ${ANALYSIS_DIR_CHIP}/gene-regulation             # ${GENE_REG_PATH} should have been defined beforehand
+    ln -s ${GENOME_DIR} ${ANALYSIS_DIR_CHIP}/genome                         # ${GENOME_DIR} should have been defined beforehand
     CONFIG_CHIP=${ANALYSIS_DIR_CHIP}/gene-regulation/examples/ChIP-seq_SE_GSE41187/config.yml
 
 Download ChIP-seq data 
@@ -251,7 +247,7 @@ Your directory should now look like this:
 .. figure:: ../img/arbo_tuto_FNR_ChIP.png
    :alt: 
 
-
+And you should be able to execute it like this:
 
 ::
 
