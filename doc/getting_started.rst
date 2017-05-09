@@ -28,4 +28,4 @@ Clone Gene-regulation
 Run Gene-regulation
 ----------------------------------------------------------------
 
-Please refer yourself to the Tutorials section. 
+Please refer yourself to the `Tutorials section <http://gene-regulation.readthedocs.io/en/latest/tutorials.html#>`__. 
