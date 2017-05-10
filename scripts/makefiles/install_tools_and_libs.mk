@@ -65,6 +65,7 @@ BEDTOOLS_VER=2.24.0
 BOWTIE1_VER=1.1.1
 BOWTIE2_VER=2.2.6
 CUFFLINKS_VER=2.2.1
+DEEPTOOLS_VER=2.5.0.1
 FASTQC_VER=0.11.5
 IGV_VER=2.3.59
 IGVTOOLS_VER=2.3.57
@@ -76,6 +77,7 @@ RSTUDIO_VER=0.99.903
 SAMTOOLS_VER=1.3
 SRATOOLKIT_VER=2.5.2
 SCIPY_VER=0.16.0
+SICKLE_VER=1.33
 SPP_VER=1.11
 STAR_VER=2.5.2b
 SUBREAD_VER=1.5.0
@@ -147,6 +149,9 @@ add_packages:
 	sudo apt-get -y install gdebi												# required by rstudio install
 
 R_installation:
+
+### !!! sudo bash -c "echo 'deb http://cran.univ-lyon1.fr/bin/linux/ubuntu trusty/' >> /etc/apt/sources.list"
+
 	sudo echo "deb http://cran.univ-lyon1.fr/bin/linux/ubuntu trusty/" >> /etc/apt/sources.list
 	sudo apt-get update
 	sudo apt-get --force-yes install r-base r-base-dev libcurl4-openssl-dev libxml2-dev
@@ -181,6 +186,7 @@ python:
 	sudo pip3 install snakemake docutils pandas
 	sudo pip3 install pyyaml
 	sudo pip install pyBigWig
+	sudo pip install pysam==0.8.4
 
 
 ubuntu_packages: add_repos add_packages
@@ -223,15 +229,16 @@ bedops:
 	cd $(SOURCE_DIR) && \
 	wget -nc https://github.com/bedops/bedops/releases/download/v$(BEDOPS_VER)/bedops_linux_x86_64-v$(BEDOPS_VER).tar.bz2 && \
 	tar jxvf bedops_linux_x86_64-v$(BEDOPS_VER).tar.bz2 && \
-	mkdir bedops && \
+	mkdir -p bedops && \
 	mv bin bedops && \
 	cp bedops/bin/* $(BIN_DIR)
 
 deeptools:
 	cd $(SOURCE_DIR) && \
-	git clone https://github.com/fidelram/deepTools && \
-	cd deepTools && \
-	python setup.py install
+	wget -nc https://github.com/fidelram/deepTools/archive/$(DEEPTOOLS_VER).tar.gz && \
+	tar xvzf $(DEEPTOOLS_VER).tar.gz && \
+	cd  deepTools-$(DEEPTOOLS_VER) && \
+	sudo python setup.py install
 
 ## Picard tools todo
 #! Java 8 required
@@ -249,13 +256,13 @@ fastqc:
 	chmod +x FastQC/fastqc && \
 	ln -s -f $(SOURCE_DIR)/FastQC/fastqc $(BIN_DIR)/fastqc
 
-sickle: 
+sickle:
 	cd $(SOURCE_DIR) && \
-	git clone https://github.com/najoshi/sickle.git && \
-	cd sickle && \
+	wget -nc https://github.com/najoshi/sickle/archive/v$(SICKLE_VER).tar.gz && \
+	tar xvzf v$(SICKLE_VER).tar.gz && \
+	cd sickle-$(SICKLE_VER) && \
 	make && \
 	cp sickle $(BIN_DIR)
-
 
 # ----------------------------------------------------------------
 # Mapping tools
@@ -370,11 +377,10 @@ homer:
 
 
 ngs_tools: \
+	deeptools\
 	samtools\
 	bedtools\
 	sratoolkit\
-	bedops\
-	deeptools\
 	fastqc\
 	sickle\
 	bowtie\
@@ -386,7 +392,7 @@ ngs_tools: \
 	macs2\
 	homer
 
-
+# BEDOPS, DEEPTOOLS
 # ================================================================
 # Visualization
 # ================================================================
