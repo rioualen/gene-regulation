@@ -12,7 +12,7 @@
     organism: "Saccharomyces cerevisiae"
     size: "12500000"                                                                                        # required. if using macs2, macs14, homer...
     version: "sacCer2"                                                                                      # required. has to match genome filenames and directories
-    fasta_file: "sacCer1.fa"
+    fasta_file: "Saccharomyces_cerevisiae.R64-1-1.30.dna.genome.fa"
     gff3_file: "Saccharomyces_cerevisiae.R64-1-1.30.gff3"
     gtf_file: "Saccharomyces_cerevisiae.R64-1-1.30.gtf"
 #    fasta_url: "http://hgdownload.soe.ucsc.edu/goldenPath/sacCer1/bigZips/chromFa.zip"
@@ -35,9 +35,9 @@
     reports: "results/reports"                                                                              # optional. will hold reports and graphics.                             If not mentioned, will be config["dir"]["results"]
 
   tools:
-    trimming: "sickle cutadapt bbduk"
+    trimming: "sickle" # cutadapt bbduk"
     mapping: "bowtie2 subread-align" # bowtie"
-    peakcalling: "macs2 swembl" # macs14 spp swembl"
+    peakcalling: "macs2 macs14 homer" #swembl" # macs14 spp swembl"
     annotation: "intersect" # window closest"
 
   sickle:
