@@ -1,3 +1,11 @@
+GENEREG_LIB = os.path.abspath(config["dir"]["gene_regulation"])
+
+# Python includes
+PYTHON = os.path.join(GENEREG_LIB, "scripts/python_lib")
+include: os.path.join(PYTHON, "util.py")
+
+from snakemake.utils import R
+
 # Set parameters
 if not "qsub" in config.keys():
     sys.exit("The parameter qsub must be defined in the config file")
@@ -29,7 +37,7 @@ if not "strand_specificity" in config["subread-featureCounts"].keys():
 ## Define input files
 def featureCounts_inputs(wildcards):
     sample_ids = read_table(config["metadata"]["samples"])["ID"]
-    bam_files =  expand(SAMPLE_DIR + "/{samples}/{samples}_{preprocess}_sorted_pos.bam", samples=sample_ids, preprocess=wildcards.preprocess)
+    bam_files =  expand(config["dir"]["samples"] + "/{samples}/{samples}_{preprocess}_sorted_pos.bam", samples=sample_ids, preprocess=wildcards.preprocess)
     return bam_files
 
 ##samples = read_table(os.path.join(config["dir"]["base"], config["metadata"]["samples"]))
