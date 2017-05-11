@@ -161,8 +161,8 @@ existing one. You just need to chose a "base" to build it on.
        # Replace XXX by the IP of your instance
        ssh -A -p 22 root@192.54.201.XXX
 
-Once you're connected to you appliance, you can install all the programs 
-that you want. You can check `this section <http://gene-regulation.readthedocs.io/en/latest/dependencies.html#>`__ for a manual on how to install NGS tools. 
+Once you're connected to your appliance, you can install all the programs 
+that you want. You can check out `this section <http://gene-regulation.readthedocs.io/en/latest/dependencies.html#>`__ for a manual on how to install NGS tools. 
 Beware that the amount of disk space of the appliance itself 
 is limited!
 
@@ -205,7 +205,7 @@ Software installation
 
 Once you're connected to the VM through ``ssh``, you can install any
 program just the way you would do it locally (see tutorials in `this
-directory <https://github.com/rioualen/gene-regulation/tree/master/doc/install_protocols>`__
+directory <http://gene-regulation.readthedocs.io/en/latest/dependencies.html#>`__
 for instance).
 
 Configuration
@@ -261,13 +261,12 @@ Requirements
 Virtual disk creation
 ****************************************************************
 
-Appliances usually have a limited amount of disk space (up to 10, 20Go).
+Appliances usually have a limited amount of disk space (up to 10 or 20Go).
 If the instance to be run necessitates disk space, you have to create a
-virtual disk (vDisk) prior to launching it. By default, the capacity of
-storage granted to a user is 250Go, which can be divided into as many
-vDisks as necessary. When instantiating an appliance, you can chose to
-attach one of these vDIsks to the virtual machine. You'll be able to
-access data on this disk through SSH.
+virtual disk (vDisk) prior to launching it.
+
+Check out `this section <http://gene-regulation.readthedocs.io/en/latest/environments.html#virtual-disk-creation>`__ 
+for details.
 
 1. Click *New vDisk* button.
 2. Enter a size (whole number equating to the amount of Go needed).
@@ -277,15 +276,12 @@ access data on this disk through SSH.
 .. figure:: ../img/vdisk-x2go.png
    :alt: 
 
-.. raw:: html
-
-   <!--\includegraphics[width=250pt]{img/vdisk-x2go.png}-->
 
 Creation of an instance
 ****************************************************************
 
 1. Click *New Instance* button.
-2. Choose appliance "Gene regulation 4.0" in the drop-down menu.
+2. Choose appliance **Gene regulation 4.0** in the drop-down menu.
 3. Name your VM.
 4. Choose the amount of CPU and RAM to grant the VM.
 5. Attach the vDisk.
@@ -489,10 +485,9 @@ Create your own Gene-regulation appliance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Creating a new appliance from scratch is very similar to using one. You
-have to satisfy the requirements described in part 1.1.
+have to satisfy the requirements described `here <http://gene-regulation.readthedocs.io/en/latest/environments.html#ifb-cloud-utilities>`__.
 
-If you want to manipulate data, you should also create a vDisk following
-step 1.2.
+If you want to manipulate data, you should also create a vDisk following `these instructions <http://gene-regulation.readthedocs.io/en/latest/environments.html#virtual-disk-creation>`__.
 
 Creation of an *appliance*
 ****************************************************************
