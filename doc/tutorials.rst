@@ -300,16 +300,18 @@ Workflow 'integrated_ChIP_RNA'
 *todo*
 
 
-::
-*Study case yet to find*
-----------------------------------------------------------------
-Workflow alternative transcripts
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*Study case yet to find*
-----------------------------------------------------------------
-Workflow orthologs
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*todo after we revise the Glossine dataset analysis*
+
+.. *Study case yet to find*
+.. ----------------------------------------------------------------
+.. Workflow alternative transcripts
+.. ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. *Study case yet to find*
+.. ----------------------------------------------------------------
+.. Workflow orthologs
+.. ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. *todo after we revise the Glossine dataset analysis*
+
+
 
 
 Running Gene-regulation workflows on your own data

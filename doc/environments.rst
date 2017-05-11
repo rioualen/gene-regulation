@@ -338,6 +338,7 @@ Download reference genome & annotations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The following commands will download the required genome files in a specific directory:
+
 - fasta file of the reference genome;
 - gff3 annotation file;
 - gtf annotation file.
@@ -362,18 +363,32 @@ You can use the option ``-n`` to make a dry run.
 ::
 
     cd  ${ANALYSIS_DIR}
-    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/factor_workflow.py --configfile gene-regulation/examples/GSE20870/GSE20870.yml -n
+    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/import_from_sra.wf --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml -n
+
+If there is no error, you can procede with the analysis:
 
 ::
 
-    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/factor_workflow.py --configfile gene-regulation/examples/GSE20870/GSE20870.yml
+    # This workflow extracts .fastq files from the .sra archives
+    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/import_from_sra.wf --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml -n
+    # This workflow performs quality check and trimming on the raw data
+    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/quality_control.wf --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml -n
+    # This workflow perform a classic ChIP-seq analysis, including mapping, peak-calling and motif search
+    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/ChIP-seq.wf --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml -n
 
-Using 4CPU & 8Go of RAM, the workflow took about 12mn to complete.
+Using 4CPU & 8Go of RAM, the workflow should take about 12mn to complete.
 
-Congratulations! You just executed this wonderful workflow:
+Congratulations! You just executed these wonderful workflows:
 
-.. figure:: ../img/rule.png
+.. figure:: ../img/import_to_fastq_rulegraph.png
    :alt: 
+
+.. figure:: ../img/quality_control_rulegraph.png
+   :alt: 
+
+.. figure:: ../img/ChIP-seq_rulegraph.png
+   :alt: 
+
 
 Visualizing results
 ****************************************************************
