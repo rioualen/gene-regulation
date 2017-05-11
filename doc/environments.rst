@@ -333,7 +333,7 @@ Here we create a folder to store the source data files and download them
     ln -s ${HOME}/gene-regulation-4.0 gene-regulation
 
 Download data
-^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. raw:: html
 
@@ -345,7 +345,7 @@ Download data
     wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra -P ${ANALYSIS_DIR}/data/GSM521935
 
 Download reference genome & annotations
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -492,15 +492,14 @@ If you want to manipulate data, you should also create a vDisk following `these 
 Creation of an *appliance*
 ****************************************************************
 
-When creating a new instance choose a 10 Go Ubuntu appliance and check
-the "Create appliance" option:
+When creating a new instance, choose a 10Go Ubuntu appliance and check
+the **Create appliance** option:
 
 1. Click **New Instance** button.
 2. Choose appliance **Ubuntu 14.04 IFB-X2GO-10GB** in the drop-down
    menu.
 3. Name your VM.
-4. Choose the amount of CPU and RAM to grant the VM (up to 8 CPU, 32 GB
-   RAM).
+4. Choose the amount of CPU and RAM to grant the VM.
 5. Check the box **Create appliance**.
 6. Attach the vDisk.
 7. Click **Run**.
@@ -513,7 +512,7 @@ The new instance should appear in orange bold fonts in the dashboard.
 .. figure:: ../img/ubuntu_create.png
    :alt: 
 
-You can connect to the instance through ``ssh`` as shown in part 1.4.
+You can connect to the instance through ``ssh`` as shown in previous sections.
 
 Installing programs and dependencies
 ****************************************************************
@@ -525,32 +524,35 @@ Get the ``gene-regulation`` repository
 
 ::
 
-    wget https://github.com/rioualen/gene-regulation/archive/2.0.tar.gz
-    tar zvxf 2.0.tar.gz
+    wget -nc https://github.com/rioualen/gene-regulation/archive/4.0.tar.gz
+    tar zvxf 4.0.tar.gz
 
 Run makefile to install the dependencies
 ****************************************************************
 
-This may take a while (up to 30mn-1h) & source the ``.bashrc`` in order
-to update the ``$PATH`` accordingly.
+The Gene-regulation library contains a makefile that installs most of the dependencies required to execute the snakemake workflows. 
+You can also install tools manually, following `these instructions <http://gene-regulation.readthedocs.io/en/latest/dependencies.html#manual-installation>`__. 
+
+The execution of the makefile may take a while (up to 30mn-1h), mostly because of the python libraries that are necessary to several NGS tools. 
+
+Then you should source the ``.bashrc`` in order to update the ``$PATH`` accordingly.
 
 ::
 
-    make -f gene-regulation-2.0/scripts/makefiles/install_tools_and_libs.mk all
+    make -f gene-regulation-4.0/scripts/makefiles/install_tools_and_libs.mk all
     source ~/.bashrc
 
-If you want to install the x2go server on the VM for visualization
-purposes:
+If you want to install the x2go server on the VM for visualization purposes, as shown `here <http://gene-regulation.readthedocs.io/en/latest/environments.html#visualizing-results>`__, 
+you can also execute this rule:
 
 ::
 
-    make -f gene-regulation-2.0/scripts/makefiles/install_tools_and_libs.mk desktop_and_x2go
+    make -f gene-regulation-4.0/scripts/makefiles/install_tools_and_libs.mk desktop_and_x2go
 
-You should now be able to execute the example workflow by following
-steps 1.5 and 1.6.
+You should now be able to execute the example workflow by following instructions from `here <http://gene-regulation.readthedocs.io/en/latest/environments.html#download-source-data>`__. 
 
 In order for your appliance to remain persistant and be available to
-other users on the IFB cloud, you should contact an admin: @?
+other users on the IFB cloud, you should contact an admin. 
 
 
 Docker
