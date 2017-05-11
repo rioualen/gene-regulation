@@ -337,6 +337,11 @@ and create the folders to organize them properly.
 Download reference genome & annotations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+The following commands will download the required genome files in a specific directory:
+- fasta file of the reference genome;
+- gff3 annotation file;
+- gtf annotation file.
+
 ::
 
     wget -nc ftp://ftp.ensemblgenomes.org/pub/fungi/release-30/fasta/saccharomyces_cerevisiae/dna/Saccharomyces_cerevisiae.R64-1-1.30.dna.genome.fa.gz -P ${ANALYSIS_DIR}/genome
