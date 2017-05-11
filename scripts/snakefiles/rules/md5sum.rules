@@ -4,6 +4,19 @@ rule md5sum:
 
     Note: md5sum is recommended for submitting NGS data to GEO.
 
+    Usage: integrate in the targets of a workflow. 
+    Alternatively, can be called directly on the command line with find.
+
+    Example: find all the fastq files in a directory (named fastq) and
+    compute one md5sum file for each, and assign the takss to 20 jobs
+    in the scheduler.
+
+    find fastq/ -name '*.fastq'  \
+       | awk '{print $1".md5sum"}' \
+       | xargs snakemake  -j 20 -p \
+           -s gene-regulation/scripts/snakefiles/rules/md5sum.rules \
+           --configfile metadata/Glossina_palpalis.yml
+
     """
     input: "{file}"
     output: "{file}.md5sum"
