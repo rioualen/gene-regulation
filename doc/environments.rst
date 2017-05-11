@@ -223,10 +223,10 @@ Operating system installation
 
 Restart once installation is completed.
 
-Once on the desktop, go to the VM menu: select *Devices* then *Install
+..Once on the desktop, go to the VM menu: select *Devices* then *Install
 Guest Additions CD image*. Run it.
 
-The VirtualBox Guest Additions will provide closer integration between
+..The VirtualBox Guest Additions will provide closer integration between
 host and guest and improve the interactive performance of guest systems.
 Reboot again to see the new display.
 
@@ -457,17 +457,19 @@ User account creation & configuration
 Virtual disk creation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Appliances usually have a limited amount of disk space (up to 10, 20Go).
+Appliances usually have a limited amount of disk space (up to 10 or 20Go).
 If the instance to be run necessitates disk space, you have to create a
 virtual disk (vDisk) prior to launching it. By default, the capacity of
 storage granted to a user is 250Go, which can be divided into as many
 vDisks as necessary. When instantiating an appliance, you can chose to
-attach one of these vDisks to the virtual machine. You'll be able to
-access data on this disk through SSH.
+attach one of these vDisks to the virtual machine. 
 
 1. Click *New vDisk* button.
 2. Enter a size (whole number equating to the amount of Go needed).
 3. Name it.
+
+.. figure:: ../img/dashboard_newvDisk.png
+   :alt:
 
 .. figure:: ../img/create_vDisk.png
    :alt: 
