@@ -434,6 +434,12 @@ useful links:
 
 -  `Documentation <http://www.france-bioinformatique.fr/en/cloud/doc-du-cloud>`__
 
+The first parts of this tutorial will explain you how to use the IFB cloud 
+for general purposes. 
+
+For a specific use of the Gene-regulation library, you should refer yourself to 
+`this section <http://gene-regulation.readthedocs.io/en/latest/environments.html#using-the-gene-regulation-appliance>`__.
+
 User account creation & configuration
 ****************************************************************
 
@@ -474,9 +480,10 @@ attach one of these vDisks to the virtual machine.
 .. figure:: ../img/create_vDisk.png
    :alt: 
 
-Creation of an instance from an existing appliance
+Creation of an instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Creating an *instance* consists in *instanciating* an existing *appliance*. 
 
 1. Click *New Instance* button.
 2. Choose an appliance in the drop-down menu. You may use the filter
