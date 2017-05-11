@@ -86,7 +86,7 @@ attach one of these vDisks to the virtual machine.
 .. figure:: ../img/dashboard_newvDisk.png
    :alt:
 
-.. figure:: ../img/create_vDisk.png
+.. figure:: ../img/vdisk-x2go.png
    :alt: 
 
 Creation of an instance
