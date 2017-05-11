@@ -501,9 +501,9 @@ the "Create appliance" option:
 3. Name your VM.
 4. Choose the amount of CPU and RAM to grant the VM (up to 8 CPU, 32 GB
    RAM).
-5. **Check the box *Create appliance*.**
+5. Check the box **Create appliance**.
 6. Attach the vDisk.
-7. Click *Run*.
+7. Click **Run**.
 
 .. figure:: ../img/create_appliance.png
    :alt: 
