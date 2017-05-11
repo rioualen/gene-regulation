@@ -495,9 +495,9 @@ Creation of an *appliance*
 When creating a new instance choose a 10 Go Ubuntu appliance and check
 the "Create appliance" option:
 
-1. Click *New Instance* button.
-2. **Choose appliance "Ubuntu 14.04 IFB-X2GO-10GB" in the drop-down
-   menu.**
+1. Click **New Instance** button.
+2. Choose appliance **Ubuntu 14.04 IFB-X2GO-10GB** in the drop-down
+   menu.
 3. Name your VM.
 4. Choose the amount of CPU and RAM to grant the VM (up to 8 CPU, 32 GB
    RAM).
