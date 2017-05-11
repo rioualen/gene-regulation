@@ -1,7 +1,8 @@
 Virtual environments
-==================================================================
+================================================================
 
-Tutorials on how to run Gene-regulation workflows in virtual environments.
+Tutorials on how to run Gene-regulation workflows in virtual environments 
+or virtual machines (VM).
 
 These protocols were developed on a Unix computer, with the OS
 LMDE and a 64-bit architecture. The virtual machines are developed
@@ -46,7 +47,7 @@ useful links:
 The first parts of this tutorial will explain you how to use the IFB cloud 
 for general purposes. 
 
-For a specific use of the Gene-regulation library, you should refer yourself to 
+For a specific use of the Gene-regulation appliance, you should refer yourself to 
 `this section <http://gene-regulation.readthedocs.io/en/latest/environments.html#using-the-gene-regulation-appliance>`__.
 
 User account creation & configuration
@@ -74,9 +75,11 @@ Virtual disk creation
 
 Appliances usually have a limited amount of disk space (up to 10 or 20Go).
 If the instance to be run necessitates disk space, you have to create a
-virtual disk (vDisk) prior to launching it. By default, the capacity of
-storage granted to a user is 250Go, which can be divided into as many
-vDisks as necessary. When instantiating an appliance, you can chose to
+virtual disk (vDisk) prior to launching it. Depending on the type of account 
+that you have, you'll have a certain amount of storage space available. 
+This space can be divided into as many vDisks as you want. 
+
+When instantiating an appliance, you can chose to
 attach one of these vDisks to the virtual machine. 
 
 1. Click *New vDisk* button.
@@ -93,14 +96,18 @@ Creation of an instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Creating an *instance* consists in *instanciating* an existing *appliance*. 
+It creates a virtual environment that has the same contents as the appliance chosen, 
+and that is accessible through ssh from your local host. 
 
 1. Click *New Instance* button.
 2. Choose an appliance in the drop-down menu. You may use the filter
    menu in order to look for a specific tool.
-3. Name your VM.
+3. Name your virtual machine.
 4. Choose the amount of CPU and RAM to grant the VM.
 5. Attach the vDisk.
 6. Click *Run*.
+
+**change screencap**
 
 .. figure:: ../img/create_instance.png
    :alt: 
@@ -127,11 +134,10 @@ Creation of an appliance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Creating your own appliance can be as simple as instantiating an
-existing one.
+existing one. You just need to chose a "base" to build it on. 
 
 1. Click *New Instance* button.
-2. Choose the appliance **Ubuntu 14.04 IFB-10G (2015-10)** or **CentOS
-   6.7 IFB-20G (2016-01)**.
+2. Choose the appliance **Ubuntu 14.04 IFB (16-12)**.
 3. Name your instance.
 4. Check **Create appliance**.
 5. Choose the amount of CPU and RAM to grant the VM.
@@ -141,7 +147,7 @@ existing one.
 .. figure:: ../img/create_appliance.png
    :alt: 
 
-8. Refresh the page. Your instance should appear in orange because of
+8. Refresh the page. Your appliance should appear in orange because of
    the creation mode you selected. You can now click on the **ssh**
    column to see the ssh parameters. It should look like this:
 
@@ -154,6 +160,14 @@ existing one.
 
        # Replace XXX by the IP of your instance
        ssh -A -p 22 root@192.54.201.XXX
+
+Once you're connected to you appliance, you can install all the programs 
+that you want. You can check `this section <http://gene-regulation.readthedocs.io/en/latest/dependencies.html#>`__ for a manual on how to install NGS tools. 
+Beware that the amount of disk space of the appliance itself 
+is limited!
+
+Later on, you can ask an admin from the IFB cloud to register the appliance, 
+in order for it to become available to other cloud users. 
 
 First connection to the instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
