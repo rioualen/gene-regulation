@@ -311,23 +311,14 @@ Download source data
 On the IFB cloud VM, the vDisk is automatically attached and mounted by
 default under ``/root/mydisk``, or ``~/mydisk``.
 
-Here we create a folder to store the source data files and download them
-.
+Here we create a folder to store the source data files and the files 
+that will results from the execution of our workflow. 
+
+We also create a link to the gene-reegulation library. 
 
 ::
 
     ANALYSIS_DIR=${HOME}/mydisk/ChIP-seq_SE_GSE20870
-
-.. raw:: html
-
-   <!--mkdir -p ${ANALYSIS_DIR}/data -->
-
-.. raw:: html
-
-   <!--mkdir -p ${ANALYSIS_DIR}/genome-->
-
-::
-
     mkdir -p ${ANALYSIS_DIR}
     cd ${ANALYSIS_DIR}
     ln -s ${HOME}/gene-regulation-4.0 gene-regulation
@@ -335,9 +326,8 @@ Here we create a folder to store the source data files and download them
 Download data
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. raw:: html
-
-   <!--mkdir -p ${ANALYSIS_DIR}/data/GSM521934 ${ANALYSIS_DIR}/data/GSM521935-->
+The following commands will download the raw files from the `GEO database <https://www.ncbi.nlm.nih.gov/geo/>`__, 
+and create the folders to organize them properly. 
 
 ::
 
