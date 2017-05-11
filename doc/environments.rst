@@ -314,7 +314,7 @@ default under ``/root/mydisk``, or ``~/mydisk``.
 Here we create a folder to store the source data files and the files 
 that will results from the execution of our workflow. 
 
-We also create a link to the gene-reegulation library. 
+We also create a link to the gene-regulation library. 
 
 ::
 
@@ -349,7 +349,7 @@ The following commands will download the required genome files in a specific dir
     wget -nc ftp://ftp.ensemblgenomes.org/pub/fungi/release-30/gtf/saccharomyces_cerevisiae/Saccharomyces_cerevisiae.R64-1-1.30.gtf.gz -P ${ANALYSIS_DIR}/genome
     gunzip ${ANALYSIS_DIR}/genome/*.gz
 
-You should now have something like this:
+Your file organization should now look like this:
 
 .. figure:: ../img/data_tuto.png
    :alt: 
