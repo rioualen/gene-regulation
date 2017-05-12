@@ -339,9 +339,9 @@ Download reference genome & annotations
 
 The following commands will download the required genome files in a specific directory:
 
-- fasta file of the reference genome;
-- gff3 annotation file;
-- gtf annotation file.
+- fasta file of the reference genome
+- gff3 annotation file
+- gtf annotation file
 
 ::
 
@@ -370,11 +370,11 @@ If there is no error, you can procede with the analysis:
 ::
 
     # This workflow extracts .fastq files from the .sra archives
-    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/import_from_sra.wf --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml -n
+    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/import_from_sra.wf --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml
     # This workflow performs quality check and trimming on the raw data
-    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/quality_control.wf --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml -n
+    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/quality_control.wf --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml
     # This workflow perform a classic ChIP-seq analysis, including mapping, peak-calling and motif search
-    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/ChIP-seq.wf --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml -n
+    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/ChIP-seq.wf --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml
 
 Using 4CPU & 8Go of RAM, the workflow should take about 12mn to complete.
 
