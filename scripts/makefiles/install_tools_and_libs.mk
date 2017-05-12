@@ -25,7 +25,7 @@ export LANG=C
 	R_installation \
 	R_lib \
 	python \
-	java9 \
+	java \
 	samtools \
 	bedtools \
 	sratoolkit \
@@ -69,7 +69,7 @@ DEEPTOOLS_VER=2.5.0.1
 FASTQC_VER=0.11.5
 IGV_VER=2.3.59
 IGVTOOLS_VER=2.3.57
-JAVA_VER=oracle-java9
+JAVA_VER=8
 MACS1_VER=1.4.2
 NUMPY_VER=1.9.2
 RPY2_VER=2.5.6
@@ -185,6 +185,7 @@ python:
 	sudo pip install numpy
 	sudo pip3 install snakemake docutils pandas
 	sudo pip3 install pyyaml
+	sudo pip3 install psutil
 	sudo pip install pyBigWig
 	sudo pip install pysam==0.8.4
 
@@ -398,13 +399,13 @@ ngs_tools: \
 # ================================================================
 
 # switch to java 8? I recall having an issue with v9, maybe in IGV?
-java9:
+java:
 	echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections
 	echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-selections
 	sudo add-apt-repository -y ppa:webupd8team/java
 	sudo apt-get update
-	sudo apt-get -y install oracle-java9-installer
-	sudo apt-get install oracle-java9-set-default
+	sudo apt-get -y install oracle-java$(JAVA_VER)-installer
+	sudo apt-get install oracle-java$(JAVA_VER)-set-default
 
 
 igv:
@@ -420,7 +421,7 @@ igv_tools:
 	ln -s -f $(SOURCE_DIR)/IGVTools/igvtools $(BIN_DIR)/igvtools \
 	ln -s -f $(SOURCE_DIR)/IGVTools/igvtools.jar $(BIN_DIR)/igvtools.jar
 
-visualization: java9 igv igv_tools
+visualization: java igv igv_tools
 
 
 ## to be used only in non-graphical environment (eg IFB cloud VMs)
