@@ -12,20 +12,24 @@ Generic tools
 ssh
 ****************************************************************
 
+Secure Shell (SSH) is a network protocol for operating network services securely over an unsecured network.
+ The best known example application is for remote login to computer systems by users.
+
+It can be useful, for example, in order to connect to a virtual machine from a host terminal, 
+work on a remote server, or connect with a git repository. 
+
+
 ::
 
     sudo apt-get install ssh
 
-.. raw:: html
-
-   <!--
-   If you have followed one of the previous tutorials, you should have copied your ssh parameters onto your VM, and have an ssh public key like `~/.ssh/id_rsa.pub`. If not, you can generate keys using `ssh-keygen` (see manual [here](https://help.github.com/articles/generating-ssh-keys/)).
-   -->
+In order to use this protocol, you should dispose of an ssh key. It is usually located in your home directory, in a hidden directory: `$HOME/.ssh`. 
+If you don't have a key, and only then, you should create one. Follow for example `this tutorial <https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/>`_. 
 
 rsync
 ****************************************************************
 
-`rsync <https://rsync.samba.org/>`__ is an open source utility that
+`rsync <https://rsync.samba.org/>`_ is an open source utility that
 provides fast incremental file transfer.
 
 ::
@@ -35,12 +39,19 @@ provides fast incremental file transfer.
 git
 ****************************************************************
 
--  Create an account on `GitHub <https://github.com>`__.
--  Install git on your machine.
+Git is a version control system (VCS) for tracking changes in computer files and coordinating work on those files among multiple people. 
+It is primarily used for software development, but it can be used to keep track of changes in any files. 
+As a distributed revision control system it is aimed at speed, data integrity, and support for distributed, non-linear workflows. 
+(from `Wikipedia page <https://en.wikipedia.org/wiki/Git>`_
 
 ::
 
     sudo apt-get install git
+
+Gene-regulation is distibuted on the `GitHub <https://en.wikipedia.org/wiki/GitHub>`_ hosting service.  
+
+-  Create an account on `GitHub <https://github.com>`_.
+-  Install git on your machine.
 
 -  Add your ssh public key to your GitHub account settings (account >
    settings > SSH keys > add SSH key).
@@ -192,11 +203,11 @@ R
 Snakemake
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  `Documentation <https://bitbucket.org/snakemake/snakemake/wiki/Documentation>`__
--  `FAQ <https://bitbucket.org/snakemake/snakemake/wiki/FAQ>`__
--  `Forum <https://groups.google.com/forum/#!forum/snakemake>`__
+-  `Documentation <https://bitbucket.org/snakemake/snakemake/wiki/Documentation>`_
+-  `FAQ <https://bitbucket.org/snakemake/snakemake/wiki/FAQ>`_
+-  `Forum <https://groups.google.com/forum/#!forum/snakemake>`_
 -  More: see
-   `wiki/informatics <https://github.com/rioualen/gene-regulation/blob/master/doc/wiki-fg/informatics.md>`__
+   `wiki/informatics <https://github.com/rioualen/gene-regulation/blob/master/doc/wiki-fg/informatics.md>`_
    section.
 
 Now you have installed Python 3 and pip3 (see previous section), you can
@@ -268,14 +279,14 @@ This toolkit includes a number of programs, allowing the conversion of
 ``*.sra`` files. ``fastq-dump`` translates ``*.sra`` files to
 ``*.fastq`` files.
 
--  `SRA format <http://www.ncbi.nlm.nih.gov/Traces/sra/>`__
+-  `SRA format <http://www.ncbi.nlm.nih.gov/Traces/sra/>`_
 -  `fastq-dump
-   manual <http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=toolkit_doc&f=fastq-dump>`__
+   manual <http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=toolkit_doc&f=fastq-dump>`_
 -  `Installation
-   manual <http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=toolkit_doc&f=std>`__
+   manual <http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=toolkit_doc&f=std>`_
 
 You can download last version
-`here <http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software>`__,
+`here <http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software>`_,
 or issue the following commands:
 
 ::
@@ -316,7 +327,7 @@ Samtools
 SAM (Sequence Alignment/Map) format is a generic format for storing
 large nucleotide sequence alignments.
 
-`SAMtools <http://samtools.sourceforge.net/>`__ provides several tools
+`SAMtools <http://samtools.sourceforge.net/>`_ provides several tools
 to process such files.
 
 TODO: install samtools from website, not from apt-get repositories.
@@ -334,7 +345,7 @@ TODO: install samtools from website, not from apt-get repositories.
 Bedtools
 ****************************************************************
 
-The `bedtools <http://bedtools.readthedocs.org/en/latest/>`__ utilities
+The `bedtools <http://bedtools.readthedocs.org/en/latest/>`_ utilities
 are a swiss-army knife of tools for a wide-range of genomics analysis
 tasks. For example, bedtools allows one to intersect, merge, count,
 complement, and shuffle genomic intervals from multiple files in
@@ -352,7 +363,7 @@ Quality assessment
 FastQC
 ****************************************************************
 
-`FastQC <http://www.bioinformatics.babraham.ac.uk/projects/fastqc/>`__
+`FastQC <http://www.bioinformatics.babraham.ac.uk/projects/fastqc/>`_
 aims to provide a simple way to do some quality control checks on raw
 sequence data coming from high throughput sequencing pipelines. It
 provides a modular set of analyses which you can use to give a quick
@@ -369,7 +380,7 @@ Trimming
 Sickle
 ****************************************************************
 
-`Sickle <https://github.com/najoshi/sickle>`__ is a trimming tool which
+`Sickle <https://github.com/najoshi/sickle>`_ is a trimming tool which
 better the quality of NGS reads.
 
 -  Pre-requisite: install ``zlib`` (see section 1.1.4).
@@ -395,11 +406,11 @@ Alignment/mapping
 BWA
 ****************************************************************
 
-`BWA <http://bio-bwa.sourceforge.net/>`__ is a software package for
+`BWA <http://bio-bwa.sourceforge.net/>`_ is a software package for
 mapping low-divergent sequences against a large reference genome, such
 as the human genome.
 
--  `Manual <http://bio-bwa.sourceforge.net/bwa.shtml>`__
+-  `Manual <http://bio-bwa.sourceforge.net/bwa.shtml>`_
 
 ::
 
@@ -417,12 +428,12 @@ Bowtie2
 ****************************************************************
 
 `General
-documentation <http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml>`__
+documentation <http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml>`_
 
-`Instructions <http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#obtaining-bowtie-2>`__
+`Instructions <http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#obtaining-bowtie-2>`_
 
 -  Download package
-   `here <https://sourceforge.net/projects/bowtie-bio/files/bowtie2/>`__
+   `here <https://sourceforge.net/projects/bowtie-bio/files/bowtie2/>`_
 -  Move package to your personnal bin/
 -  Unzip
 -  Add to $PATH (see section 1.3)
@@ -448,10 +459,10 @@ process small genomes only.
 HOMER
 ****************************************************************
 
-`Web page <http://homer.salk.edu/>`__
+`Web page <http://homer.salk.edu/>`_
 
 `Install
-instructions <http://homer.salk.edu/homer/introduction/install.html>`__
+instructions <http://homer.salk.edu/homer/introduction/install.html>`_
 
 ::
 
@@ -518,8 +529,8 @@ annotations in GTF format.
 MACS 1.4
 ****************************************************************
 
--  `doc <http://liulab.dfci.harvard.edu/MACS/00README.html>`__
--  `install <http://liulab.dfci.harvard.edu/MACS/INSTALL.html>`__
+-  `doc <http://liulab.dfci.harvard.edu/MACS/00README.html>`_
+-  `install <http://liulab.dfci.harvard.edu/MACS/INSTALL.html>`_
 
 ::
 
@@ -535,7 +546,7 @@ MACS 1.4
 MACS2
 ****************************************************************
 
--  `MACS2 web page <https://github.com/taoliu/MACS/>`__
+-  `MACS2 web page <https://github.com/taoliu/MACS/>`_
 
 ::
 
@@ -601,7 +612,7 @@ SWEMBL
 ****************************************************************
 
 -  `SWEMBL beginner's
-   manual <http://www.ebi.ac.uk/~swilder/SWEMBL/beginners.html>`__
+   manual <http://www.ebi.ac.uk/~swilder/SWEMBL/beginners.html>`_
 
 **TODO**
 
@@ -612,7 +623,7 @@ RSAT suite
 ****************************************************************
 
 See `doc/install\_protocols
-section <https://github.com/rioualen/gene-regulation/blob/master/doc/install_protocols/install_rsat_ubuntu14.04.Rmd>`__.
+section <https://github.com/rioualen/gene-regulation/blob/master/doc/install_protocols/install_rsat_ubuntu14.04.Rmd>`_.
 Beware, this manuel might be deprecated.
 
 
@@ -624,64 +635,64 @@ Bazar à trier
 Table of Contents
 
 -  `Pre-requisites in case of virtual machine (VM)
-   development <#pre-requisites-in-case-of-virtual-machine-vm-development>`__
+   development <#pre-requisites-in-case-of-virtual-machine-vm-development>`_
 
-   -  `VM creation <#vm-creation>`__
-   -  `VM customization <#vm-customization>`__
+   -  `VM creation <#vm-creation>`_
+   -  `VM customization <#vm-customization>`_
 
--  `General requirements <#general-requirements>`__
+-  `General requirements <#general-requirements>`_
 
-   -  `Generic tools <#generic-tools>`__
-   -  `ssh <#ssh>`__
-   -  `rsync <#rsync>`__
-   -  `git <#git>`__
-   -  `zlib <#zlib>`__
-   -  `qsub <#qsub>`__
-   -  `Create bin/ (opt) <#create-bin-opt>`__
-   -  `Edit $PATH <#edit-path>`__
+   -  `Generic tools <#generic-tools>`_
+   -  `ssh <#ssh>`_
+   -  `rsync <#rsync>`_
+   -  `git <#git>`_
+   -  `zlib <#zlib>`_
+   -  `qsub <#qsub>`_
+   -  `Create bin/ (opt) <#create-bin-opt>`_
+   -  `Edit $PATH <#edit-path>`_
 
 -  `Snakemake workflows basic
-   requirements <#snakemake-workflows-basic-requirements>`__
+   requirements <#snakemake-workflows-basic-requirements>`_
 
-   -  `Python <#python>`__
-   -  `Pandas library <#pandas-library>`__
-   -  `Package rpy2 <#package-rpy2>`__
-   -  `R (to be revised) <#r-to-be-revised>`__
-   -  `Snakemake <#snakemake>`__
-   -  `Graphviz <#graphviz>`__
+   -  `Python <#python>`_
+   -  `Pandas library <#pandas-library>`_
+   -  `Package rpy2 <#package-rpy2>`_
+   -  `R (to be revised) <#r-to-be-revised>`_
+   -  `Snakemake <#snakemake>`_
+   -  `Graphviz <#graphviz>`_
 
--  `NGS analysis software & tools <#ngs-analysis-software--tools>`__
+-  `NGS analysis software & tools <#ngs-analysis-software--tools>`_
 
-   -  `File management <#file-management>`__
-   -  `SRA toolkit <#sra-toolkit>`__
-   -  `Samtools <#samtools>`__
-   -  `Bedtools <#bedtools>`__
-   -  `Quality assessment <#quality-assessment>`__
-   -  `FastQC <#fastqc>`__
-   -  `Trimming <#trimming>`__
-   -  `Sickle <#sickle>`__
-   -  `Alignment/mapping <#alignmentmapping>`__
-   -  `BWA <#bwa>`__
-   -  `Bowtie2 <#bowtie2>`__
-   -  `Peak-calling <#peak-calling>`__
-   -  `bPeaks <#bpeaks>`__
-   -  `HOMER <#homer>`__
-   -  `MACS 1.4 <#macs-14>`__
-   -  `MACS2 <#macs2>`__
-   -  `SPP R package (broken) <#spp-r-package-broken>`__
-   -  `SWEMBL <#swembl>`__
+   -  `File management <#file-management>`_
+   -  `SRA toolkit <#sra-toolkit>`_
+   -  `Samtools <#samtools>`_
+   -  `Bedtools <#bedtools>`_
+   -  `Quality assessment <#quality-assessment>`_
+   -  `FastQC <#fastqc>`_
+   -  `Trimming <#trimming>`_
+   -  `Sickle <#sickle>`_
+   -  `Alignment/mapping <#alignmentmapping>`_
+   -  `BWA <#bwa>`_
+   -  `Bowtie2 <#bowtie2>`_
+   -  `Peak-calling <#peak-calling>`_
+   -  `bPeaks <#bpeaks>`_
+   -  `HOMER <#homer>`_
+   -  `MACS 1.4 <#macs-14>`_
+   -  `MACS2 <#macs2>`_
+   -  `SPP R package (broken) <#spp-r-package-broken>`_
+   -  `SWEMBL <#swembl>`_
    -  `Motif discovery, motif
-      analysis <#motif-discovery-motif-analysis>`__
-   -  `RSAT suite <#rsat-suite>`__
+      analysis <#motif-discovery-motif-analysis>`_
+   -  `RSAT suite <#rsat-suite>`_
 
 -  `Workpackage 2.6 - Gene
-   regulation <#workpackage-26---gene-regulation>`__
+   regulation <#workpackage-26---gene-regulation>`_
 
-   -  `Cloning the repository <#cloning-the-repository>`__
-   -  `Data transfer/download <#data-transferdownload>`__
-   -  `Running the pipeline <#running-the-pipeline>`__
+   -  `Cloning the repository <#cloning-the-repository>`_
+   -  `Data transfer/download <#data-transferdownload>`_
+   -  `Running the pipeline <#running-the-pipeline>`_
 
--  `VM export / submission <#vm-export--submission>`__ --> <!-- ###
+-  `VM export / submission <#vm-export--submission>`_ --> <!-- ###
    **TODO**
 
 -  Include map of possible "bricks" of worflows (like general rulegraph)
