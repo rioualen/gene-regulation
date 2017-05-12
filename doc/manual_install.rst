@@ -1,9 +1,9 @@
 
-This manual aims at helping you install the necessary programs and
+This manual aims at helping you install necessary and optional programs and
 dependencies in order to have the snakemake workflows work. It was
 designed for Unix-running computers (Ubuntu, Debian).
 
-General requirements
+General tools
 ----------------------------------------------------------------
 
 Generic tools
@@ -48,13 +48,11 @@ As a distributed revision control system it is aimed at speed, data integrity, a
 
     sudo apt-get install git
 
-Gene-regulation is distibuted on the `GitHub <https://en.wikipedia.org/wiki/GitHub>`_ hosting service.  
+Gene-regulation is distibuted on the `GitHub <https://en.wikipedia.org/wiki/GitHub>`_ hosting service. 
+You can download an archive of Gene-regulation freely, or you can clone the repository and work on it. 
 
--  Create an account on `GitHub <https://github.com>`_.
--  Install git on your machine.
-
--  Add your ssh public key to your GitHub account settings (account >
-   settings > SSH keys > add SSH key).
+-  Create an account on GitHub `here <https://github.com/join?source=header-home>`_.
+-  Add your ssh public key to your GitHub `account settings <https://github.com/settings/keys`_
 
 ::
 
@@ -69,10 +67,7 @@ Several tools require this dependency (e.g. sickle, bamtools...).
 
     sudo apt-get install libz-dev
 
-qsub
-****************************************************************
 
-**TODO**
 
 Create bin/ and app\_sources/ (opt) TODO
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
