@@ -217,8 +217,8 @@ if not (("tools" in config.keys()) and ("peakcalling" in config["tools"].keys())
     sys.exit("The parameter config['tools']['peakcalling'] should be specified in the config file.")
 
 PEAKCALLING_TOOLS = config["tools"]["peakcalling"].split()
-PEAKS       = expand(expand(PEAKS_DIR + "/{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}.bed", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLING_TOOLS, aligner=MAPPING_TOOLS, trimmer=TRIMMING_TOOLS)
-GET_FASTA   = expand(expand(PEAKS_DIR + "/{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}.fasta", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLING_TOOLS, aligner=MAPPING_TOOLS, trimmer=TRIMMING_TOOLS)
+PEAKS       = expand(expand(PEAKS_DIR + "/{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{prefix}}_{{peakcaller}}.bed", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLING_TOOLS, prefix=PREFIX)
+GET_FASTA   = expand(expand(PEAKS_DIR + "/{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{prefix}}_{{peakcaller}}.fasta", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLING_TOOLS, prefix=PREFIX)
 
 # ----------------------------------------------------------------
 # Peak annotation
@@ -228,11 +228,11 @@ if not (("tools" in config.keys()) and ("annotation" in config["tools"].keys()))
     sys.exit("The parameter config['tools']['annotation'] should be specified in the config file.")
 
 DISTANCE = config["tools"]["annotation"].split()
-GENOMIC_FEAT    = expand(expand(PEAKS_DIR + "/{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}_{{distance}}_annot.bed", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLING_TOOLS, distance=DISTANCE, aligner=MAPPING_TOOLS, trimmer=TRIMMING_TOOLS)
+GENOMIC_FEAT    = expand(expand(PEAKS_DIR + "/{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{prefix}}_{{peakcaller}}_{{distance}}_annot.bed", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLING_TOOLS, distance=DISTANCE, prefix=PREFIX)
 
-GENE_LIST       = expand(expand(PEAKS_DIR + "/{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}_{{distance}}_annot_gene_list.tab", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLING_TOOLS, distance=DISTANCE,aligner=MAPPING_TOOLS, trimmer=TRIMMING_TOOLS)
+GENE_LIST       = expand(expand(PEAKS_DIR + "/{treat}_vs_{control}/{{peakcaller}}/{treat}_vs_{control}_{{prefix}}_{{peakcaller}}_{{distance}}_annot_gene_list.tab", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLING_TOOLS, distance=DISTANCE,prefix=PREFIX)
 
-PEAK_MOTIFS     = expand(expand(PEAKS_DIR + "/{treat}_vs_{control}/{{peakcaller}}/peak-motifs/{treat}_vs_{control}_{{trimmer}}_{{aligner}}_{{peakcaller}}_peak-motifs_synthesis.html", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLING_TOOLS, aligner=MAPPING_TOOLS, trimmer=TRIMMING_TOOLS)
+PEAK_MOTIFS     = expand(expand(PEAKS_DIR + "/{treat}_vs_{control}/{{peakcaller}}/peak-motifs/{treat}_vs_{control}_{{prefix}}_{{peakcaller}}_peak-motifs_synthesis.html", zip, treat=TREATMENT, control=CONTROL), peakcaller=PEAKCALLING_TOOLS, prefix=PREFIX)
 
 # ----------------------------------------------------------------
 # Visualization & reports
