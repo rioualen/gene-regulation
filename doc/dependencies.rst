@@ -1,12 +1,14 @@
 Dependencies
 ================================================================
 
+These manuals aim at helping you install the necessary programs and
+dependencies in order to have the snakemake workflows work. It was
+designed for Unix-running computers (Ubuntu, Debian).
+
 Manual installation
 ----------------------------------------------------------------
 
-This manual aims at helping you install the necessary programs and
-dependencies in order to have the snakemake workflows work. It was
-designed for Unix-running computers (Ubuntu, Debian).
+The following manual is meant to help you install the programs that you might need in order to run workflows. 
 
 General requirements
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -739,28 +741,32 @@ Makefile
 ----------------------------------------------------------------
 
 The Gene-regulation library comprises a makefile that can install most of the 
-dependencies described in the previous section. 
+dependencies described in the previous section. It is recommended when you're setting up a virtual environments, 
+as described in `these tutorials <http://gene-regulation.readthedocs.io/en/latest/environments.html>`_. 
 
-It currently allows running the following workflows:
+If you want to run the workflows on your personal computer or on a server, you should follow the `manual installation 
+<http://gene-regulation.readthedocs.io/en/latest/dependencies.html#manual-installation>`_, or contact a sysadmin. 
+
+The makefile currently allows running the following workflows:
 
 - import_from_sra.wf
 - quality_control.wf
 - ChIP-seq.wf
 
+It is not yet handling al the RNA-seq dependencies.
+
 ::
 
-    cd $GENE_REG_PATH
+    # it is assumed that you have defined a global variable with the path to the Gene-regulation library
+    cd ${GENE_REG_PATH}
     make -f scripts/makefiles/install_tools_and_libs.mk all
     source ~/.bashrc
 
+..
 Conda
 ----------------------------------------------------------------
-
 A number of dependencies of Gene-regulation can be installed through a Conda environment. 
 This list is not exhaustive. 
-
-::
-
     conda install -c bioconda sickle=0.5 
     conda install -c bioconda bowtie=1.2.0 
     conda install -c bioconda bowtie2=2.3.0 
