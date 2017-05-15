@@ -324,7 +324,9 @@ The bigger the sequencing depth, the better the quality of the alignment, and th
 BWA
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-BWA is designed for short 
+BWA is designed for short reads alignment. 
+
+
 `BWA <http://bio-bwa.sourceforge.net/>`__ is a software package for
 mapping low-divergent sequences against a large reference genome, such
 as the human genome.
@@ -341,6 +343,9 @@ Li H. and Durbin R. (2009). Fast and accurate short read alignment with Burrows-
 
 Bowtie
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Bowtie performs ungapped alignment, and is therefore not suitable for certain types of data, like RNA-seq data. 
+
 
 ::
 
