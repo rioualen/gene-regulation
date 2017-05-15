@@ -559,6 +559,11 @@ A few links:
 SWEMBL
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+The i nstallation of this peak-caller is optional, as it is not currently published and maintained properly. 
+
+It is therefore not used in our demo workflows. 
+
+
 -  `SWEMBL beginner's
    manual <http://www.ebi.ac.uk/~swilder/SWEMBL/beginners.html>`__
 
@@ -577,6 +582,8 @@ It seems there could be issues with C flags. To be investigated.
 
 Motif discovery, motif analysis
 ****************************************************************
+
+These software can be useful for the analysis of ChIP-seq peaks. 
 
 Regulatory Sequence Analysis Tools (RSAT)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
