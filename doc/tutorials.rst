@@ -8,12 +8,12 @@ Initial setup
 Gene-regulation library
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For each study presented here we're creating a link to the gene-regulation library, 
-previously downloaded in section `Getting started <http://gene-regulation.readthedocs.io/en/latest/getting_started.html>`__. 
+The following tutorials assume that you have previously downloaded or cloned a copy of the gene-regulation library, 
+following section `Getting started <http://gene-regulation.readthedocs.io/en/latest/getting_started.html>`__. 
 
 Note: if you're using a clone of the library, 
 you might want to make a copy of it, in order to ensure consistency 
-for later analyses.
+for later analyses even after pulling updates.
 
 
 Genome directory
