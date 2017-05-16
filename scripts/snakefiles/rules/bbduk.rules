@@ -13,8 +13,12 @@ if config["metadata"]["seq_type"] == "pe" and not "strands" in config["metadata"
 if not "bbduk" in config.keys():
     config["bbduk"] = {}
 
-if not "threshold" in config["bbduk"].keys():
-    config["bbduk"]["threshold"] = "20"
+if not "qual_threshold" in config["bbduk"].keys():
+    config["bbduk"]["qual_threshold"] = "20"
+
+if not "length_threshold" in config["bbduk"].keys():
+    config["bbduk"]["length_threshold"] = "20"
+
 
 if not "qual" in config["bbduk"].keys():
     config["bbduk"]["qual"] = "sanger"

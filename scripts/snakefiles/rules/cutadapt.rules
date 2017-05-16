@@ -13,8 +13,11 @@ if config["metadata"]["seq_type"] == "pe" and not "strands" in config["metadata"
 if not "cutadapt" in config.keys():
     config["cutadapt"] = {}
 
-if not "threshold" in config["cutadapt"].keys():
-    config["cutadapt"]["threshold"] = "20"
+if not "qual_threshold" in config["cutadapt"].keys():
+    config["cutadapt"]["qual_threshold"] = "20"
+
+if not "length_threshold" in config["cutadapt"].keys():
+    config["cutadapt"]["length_threshold"] = "20"
 
 if not "qual" in config["cutadapt"].keys():
     config["cutadapt"]["qual"] = "sanger"
