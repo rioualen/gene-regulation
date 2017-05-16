@@ -626,6 +626,10 @@ Switch back to azerty:
 
 -->
 
+
+Gene-regulation with Docker
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Create shared repositories and download source data
 ****************************************************************
 
@@ -785,17 +789,15 @@ rioualen/gene-regulation:0.3 509 docker run -v
     history
     snakemake -s scripts/snakefiles/workflows/factor_workflow.py -np
 
-
+..
 Questions
 ****************************************************************
-
 1. Quand on fait un login dans la vm gene--regulation, on entre dans un
    shell basique (pas bash). Est-il possible de configurer docker pour
    qu'on entre automatiquement en bash ?
-
 Entry point /bin/bash
-
 2. Il faut ajouter le bashrc dans le /etc du docker.
+
 
 
 
@@ -1191,8 +1193,7 @@ and untick "enable USB Controller". You should now be able to start the
 VM.
 
 
-
+..
 Conda
 ----------------------------------------------------------------
-
 *TODO*
