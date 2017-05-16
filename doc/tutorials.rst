@@ -458,12 +458,18 @@ If your directory now looks like this, you should be ready to run a worflow!
 .. figure:: ../img/file_orga_ready.png
    :alt: 
 
+You can verify it by doing dry runs:
 
 ::
 
     cd ${ANALYSIS_DIR}
-    snakemake -s gene-regulation/scripts/snakefiles/workflows/quality_control.wf --config-file metadata/config.yml -pn
-    snakemake -s gene-regulation/scripts/snakefiles/workflows/ChIP-seq.wf --config-file metadata/config.yml -pn
+    # Run the quality check
+    snakemake -s gene-regulation/scripts/snakefiles/workflows/quality_control.wf --config-file metadata/config.yml -p -n
+    # Run the ChIP-seq workflow
+    snakemake -s gene-regulation/scripts/snakefiles/workflows/ChIP-seq.wf --config-file metadata/config.yml -p -n
+    # Run the RNA-seq workflow
+    snakemake -s gene-regulation/scripts/snakefiles/workflows/RNA-seq.wf --config-file metadata/config.yml -p -n
 
+Just remove the `-n` option to actually run them. 
 
 
