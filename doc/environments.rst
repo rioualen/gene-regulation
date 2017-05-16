@@ -579,15 +579,15 @@ Docker
 ----------------------------------------------------------------
 
 Docker is an open-source project that automates the deployment of applications inside software containers. 
-`Source: Wikipedia <https://en.wikipedia.org/wiki/Docker_(software)`_). 
+`Source: Wikipedia <https://en.wikipedia.org/wiki/Docker_(software)>`_. 
 
 
 .. figure:: ../img/physical_machine.png
-   :alt: 
+   :width: 30% 
 .. figure:: ../img/virtual_machine.png
-   :alt: 
+   :width: 30% 
 .. figure:: ../img/docker_container.png
-   :alt: 
+   :width: 30%
 
 
 Get started with Docker!
