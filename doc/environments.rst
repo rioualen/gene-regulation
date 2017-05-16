@@ -10,6 +10,16 @@ with the Ubuntu 14.04 OS.
 
 Last update: 17/05/09
 
+In computing, a **virtual machine** (VM) is an emulation of a computer system. 
+Virtual machines are based on computer architectures and provide functionality of a physical computer. 
+Their implementations may involve specialized hardware, software, or a combination.
+`Source: Wikipedia <https://en.wikipedia.org/wiki/Virtual_machine>`_
+
+.. figure:: ../img/physical_machine.png
+   :alt: 
+.. figure:: ../img/virtual_machine.png
+   :alt: 
+
 IFB cloud
 ----------------------------------------------------------------
 
@@ -568,6 +578,17 @@ other users on the IFB cloud, you should contact an admin.
 Docker
 ----------------------------------------------------------------
 
+Docker is an open-source project that automates the deployment of applications inside software containers. 
+`Source: Wikipedia <https://en.wikipedia.org/wiki/Docker_(software)`_). 
+
+
+.. figure:: ../img/physical_machine.png
+   :alt: 
+.. figure:: ../img/virtual_machine.png
+   :alt: 
+.. figure:: ../img/docker_container.png
+   :alt: 
+
 
 Get started with Docker!
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -575,7 +596,7 @@ Get started with Docker!
 Create a Docker account
 ****************************************************************
 
-Instructions `here <https://docs.docker.com/linux/step_five/>`__.
+Instructions `here <https://docs.docker.com/linux/step_five/>`__ (linux users).
 
 Install Docker on your local host
 ****************************************************************
@@ -670,10 +691,8 @@ Execute the pipeline
 
 <!-- # JVH / Mac
 
-Quick tour
-****************************************************************
-
 On Mac OSX
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1. Install docker
 
