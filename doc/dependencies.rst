@@ -350,9 +350,9 @@ Bowtie performs ungapped alignment, and is therefore not suitable for certain ty
 ::
 
     cd $HOME/app_sources
-    wget --no-clobber http://downloads.sourceforge.net/project/bowtie-bio/bowtie/$(BOWTIE1_VER)/bowtie-$(BOWTIE1_VER)-linux-x86_64.zip
-    unzip bowtie-$(BOWTIE1_VER)-linux-x86_64.zip
-    cp `find bowtie-$(BOWTIE1_VER)/ -maxdepth 1 -executable -type f` $HOME/bin
+    wget --no-clobber http://downloads.sourceforge.net/project/bowtie-bio/bowtie/1.1.1/bowtie-1.1.1-linux-x86_64.zip
+    unzip bowtie-1.1.1-linux-x86_64.zip
+    cp `find bowtie-1.1.1/ -maxdepth 1 -executable -type f` $HOME/bin
 
 
 Bowtie2
@@ -370,7 +370,7 @@ documentation <http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml>`__
     cd $HOME/app_sources
     wget http://sourceforge.net/projects/bowtie-bio/files/bowtie2/2.2.6/bowtie2-2.2.6-linux-x86_64.zip
     unzip bowtie2-2.2.6-linux-x86_64.zip
-    p `find bowtie2-$(BOWTIE2_VER)/ -maxdepth 1 -executable -type f` $HOME/bin
+    p `find bowtie2-2.2.6/ -maxdepth 1 -executable -type f` $HOME/bin
 
 
 Peak-calling
