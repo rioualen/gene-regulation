@@ -370,7 +370,7 @@ documentation <http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml>`__
     cd $HOME/app_sources
     wget http://sourceforge.net/projects/bowtie-bio/files/bowtie2/2.2.6/bowtie2-2.2.6-linux-x86_64.zip
     unzip bowtie2-2.2.6-linux-x86_64.zip
-    p `find bowtie2-2.2.6/ -maxdepth 1 -executable -type f` $HOME/bin
+    cp `find bowtie2-2.2.6/ -maxdepth 1 -executable -type f` $HOME/bin
 
 
 Peak-calling

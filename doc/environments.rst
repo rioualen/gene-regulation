@@ -15,14 +15,12 @@ Virtual machines are based on computer architectures and provide functionality o
 Their implementations may involve specialized hardware, software, or a combination.
 `Source: Wikipedia <https://en.wikipedia.org/wiki/Virtual_machine>`_
 
-.. |logo1| figure:: ../img/physical_machine.png
-   :width: 30%
-.. |logo2| figure:: ../img/virtual_machine.png
-   :width: 30%
+Diagram of a physical machine vs a virtual machine:
 
-+---------+---------+
-| |logo1| | |logo2| |
-+---------+---------+
+.. figure:: ../img/physical_machine.png
+   :width: 30%
+.. figure:: ../img/virtual_machine.png
+   :width: 30%
 
 IFB cloud
 ----------------------------------------------------------------
@@ -584,6 +582,8 @@ Docker
 
 Docker is an open-source project that automates the deployment of applications inside software containers. 
 `Source: Wikipedia <https://en.wikipedia.org/wiki/Docker_(software)>`_. 
+
+Diagram of Docker containers compared to physical and virtual machines. 
 
 
 .. figure:: ../img/physical_machine.png
