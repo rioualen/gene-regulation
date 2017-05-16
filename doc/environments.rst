@@ -15,10 +15,14 @@ Virtual machines are based on computer architectures and provide functionality o
 Their implementations may involve specialized hardware, software, or a combination.
 `Source: Wikipedia <https://en.wikipedia.org/wiki/Virtual_machine>`_
 
-.. figure:: ../img/physical_machine.png
-   :alt: 
-.. figure:: ../img/virtual_machine.png
-   :alt: 
+.. |logo1| figure:: ../img/physical_machine.png
+   :width: 30%
+.. |logo2| figure:: ../img/virtual_machine.png
+   :width: 30%
+
++---------+---------+
+| |logo1| | |logo2| |
++---------+---------+
 
 IFB cloud
 ----------------------------------------------------------------
