@@ -37,10 +37,9 @@
 
   tools:                                                        # required
     trimming: "sickle"
-    mapping: "bowtie2"
+    mapping: "subread-align"
     read_counts: "featureCounts"
     diffexpr: "edgeR DESeq2"
-    infer_transcripts: "cufflinks"
 
   fastqc: 
     other_options: ""
@@ -65,20 +64,10 @@
     strand_specificity: 1               ## strand-specific read counting.  0 (unstranded), 1 (stranded) and 2 (reversely stranded). 
     multi_mapping: ""
 
-  bowtie:
-    max_mismatches: "1"
-    threads: "10"
-
-  bwa:
-    threads: "10"
-
   tophat:
     max_mismatches: "1"
     threads: "10"
 
-  cufflinks:
-    threads: "4"
-    libtype: "fr-firststrand"
 
   edgeR:
     featuresToRemove: "NULL"
@@ -104,9 +93,4 @@
     typeTrans: "VST"                                # "VST" or "rlog"
     locfunc: "median"                               # "median" (default) or "shorth" to estimate the size factors
 
-  blastall:
-    organism: "Arabidopsis_thaliana"
-    db_fasta: "genome/TAIR10/TAIR10.fa"
-    db: "genome/TAIR10/TAIR10_blastdb_pT"
-    matrix: "BLOSUM62"
 
