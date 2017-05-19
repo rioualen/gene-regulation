@@ -80,7 +80,7 @@ SCIPY_VER=0.16.0
 SICKLE_VER=1.33
 SPP_VER=1.11
 STAR_VER=2.5.2b
-SUBREAD_VER=1.5.0
+SUBREAD_VER=1.5.2
 SWEMBL_VER=3.3.1
 
 # ================================================================
