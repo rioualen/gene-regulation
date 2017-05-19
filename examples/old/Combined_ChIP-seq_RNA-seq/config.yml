@@ -1,14 +1,13 @@
----
   RNA_seq:
-    snakefile: "RNA-seq_workflow_PE.py"
-    configfile: "gene-regulation/examples/RNA-seq_PE_GSE41190/config.yml"
-    directory: "/data/analyses/RNA-seq_PE_GSE41190"
+    snakefile: "gene-regulation/scripts/workflows/RNA-seq.wf"
+    configfile: "gene-regulation/examples/RNA-seq_GSE55316/config.yml"
+    directory: "RNA-seq_GSE55316"
 
   ChIP_seq:
-    snakefile: "ChIP-seq_workflow_SE.py"
-    configfile: "gene-regulation/examples/ChIP-seq_SE_GSE41187/config.yml"
-    directory: "/data/analyses/ChIP-seq_SE_GSE41187"
+    snakefile: "gene-regulation/scripts/workflows/ChIP-seq.wf"
+    configfile: "gene-regulation/examples/ChIP-seq_GSE55357/config.yml"
+    directory: "ChIP-seq_GSE55357"
 
-  snakemake:
-    workflows: "gene-regulation/scripts/snakefiles/workflows"
-    rules: "gene-regulation/scripts/snakefiles/rules"
+#  snakemake:
+#    workflows: "gene-regulation/scripts/snakefiles/workflows"
+#    rules: "gene-regulation/scripts/snakefiles/rules"
