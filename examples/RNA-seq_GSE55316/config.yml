@@ -1,0 +1,72 @@
+################################################################
+## REQUIRED PARAMETERS
+  author: "Claire Rioualen"
+  qsub: "-V -m a -d ."  # qsub options, which should be adapted to the local configuration
+  genome:
+    organism: "Saccharomyces cerevisiae"
+    size: "12500000"                                                                                        # required. if using macs2, macs14, homer...
+    version: "sacCer3"                                                                                      # required. has to match genome filenames and directories
+    fasta_file: "Saccharomyces_cerevisiae.R64-1-1.30.dna.genome.fa"
+    gff3_file: "Saccharomyces_cerevisiae.R64-1-1.30.gff3"
+    gtf_file: "Saccharomyces_cerevisiae.R64-1-1.30.gtf"
+
+  metadata:
+    samples: "gene-regulation/examples/RNA-seq_GSE55316/samples.tab"                                    # required. has to contain at least sample ids
+    design: "gene-regulation/examples/RNA-seq_GSE55316/design.tab"                                      # required. has to contain at least ids of pairs of samples to be compared
+    configfile: "gene-regulation/examples/RNA-seq_GSE55316/config.yml"                        # required for flowcharts generation; maybe this should be revised
+    seq_type: "se"
+
+  dir:
+    reads_source: "RNA-seq_GSE55316/data"                                                       # opt
+    fastq: "RNA-seq_GSE55316/fastq"                                                                 # required
+    genome: "genome"                                                          # required. where to store genomes
+    results: "RNA-seq_GSE55316/results"                                                         # required. dir for all result files that are produced by the pipeline
+    gene_regulation: "gene-regulation"                                         # required. location of the snakemake library
+
+    samples: "RNA-seq_GSE55316/results/samples"                                # optional. will hold sample treatment (trimming, alignment, QC...).    If not mentioned, will be config["dir"]["results"]
+    diffexpr: "RNA-seq_GSE55316/results/diffexpr"                                       # optional. will hold the results of differential expression analysis.  If not mentioned, will be config["dir"]["results"]
+    reports: "RNA-seq_GSE55316/results/reports"                                # optional. will hold reports and graphics.                             If not mentioned, will be config["dir"]["results"]
+
+  tools:                                                        # required
+    trimming: ""
+    mapping: "tophat"
+    read_counts: "featureCounts"
+    diffexpr: "edgeR DESeq2"
+
+################################################################
+## OPTIONAL PARAMETERS
+
+  tophat:
+    max_mismatches: "1"
+    threads: "1"
+
+  subread-featureCounts:
+    attr_type: "gene_id" 
+    feature_type: "exon"
+    strand_specificity: 1               ## strand-specific read counting.  0 (unstranded), 1 (stranded) and 2 (reversely stranded). 
+    multi_mapping: ""
+
+  edgeR:
+    featuresToRemove: "NULL"
+    varInt: "group"
+    condRef: "WT"
+    batch: NULL
+    alpha: "0.05"
+    pAdjustMethod: "BH"
+    cpmCutoff: "1"
+    gene_selection: "pairwise"
+    normalizationMethod: "TMM"
+
+  DESeq2:
+    featuresToRemove: NULL                          # c("alignment_not_unique", "ambiguous", "no_feature", "not_aligned", "too_low_aQual")
+    varInt: "group"
+    condRef: "WT"
+    batch: "NULL"
+    fitType: "parametric"                           # "parametric" (default) or "local"
+    cooksCutoff: "TRUE"
+    independentFiltering: "TRUE"
+    alpha: "0.05"
+    pAdjustMethod: "BH"                             # "BH" (default) or "BY"
+    typeTrans: "VST"                                # "VST" or "rlog"
+    locfunc: "median"                               # "median" (default) or "shorth" to estimate the size factors
+

@@ -1,0 +1,74 @@
+################################################################
+## REQUIRED PARAMETERS
+  author: "Claire Rioualen"
+  qsub: "-V -m a -d ."
+  genome:
+    organism: "Saccharomyces cerevisiae"
+    size: "12500000"                                                                                        # required. if using macs2, macs14, homer...
+    version: "sacCer3"                                                                                      # required. has to match genome filenames and directories
+    fasta_file: "Saccharomyces_cerevisiae.R64-1-1.30.dna.genome.fa"
+    gff3_file: "Saccharomyces_cerevisiae.R64-1-1.30.gff3"
+    gtf_file: "Saccharomyces_cerevisiae.R64-1-1.30.gtf"
+
+  metadata:
+    samples: "gene-regulation/examples/ChIP-seq_GSE55357/samples.tab"                                    # required. has to contain at least sample ids
+    design: "gene-regulation/examples/ChIP-seq_GSE55357/design.tab"                                      # required. has to contain at least ids of pairs of samples to be compared
+    configfile: "gene-regulation/examples/ChIP-seq_GSE55357/config.yml"                                  # required for flowcharts generation
+    seq_type: "se"
+
+  dir:
+    reads_source: "ChIP-seq_GSE55357/data"                                                                                    # required. dir containing raw data organized in sub directories named after the samples
+    fastq: "ChIP-seq_GSE55357/fastq"
+    genome: "genome"                                                                                        # required. where to store genomes
+    results: "ChIP-seq_GSE55357/results"                                                                                      # required. dir for all result files that are produced by the pipeline
+    gene_regulation: "gene-regulation"                                                                      # required. location of the libraries
+
+    samples: "ChIP-seq_GSE55357/results/samples"                                                                              # optional. will hold sample treatment (trimming, alignment, QC...).    If not mentioned, will be config["dir"]["results"]
+    peaks: "ChIP-seq_GSE55357/results/peaks"                                                                                  # optional. will hold comparison data (peak-calling, motifs search...). If not mentioned, will be config["dir"]["results"]
+    reports: "ChIP-seq_GSE55357/results/reports"                                                                              # optional. will hold reports and graphics.                             If not mentioned, will be config["dir"]["results"]
+
+  tools:
+    trimming: ""
+    mapping: "bowtie2"
+    peakcalling: "macs2 homer"
+    annotation: "intersect"
+
+################################################################
+## OPTIONAL PARAMETERS
+  bowtie2:
+    threads: "1"                                                               # optional. number of threads to speed up calculations (def. 1)
+    max_mismatches: "1"                                                         # optional (def. 0)
+
+  macs14:
+    pval: "0.00001"                                                             # optional (def. 0.00001)
+    mfold: "5,30"                                                               # optional (def. 10,30)
+    keep_dup: "auto"                                                            # optional (def. auto, else int)
+    bandwidth: "300"                                                            # optional (def. 300)
+    other_options: "--nomodel"                                                  # optional can include -bdg (time-consuming), -wig (time-consuming), --call-summits (requires PeakSplitter)
+
+  macs2: 
+    qval: "0.001"                                                               # optional (def. 0.05)
+    keep_dup: "all"                                                             # optional (def. 1)
+    mfold_min: "2"                                                              # optional (def. 5)
+    mfold_max: "50"                                                             # optional (def. 50)
+    other_options: "--call-summits"                                             # optional can include --call-summits, --broad...
+
+  homer: 
+    style: "factor"                                                             # optional (def. factor), can be factor, histone, groseq, tss, dnase, super, mC (beware of output filenames)
+    F: "2"                                                                      # optional (def. 4)
+    L: "2"                                                                      # optional (def. 4)
+    P: "0.05"                                                                   # optional (def. 0.0001)
+    fdr: "0.05"                                                                 # optional (def. 0.001)
+
+#  spp: 
+#    fdr: "0.01"                                                                 # optional (def. 0.01)
+
+  bPeaks: 
+    IPcoeff: "2"                                                                # optional (def. 2)
+    controlCoeff: "4"                                                           # optional (def. 2)
+    log2FC: "1"                                                                 # optional (def. 2)
+    averageQuantiles: "0.8"                                                     # optional (def. 0.9)
+    windowSize: "50"                                                            # optional (def. 150)
+    windowOverlap: "40"                                                         # optional (def. 50)
+
+

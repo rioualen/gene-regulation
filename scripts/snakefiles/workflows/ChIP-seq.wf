@@ -148,7 +148,7 @@ include: os.path.join(RULES, "index_bam.rules")
 include: os.path.join(RULES, "index_fasta.rules")
 include: os.path.join(RULES, "macs2.rules")
 include: os.path.join(RULES, "macs14.rules")
-include: os.path.join(RULES, "peak_motifs.rules")
+#include: os.path.join(RULES, "peak_motifs.rules")
 #include: os.path.join(RULES, "sickle.rules")
 include: os.path.join(RULES, "spp.rules")
 #include: os.path.join(RULES, "sra_to_fastq.rules")
@@ -243,8 +243,10 @@ GRAPHICS = expand(REPORTS_DIR + "/flowcharts/ChIP-seq_{graph}.{ext}", graph=["da
 
 ## IGV
 ## gene-regulation/scripts/python/igv_session.py - under developemment
-xml_file = REPORTS_DIR + "/igv_session.xml"
-igv_session(xml_file, genome=GENOME_FASTA, gff3=GENOME_GFF3, gtf=GENOME_GTF, peaks=PEAKS, coverage=GENOME_COV_GZ)
+#xml_file = REPORTS_DIR + "/igv_session.xml"
+#if not os.path.exists(REPORTS_DIR):
+#    os.makedirs(REPORTS_DIR)
+#igv_session(xml_file, genome=GENOME_FASTA, gff3=GENOME_GFF3, gtf=GENOME_GTF, peaks=PEAKS, coverage=GENOME_COV_GZ)
 
 
 #================================================================#

@@ -1,0 +1,14 @@
+; RNA-seq samples from GEO 
+; super series GSE55358
+; sub series GSE55316
+; Organism: Saccharomyces cerevisiae - Assembly sacCer3
+;
+ID	Condition	SRR
+GSM1334027	WT	SRR1176894
+GSM1334029	WT	SRR1176896
+GSM1334033	scc4	SRR1176900
+GSM1334034	scc4	SRR1176901
+
+
+
+

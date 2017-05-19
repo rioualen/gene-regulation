@@ -187,12 +187,12 @@ ALL_FEATURE_COUNTS          = expand(DEG_DIR + "/{prefix}_{read_counts}_all.txt"
 SARTOOLS_TARGETFILE = expand(expand(DEG_DIR + "/{test}_vs_{ref}/{{prefix}}_{{read_counts}}_SARTools_targetfile.txt", test=TEST_COND, ref=REFERENCE_COND), prefix=PREFIX, read_counts=COUNTING_TOOLS)
 DEG = expand(expand(DEG_DIR + "/{test}_vs_{ref}/{{deg}}/{test}_vs_{ref}_{{prefix}}_{{read_counts}}_{{deg}}_report.html", zip, test=TEST_COND, ref=REFERENCE_COND), deg=DIFFEXPR_TOOLS, prefix=PREFIX, read_counts=COUNTING_TOOLS)
 
-#----------------------------------------------------------------#
-# Transcripts search
-#----------------------------------------------------------------#
+##----------------------------------------------------------------#
+## Transcripts search
+##----------------------------------------------------------------#
 
-TRANSCRIPTS_TOOLS = config["tools"]["infer_transcripts"].split()
-INFER_TRANSCRIPTS = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_{infer_transcripts}/transcripts.gtf", samples=SAMPLE_IDS, prefix=PREFIX, infer_transcripts=TRANSCRIPTS_TOOLS)
+#TRANSCRIPTS_TOOLS = config["tools"]["infer_transcripts"].split()
+#INFER_TRANSCRIPTS = expand(SAMPLE_DIR + "/{samples}/{samples}_{prefix}_{infer_transcripts}/transcripts.gtf", samples=SAMPLE_IDS, prefix=PREFIX, infer_transcripts=TRANSCRIPTS_TOOLS)
 
 
 
@@ -217,7 +217,7 @@ rule all:
             ALL_FEATURE_COUNTS,
 #            SARTOOLS_TARGETFILE,
             DEG,
-            INFER_TRANSCRIPTS,
+#            INFER_TRANSCRIPTS,
             GRAPHICS
 	params: qsub=config["qsub"]
 	shell: "echo Job done    `date '+%Y-%m-%d %H:%M'`"
