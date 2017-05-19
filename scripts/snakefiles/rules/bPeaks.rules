@@ -30,7 +30,7 @@ if not "peaks" in config["dir"].keys():
     sys.exit("The peaks dir must be defined in the config file")
 
 dir_samples = config["dir"]["samples"]
-suffix = "bPeaks"
+dir_bPeaks = os.path.join(config["dir"]["peaks"], "{treatment}_vs_{control}/bPeaks")
 
 # Rule
 rule bPeaks:
@@ -60,9 +60,9 @@ rule bPeaks:
         treatment = dir_samples + "/{treatment}/{treatment}{preprocess,.*}_sorted_pos.bam", \
         control = dir_samples + "/{control}/{control}{preprocess,.*}_sorted_pos.bam"
     output: 
-        peaks_bed = config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".bed"
+        peaks_bed = dir_bPeaks + "/{treatment}_vs_{control}/bPeaks/{treatment}_vs_{control}{preprocess,.*}_bPeaks.bed"
     params:
-        outdir = config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix, \
+        outdir = dir_bPeaks + "/{treatment}_vs_{control}/bPeaks", \
         name = "{treatment}_vs_{control}{preprocess,.*}", \
         IPcoeff = config["bPeaks"]["IPcoeff"], \
         controlCoeff = config["bPeaks"]["controlCoeff"], \
@@ -71,10 +71,10 @@ rule bPeaks:
         windowSize = config["bPeaks"]["windowSize"], \
         windowOverlap = config["bPeaks"]["windowOverlap"], \
         qsub=config["qsub"] \
-          + " -e " + config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.err" \
-          + " -o " + config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_qsub.out"
-    log: config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + ".log"
-    benchmark: config["dir"]["peaks"] + "/{treatment}_vs_{control}/" + suffix + "/{treatment}_vs_{control}{preprocess,.*}_" + suffix + "_benchmark.json"
+          + " -e " + dir_bPeaks + "/{treatment}_vs_{control}/bPeaks/{treatment}_vs_{control}{preprocess,.*}_bPeaks_qsub.err" \
+          + " -o " + dir_bPeaks + "/{treatment}_vs_{control}/bPeaks/{treatment}_vs_{control}{preprocess,.*}_bPeaks_qsub.out"
+    log: config["dir"]["peaks"] + "/{treatment}_vs_{control}/bPeaks/{treatment}_vs_{control}{preprocess,.*}_bPeaks.log"
+    benchmark: config["dir"]["peaks"] + "/{treatment}_vs_{control}/bPeaks/{treatment}_vs_{control}{preprocess,.*}_bPeaks_benchmark.json"
     run: 
         R("""sink("{log}")
         
