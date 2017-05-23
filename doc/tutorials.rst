@@ -111,7 +111,6 @@ Workflow execution
 
 If you have followed the previous steps, you have a file organization that looks like this: 
 
-
 .. figure:: ../img/data_tuto.png
    :alt: 
 
@@ -122,8 +121,8 @@ You should then be able to run the following command:
     cd ${ANALYSIS_DIR}
     snakemake -s gene-regulation/scripts/snakefiles/workflows/import_from_sra.wf -p --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml
 
-
-
+.. figure:: ../img/import_from_sra_rulegraph.png
+   :alt: 
 
 Workflow 'quality_control'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -136,35 +135,29 @@ The purpose of this workflow is to perform quality check with `FastQC https://ww
 
 Optionally, trimming can be performed using the tools `Sickle <https://github.com/najoshi/sickle>`_. or `Cutadapt <http://cutadapt.readthedocs.io/en/stable/>`_.
 
-::
-
-    cd ${ANALYSIS_DIR}
-
-*show file arborescence*
 
 Workflow execution
 ****************************************************************
 
 ::
 
-    snakemake -s ${ANALYSIS_DIR}/gene-regulation/scripts/snakefiles/workflows/quality_control.wf -p --configfile ${CONFIG}
+    cd ${ANALYSIS_DIR}
+    snakemake -s gene-regulation/scripts/snakefiles/workflows/quality_control.wf -p --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml
 
-*show arborescence and/or FastQC screencaps*
+.. figure:: ../img/quality_control_rulegraph.png
+   :alt: 
 
 Workflow 'ChIP-seq'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This workflows performs:
- - mapping with various algorithms;
+ - mapping with various algorithms
  - genome coverage in different formats (check out our `glossary
-<http://gene-regulation.readthedocs.io/en/latest/wiki.html#glossary>`_);
- - peak-calling with various algorithms;
- - motifs search using the `RSAT suite <rsat.eu>`_. 
+<http://gene-regulation.readthedocs.io/en/latest/wiki.html#glossary>`_)
+ - peak-calling with various algorithms
+ - motifs search using the `RSAT suite <rsat.eu>`_
 
-It order to run it, you must have followed sections "Setup analysis environment",
- "Download data", and "Download genome and annotation" for the dataset GSE20870. 
-
-You must have run at least the workflow "import_from_sra', and optionally the workflow "quality_control". 
+You must have run at least the workflow "import_from_sra", and optionally the workflow "quality_control". 
 
 
 Workflow execution
@@ -173,12 +166,10 @@ Workflow execution
 ::
 
     cd ${ANALYSIS_DIR}
-    snakemake -s ${ANALYSIS_DIR}/gene-regulation/scripts/snakefiles/workflows/ChIP-seq.wf -p --configfile ${CONFIG}
+    snakemake -s gene-regulation/scripts/snakefiles/workflows/ChIP-seq.wf -p --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml
 
-*rulegraph + screencap*
-
-
-
+.. figure:: ../img/ChIP-seq_rulegraph.png
+   :alt: 
 
 Integration: ChIP-seq and RNA-seq workflows
 ----------------------------------------------------------------
