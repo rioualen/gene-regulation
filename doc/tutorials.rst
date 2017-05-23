@@ -2,35 +2,6 @@
 Tutorials
 ================================================================
 
-..
-Initial setup
-----------------------------------------------------------------
-
-Gene-regulation library
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The following tutorials assume that you have previously downloaded or cloned a copy of the gene-regulation library, 
-following section `Getting started <http://gene-regulation.readthedocs.io/en/latest/getting_started.html>`__. 
-
-Note: if you're using a clone of the library, 
-you might want to make a copy of it, in order to ensure consistency 
-for later analyses even after pulling updates.
-
-
-Genome directory
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-We chose to define a permanent location for genome downloads, then 
-create symlinks for study cases. 
-
-::
-
-    GENOME_DIR=$HOME/genome
-    mkdir ${GENOME_DIR}
-
-
-
-
 
 ChIP-seq analysis
 ----------------------------------------------------------------
@@ -66,30 +37,56 @@ a second telomere-binding protein also functions as a transcriptional regulator 
 - GEO series: `GSE20870 <http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE20870>`__
 
 
-Download reference genome & annotations
-****************************************************************
-
-::
-
-    mkdir ${GENOME_DIR}/sacCer2
-    wget -nc ftp://ftp.ensemblgenomes.org/pub/fungi/release-30/fasta/saccharomyces_cerevisiae/dna/Saccharomyces_cerevisiae.R64-1-1.30.dna.genome.fa.gz -P${GENOME_DIR}/sacCer2
-    wget -nc ftp://ftp.ensemblgenomes.org/pub/fungi/release-30/gff3/saccharomyces_cerevisiae/Saccharomyces_cerevisiae.R64-1-1.30.gff3.gz -P ${GENOME_DIR}/sacCer2
-    wget -nc ftp://ftp.ensemblgenomes.org/pub/fungi/release-30/gtf/saccharomyces_cerevisiae/Saccharomyces_cerevisiae.R64-1-1.30.gtf.gz -P ${GENOME_DIR}/sacCer2
-    gunzip ${GENOME_DIR}/sacCer2/*.gz
-
 Setup analysis environment
 ****************************************************************
+
+Here, we create a directory that will contain the raw data, the Gene-regulation library, 
+the reference genome data and the results of the workflow(s) used. 
+
+We are going to use a global variable: $ANALYSIS_DIR. 
 
 ::
 
     ANALYSIS_DIR=$HOME/ChIP-seq_GSE20870
     mkdir -p ${ANALYSIS_DIR}
     cd ${ANALYSIS_DIR}
-    ln -s ${GENE_REG_PATH} gene-regulation
-    ln -s ${GENOME_DIR}/sacCer2 genome
-    CONFIG=${ANALYSIS_DIR}/gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml
 
-Download data
+
+Download Gene-regulation
+****************************************************************
+
+We are going to download the Gene-regulation library in the analysis directory. 
+Another possibility would be to download Gene-regulation in a fixed place, and create a symlink 
+to the analysis directory. 
+
+::
+
+    wget --no-clobber https://github.com/rioualen/gene-regulation/archive/4.0.tar.gz 
+    tar xvzf 4.0.tar.gz
+    ln -s gene-regulation-4.0 gene-regulation
+
+Download reference genome & annotations
+****************************************************************
+
+Here, we are going to download the geneome sequence and annotation files in the analysis directory. 
+It is also possible to define a fixed location to store genomes and then create a symlink to it. 
+
+It can be useful to store all the genomes in one place, in order to avoid duplication of 
+big files. Also, most mapping algorithms need to index the genome before proceeding with 
+the alignment. This index needs only be done once, but it takes time and storage space, so it's better to avoid 
+duplicating it. 
+
+
+::
+
+    mkdir ${ANALYSIS_DIR}/genome
+    wget -nc ftp://ftp.ensemblgenomes.org/pub/fungi/release-30/fasta/saccharomyces_cerevisiae/dna/Saccharomyces_cerevisiae.R64-1-1.30.dna.genome.fa.gz -P ${ANALYSIS_DIR}/genome
+    wget -nc ftp://ftp.ensemblgenomes.org/pub/fungi/release-30/gff3/saccharomyces_cerevisiae/Saccharomyces_cerevisiae.R64-1-1.30.gff3.gz -P ${ANALYSIS_DIR}/genome
+    wget -nc ftp://ftp.ensemblgenomes.org/pub/fungi/release-30/gtf/saccharomyces_cerevisiae/Saccharomyces_cerevisiae.R64-1-1.30.gtf.gz -P ${ANALYSIS_DIR}/genome
+    gunzip ${ANALYSIS_DIR}/genome/*.gz
+
+
+Download raw data
 ****************************************************************
 
 ::
@@ -98,7 +95,10 @@ Download data
     wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021358/SRR051929/SRR051929.sra -P ${ANALYSIS_DIR}/data/GSM521934
     wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra -P ${ANALYSIS_DIR}/data/GSM521935
 
-*show file arborescence*
+
+.. figure:: ../img/data_tuto.png
+   :alt: 
+
 
 
 Workflow 'import_from_sra'
