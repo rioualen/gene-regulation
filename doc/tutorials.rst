@@ -3,7 +3,7 @@ Tutorials
 ================================================================
 
 
-ChIP-seq analysis
+Demo: ChIP-seq analysis
 ----------------------------------------------------------------
 
 Case: ChIP-seq study of Tbf1 in *S. cerevisiae*
@@ -171,7 +171,7 @@ Workflow execution
 .. figure:: ../img/ChIP-seq_rulegraph.png
    :alt: 
 
-Integration: ChIP-seq and RNA-seq workflows
+Demo: ChIP-seq and RNA-seq integration
 ----------------------------------------------------------------
 
 Case: Genomic analysis of the scc2-4 mutant in budding yeast
@@ -257,7 +257,7 @@ And you should be able to execute it like this:
 
 
 
-Workflow 'RNA-seq' DEG
+Workflow 'RNA-seq' for differential expression analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Download RNA-seq data
@@ -316,15 +316,6 @@ Running Gene-regulation workflows on your own data
 Gene-regulation library & genome data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Assuming you have followed section "Initial setup", you should 
-have defined a location for the genome files and the Gene-regulation 
-library. 
-
-You should dispose of 3 files related to your reference genome:
-
-- a fasta file
-- a gff3 annotation file
-- a gtf annotation file
 
 Hereafter is a suggestion for the organization of your files.
 
@@ -343,15 +334,11 @@ Hereafter is a suggestion for the organization of your files.
 
 ::
 
+    # Download genome data
     wget -nc <URL_to_my_genome.fa.gz> -P ${ANALYSIS_DIR}/genome
     wget -nc <URL_to_my_genome.gff3.gz> -P ${ANALYSIS_DIR}/genome
     wget -nc <URL_to_my_genome.gtf.gz> -P ${ANALYSIS_DIR}/genome
     gunzip ${ANALYSIS_DIR}/genome/*.gz
-
-
-
-    ln -s ${GENE_REG_PATH} gene-regulation
-    ln -s ${GENOME_DIR}/my_genome_dir genome
 
 Your directory should look like this:
 
@@ -360,11 +347,13 @@ Your directory should look like this:
    :alt: 
 
 
+
+
 Fastq files organization
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This tutorial assumes you dispose of your own fastq files. 
-We recommend that your organise your samples in separate folders, 
+We recommend that your organize your samples in separate folders, 
 and name both fastq files and their parent directories accordingly. 
 
 
