@@ -74,17 +74,17 @@ rule bowtie2:
     params:
         sam = sample_dir + "/{samples}/{prefix}_bowtie2.sam", 
         max_mismatches = config["bowtie2"]["max_mismatches"], 
-        threads = config["bowtie2"]["threads"], 
         qsub = config["qsub"] \
           + " -e " + sample_dir + "/{samples}/{prefix}_bowtie2_qsub.err" \
           + " -o " + sample_dir + "/{samples}/{prefix}_bowtie2_qsub.out"
+    threads: config["bowtie2"]["threads"],
     log: sample_dir + "/{samples}/{prefix}_bowtie2.log"
     benchmark: sample_dir + "/{samples}/{prefix}_bowtie2_benchmark.json"
     run:
         if (seq_type == "pe"):
-            shell("bowtie2 -x {input.index} -1 " + input.reads[0] + " -2 " + input.reads[1] + " -S {params.sam} --phred33 -N {params.max_mismatches} --threads {params.threads} 2> {log}")
+            shell("bowtie2 -x {input.index} -1 " + input.reads[0] + " -2 " + input.reads[1] + " -S {params.sam} --phred33 -N {params.max_mismatches} --threads {threads} 2> {log}")
         elif (seq_type == "se"):
-            shell("bowtie2 -x {input.index} -U {input.reads} -S {params.sam} --threads {params.threads} --phred33 -N {params.max_mismatches} 2> {log}")
+            shell("bowtie2 -x {input.index} -U {input.reads} -S {params.sam} --threads {threads} --phred33 -N {params.max_mismatches} 2> {log}")
         shell("samtools view -b -S {params.sam} > {output.bam}")
         shell("rm {params.sam}")
 

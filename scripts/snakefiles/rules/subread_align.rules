@@ -84,18 +84,18 @@ rule subread_align:
         bam = sample_dir + "/{samples}/{prefix}_subread-align.bam"
     params:
         seq_data = config["subread-align"]["seq_data"], \
-        threads = config["subread-align"]["threads"], \
         max_mismatches = config["subread-align"]["max_mismatches"], \
         align_options = config["subread-align"]["align_options"], \
         qsub = config["qsub"] \
           + " -e " + sample_dir + "/{samples}/{prefix}_subread-align_qsub.err" \
           + " -o " + sample_dir + "/{samples}/{prefix}_subread-align_qsub.out"
+    threads: config["subread-align"]["threads"]
     log: sample_dir + "/{samples}/{prefix}_subread-align.log"
     benchmark: sample_dir + "/{samples}/{prefix}_subread-align_benchmark.json"
     run:
         if (seq_type == "pe"):
-            shell("subread-align -i {input.index} -r " + input.reads[0] + " -R " + input.reads[1] + " -t {params.seq_data} -T {params.threads} -M {params.max_mismatches} {params.align_options} -o {output.bam} 2> {log}")
+            shell("subread-align -i {input.index} -r " + input.reads[0] + " -R " + input.reads[1] + " -t {params.seq_data} -T {threads} -M {params.max_mismatches} {params.align_options} -o {output.bam} 2> {log}")
         elif (seq_type == "se"):
-            shell("subread-align -i {input.index} -r {input.reads} -t {params.seq_data} -T {params.threads} -M {params.max_mismatches} {params.align_options} -o {output.bam} 2> {log}")
+            shell("subread-align -i {input.index} -r {input.reads} -t {params.seq_data} -T {threads} -M {params.max_mismatches} {params.align_options} -o {output.bam} 2> {log}")
 
 

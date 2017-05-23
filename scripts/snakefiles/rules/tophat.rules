@@ -76,16 +76,16 @@ rule tophat:
     params:
         outdir = sample_dir + "/{samples}/{prefix}_tophat", \
         max_mismatches = config["tophat"]["max_mismatches"], \
-        threads = config["tophat"]["threads"], \
         qsub = config["qsub"] \
           + " -e " + sample_dir + "/{samples}/{prefix}_tophat_qsub.err" \
           + " -o " + sample_dir + "/{samples}/{prefix}_tophat_qsub.out"
+    threads: config["tophat"]["threads"]
     log: sample_dir + "/{samples}/{prefix}_tophat.log"
     benchmark: sample_dir + "/{samples}/{prefix}_tophat_benchmark.json"
     run:
         if (seq_type == "pe"):
-            shell("tophat --num-threads {params.threads} --read-mismatches {params.max_mismatches} --output-dir {params.outdir} {input.index} " + input.reads[0] + " " + input.reads[1] + " 2> {log}")
+            shell("tophat --num-threads {threads} --read-mismatches {params.max_mismatches} --output-dir {params.outdir} {input.index} " + input.reads[0] + " " + input.reads[1] + " 2> {log}")
         elif (seq_type == "se"):
-            shell("tophat --num-threads {params.threads} --read-mismatches {params.max_mismatches} --output-dir {params.outdir} {input.index} {input.reads} 2> {log}")
+            shell("tophat --num-threads {threads} --read-mismatches {params.max_mismatches} --output-dir {params.outdir} {input.index} {input.reads} 2> {log}")
         shell("mv {params.outdir}/accepted_hits.bam {output.bam} 2> {log}")
 

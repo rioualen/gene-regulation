@@ -71,19 +71,19 @@ rule bwa:
     params:
 #        sai = sample_dir + "/{samples}/{prefix}_bwa.sai", 
         sam = sample_dir + "/{samples}/{prefix}_bwa.sam", 
-        threads = config["bwa"]["threads"], 
         qsub = config["qsub"] \
           + " -e " + sample_dir + "/{samples}/{prefix}_bwa_qsub.err" \
           + " -o " + sample_dir + "/{samples}/{prefix}_bwa_qsub.out"
+    threads: config["bwa"]["threads"],
     log: sample_dir + "/{samples}/{prefix}_bwa.log"
     benchmark: sample_dir + "/{samples}/{prefix}_bwa_benchmark.json"
     run:
         if (seq_type == "pe"):
-            shell("bwa aln -t {params.threads} {input.index} " + input.reads[0] + " > " + input.reads[0] + ".sai 2> {log}")
-            shell("bwa aln -t {params.threads} {input.index} " + input.reads[1] + " > " + input.reads[1] + ".sai 2> {log}")
+            shell("bwa aln -t {threads} {input.index} " + input.reads[0] + " > " + input.reads[0] + ".sai 2> {log}")
+            shell("bwa aln -t {threads} {input.index} " + input.reads[1] + " > " + input.reads[1] + ".sai 2> {log}")
             shell("bwa sampe {input.index} " + input.reads[0] + ".sai " + input.reads[1] + ".sai " + input.reads[0] + " " + input.reads[1] + " > {params.sam} 2> {log}")
         elif (seq_type == "se"):
-            shell("bwa aln -t {params.threads} {input.index} {input.reads} > {input.reads}.sai 2> {log}")
+            shell("bwa aln -t {threads} {input.index} {input.reads} > {input.reads}.sai 2> {log}")
             shell("bwa samse {input.index} {input.reads}.sai {input.reads} > {params.sam} 2> {log}")
         shell("samtools view -b -S {params.sam} > {output.bam} 2> {log}")
         shell("rm {params.sam}")

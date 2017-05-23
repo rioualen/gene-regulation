@@ -47,10 +47,10 @@ rule cufflinks:
     output:
         outdir="{reads}_cufflinks", \
         transcripts = "{reads}_cufflinks/transcripts.gtf"
+    params: libtype = config["cufflinks"]["libtype"], \
+        qsub = config["qsub"] + " -e {reads}_cufflinks_qsub.err -o {reads}_cufflinks_qsub.out"
+    threads: config["cufflinks"]["threads"],
     log:  "{reads}_cufflinks.log"
     benchmark:  "{reads}_cufflinks_benchmark.json"
-    params: libtype = config["cufflinks"]["libtype"], \
-        threads = config["cufflinks"]["threads"], \
-        qsub = config["qsub"] + " -e {reads}_cufflinks_qsub.err -o {reads}_cufflinks_qsub.out"
-    shell: "cufflinks --GTF-guide {input.gtf} --num-threads {params.threads}  --library-type {params.libtype}  --output-dir {output.outdir} {input.bam} 2> {log}" 
+    shell: "cufflinks --GTF-guide {input.gtf} --num-threads {threads}  --library-type {params.libtype}  --output-dir {output.outdir} {input.bam} 2> {log}" 
 
