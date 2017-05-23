@@ -180,6 +180,7 @@ Case: Genomic analysis of the scc2-4 mutant in budding yeast
 **Reference**
 
 Genomic analysis of the scc2-4 mutant in budding yeast
+
 Musinu Zakari
 
 **GEO series**
@@ -192,7 +193,7 @@ Setup workdir
 
 ::
 
-    ANALYSIS_DIR=${HOME}/GSE55358_Integrated_analysis
+    ANALYSIS_DIR=$HOME/GSE55358_Integrated_analysis
     mkdir ${ANALYSIS_DIR}
     cd ${ANALYSIS_DIR}
 
@@ -249,9 +250,10 @@ And you should be able to execute it like this:
 
 ::
 
-    snakemake -s ${ANALYSIS_DIR}/gene-regulation/scripts/snakefiles/workflows/import_from_sra.wf -p --configfile gene-regulation/examples/ChIP-seq_GSE55357/config.yml
-    snakemake -s ${ANALYSIS_DIR}/gene-regulation/scripts/snakefiles/workflows/quality_control.wf -p --configfile gene-regulation/examples/ChIP-seq_GSE55357/config.yml
-    snakemake -s ${ANALYSIS_DIR}/gene-regulation/scripts/snakefiles/workflows/ChIP-seq.wf -p --configfile gene-regulation/examples/ChIP-seq_GSE55357/config.yml
+    cd ${ANALYSIS_DIR}
+    snakemake -s gene-regulation/scripts/snakefiles/workflows/import_from_sra.wf -p --configfile gene-regulation/examples/ChIP-seq_GSE55357/config.yml
+    snakemake -s gene-regulation/scripts/snakefiles/workflows/quality_control.wf -p --configfile gene-regulation/examples/ChIP-seq_GSE55357/config.yml
+    snakemake -s gene-regulation/scripts/snakefiles/workflows/ChIP-seq.wf -p --configfile gene-regulation/examples/ChIP-seq_GSE55357/config.yml
 
 
 
@@ -281,9 +283,10 @@ And you should be able to execute it like this:
 
 ::
 
-    snakemake -s ${ANALYSIS_DIR}/gene-regulation/scripts/snakefiles/workflows/import_from_sra.wf -p --configfile gene-regulation/examples/RNA-seq_GSE55316/config.yml
-    snakemake -s ${ANALYSIS_DIR}/gene-regulation/scripts/snakefiles/workflows/quality_control.wf -p --configfile gene-regulation/examples/RNA-seq_GSE55316/config.yml
-    snakemake -s ${ANALYSIS_DIR}/gene-regulation/scripts/snakefiles/workflows/RNA-seq.wf -p --configfile gene-regulation/examples/RNA-seq_GSE55316/config.yml
+    cd ${ANALYSIS_DIR}
+    snakemake -s gene-regulation/scripts/snakefiles/workflows/import_from_sra.wf -p --configfile gene-regulation/examples/RNA-seq_GSE55316/config.yml
+    snakemake -s gene-regulation/scripts/snakefiles/workflows/quality_control.wf -p --configfile gene-regulation/examples/RNA-seq_GSE55316/config.yml
+    snakemake -s gene-regulation/scripts/snakefiles/workflows/RNA-seq.wf -p --configfile gene-regulation/examples/RNA-seq_GSE55316/config.yml
 
 
 
@@ -309,6 +312,7 @@ Workflow 'integration_ChIP_RNA'
 
 Running Gene-regulation workflows on your own data
 ----------------------------------------------------------------
+
 Gene-regulation library & genome data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -326,9 +330,26 @@ Hereafter is a suggestion for the organization of your files.
 
 ::
 
-    ANALYSIS_DIR=/your/directory
+    ANALYSIS_DIR=$HOME/my_analysis
     mkdir -p ${ANALYSIS_DIR}
     cd ${ANALYSIS_DIR}
+
+::
+
+    # Download the Gene-regulation library
+    wget --no-clobber https://github.com/rioualen/gene-regulation/archive/4.0.tar.gz 
+    tar xvzf 4.0.tar.gz
+    ln -s gene-regulation-4.0 gene-regulation
+
+::
+
+    wget -nc <URL_to_my_genome.fa.gz> -P ${ANALYSIS_DIR}/genome
+    wget -nc <URL_to_my_genome.gff3.gz> -P ${ANALYSIS_DIR}/genome
+    wget -nc <URL_to_my_genome.gtf.gz> -P ${ANALYSIS_DIR}/genome
+    gunzip ${ANALYSIS_DIR}/genome/*.gz
+
+
+
     ln -s ${GENE_REG_PATH} gene-regulation
     ln -s ${GENOME_DIR}/my_genome_dir genome
 
