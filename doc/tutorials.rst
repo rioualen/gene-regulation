@@ -96,11 +96,6 @@ Download raw data
     wget --no-clobber ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX%2FSRX021%2FSRX021359/SRR051930/SRR051930.sra -P ${ANALYSIS_DIR}/data/GSM521935
 
 
-.. figure:: ../img/data_tuto.png
-   :alt: 
-
-
-
 Workflow 'import_from_sra'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -110,19 +105,23 @@ for downstream analyses we need to dispose of fastq-formatted files.
 You can check out the `glossary
 <http://gene-regulation.readthedocs.io/en/latest/wiki.html#glossary>`_ to find out more about file formats. 
 
-It order to run it, you must have followed sections "Setup analysis environment" 
-and "Download data" for the dataset GSE20870. 
-
-
 
 Workflow execution
 ****************************************************************
 
+If you have followed the previous steps, you have a file organization that looks like this: 
+
+
+.. figure:: ../img/data_tuto.png
+   :alt: 
+
+You should then be able to run the following command: 
+
 ::
 
-    snakemake -s ${ANALYSIS_DIR}/gene-regulation/scripts/snakefiles/workflows/import_from_sra.wf -p --configfile ${CONFIG}
+    cd ${ANALYSIS_DIR}
+    snakemake -s gene-regulation/scripts/snakefiles/workflows/import_from_sra.wf -p --configfile gene-regulation/examples/ChIP-seq_SE_GSE20870/config.yml
 
-*show file arborescence*
 
 
 
