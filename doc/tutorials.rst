@@ -2,6 +2,7 @@
 Tutorials
 ================================================================
 
+..
 Initial setup
 ----------------------------------------------------------------
 
@@ -26,6 +27,9 @@ create symlinks for study cases.
 
     GENOME_DIR=$HOME/genome
     mkdir ${GENOME_DIR}
+
+
+
 
 
 ChIP-seq analysis
