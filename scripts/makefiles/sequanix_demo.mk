@@ -3,7 +3,6 @@
 ##
 ## Author: Claire Rioualen
 ## Date: 2017-05-23
-
 export LC_ALL=C
 export LANG=C
 
@@ -24,7 +23,7 @@ create_dir:
 ### Download Gene-regulation v4.0
 
 download_gene-regulation:
-	cd $(SOURCE_DIR) && \
+	cd $(ANALYSIS_DIR) && \
 	wget --no-clobber https://github.com/rioualen/gene-regulation/archive/4.0.tar.gz && \
 	tar xvzf 4.0.tar.gz && \
 	ln -s gene-regulation-4.0 gene-regulation
@@ -33,7 +32,7 @@ download_gene-regulation:
 ### Download genome & annotations 
 
 download_genome_data:
-	cd $(SOURCE_DIR) && \
+	cd $(ANALYSIS_DIR) && \
 	wget -nc ftp://ftp.ensemblgenomes.org/pub/fungi/release-30/fasta/saccharomyces_cerevisiae/dna/Saccharomyces_cerevisiae.R64-1-1.30.dna.genome.fa.gz -P ${ANALYSIS_DIR}/genome && \
 	wget -nc ftp://ftp.ensemblgenomes.org/pub/fungi/release-30/gff3/saccharomyces_cerevisiae/Saccharomyces_cerevisiae.R64-1-1.30.gff3.gz -P ${ANALYSIS_DIR}/genome && \
 	wget -nc ftp://ftp.ensemblgenomes.org/pub/fungi/release-30/gtf/saccharomyces_cerevisiae/Saccharomyces_cerevisiae.R64-1-1.30.gtf.gz -P ${ANALYSIS_DIR}/genome && \
@@ -43,7 +42,7 @@ download_genome_data:
 ### Download ChIP-seq data 
 
 download_raw_data:
-	cd $(SOURCE_DIR) && \
+	cd $(ANALYSIS_DIR) && \
 	wget --no-clobber ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR117/005/SRR1176905/SRR1176905.fastq.gz -P ${ANALYSIS_DIR}/ChIP-seq_GSE55357/fastq/GSM1334674 && \
 	wget --no-clobber ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR117/007/SRR1176907/SRR1176907.fastq.gz -P ${ANALYSIS_DIR}/ChIP-seq_GSE55357/fastq/GSM1334676 && \
 	wget --no-clobber ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR117/008/SRR1176908/SRR1176908.fastq.gz -P ${ANALYSIS_DIR}/ChIP-seq_GSE55357/fastq/GSM1334679 && \
