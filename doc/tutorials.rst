@@ -28,10 +28,10 @@ create symlinks for study cases.
     mkdir ${GENOME_DIR}
 
 
-ChIP-seq study case in *S. cerevisiae*
+ChIP-seq analysis
 ----------------------------------------------------------------
 
-Presentation
+Case: ChIP-seq study of Tbf1 in *S. cerevisiae*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Reference**
@@ -177,10 +177,10 @@ Workflow execution
 
 
 
-Genomic analysis of the scc2-4 mutant in budding yeast
+Integration: ChIP-seq and RNA-seq workflows
 ----------------------------------------------------------------
 
-Presentation
+Case: Genomic analysis of the scc2-4 mutant in budding yeast
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Reference**
