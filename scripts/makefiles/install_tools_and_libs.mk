@@ -440,7 +440,6 @@ desktop_and_x2go:
 sequanix_demo: \
 	create_bin \
 	fastqc \
-	bamtools \
 	bedtools \
 	samtools \
 	bowtie2 \
