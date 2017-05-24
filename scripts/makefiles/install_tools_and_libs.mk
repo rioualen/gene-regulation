@@ -437,6 +437,16 @@ desktop_and_x2go:
 # All targets
 # ================================================================
 
+sequanix_demo: \
+	fastqc \
+	bamtools \
+	bedtools \
+	samtools \
+	bowtie2 \
+	macs2 \
+	homer
+
+
 all: \
 	init\
 	ubuntu_packages\
