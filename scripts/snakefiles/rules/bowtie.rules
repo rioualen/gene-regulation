@@ -77,7 +77,7 @@ rule bowtie:
         qsub = config["qsub"] \
           + " -e " + sample_dir + "/{samples}/{prefix}_bowtie_qsub.err" \
           + " -o " + sample_dir + "/{samples}/{prefix}_bowtie_qsub.out"
-    threads: config["bowtie"]["threads"],
+    threads: 10
     log: sample_dir + "/{samples}/{prefix}_bowtie.log"
     benchmark: sample_dir + "/{samples}/{prefix}_bowtie_benchmark.json"
     run:

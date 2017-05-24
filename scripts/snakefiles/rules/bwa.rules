@@ -74,7 +74,7 @@ rule bwa:
         qsub = config["qsub"] \
           + " -e " + sample_dir + "/{samples}/{prefix}_bwa_qsub.err" \
           + " -o " + sample_dir + "/{samples}/{prefix}_bwa_qsub.out"
-    threads: config["bwa"]["threads"],
+    threads: 10
     log: sample_dir + "/{samples}/{prefix}_bwa.log"
     benchmark: sample_dir + "/{samples}/{prefix}_bwa_benchmark.json"
     run:

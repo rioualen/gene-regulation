@@ -79,7 +79,7 @@ rule tophat:
         qsub = config["qsub"] \
           + " -e " + sample_dir + "/{samples}/{prefix}_tophat_qsub.err" \
           + " -o " + sample_dir + "/{samples}/{prefix}_tophat_qsub.out"
-    threads: config["tophat"]["threads"]
+    threads: 10
     log: sample_dir + "/{samples}/{prefix}_tophat.log"
     benchmark: sample_dir + "/{samples}/{prefix}_tophat_benchmark.json"
     run:

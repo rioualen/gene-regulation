@@ -89,7 +89,7 @@ rule subread_align:
         qsub = config["qsub"] \
           + " -e " + sample_dir + "/{samples}/{prefix}_subread-align_qsub.err" \
           + " -o " + sample_dir + "/{samples}/{prefix}_subread-align_qsub.out"
-    threads: config["subread-align"]["threads"]
+    threads: 10
     log: sample_dir + "/{samples}/{prefix}_subread-align.log"
     benchmark: sample_dir + "/{samples}/{prefix}_subread-align_benchmark.json"
     run:
