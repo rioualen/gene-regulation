@@ -3,6 +3,9 @@
 ##
 ## Author: Claire Rioualen
 ## Date: 2017-05-23
+##
+## Usage: make -f sequanix_demo.mk all ANALYSIS_DIR=/my/dir
+##
 export LC_ALL=C
 export LANG=C
 
@@ -13,7 +16,7 @@ export LANG=C
 	download_genome_data\
 	download_raw_data
 
-#make target FOO=bar
+
 
 create_dir:
 	@echo "Creating ANALYSIS_DIR directory"
