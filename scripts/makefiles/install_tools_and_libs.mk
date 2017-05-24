@@ -440,6 +440,7 @@ desktop_and_x2go:
 sequanix_demo: \
 	create_bin \
 	add_packages \
+	R_installation \
 	python \
 	fastqc \
 	bedtools \
