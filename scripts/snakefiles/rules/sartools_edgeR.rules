@@ -173,8 +173,8 @@ rule sartools_edgeR:
         #up <- as.vector(read.table(paste("tables/", list.files(path = "tables", pattern = "{wildcards.test}vs{wildcards.ref}.up.txt$")[1], sep=""))[,1])
         #down <- as.vector(read.table(paste("tables/", list.files(path = "tables", pattern = "{wildcards.test}vs{wildcards.ref}.down.txt$")[1], sep=""))[,1])
 
-        up <- as.vector(read.table(paste("tables/", "{wildcards.test}", "vs", "{wildcards.ref}", ".up.txt", sep=""))[1])[,1])
-        down <- as.vector(read.table(paste("tables/", "{wildcards.test}", "vs", "{wildcards.ref}", ".down.txt", sep=""))[1])[,1])
+        up <- as.vector(read.table(paste("tables/", "{wildcards.test}", "vs", "{wildcards.ref}", ".up.txt", sep="")[1])[,1])
+        down <- as.vector(read.table(paste("tables/", "{wildcards.test}", "vs", "{wildcards.ref}", ".down.txt", sep="")[1])[,1])
 
 
         setwd(baseDir)
