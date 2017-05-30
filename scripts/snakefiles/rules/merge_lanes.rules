@@ -53,7 +53,7 @@ rule merge_lanes:
     """
     input: table=config["metadata"]["lane_merging"], \
         source_files=SOURCE_FILES
-#    output: config["dir"]["samples"] + "/lane_merging_benchmark.json"
+#    output: config["dir"]["samples"] + "/lane_merging_benchmark.txt"
     output: 
         merged_files=MERGED_FILES
 #done_file=touch(config["dir"]["samples"] + "merge_lanes.done"), \
@@ -62,7 +62,7 @@ rule merge_lanes:
           + " -e " + config["dir"]["samples"] + "lane_merging_qsub.err" \
           + " -o " + config["dir"]["samples"] + "lane_merging_qsub.out"
     log: config["dir"]["samples"] + "lane_merging.log"
-    benchmark: config["dir"]["samples"] + "lane_merging_benchmark.json"
+    benchmark: config["dir"]["samples"] + "lane_merging_benchmark.txt"
     run:
         if (verbosity >= 0):
             print("Lane merging table:\t" + config["metadata"]["lane_merging"])

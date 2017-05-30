@@ -24,7 +24,7 @@ rule dot_graph:
           + " -e {path}{graph}_dot_qsub.err" \
           + " -o {path}{graph}_dot_qsub.out"
     log: "{path}{graph}_dot.log"
-    benchmark: "{path}{graph}_dot_benchmark.json"
+    benchmark: "{path}{graph}_dot_benchmark.txt"
     shell: """
 (snakemake -s {params.snakefile}  --configfile {params.configfile} --{wildcards.graph} > {output}
 if [ "{wildcards.graph}" = "dag" ]

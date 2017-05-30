@@ -52,7 +52,7 @@ rule matrix_quality
                 + " -e {peaks}_qsub.err" \
                 + " -o {peaks}_qsub.out" 
     log: "{caller_dir}/{peaks}_matrix-quality.log"
-    benchmark: "{caller_dir}/{peaks}_matrix-quality_bench.json"
+    benchmark: "{caller_dir}/{peaks}_matrix-quality_bench.txt"
 shell:"""
 
 peaks = ""

@@ -29,5 +29,5 @@ rule bed_to_fasta:
         genome = config["genome"]["version"],
         qsub = config["qsub"] + " -e {regions}_fetchseq_qsub.err -o {regions}_fetchseq_qsub.out"
     log: "{regions}_fetchseq.log"
-    benchmark: "{regions}_fetchseq_benchmark.json"
+    benchmark: "{regions}_fetchseq_benchmark.txt"
     shell: "fetch-sequences -i {input} -header_format galaxy -genome {params.genome} -o {output} 2> {log}"

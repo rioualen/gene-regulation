@@ -44,7 +44,7 @@ rule bedtools_window:
     input: bed = "{regions}.bed", gff3 = gff3_file
     output: "{regions}_window_annot.bed"
     log: "{regions}_window.log"
-    benchmark: "{regions}_window_benchmark.json"
+    benchmark: "{regions}_window_benchmark.txt"
     params: window = config["bedtools"]["window"],\
         qsub = config["qsub"] + " -e {regions}_window_qsub.err -o {regions}_window_qsub.out"
     shell:"""bedtools window -a {input.bed} -b {input.gff3} -w {params.window} > {output}"""

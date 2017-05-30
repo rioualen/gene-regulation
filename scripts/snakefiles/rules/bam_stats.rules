@@ -20,5 +20,5 @@ rule bam_stats:
             + " -e {reads}_bam_stats_qsub.err"\
             + " -o {reads}_bam_stats_qsub.out"
     log: "{reads}_bam_stats.log"
-    benchmark: "{reads}_bam_stats_benchmark.json"
+    benchmark: "{reads}_bam_stats_benchmark.txt"
     shell: "(samtools flagstat {input} > {output}) &> {log}"

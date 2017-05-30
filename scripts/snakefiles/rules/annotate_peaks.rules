@@ -37,7 +37,7 @@ rule annotate_peaks:
         gtf = gtf_file
     output: "{regions}_gene_list.tab"
     log: "{regions}_gene_list.log"
-    benchmark: "{regions}_gene_list_benchmark.json"
+    benchmark: "{regions}_gene_list_benchmark.txt"
     params: 
         wd = config["dir"]["base"], 
         qsub = config["qsub"] + " -e {regions}_gene_list_qsub.err -o {regions}_gene_list_qsub.out"

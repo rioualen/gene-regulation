@@ -68,7 +68,7 @@ rule mosaics:
           + " -e " + dir_mosaics + "/{treatment}_vs_{control}{preprocess,.*}_mosaics_qsub.err" \
           + " -o " + dir_mosaics + "/{treatment}_vs_{control}{preprocess,.*}_mosaics_qsub.out"
     log: dir_mosaics + "/{treatment}_vs_{control}{preprocess,.*}_mosaics.log"
-    benchmark: dir_mosaics + "/{treatment}_vs_{control}{preprocess,.*}_mosaics_benchmark.json"
+    benchmark: dir_mosaics + "/{treatment}_vs_{control}{preprocess,.*}_mosaics_benchmark.txt"
 
     run:
         R("""

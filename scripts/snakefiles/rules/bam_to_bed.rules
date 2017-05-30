@@ -18,5 +18,5 @@ rule bam_to_bed:
             + " -e {reads}_bam_to_bed_qsub.err"\
             + " -o {reads}_bam_to_bed_qsub.out"
     log: "{reads}_bam_to_bed.log"
-    benchmark: "{reads}_bam_to_bed_benchmark.json"
+    benchmark: "{reads}_bam_to_bed_benchmark.txt"
     shell:"bedtools bamtobed -i {input} > {output} 2> {log}"

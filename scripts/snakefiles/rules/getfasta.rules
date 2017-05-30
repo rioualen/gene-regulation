@@ -25,6 +25,6 @@ rule getfasta:
     output: "{regions}.fasta"
     params: qsub = config["qsub"] + " -e {regions}_getfasta_qsub.err -o {regions}_getfasta_qsub.out"
     log: "{regions}_getfasta.log"
-    benchmark: "{regions}_getfasta_benchmark.json"
+    benchmark: "{regions}_getfasta_benchmark.txt"
     shell:"""bedtools getfasta -fi {input.genome_fasta} -bed {input.bed} -fo {output} 2> {log}"""
 

@@ -22,6 +22,6 @@ rule genome_coverage_bigwig:
 #            chromsize = re.sub('\.fa$', '', genome_file) + ".genome", 
             qsub = config["qsub"] + " -e {reads}_bam2bigwig_qsub.err -o {reads}_bam2bigwig_qsub.out"
     log:  "{reads}_bam2bigwig.log"
-    benchmark:  "{reads}_bam2bigwig_benchmark.json"
+    benchmark:  "{reads}_bam2bigwig_benchmark.txt"
     shell: "bamCoverage -b {input.bam} -o {output} 2> {log}" 
 

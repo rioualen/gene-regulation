@@ -22,7 +22,7 @@ rule blast_formatdb:
           + " -e " + "{ref_db}_blastdb_p{type}_qsub.err" \
           + " -o " + "{ref_db}_blastdb_p{type}_qsub.out"
     log: "{ref_db}_blastdb_p{type}.log"
-    benchmark: "{ref_db}_blastdb_p{type}_benchmark.json"
+    benchmark: "{ref_db}_blastdb_p{type}_benchmark.txt"
     shell: """
     formatdb -p {wildcards.type} -i {input.fasta_seq} -o t -n {params.basename} -l {log}
 """

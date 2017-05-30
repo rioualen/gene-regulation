@@ -46,7 +46,7 @@ rule blastall:
           + " -e " + "{query}_{blast_program}_hits_qsub.err" \
           + " -o " + "{query}_{blast_program}_hits_qsub.out"
     log: "{query}_{blast_program}_hits.log"
-    benchmark: "{query}_{blast_program}_hits_benchmark.json"
+    benchmark: "{query}_{blast_program}_hits_benchmark.txt"
     shell: """
     blastall -i {input.query} -d {params.db} -M {params.matrix} -p {wildcards.blast_program} -m {params.view} -e {params.expect} > {output.hits} 2> {log}
 """

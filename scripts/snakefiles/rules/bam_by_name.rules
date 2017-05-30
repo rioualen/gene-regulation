@@ -17,7 +17,7 @@ rule bam_by_name:
     input: "{aligned_reads}.bam"
     output: "{aligned_reads}_sorted_name.bam"
     log: "{aligned_reads}_sorted_name.log"
-    benchmark: "{aligned_reads}_sorted_name_benchmark.json"
+    benchmark: "{aligned_reads}_sorted_name_benchmark.txt"
     params: prefix = "{aligned_reads}_sorted_name", \
             qsub = config["qsub"] + " -e {aligned_reads}_sorted_name_qsub.err -o {aligned_reads}_sorted_name_qsub.out"
     shell: "samtools sort -n {input} -o {output} 2> {log}"

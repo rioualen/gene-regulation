@@ -38,7 +38,7 @@ rule bowtie_index:
           + " -e " + bowtie_dir + "index_qsub.err" \
           + " -o " + bowtie_dir + "index_qsub.out"
     log: bowtie_dir + "/index.log"
-    benchmark: bowtie_dir + "/index_benchmark.json"
+    benchmark: bowtie_dir + "/index_benchmark.txt"
     shell: """
 mkdir -p {params.dir}
 cp {input} {params.dir}/{params.fasta}

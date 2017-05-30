@@ -38,7 +38,7 @@ rule fastqc:
             + " -e {reads}_{ext}_fastqc/{sample}_fastqc_qsub.err"\
             + " -o {reads}_{ext}_fastqc/{sample}_fastqc_qsub.out"
     log: "{reads}_{ext}_fastqc/{sample}_fastqc.log"
-    benchmark: "{reads}_{ext}_fastqc/{sample}_fastqc_benchmark.json"
+    benchmark: "{reads}_{ext}_fastqc/{sample}_fastqc_benchmark.txt"
 #    shell:"fastqc --outdir {params.outdir} --format fastq {input} {params.options} 2> {log} "
 #    shell:"fastqc --outdir {params.outdir} --format {wildcards.ext} {input} {params.options} 2> {log} "
     shell:"fastqc --outdir {params.outdir} {input} {params.options} 2> {log} "

@@ -74,7 +74,7 @@ rule bbduk:
             + " -e "+ config["dir"]["fastq"] + "/{samples}/{samples}_bbduk_qsub.err" \
             + " -o "+ config["dir"]["fastq"] + "/{samples}/{samples}_bbduk_qsub.out"
     log: config["dir"]["fastq"] + "/{samples}/{samples}_bbduk.log"
-    benchmark: config["dir"]["fastq"] + "/{samples}/{samples}_bbduk_benchmark.json"
+    benchmark: config["dir"]["fastq"] + "/{samples}/{samples}_bbduk_benchmark.txt"
     run:
 #        if (seq_type == "pe"):
 #            shell("bbduk pe --pe-file1 " + input.reads[0] + " --pe-file2 " + input.reads[1] + " --qual-type {params.qual_type} --qual-threshold {params.threshold} --output-pe1 {output.forward} --output-pe2 {output.reverse} --output-single {output.single} 2> {log}")

@@ -22,6 +22,6 @@ rule md5sum:
     output: "{file}.md5sum"
     params: qsub = config["qsub"] + " -e {file}_md5sum_qsub.err -o {file}_md5sum_qsub.out"
     log: "{file}_md5sum.log"
-    benchmark: "{file}_md5sum_benchmark.json"
+    benchmark: "{file}_md5sum_benchmark.txt"
     shell:"md5sum {input} > {output} 2> {log} "
 

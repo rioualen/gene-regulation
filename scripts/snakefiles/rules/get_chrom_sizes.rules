@@ -15,7 +15,7 @@ rule get_chrom_sizes:
           + " -e {genome}_chromsize_qsub.err" \
           + " -o {genome}_chromsize_qsub.out"
     log: "{genome}_chromsize.log"
-    benchmark: "{genome}_chromsize_benchmark.json"
+    benchmark: "{genome}_chromsize_benchmark.txt"
     shell:"""
 (samtools faidx {input}
 cut -f1,2 {input}.fai > {output}) 2> {log}

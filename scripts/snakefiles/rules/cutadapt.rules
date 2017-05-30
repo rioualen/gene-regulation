@@ -73,7 +73,7 @@ rule cutadapt:
             + " -e "+ config["dir"]["fastq"] + "/{samples}/{samples}_cutadapt_qsub.err" \
             + " -o "+ config["dir"]["fastq"] + "/{samples}/{samples}_cutadapt_qsub.out"
     log: config["dir"]["fastq"] + "/{samples}/{samples}_cutadapt.log"
-    benchmark: config["dir"]["fastq"] + "/{samples}/{samples}_cutadapt_benchmark.json"
+    benchmark: config["dir"]["fastq"] + "/{samples}/{samples}_cutadapt_benchmark.txt"
     run:
 #        if (seq_type == "pe"):
 #            shell("cutadapt pe --pe-file1 " + input.reads[0] + " --pe-file2 " + input.reads[1] + " --qual-type {params.qual_type} --qual-threshold {params.threshold} --output-pe1 {output.forward} --output-pe2 {output.reverse} --output-single {output.single} 2> {log}")

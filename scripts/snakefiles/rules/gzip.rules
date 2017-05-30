@@ -13,6 +13,6 @@ rule gzip:
     output: "{file}.gz"
     params: qsub = config["qsub"] + " -e {file}_gzip_qsub.err -o {file}_gzip_qsub.out"
     log: "{file}_gzip.log"
-    benchmark: "{file}_gzip_benchmark.json"
+    benchmark: "{file}_gzip_benchmark.txt"
     shell:"gzip -f {input} 2> {log} "
 

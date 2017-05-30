@@ -24,6 +24,6 @@ rule genome_coverage_wig:
             chromsize = re.sub('\.fa$', '', fasta_file) + ".genome", 
             qsub = config["qsub"] + " -e {reads}_bam2wig_qsub.err -o {reads}_bam2wig_qsub.out"
     log:  "{reads}_bam2wig.log"
-    benchmark:  "{reads}_bam2wig_benchmark.json"
+    benchmark:  "{reads}_bam2wig_benchmark.txt"
     shell: "bam2wig.py -i {input} -s {params.chromsize} -o {params.output_prefix} 2> {log}" 
 

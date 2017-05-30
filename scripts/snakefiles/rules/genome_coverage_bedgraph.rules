@@ -33,5 +33,5 @@ rule genome_coverage_bedgraph:
     output: "{reads}.bedgraph"
     params: qsub = config["qsub"] + " -e {reads}_genomecov_bedgraph_qsub.err -o {reads}_genomecov_bedgraph_qsub.out"
     log:  "{reads}_genomecov_bedgraph.log"
-    benchmark:  "{reads}_genomecov_bedgraph_benchmark.json"
+    benchmark:  "{reads}_genomecov_bedgraph_benchmark.txt"
     shell: "bedtools genomecov -bg -ibam {input.reads} -g {input.chrom_size} > {output} 2> {log}" 

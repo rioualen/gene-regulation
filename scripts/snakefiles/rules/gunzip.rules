@@ -16,6 +16,6 @@ rule gunzip:
     output: "{file}"
     params: qsub = config["qsub"] + " -e {file}_gunzip_qsub.err -o {file}_gunzip_qsub.out"
     log: "{file}_gunzip.log"
-    benchmark: "{file}_gunzip_benchmark.json"
+    benchmark: "{file}_gunzip_benchmark.txt"
     shell:"gunzip {input} 2> {log} "
 

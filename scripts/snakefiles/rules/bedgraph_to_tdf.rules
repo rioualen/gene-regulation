@@ -28,7 +28,7 @@ rule bedgraph_to_tdf:
     input: "{coverage}.bedgraph"
     output: "{coverage}.tdf"
     log: "{coverage}_bedgraph_to_tdf.log"
-    benchmark: "{coverage}_bedgraph_to_tdf_benchmark.json"
+    benchmark: "{coverage}_bedgraph_to_tdf_benchmark.txt"
     params: genome=genome_file, \
             qsub = config["qsub"] + " -e {coverage}_bedgraph_to_tdf_qsub.err -o {coverage}_bedgraph_to_tdf_qsub.out"
     shell: "igvtools totdf {input} {output} {params.genome} 2> {log}"

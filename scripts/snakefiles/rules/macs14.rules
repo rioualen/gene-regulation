@@ -71,7 +71,7 @@ rule macs14:
           + " -e " + dir_macs14 + "/{treatment}_vs_{control}{preprocess,.*}_macs14_qsub.err" \
           + " -o " + dir_macs14 + "/{treatment}_vs_{control}{preprocess,.*}_macs14_qsub.out"
     log: dir_macs14 + "/{treatment}_vs_{control}{preprocess,.*}_macs14.log"
-    benchmark: dir_macs14 + "/{treatment}_vs_{control}{preprocess,.*}_macs14_benchmark.json"
+    benchmark: dir_macs14 + "/{treatment}_vs_{control}{preprocess,.*}_macs14_benchmark.txt"
     shell: """
 (mkdir -p {params.outdir}
 macs -t {input.treatment} -c {input.control} -f BED -g {params.genome_size} -m {params.mfold} --pvalue {params.pval} --keep-dup {params.keep_dup} --outdir {params.outdir} -n {params.name} --bw {params.bandwidth} {params.other_options}

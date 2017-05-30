@@ -19,6 +19,6 @@ rule genome_coverage_dz:
     output: "{reads}_genomecov_dz.txt"
     params: qsub = config["qsub"] + " -e {reads}_genomecov_dz_qsub.err -o {reads}_genomecov_dz_qsub.out"
     log:  "{reads}_genomecov_dz.log"
-    benchmark:  "{reads}_genomecov_dz_benchmark.json"
+    benchmark:  "{reads}_genomecov_dz_benchmark.txt"
     shell: "bedtools genomecov -strand -dz -ibam {input.reads} > {output} 2> {log}"
 

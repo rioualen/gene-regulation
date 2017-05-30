@@ -79,7 +79,7 @@ rule bowtie:
           + " -o " + sample_dir + "/{samples}/{prefix}_bowtie_qsub.out"
     threads: 10
     log: sample_dir + "/{samples}/{prefix}_bowtie.log"
-    benchmark: sample_dir + "/{samples}/{prefix}_bowtie_benchmark.json"
+    benchmark: sample_dir + "/{samples}/{prefix}_bowtie_benchmark.txt"
     run:
         if (seq_type == "pe"):
             shell("bowtie -t -q -S -n {params.max_mismatches} --threads {threads} --phred33-quals {input.index} -1 " + input.reads[0] + " -2 " + input.reads[1] + " {params.sam} 2> {log}")

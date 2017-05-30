@@ -80,7 +80,7 @@ rule homer:
           + " -e " + dir_homer + "/{treatment}_vs_{control}{preprocess,.*}_homer_qsub.err" \
           + " -o " + dir_homer + "/{treatment}_vs_{control}{preprocess,.*}_homer_qsub.out"
     log: dir_homer + "/{treatment}_vs_{control}{preprocess,.*}_homer.log"
-    benchmark: dir_homer + "/{treatment}_vs_{control}{preprocess,.*}_homer_benchmark.json"
+    benchmark: dir_homer + "/{treatment}_vs_{control}{preprocess,.*}_homer_benchmark.txt"
     shell:"""
 (makeTagDirectory {params.treatment_tag} -genome {params.genome} -checkGC {input.treatment} -format bed
 makeTagDirectory {params.control_tag} -genome {params.genome} -checkGC {input.control} -format bed
