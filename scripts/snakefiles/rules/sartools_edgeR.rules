@@ -170,8 +170,12 @@ rule sartools_edgeR:
                           gene.selection=gene.selection, normalizationMethod=normalizationMethod)
 
         # get list of gene_ids of up/down genes
-        up <- as.vector(read.table(paste("tables/", list.files(path = "tables", pattern = "{wildcards.test}vs{wildcards.ref}up.txt$")[1], sep=""))[,1])
-        down <- as.vector(read.table(paste("tables/", list.files(path = "tables", pattern = "{wildcards.test}vs{wildcards.ref}down.txt$")[1], sep=""))[,1])
+        #up <- as.vector(read.table(paste("tables/", list.files(path = "tables", pattern = "{wildcards.test}vs{wildcards.ref}.up.txt$")[1], sep=""))[,1])
+        #down <- as.vector(read.table(paste("tables/", list.files(path = "tables", pattern = "{wildcards.test}vs{wildcards.ref}.down.txt$")[1], sep=""))[,1])
+
+        up <- as.vector(read.table(paste("tables/", "{wildcards.test}", "vs", "{wildcards.ref}", ".up.txt", sep=""))[1])[,1])
+        down <- as.vector(read.table(paste("tables/", "{wildcards.test}", "vs", "{wildcards.ref}", ".down.txt", sep=""))[1])[,1])
+
 
         setwd(baseDir)
 
