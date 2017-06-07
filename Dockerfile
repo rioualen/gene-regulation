@@ -14,9 +14,9 @@ RUN apt-get update \
 RUN mkdir -p /usr/bin
 WORKDIR /usr/bin
 
-RUN wget https://github.com/rioualen/gene-regulation/archive/1.0.tar.gz
-RUN tar zvxf 1.0.tar.gz
-WORKDIR gene-regulation-1.0
+RUN wget https://github.com/rioualen/gene-regulation/archive/4.0.tar.gz
+RUN tar zvxf 4.0.tar.gz
+WORKDIR gene-regulation-4.0
 
 RUN make -f scripts/makefiles/install_tools_and_libs.mk all
 
@@ -26,7 +26,7 @@ RUN echo export SHELL=/bin/bash >> /root/.bashrc
 RUN echo export PATH=$PATH:/root/bin >> /root/.bashrc
 
 
-WORKDIR /usr/bin/gene-regulation-1.0
+WORKDIR /usr/bin/gene-regulation-4.0
 
 MAINTAINER Claire Rioualen <claire.rioualen@inserm.fr> 
 

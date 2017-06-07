@@ -644,11 +644,7 @@ Switch back to azerty:
     setxkbmap fr
 
 <!-- Run the following command:
-
-::
-
     sudo apt-get --yes install docker
-
 -->
 
 
@@ -693,7 +689,6 @@ Execute the pipeline
 
     snakemake -p -s gene-regulation/scripts/snakefiles/workflows/factor_workflow.py --configfile gene-regulation/examples/GSE20870/GSE20870.yml
 
-<!-- # JVH / Mac
 
 On Mac OSX
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
