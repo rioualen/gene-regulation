@@ -190,7 +190,7 @@ python:
 	sudo pip install pysam==0.8.4
 
 
-ubuntu_packages: add_pubkey add_repos add_packages
+ubuntu_packages: add_pub_key add_repos add_packages
 
 R: R_installation R_lib Rstudio
 
