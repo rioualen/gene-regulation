@@ -418,7 +418,7 @@ igv_tools:
 	wget --no-clobber http://data.broadinstitute.org/igv/projects/downloads/igvtools_$(IGVTOOLS_VER).zip  && \
 	unzip igvtools_$(IGVTOOLS_VER).zip && \
 	ln -s -f $(SOURCE_DIR)/IGVTools/igvtools $(BIN_DIR)/igvtools \
-	ln -s -f -T $(SOURCE_DIR)/IGVTools/igvtools.jar $(BIN_DIR)/igvtools.jar
+	#ln -s -f $(SOURCE_DIR)/IGVTools/igvtools.jar $(BIN_DIR)/igvtools.jar
 
 visualization: java igv igv_tools
 
