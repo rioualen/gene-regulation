@@ -153,7 +153,7 @@ R_installation:
 ### !!! sudo bash -c "echo 'deb http://cran.univ-lyon1.fr/bin/linux/ubuntu trusty/' >> /etc/apt/sources.list"
 
 	sudo echo "deb http://cran.univ-lyon1.fr/bin/linux/ubuntu trusty/" >> /etc/apt/sources.list
-	sudo apt-get update
+	sudo apt-get --force-yes update
 	sudo apt-get --force-yes install r-base r-base-dev libcurl4-openssl-dev libxml2-dev
 	echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);" >> ~/.Rprofile
 
