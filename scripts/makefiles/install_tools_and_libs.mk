@@ -58,7 +58,7 @@ usage:
 
 CRAN_PACK_LIST='XML', 'bPeaks', 'caTools', 'VennDiagram', 'devtools'
 BIOC_PACK_LIST='affy', 'biomaRt', 'Rsamtools', 'genefilter', 'GenomicFeatures', 'edgeR', 'DESeq2'
-PUB_KEY=""
+PUB_KEY="51716619E084DAB9"
 #E084DAB9 51716619E084DAB9 F7B8CEA6056E8E56 06F90DE5381BA480
 
 BEDOPS_VER=2.4.19
