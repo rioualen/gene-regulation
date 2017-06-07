@@ -150,8 +150,6 @@ add_packages:
 
 R_installation:
 
-### !!! sudo bash -c "echo 'deb http://cran.univ-lyon1.fr/bin/linux/ubuntu trusty/' >> /etc/apt/sources.list"
-
 	sudo echo "deb http://cran.univ-lyon1.fr/bin/linux/ubuntu trusty/" >> /etc/apt/sources.list
 	sudo apt-get -y update
 	sudo apt-get -y install r-base r-base-dev libcurl4-openssl-dev libxml2-dev
@@ -394,11 +392,12 @@ ngs_tools: \
 	homer
 
 # BEDOPS, DEEPTOOLS
+
 # ================================================================
 # Visualization
 # ================================================================
 
-# switch to java 8? I recall having an issue with v9, maybe in IGV?
+
 java:
 	echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections
 	echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-selections
@@ -419,7 +418,7 @@ igv_tools:
 	wget --no-clobber http://data.broadinstitute.org/igv/projects/downloads/igvtools_$(IGVTOOLS_VER).zip  && \
 	unzip igvtools_$(IGVTOOLS_VER).zip && \
 	ln -s -f $(SOURCE_DIR)/IGVTools/igvtools $(BIN_DIR)/igvtools \
-	ln -s -f $(SOURCE_DIR)/IGVTools/igvtools.jar $(BIN_DIR)/igvtools.jar
+	ln -s -f -T $(SOURCE_DIR)/IGVTools/igvtools.jar $(BIN_DIR)/igvtools.jar
 
 visualization: java igv igv_tools
 
