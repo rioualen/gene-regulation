@@ -1,8 +1,9 @@
 FROM adreeve/python-numpy:latest 
 
 RUN apt-get update \
-    && apt-get --yes install git ssh rsync graphviz \
-    wget zlibc zlib1g-dev
+    apt-get --yes install git ssh rsync graphviz wget zlibc zlib1g-dev python3-pip 
+
+RUN pip3 install snakemake
 
 #    python-software-properties\
 #    build-essential \
