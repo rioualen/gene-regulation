@@ -1,6 +1,7 @@
 FROM adreeve/python-numpy:latest 
 
 ENV PATH /usr/local/bin:$PATH
+ENV HOME /home
 
 RUN apt-get update \
     && apt-get --yes install git ssh rsync graphviz \
@@ -20,7 +21,7 @@ RUN pip3 install snakemake pyyaml psutil
 
 ## Gene-regulation
 
-WORKDIR ${HOME}
+WORKDIR $HOME
 
 RUN wget https://github.com/rioualen/gene-regulation/archive/4.0.tar.gz && \
     tar zvxf 4.0.tar.gz && \
