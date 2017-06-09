@@ -8,7 +8,7 @@ RUN apt-get update \
     libncurses5-dev libncursesw5-dev libboost-dev \
     python3-pip 
 
-RUN pip3 install snakemake
+RUN pip3 install snakemake pyyaml psutil
 
 #    python-software-properties\
 #    build-essential \
@@ -16,12 +16,23 @@ RUN pip3 install snakemake
 #    software-properties-common \
 # libncurses5-dev libncursesw5-dev libboost-dev
 
-RUN wget https://github.com/rioualen/gene-regulation/archive/4.0.tar.gz && \
-	tar zvxf 4.0.tar.gz
+#docutils 
 
-#WORKDIR gene-regulation-4.0
+## Gene-regulation
+
+WORKDIR ${HOME}
+
+RUN wget https://github.com/rioualen/gene-regulation/archive/4.0.tar.gz && \
+    tar zvxf 4.0.tar.gz && \
+    ln -s gene-regulation-4.0 gene-regulation && \
+    rm 4.0.tar.gz
+
 
 #RUN make -f scripts/makefiles/install_tools_and_libs.mk all
+
+
+## Programs
+
 
 # bowtie2
 RUN wget --no-clobber http://downloads.sourceforge.net/project/bowtie-bio/bowtie2/2.2.6/bowtie2-2.2.6-linux-x86_64.zip && \
@@ -68,8 +79,6 @@ RUN wget -nc "http://homer.salk.edu/homer/configureHomer.pl" && \
 #RUN echo export SHELL=/bin/bash >> /root/.bashrc
 #RUN echo export PATH=$PATH:/root/bin >> /root/.bashrc
 
-
-#WORKDIR /usr/bin/gene-regulation-4.0
 
 MAINTAINER Claire Rioualen <claire.rioualen@inserm.fr> 
 
