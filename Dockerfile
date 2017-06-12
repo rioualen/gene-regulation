@@ -2,6 +2,9 @@ FROM adreeve/python-numpy:latest
 
 ENV PATH /usr/local/bin:$PATH
 
+RUN mkdir -p /home/progs
+WORKDIR /home/progs
+
 RUN apt-get update \
     && apt-get --yes install git ssh rsync nano graphviz \
     wget zlibc zlib1g-dev unzip zip \
@@ -36,8 +39,7 @@ RUN wget --no-clobber http://downloads.sourceforge.net/project/bowtie-bio/bowtie
 RUN wget --no-clobber http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.5.zip && \
 	unzip -o fastqc_v0.11.5.zip && \
 	chmod +x FastQC/fastqc && \
-	ln -s -f FastQC/fastqc /usr/local/bin && \
-	rm fastqc_v0.11.5.zip
+	cp FastQC/fastqc /usr/local/bin
 
 # samtools
 RUN wget --no-clobber http://sourceforge.net/projects/samtools/files/samtools/1.3/samtools-1.3.tar.bz2 && \
@@ -47,12 +49,16 @@ RUN wget --no-clobber http://sourceforge.net/projects/samtools/files/samtools/1.
 	make  && \
 	sudo make install
 
+WORKDIR /home/progs
+
 # bedtools
 RUN wget --no-clobber https://github.com/arq5x/bedtools2/releases/download/v2.24.0/bedtools-2.24.0.tar.gz && \
 	tar xvfz bedtools-2.24.0.tar.gz && \
 	cd bedtools2 && \
 	make && \
 	sudo make install
+
+WORKDIR /home/progs
 
 # macs2
 RUN sudo pip install MACS2
@@ -62,8 +68,7 @@ RUN mkdir Homer && \
 	cd Homer && \
 	wget -nc "http://homer.salk.edu/homer/configureHomer.pl" && \
 	perl configureHomer.pl -install homer && \
-	cd .. && \
-	cp Homer/bin/* /usr/local/bin 
+	cp `find bin/ -maxdepth 1 -executable -type f` /usr/local/bin
 
 RUN pip3 install -U pandas
 
