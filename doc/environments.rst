@@ -600,7 +600,7 @@ Get started with Docker!
 Create a Docker account
 ****************************************************************
 
-Instructions `here <https://docs.docker.com/linux/step_five/>`__ (linux users).
+Instructions `here <https://docs.docker.com/engine/installation/linux/ubuntu/>`__ (linux users).
 
 Install Docker on your local host
 ****************************************************************
