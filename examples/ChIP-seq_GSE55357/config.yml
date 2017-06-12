@@ -18,15 +18,15 @@
     seq_type: "se"
 
   dir:
-    reads_source: "ChIP-seq_GSE55357/data"                                      # required. dir containing raw data organized in sub directories named after the samples
-    fastq: "ChIP-seq_GSE55357/fastq"                                            # required. dir containing fastq files (trimmed or not) and fastqc reports
+    reads_source: "data"                                      # required. dir containing raw data organized in sub directories named after the samples
+    fastq: "fastq"                                            # required. dir containing fastq files (trimmed or not) and fastqc reports
     genome: "genome"                                                            # required. where to store genomes
-    results: "ChIP-seq_GSE55357/results"                                        # required. dir for all result files that are produced by the pipeline
+    results: "results"                                        # required. dir for all result files that are produced by the pipeline
     gene_regulation: "gene-regulation"                                          # required. location of the libraries
 
-    samples: "ChIP-seq_GSE55357/results/samples"                                # optional. will hold sample treatment (trimming, alignment, QC...).    If not mentioned, will be config["dir"]["results"]
-    peaks: "ChIP-seq_GSE55357/results/peaks"                                    # optional. will hold comparison data (peak-calling, motifs search...). If not mentioned, will be config["dir"]["results"]
-    reports: "ChIP-seq_GSE55357/results/reports"                                # optional. will hold reports and graphics.                             If not mentioned, will be config["dir"]["results"]
+    samples: "results/samples"                                # optional. will hold sample treatment (trimming, alignment, QC...).    If not mentioned, will be config["dir"]["results"]
+    peaks: "results/peaks"                                    # optional. will hold comparison data (peak-calling, motifs search...). If not mentioned, will be config["dir"]["results"]
+    reports: "results/reports"                                # optional. will hold reports and graphics.                             If not mentioned, will be config["dir"]["results"]
 
   tools:
     trimming: ""

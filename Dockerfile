@@ -1,10 +1,9 @@
 FROM adreeve/python-numpy:latest 
 
 ENV PATH /usr/local/bin:$PATH
-ENV HOME /home
 
 RUN apt-get update \
-    && apt-get --yes install git ssh rsync graphviz \
+    && apt-get --yes install git ssh rsync nano graphviz \
     wget zlibc zlib1g-dev unzip zip \
     libncurses5-dev libncursesw5-dev libboost-dev \
     python3-pip 
@@ -20,8 +19,6 @@ RUN pip3 install snakemake pyyaml psutil
 #docutils 
 
 ## Gene-regulation
-
-WORKDIR $HOME
 
 RUN wget https://github.com/rioualen/gene-regulation/archive/4.0.tar.gz && \
     tar zvxf 4.0.tar.gz && \
@@ -39,7 +36,7 @@ RUN wget --no-clobber http://downloads.sourceforge.net/project/bowtie-bio/bowtie
 RUN wget --no-clobber http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.5.zip && \
 	unzip -o fastqc_v0.11.5.zip && \
 	chmod +x FastQC/fastqc && \
-	ln -s -f FastQC/fastqc /usr/local/bin/fastqc && \
+	ln -s -f FastQC/fastqc /usr/local/bin && \
 	rm fastqc_v0.11.5.zip
 
 # samtools
@@ -61,9 +58,12 @@ RUN wget --no-clobber https://github.com/arq5x/bedtools2/releases/download/v2.24
 RUN sudo pip install MACS2
 
 # homer
-RUN wget -nc "http://homer.salk.edu/homer/configureHomer.pl" && \
-	perl configureHomer.pl -install homer
-
+RUN mkdir Homer && \
+	cd Homer && \
+	wget -nc "http://homer.salk.edu/homer/configureHomer.pl" && \
+	perl configureHomer.pl -install homer && \
+	cd .. && \
+	cp Homer/bin/* /usr/local/bin 
 
 RUN pip3 install -U pandas
 
