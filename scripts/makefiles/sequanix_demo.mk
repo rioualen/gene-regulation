@@ -58,7 +58,7 @@ download_raw_data:
 all: \
 	init\
 	create_dir\
-	download_gene-regulation\
+#	download_gene-regulation\
 	download_genome_data\
 	download_raw_data
 
