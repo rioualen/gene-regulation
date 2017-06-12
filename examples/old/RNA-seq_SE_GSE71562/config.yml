@@ -19,9 +19,9 @@
 
 
   metadata: 
-    samples: "gene-regulation/examples/RNA-seq_SE_GSE71562/samples.tab"                                     # required. has to contain at least sample ids
-    design: "gene-regulation/examples/RNA-seq_SE_GSE71562/design.tab"                                       # required. has to contain at least ids of pairs of samples to be compared
-    configfile: "gene-regulation/examples/RNA-seq_SE_GSE71562/config.yml"                                   # required for flowcharts generation; maybe this should be revised
+    samples: "gene-regulation/examples/old/RNA-seq_SE_GSE71562/samples.tab"                                     # required. has to contain at least sample ids
+    design: "gene-regulation/examples/old/RNA-seq_SE_GSE71562/design.tab"                                       # required. has to contain at least ids of pairs of samples to be compared
+    configfile: "gene-regulation/examples/old/RNA-seq_SE_GSE71562/config.yml"                                   # required for flowcharts generation; maybe this should be revised
     seq_type: "se"
 
   dir:
