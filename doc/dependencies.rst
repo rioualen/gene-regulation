@@ -216,7 +216,7 @@ It is the first system to support the use of automatically inferred multiple nam
 -  `Forum <https://groups.google.com/forum/#!forum/snakemake>`__
 -  See also Snakemake section for tutorials. 
 
-NB: Python 3 and pip3 are required ('see `this section <http://gene-regulation.readthedocs.io/en/latest/dependencies.html#python>`__). 
+NB: Python 3 and pip3 are required (see `this section <http://gene-regulation.readthedocs.io/en/latest/dependencies.html#python>`__). 
 
 ::
 
@@ -330,6 +330,7 @@ We recommend installing it manually:
     ln -s -f $HOME/app_sources/FastQC/fastqc $HOME/bin/fastqc
 
 NB: FastQC requires to have Java installed (even for commandline use). 
+See dedicated `section <http://gene-regulation.readthedocs.io/en/latest/dependencies.html#java>`__ to install it.
 
 Check installation:
 
@@ -530,39 +531,65 @@ Langmead B, Trapnell C, Pop M, L Salzberg S. Ultrafast and memory-efficient alig
     unzip bowtie2-2.2.6-linux-x86_64.zip
     cp `find bowtie2-2.2.6/ -maxdepth 1 -executable -type f` $HOME/bin
 
+Check installation:
+
+::
+
+     bowtie2 --version
+
 Subread-align
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-http://subread.sourceforge.net/
 
-
-he Subread package comprises a suite of software programs for processing next-gen sequencing read data including:
+`The Subread package <http://subread.sourceforge.net/>`__ comprises a suite of software programs for processing next-gen sequencing read data including:
 
     Subread: a general-purpose read aligner which can align both genomic DNA-seq and RNA-seq reads. It can also be used to discover genomic mutations including short indels and structural variants.
     Subjunc: a read aligner developed for aligning RNA-seq reads and for the detection of exon-exon junctions. Gene fusion events can be detected as well.
     featureCounts: a software program developed for counting reads to genomic features such as genes, exons, promoters and genomic bins.
     exactSNP: a SNP caller that discovers SNPs by testing signals against local background noises
 
-Ref
+Reference:
 
 Liao Y, Smyth GK and Shi W. The Subread aligner: fast, accurate and scalable read mapping by seed-and-vote. Nucleic Acids Research, 41(10):e108, 2013
-Liao Y, Smyth GK and Shi W. featureCounts: an efficient general-purpose program for assigning sequence reads to genomic features. Bioinformatics, 30(7):923-30, 2014
 
 
-subread:
-	cd $(SOURCE_DIR) && \
-	wget -nc https://sourceforge.net/projects/subread/files/subread-$(SUBREAD_VER)/subread-$(SUBREAD_VER)-source.tar.gz && \
-	tar zxvf subread-$(SUBREAD_VER)-source.tar.gz && \
-	cd subread-$(SUBREAD_VER)-source/src && \
-	make -f Makefile.Linux && \
-	cd ../bin && \
-	cp `find * -executable -type f` $(BIN_DIR)
+::
 
+	cd $HOME/app_sources
+	wget -nc https://sourceforge.net/projects/subread/files/subread-1.5.2/subread-1.5.2-source.tar.gz
+	tar zxvf subread-1.5.2-source.tar.gz
+	cd subread-1.5.2-source/src
+	make -f Makefile.Linux
+	cd ../bin 
+	cp `find * -executable -type f` $HOME/bin
 
+Check installation: 
 
+::
+
+    subread-align --version
 
 Tophat
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+`TopHat <https://ccb.jhu.edu/software/tophat/index.shtml>`__ is a fast splice junction mapper for RNA-Seq reads. 
+It aligns RNA-Seq reads to mammalian-sized genomes using the ultra high-throughput short read aligner Bowtie, 
+and then analyzes the mapping results to identify splice junctions between exons. 
+
+::
+
+	cd $HOME/app_sources
+	wget --no-clobber https://ccb.jhu.edu/software/tophat/downloads/tophat-2.0.14.Linux_x86_64.tar.gz
+	tar xvfz tophat-2.0.14.Linux_x86_64.tar.gz
+	cd tophat-2.0.14.Linux_x86_64
+	rm -Rf AUTHORS LICENSE README intervaltree/ sortedcontainers/
+	mv ./* $HOME/bin
+	cd ..; rm -Rf tophat-2.0.14.Linux_x86_64*
+
+Check installation:
+
+::
+
+     tophat --version
 
 Peak-calling
 ****************************************************************
@@ -570,10 +597,10 @@ Peak-calling
 The following tools can be used to perform ChIP-seq peak-calling.
 
 
-HOMER
+Homer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Required in order to run the demo workflow "ChIP-seq" on dataset GSE20870 (in the tutorials section). 
+Required in order to run the `tutorials <http://gene-regulation.readthedocs.io/en/latest/tutorials.html#>`__. 
 
 `Web page <http://homer.salk.edu/>`__
 
@@ -599,47 +626,19 @@ To get a list of available packages:
 To install packages, simply use the -install option and the name(s) of
 the package(s).
 
+However, Homer can also work with custom genomes in FASTA format and gene
+annotations in GTF format. Thus the Gene-regulation workflows don't require to install any genome. 
+
+Check installation: 
+
 ::
 
-    perl  $HOME/bin/HOMER/configureHomer.pl -install mouse # (to download the mouse promoter set)
-    perl  $HOME/bin/HOMER/configureHomer.pl -install mm8   # (to download the mm8 version of the mouse genome)
-    perl  $HOME/bin/HOMER/configureHomer.pl -install hg19  # (to download the hg19 version of the human genome)
-
-Supported organisms:
-
-+-----------------+--------------------+
-| Organism        | Assembly           |
-+=================+====================+
-| Human           | hg17, hg18, hg19   |
-+-----------------+--------------------+
-| Mouse           | mm8, mm9, mm10     |
-+-----------------+--------------------+
-| Rat             | rn4, rn5           |
-+-----------------+--------------------+
-| Frog            | xenTro2, xenTro3   |
-+-----------------+--------------------+
-| Zebrafish       | danRer7            |
-+-----------------+--------------------+
-| Drosophila      | dm3                |
-+-----------------+--------------------+
-| C. elegans      | ce6, ce10          |
-+-----------------+--------------------+
-| S. cerevisiae   | sacCer2, sacCer3   |
-+-----------------+--------------------+
-| S. pombe        | ASM294v1           |
-+-----------------+--------------------+
-| Arabidopsis     | tair10             |
-+-----------------+--------------------+
-| Rice            | msu6               |
-+-----------------+--------------------+
-
-HOMER can also work with custom genomes in FASTA format and gene
-annotations in GTF format.
+    findMotifs.pl
 
 MACS 1.4
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Required in order to run the demo workflow "ChIP-seq" on dataset GSE20870 (in the tutorials section). 
+Required in order to run the demo workflow "ChIP-seq" on dataset GSE20870 (in the  `tutorials <http://gene-regulation.readthedocs.io/en/latest/tutorials.html#>`__ section). 
 
 
 -  `Documentation <http://liulab.dfci.harvard.edu/MACS/00README.html>`__
@@ -648,17 +647,22 @@ Required in order to run the demo workflow "ChIP-seq" on dataset GSE20870 (in th
 ::
 
     cd $HOME/app_sources
-    wget "https://github.com/downloads/taoliu/MACS/MACS-1.4.3.tar.gz"
-    tar -xvzf MACS-1.4.3.tar.gz
-    cd MACS-1.4.3
+    wget "https://github.com/downloads/taoliu/MACS/MACS-1.4.2.tar.gz"
+    tar -xvzf MACS-1.4.2.tar.gz
+    cd MACS-1.4.2
     sudo python setup.py install
+
+Check installaiton: 
+
+::
+
     macs14 --version
 
 
-MACS2
+MACS 2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Required in order to run the demo workflow "ChIP-seq" on dataset GSE20870 (in the tutorials section). 
+Required in order to run the `tutorials <http://gene-regulation.readthedocs.io/en/latest/tutorials.html#>`__. 
 
 -  `Webpage <https://github.com/taoliu/MACS/>`__
 
@@ -667,15 +671,21 @@ Required in order to run the demo workflow "ChIP-seq" on dataset GSE20870 (in th
     sudo apt-get install python-numpy
     sudo pip install MACS2
 
+Check installation: 
+
+::
+
+    macs2 --version
+
 bPeaks
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Peak-caller developped specifically for yeast, can be useful in order to
 process small genomes only.
 
-It is currently not used in demo workflows, and is therefore not m adatory to run the tutorials. 
+It is currently not used in demo workflows, and is therefore not mandatory to run the tutorials. 
 
-Available as an R library.
+Available as an R package.
 
 `Web page <http://bpeaks.gene-networks.net/>`__
 
@@ -684,16 +694,14 @@ Available as an R library.
     install.packages("bPeaks")
     library(bPeaks)
 
-
-SPP R package
+SPP
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The installation of this peak-caller is optional, as it is not currently published and maintained properly. 
 
 It is therefore not used in our demo workflows. 
 
-
-- In R
+- Method 1: R
 
 ::
 
@@ -702,7 +710,7 @@ It is therefore not used in our demo workflows.
     install.packages("caTools")
     install.packages("spp")
 
-- In commandline
+- Method 2: commandline
 
 ::
 
@@ -711,25 +719,25 @@ It is therefore not used in our demo workflows.
     wget -nc http://compbio.med.harvard.edu/Supplements/ChIP-seq/spp_1.11.tar.gz
     sudo R CMD INSTALL spp_1.11.tar.gz
 
-- Using git (I haven't tried this one but it looks more recent) (see `github page <https://github.com/hms-dbmi/spp>`__)
+- Method 3: git 
+
+I haven't tried this one but it looks more recent (see `github page <https://github.com/hms-dbmi/spp>`__).
 
 ::
 
     require(devtools)
     devtools::install_github('hms-dbmi/spp', build_vignettes = FALSE)
 
-
-I also wrote a little protocol a while ago. 
-Here's the procedure on Ubuntu 14.04, in this very order:
+- Method 4: the ultimate protocol for Ubuntu 14.04
 
 In unix shell:
 
 ::
 
     # unix libraries
-    apt-get update
-    apt-get -y install r-base
-    apt-get -y install libboost-dev zlibc zlib1g-dev
+    sudo apt-get update
+    sudo apt-get -y install r-base
+    sudo apt-get -y install libboost-dev zlibc zlib1g-dev
 
 In R shell:
 
@@ -744,8 +752,15 @@ In unix shell:
 ::
 
     # spp
+    cd $HOME/app_sources
     wget http://compbio.med.harvard.edu/Supplements/ChIP-seq/spp_1.11.tar.gz
     sudo R CMD INSTALL spp_1.11.tar.gz
+
+Check installation in R:
+
+::
+
+     library(spp)
 
 A few links:
 
@@ -760,6 +775,12 @@ A few links:
 -  You can find a few more notes
    `here <http://seqanswers.com/forums/archive/index.php/t-22653.html>`__.
 -  Good luck!
+
+Mosaics
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+#source("https://bioconductor.org/biocLite.R")
+#biocLite("mosaics")
 
 SWEMBL
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -817,6 +838,13 @@ Suite logicielle spécialisée pour l'analyse de motifs cis-régulateurs,
 développée par l'équipe de Tim Bailey. Inclut des outils spécifiques
 pour l'analyse de données de ChIP-seq.
 
+RNA-seq
+****************************************************************
+
+featureCounts
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Liao Y, Smyth GK and Shi W. featureCounts: an efficient general-purpose program for assigning sequence reads to genomic features. Bioinformatics, 30(7):923-30, 2014
 
 Miscellaneous
 ****************************************************************
