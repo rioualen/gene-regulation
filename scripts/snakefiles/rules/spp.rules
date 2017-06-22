@@ -49,7 +49,7 @@ rule spp:
     log: dir_spp + "/{treatment}_vs_{control}{preprocess,.*}_spp.log"
     benchmark: dir_spp + "/{treatment}_vs_{control}{preprocess,.*}_spp_benchmark.json"
     run:
-        R("""
+        R("""sink("{log}")
 
         library(caTools)
         library(Rsamtools)
