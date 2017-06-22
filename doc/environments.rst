@@ -17,10 +17,7 @@ Their implementations may involve specialized hardware, software, or a combinati
 
 Diagram of a physical machine vs a virtual machine:
 
-.. figure:: ../img/physical_machine.png
-   :width: 30%
 .. figure:: ../img/virtual_machine.png
-   :width: 30%
 
 IFB cloud
 ----------------------------------------------------------------
@@ -536,11 +533,6 @@ The new instance should appear in orange bold fonts in the dashboard.
 
 You can connect to the instance through ``ssh`` as shown in previous sections.
 
-Installing programs and dependencies
-****************************************************************
-
-Once in the virtual machine, you can install the required programs.
-
 Get the ``gene-regulation`` repository
 ****************************************************************
 
@@ -569,7 +561,7 @@ you can also execute this rule:
 
 ::
 
-    make -f gene-regulation-4.0/scripts/makefiles/install_tools_and_libs.mk desktop_and_x2go
+    make -f gene-regulation-4.0/scripts/makefiles/install_tools_and_libs.mk add_repos desktop_and_x2go
 
 You should now be able to execute the example workflow by following instructions from `here <http://gene-regulation.readthedocs.io/en/latest/environments.html#download-source-data>`__. 
 
@@ -585,13 +577,8 @@ Docker is an open-source project that automates the deployment of applications i
 
 Diagram of Docker containers compared to physical and virtual machines. 
 
-
-.. figure:: ../img/physical_machine.png
-   :width: 30% 
-.. figure:: ../img/virtual_machine.png
-   :width: 30% 
 .. figure:: ../img/docker_container.png
-   :width: 30%
+
 
 
 Get started with Docker!
