@@ -77,15 +77,15 @@ def igv_session(filename, genome, gtf="", gff3="", peaks="", coverage="", transc
             file.write('  </Track>\n')
         file.write('</Panel>\n')
 
-    ## Peaks panel
+    ## Peaks panel ## bug in track names
     if peaks:
         file.write('<Panel name="FeaturePanel" height="' + str(len(peaks)*60) + '">\n')
         for bedfile in peaks:
             pc_name = bedfile.split(sep="_")[-1]
             pc_name = os.path.splitext(pc_name)[0]
 
-            sam_name = bdg.split(sep="/")[-1]
-            sam_name = sam_name.split(sep=".")[0]
+            sam_name = bedfile.split(sep="/")[-1]
+            sam_name = bedfile.split(sep="_")[0]
 
             file.write('  <Track id="../../' + bedfile + '" name="' + pc_name + " " + sam_name + '" color="0,0,178" fontSize="12">\n')
             file.write(    '<DataRange/>\n')
