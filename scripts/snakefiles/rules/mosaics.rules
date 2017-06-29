@@ -71,7 +71,7 @@ rule mosaics:
     benchmark: dir_mosaics + "/{treatment}_vs_{control}{preprocess,.*}_mosaics_benchmark.txt"
 
     run:
-        R("""
+        R("""sink("{log}")
 
 
 library("mosaics")
@@ -99,6 +99,8 @@ export(  peak,  type="narrowPeak",  filename="{output.peaks}")
 
 #export(  peak,  type="txt",  filename="fnr_bowtie2_1.txt"  )
 #export(  peak,  type="gff",  filename="fnr_bowtie2_1.gff"  )
+
+sink()
 
 """)
 
