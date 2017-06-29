@@ -29,6 +29,9 @@ if not "P" in config["homer"].keys():
 if not "fdr" in config["homer"].keys():
     config["homer"]["fdr"] = "0.001"
 
+if not "frag_length" in config["homer"].keys():
+    config["homer"]["frag_length"] = "auto"
+
 if not "samples" in config["dir"].keys():
     sys.exit("The sample dir must be defined in the config file")
 
@@ -75,6 +78,7 @@ rule homer:
         P = config["homer"]["P"],
         F = config["homer"]["F"],
         fdr = config["homer"]["fdr"],
+        frag_length = config["homer"]["frag_length"],
         genome_size = config["genome"]["size"],
         qsub = config["qsub"] \
           + " -e " + dir_homer + "/{treatment}_vs_{control}{preprocess,.*}_homer_qsub.err" \
@@ -84,7 +88,7 @@ rule homer:
     shell:"""
 (makeTagDirectory {params.treatment_tag} -genome {params.genome} -checkGC {input.treatment} -format bed
 makeTagDirectory {params.control_tag} -genome {params.genome} -checkGC {input.control} -format bed
-findPeaks {params.treatment_tag} -style {params.style} -L {params.L} -P {params.P} -F {params.F} -fdr {params.fdr} -gsize {params.genome_size} -o {params.treatment_tag}/peaks.txt -i {params.control_tag}
+findPeaks {params.treatment_tag} -style {params.style} -L {params.L} -P {params.P} -F {params.F} -fdr {params.fdr} -gsize {params.genome_size} -fragLength {params.frag_length} -o {params.treatment_tag}/peaks.txt -i {params.control_tag}
 pos2bed.pl {params.treatment_tag}/peaks.txt > {output}
 makeUCSCfile {params.treatment_tag} -o auto
 makeUCSCfile {params.control_tag} -o auto) &> {log}
