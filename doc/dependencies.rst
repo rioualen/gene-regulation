@@ -414,6 +414,7 @@ Cutadapt
 ::
 
     pip install --user --upgrade cutadapt
+    mv /root/.local/bin/cutadapt $HOME/bin
 
 Check installation:
 
@@ -443,6 +444,21 @@ Check installation:
 ::
 
     trim_galore --version
+
+
+BBDuk
+****************************************************************
+
+- `SeqAnswers <http://seqanswers.com/forums/showthread.php?t=42776>`__
+
+- `SourceForge <https://sourceforge.net/projects/bbmap>`__
+
+::
+
+    cd $HOME/app_sources
+    wget https://sourceforge.net/projects/bbmap/files/BBMap_37.31.tar.gz
+    tar xvzf BBMap_37.31.tar.gz
+    cp `find bbmap/ -maxdepth 1 -executable -type f` $HOME/bin
 
 
 Alignment/mapping
@@ -695,11 +711,21 @@ Available as an R package.
 SPP
 ****************************************************************
 
-The installation of this peak-caller is optional, as it is not currently published and maintained properly. 
+This peak-caller is used in the ChIP-seq study case GSE20870.  
 
-It is therefore not used in our demo workflows. 
+- Method 1: git 
 
-- Method 1: R
+See `github page <https://github.com/hms-dbmi/spp>`__.
+
+Commands in R:
+
+::
+
+    require(devtools)
+    devtools::install_github('hms-dbmi/spp', build_vignettes = FALSE)
+
+
+- Method 2: Bioconductor [deprecated]
 
 ::
 
@@ -708,7 +734,7 @@ It is therefore not used in our demo workflows.
     install.packages("caTools")
     install.packages("spp")
 
-- Method 2: commandline
+- Method 3: commandline [deprecated]
 
 ::
 
@@ -716,17 +742,6 @@ It is therefore not used in our demo workflows.
     cd $HOME/app_sources
     wget -nc http://compbio.med.harvard.edu/Supplements/ChIP-seq/spp_1.11.tar.gz
     sudo R CMD INSTALL spp_1.11.tar.gz
-
-- Method 3: git 
-
-I haven't tried this one but it looks more recent (see `github page <https://github.com/hms-dbmi/spp>`__).
-
-Commands in R:
-
-::
-
-    require(devtools)
-    devtools::install_github('hms-dbmi/spp', build_vignettes = FALSE)
 
 - Method 4: the ultimate protocol for Ubuntu 14.04
 
@@ -779,8 +794,14 @@ A few links:
 Mosaics
 ****************************************************************
 
-#source("https://bioconductor.org/biocLite.R")
-#biocLite("mosaics")
+This peak-caller is used in the ChIP-seq study case GSE20870.  
+
+Installation in R from Bioconductor:
+
+:: 
+
+    source("https://bioconductor.org/biocLite.R")
+    biocLite("mosaics")
 
 SWEMBL
 ****************************************************************
@@ -797,6 +818,25 @@ This peak-caller is used in the ChIP-seq study case GSE20870.
     cd SWEMBL
     make 
     cp SWEMBL $(BIN_DIR)
+
+
+*Deprecated method*
+
+::
+
+    cd $HOME/app_sources
+    wget "http://www.ebi.ac.uk/~swilder/SWEMBL/SWEMBL.3.3.1.tar.bz2" && \
+    bunzip2 -f SWEMBL.3.3.1.tar.bz2 && \
+    tar xvf SWEMBL.3.3.1.tar && \
+    rm SWEMBL.3.3.1.tar && \
+    chown -R ubuntu-user SWEMBL.3.3.1 && \
+    cd SWEMBL.3.3.1 && \
+    make
+
+    # This method require a manual fix of C flags in makefile
+    # gcc main.c IO.c calc.c stack.c summit.c refcalc.c wiggle.c overlap.c -o SWEMBL -lz -lm
+
+
 
 Motif discovery, motif analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
