@@ -38,7 +38,8 @@ if (seq_type == "pe"):
 # Define input files
 def bbduk_inputs(wildcards):
     if (seq_type == "pe"):
-        reads = expand("{fastq_dir}/{samples}/{samples}_{strand}.fastq", strand=strands, samples=wildcards.samples, fastq_dir=fastq_dir)
+#        reads = expand("{fastq_dir}/{samples}/{samples}_{strand}.fastq", strand=strands, samples=wildcards.samples, fastq_dir=fastq_dir)
+        sys.exit("Sorry; bbduk currently only works with single-end data")
     elif (seq_type == "se"):
         reads = expand("{fastq_dir}/{samples}/{samples}.fastq", samples=wildcards.samples, fastq_dir=fastq_dir)
     else:
@@ -79,7 +80,7 @@ rule bbduk:
 #        if (seq_type == "pe"):
 #            shell("bbduk pe --pe-file1 " + input.reads[0] + " --pe-file2 " + input.reads[1] + " --qual-type {params.qual_type} --qual-threshold {params.threshold} --output-pe1 {output.forward} --output-pe2 {output.reverse} --output-single {output.single} 2> {log}")
         if (seq_type == "se"):
-            shell("bbduk -Xmx1g in={input} out={output} qtrim=rl trimq={params.qual_threshold} ml={params.length_threshold} &> {log}")
+            shell("bbduk.sh -Xmx1g in={input} out={output} qtrim=rl trimq={params.qual_threshold} ml={params.length_threshold} &> {log}")
 
 
  

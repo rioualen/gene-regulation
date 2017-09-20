@@ -10,7 +10,7 @@
 ## directory.
 ##
 ## Author: Claire Rioualen
-## Date: 2016
+## Date: 2017
 
 export LC_ALL=C
 export LANG=C
@@ -167,6 +167,11 @@ R_lib:
 	if(length(pack)) biocLite(pack);\
 	library(devtools);\
 	install_github('PF2-pasteur-fr/SARTools', build_vignettes=TRUE)"
+
+
+#    require(devtools)
+#    devtools::install_github('hms-dbmi/spp', build_vignettes = FALSE)
+
 
 Rstudio: 
 	cd $(SOURCE_DIR) && \
@@ -337,7 +342,7 @@ macs2:
 #	wget -nc http://compbio.med.harvard.edu/Supplements/ChIP-seq/spp_$(SPP_VER).tar.gz && \
 #	sudo R CMD INSTALL spp_$(SPP_VER).tar.gz
 
-## Currently not working -> see w/ S.Wilder, new version to come?
+
 #swembl:
 #	cd $(SOURCE_DIR) && \
 #	wget "http://www.ebi.ac.uk/~swilder/SWEMBL/SWEMBL.$(SWEMBL_VER).tar.bz2" && \
@@ -347,7 +352,18 @@ macs2:
 #	chown -R ubuntu-user SWEMBL.$(SWEMBL_VER) && \
 #	cd SWEMBL.$(SWEMBL_VER) && \
 #	make
+## Currently not working -> see w/ S.Wilder, new version to come?
+## Correction
 ##gcc main.c IO.c calc.c stack.c summit.c refcalc.c wiggle.c overlap.c -o SWEMBL -lz -lm
+
+
+#testé OK le 21/06/17
+#git clone https://github.com/stevenwilder/SWEMBL.git
+#cd SWEMBL
+#make 
+#cp SWEMBL $(BIN_DIR)
+
+
 
 homer:
 	mkdir $(SOURCE_DIR)/homer && \
@@ -425,6 +441,7 @@ visualization: java igv igv_tools
 
 ## to be used only in non-graphical environment (eg IFB cloud VMs)
 desktop_and_x2go:
+	add_repos
 	sudo apt-get install -y x2goserver
 	sudo apt-get install -y --no-install-recommends ubuntu-mate-core ubuntu-mate-desktop
 	sudo apt-get install -y mate-desktop-environment-extra

@@ -9,7 +9,7 @@ This workflow performs the following treatments:
  - peak-calling with alternate peak-calling programs
  - motif discovery
 
-The details are specified in a yaml-formatted configuration file.
+The parameters are specified in a yaml-formatted configuration file.
 
 Usage:
 
@@ -26,20 +26,10 @@ Usage:
         --configfile path/to/specific/config_file.yml \
         [targets]
 
-3. Generate flowcharts:
-
-    snakemake -p -s gene-regulation/scripts/snakefiles/workflows/chip-seq_workflow_SE.py \
-        --configfile path/to/specific/config_file.yml \
-        --force flowcharts
-
-Sequencing type: single end
-
 Author: Claire Rioualen, Jacques van Helden
 Contact: claire.rioualen@inserm.fr
 
 """
-
-
 
 #================================================================#
 #                       Python Imports 
@@ -52,11 +42,9 @@ import datetime
 import re
 import pandas as pd
 
-wd = os.getcwd()
+workdir = os.getcwd()
 
-#workdir: os.getcwd()
-
-GENEREG_LIB = os.path.join(wd, config["dir"]["gene_regulation"])
+GENEREG_LIB = os.path.join(workdir, config["dir"]["gene_regulation"])
 
 include: os.path.join(GENEREG_LIB, "scripts/python_lib/util.py")
 include: os.path.join(GENEREG_LIB, "scripts/python_lib/igv_session.py")
@@ -64,7 +52,7 @@ include: os.path.join(GENEREG_LIB, "scripts/python_lib/igv_session.py")
 
 
 #================================================================#
-#                      Variables
+#           Variables & directories
 #================================================================#
 
 # Genome & annotations
@@ -114,12 +102,12 @@ else:
 
 
 #================================================================#
-#               Snakemake includes
+#               Snakemake rules
 #================================================================#
 
 RULES = os.path.join(GENEREG_LIB, "scripts/snakefiles/rules")
 
-#include: os.path.join(RULES, "annotate_peaks.rules")
+include: os.path.join(RULES, "annotate_peaks.rules")
 include: os.path.join(RULES, "bam_by_pos.rules")
 include: os.path.join(RULES, "bam_to_bed.rules")
 include: os.path.join(RULES, "bam_stats.rules")
@@ -149,9 +137,7 @@ include: os.path.join(RULES, "index_fasta.rules")
 include: os.path.join(RULES, "macs2.rules")
 include: os.path.join(RULES, "macs14.rules")
 #include: os.path.join(RULES, "peak_motifs.rules")
-#include: os.path.join(RULES, "sickle.rules")
 include: os.path.join(RULES, "spp.rules")
-#include: os.path.join(RULES, "sra_to_fastq.rules")
 include: os.path.join(RULES, "subread_index.rules")
 include: os.path.join(RULES, "subread_align.rules")
 include: os.path.join(RULES, "swembl.rules")
@@ -163,7 +149,7 @@ include: os.path.join(RULES, "swembl.rules")
 
 
 #----------------------------------------------------------------#
-# Workflow design (TODO)
+# Workflow design
 #----------------------------------------------------------------#
 
 if not (("tools" in config.keys()) and ("trimming" in config["tools"].keys())):
@@ -171,15 +157,11 @@ if not (("tools" in config.keys()) and ("trimming" in config["tools"].keys())):
 
 TRIMMING_TOOLS = config["tools"]["trimming"].split()
 
-
-
 if not (("tools" in config.keys()) and ("mapping" in config["tools"].keys())):
     sys.exit("The parameter config['tools']['mapping'] should be specified in the config file.")
 
 MAPPING_TOOLS = config["tools"]["mapping"].split()
 
-
-## TODO ##
 if TRIMMING_TOOLS:
     PREFIX = expand("{trimmer}_{aligner}", aligner=MAPPING_TOOLS, trimmer=TRIMMING_TOOLS)
 else:

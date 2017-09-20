@@ -56,7 +56,7 @@ rule sartools_targetfile:
         for id in range(len(sample_ids)):
             cond = sample_conditions[id]
             counts = expand(cwd + "/" + sample_dir + "/" + sample_ids[id] + "/" + sample_ids[id] + "_{preprocess}.txt", preprocess=wildcards.preprocess)
-            f.write(sample_ids[id] + "\t" + counts[0] + "\t" + cond + "\n")
+            f.write(sample_ids[id] + "\t" + counts[0] + "\t" + str(cond) + "\n")
         f.close()
 #        sys.stdout.close()
 

@@ -60,9 +60,9 @@ rule bPeaks:
         treatment = dir_samples + "/{treatment}/{treatment}{preprocess,.*}_sorted_pos.bam", \
         control = dir_samples + "/{control}/{control}{preprocess,.*}_sorted_pos.bam"
     output: 
-        peaks_bed = dir_bPeaks + "/{treatment}_vs_{control}/bPeaks/{treatment}_vs_{control}{preprocess,.*}_bPeaks.bed"
+        peaks_bed = dir_bPeaks + "/{treatment}_vs_{control}{preprocess,.*}_bPeaks.bed"
     params:
-        outdir = dir_bPeaks + "/{treatment}_vs_{control}/bPeaks", \
+        outdir = dir_bPeaks, \
         name = "{treatment}_vs_{control}{preprocess,.*}", \
         IPcoeff = config["bPeaks"]["IPcoeff"], \
         controlCoeff = config["bPeaks"]["controlCoeff"], \
@@ -75,15 +75,18 @@ rule bPeaks:
           + " -o " + dir_bPeaks + "/{treatment}_vs_{control}/bPeaks/{treatment}_vs_{control}{preprocess,.*}_bPeaks_qsub.out"
     log: config["dir"]["peaks"] + "/{treatment}_vs_{control}/bPeaks/{treatment}_vs_{control}{preprocess,.*}_bPeaks.log"
     benchmark: config["dir"]["peaks"] + "/{treatment}_vs_{control}/bPeaks/{treatment}_vs_{control}{preprocess,.*}_bPeaks_benchmark.txt"
-    run: 
+    run:
+        shell("mkdir {params.outdir}") ## to remove
         R("""sink("{log}")
-        
+
         library("bPeaks")
 
         setwd(".")
 
-        system("genomeCoverageBed -ibam {input.control} -d > INPUT_genomeCoverage.txt")
-        system("genomeCoverageBed -ibam {input.treatment} -d > IP_genomeCoverage.txt")
+        system("genomeCoverageBed -ibam {input.control} -d > {params.outdir}/INPUT_genomeCoverage.txt")
+        system("genomeCoverageBed -ibam {input.treatment} -d > {params.outdir}/IP_genomeCoverage.txt")
+
+        setwd("{params.outdir}")
 
         seqResult = dataReading("IP_genomeCoverage.txt", "INPUT_genomeCoverage.txt")
 
@@ -91,7 +94,7 @@ rule bPeaks:
         IPcoeff={params.IPcoeff}, controlCoeff={params.controlCoeff}, log2FC={params.log2FC}, averageQuantiles={params.averageQuantiles}, windowSize={params.windowSize}, windowOverlap={params.windowOverlap}, 
         peakDrawing = FALSE, resultName="{params.name}")
 
-        file.rename("{params.name}_bPeaks_allGenome.bed", "{params.outdir}/{params.name}_bPeaks-log{params.log2FC}.bed")
+        file.rename("{params.name}_bPeaks_allGenome.bed", "{output.peaks_bed}")
 
         sink()
 

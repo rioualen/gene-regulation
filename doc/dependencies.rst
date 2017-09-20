@@ -1,26 +1,40 @@
 Dependencies
 ================================================================
 
-These manuals aim at helping you install the necessary programs and
-dependencies in order to have the snakemake workflows work. It was
-designed for Unix-running computers (Ubuntu, Debian).
+These manuals aim at helping you install programs and
+dependencies used in the Gene-regulation library. 
+
+Some of them are mandatory, and some are optional, depending 
+on the Snakemake workflows you need to run. 
+
+They were tested under Ubuntu 14.04. 
 
 Manual installation
 ----------------------------------------------------------------
 
-The following manual is meant to help you install the programs that you might need in order to run workflows. 
+This manual is organized in sections, so you can cherry-pick the programs you want to manually install. 
+For "all inclusive" solutions, please refer yourself to the following sections. 
 
-General requirements
+General 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Generic tools
 ****************************************************************
 
+nano
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Nano is a simple command-line text editor. 
+
+::
+
+    sudo apt-get install nano
+
 
 rsync
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-`rsync <https://rsync.samba.org/>`__ is an open source utility that
+`Rsync <https://rsync.samba.org/>`__ is an open source utility that
 provides fast incremental file transfer.
 
 ::
@@ -30,7 +44,7 @@ provides fast incremental file transfer.
 git
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
--  Install git on your machine.
+`Git rsync <https://en.wikipedia.org/wiki/Git>`__ is a version control system (VCS) for tracking changes in computer files and coordinating work on those files among multiple people. 
 
 ::
 
@@ -49,16 +63,32 @@ Optional:
 zlib
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Several tools require this dependency (e.g. sickle, bamtools...).
+Unix package required by several tools, including Sickle and Bamtools.
 
 ::
 
     sudo apt-get install libz-dev
 
-qsub
+Java
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Java is required by several tools using GUIs, such as FastQC or IGV. 
 
+It seems java 9 causes issues with IGV, so we chose to use java 8 here. 
+
+::
+
+	echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections
+	echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-selections
+	sudo add-apt-repository -y ppa:webupd8team/java
+	sudo apt-get update
+	sudo apt-get -y install oracle-java8-installer
+
+Check installation:
+
+::
+
+     java -version
 
 Create bin/ and app\_sources/ (optional)
 ****************************************************************
@@ -100,18 +130,26 @@ Execute the file to validate the change.
 
     source ~/.profile
 
-Snakemake workflows basic requirements
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Graphviz
+****************************************************************
+
+Snakemake can generate useful graphviz outputs.
+
+::
+
+    sudo apt-get install graphviz
+
+
 
 Python
-****************************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Snakemake requires to have Python 3.3+ installed. 
 You can check this by issuing the following commands in a terminal:
 
 ::
 
-    python --version # usually the default python version is 2.7+
+    python --version
     python3 --version
 
 If you don't have python 3 you should install it.
@@ -120,22 +158,20 @@ If you don't have python 3 you should install it.
 
     sudo apt-get install python3
 
-Install pip and pip3.
-
-::
-
-    sudo apt-get install python-pip
-    sudo apt-get install python3-pip
-
-Not installed natively?
+Install python package managers and devel libraries.
 
 ::
 
     apt-get install python-dev
     apt-get install python3.4-dev
+    sudo apt-get install python-pip
+    sudo apt-get install python3-pip
+
 
 Pandas library
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+****************************************************************
+
+`Python Data Analysis Library <http://pandas.pydata.org/>`__ is an open source, BSD-licensed library providing high-performance, easy-to-use data structures and data analysis tools for the Python programming language.
 
 This library is used in order to read tab-delimited files used in the workflows 
 (see files ``samples.tab`` and ``design.tab``).
@@ -145,36 +181,57 @@ This library is used in order to read tab-delimited files used in the workflows
     pip3 install pandas
 
 Package rpy2
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+****************************************************************
+
+The package `rpy2 <https://rpy2.readthedocs.io>`__ alloàws to access R from within Python code. 
 
 ::
 
+    sudo apt-get install python-matplotlib
     pip3 install "rpy2<2.3.10"
 
 
 
 R
-****************************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+You can fetch a CRAN mirror `here <https://cran.r-project.org/mirrors.html>`__. 
 
-*todo*
+::
+
+	sudo sh -c "echo 'deb <your mirror> trusty/' >> /etc/apt/sources.list"                          ## Repository for Ubuntu 14.04 Trusty Tahr
+	#sudo sh -c "echo 'deb http://ftp.igh.cnrs.fr/pub/CRAN/ trusty/' >> /etc/apt/sources.list"      ## Mirror in Montpellier, France
+	sudo apt-get -y update
+	sudo apt-get -y install r-base r-base-dev libcurl4-openssl-dev libxml2-dev
+	echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);" >> ~/.Rprofile
+
+Check installation:
+
+::
+
+    R --version
 
 Snakemake
-****************************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+"Snakemake is a workflow engine that provides a readable Python-based workflow definition language and a powerful execution environment 
+that scales from single-core workstations to compute clusters without modifying the workflow. 
+It is the first system to support the use of automatically inferred multiple named wildcards (or variables) in input and output filenames."
+
+(Köster and Rahman, 2012)
 
 -  `Documentation <http://snakemake.readthedocs.io>`__
 -  `FAQ <https://bitbucket.org/snakemake/snakemake/wiki/FAQ>`__
 -  `Forum <https://groups.google.com/forum/#!forum/snakemake>`__
 -  See also Snakemake section for tutorials. 
 
-Now you have installed Python 3 and pip3 (see previous section), you can
-install snakemake safely.
+NB: Python 3 and pip3 are required (see `this section <http://gene-regulation.readthedocs.io/en/latest/dependencies.html#python>`__). 
 
 ::
 
     pip3 install snakemake
 
-You can check that snakemake works properly with this basic script:
+You can check that snakemake works properly with this basic script. 
 
 ::
 
@@ -198,11 +255,18 @@ You can check that snakemake works properly with this basic script:
         message: "Generating {output} file."
         shell: "echo BYE > {output}"
 
--  Save it to ``~/workspace/hello.py``.
--  Issue the command ``cd ~/workspace ; snakemake -s hello.py``.
--  2 files should be created: ``hello.txt`` and ``bye.txt``.
+::
 
-As of December 2015, you need snakemake version 3.4+.
+    touch $HOME/hello.py
+    nano $HOME/hello.py             ## copy/paste script above and save
+
+Execute the workflow; two files should be created: ``hello.txt`` and ``bye.txt``.
+
+::
+
+    cd ; snakemake -s hello.py
+
+In case you need to upgrade snakemake:
 
 ::
 
@@ -214,24 +278,12 @@ If you want to use Snakemake reports function (optional):
 
     pip3 install docutils
 
-Graphviz
-****************************************************************
 
-Snakemake can generate useful graphviz outputs.
-
-::
-
-    sudo apt-get install graphviz
-
-NGS analysis software & tools
+Quality control
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
-Quality assessment
-****************************************************************
-
 FastQC
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+****************************************************************
 
 `FastQC <http://www.bioinformatics.babraham.ac.uk/projects/fastqc/>`__
 aims to provide a simple way to do some quality control checks on raw
@@ -275,8 +327,47 @@ We recommend installing it manually:
     chmod +x FastQC/fastqc
     ln -s -f $HOME/app_sources/FastQC/fastqc $HOME/bin/fastqc
 
-Trimming
+NB: FastQC requires to have Java installed (even for commandline use). 
+See dedicated `section <http://gene-regulation.readthedocs.io/en/latest/dependencies.html#java>`__ to install it.
+
+Check installation:
+
+::
+
+    fastqc --version
+
+MultiQC
 ****************************************************************
+
+`MultiQC <http://multiqc.info/>`__ searches a given directory for analysis logs and compiles a HTML report. 
+It's a general use tool, perfect for summarising the output from numerous bioinformatics tools.
+
+::
+
+    sudo pip install multiqc
+
+NB: a bug can appear depending on versions:
+
+::
+
+Command python setup.py egg_info failed with error code 1 in /tmp/pip_build_root/matplotlib
+Storing debug log for failure in /home/gr/.pip/pip.log
+
+If so, it can be avoided by installing ubuntu dependencies, then reinstalling multiqc:
+
+::
+
+    sudo apt-get install libfreetype6-dev python-matplotlib
+    sudo pip install multiqc
+
+Check installation: 
+
+::
+
+     multiqc --version
+
+Trimming
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The quality of the reads generated by high-throughput sequencing
 technologies tends to decrease at their ends. Trimming consists in
@@ -285,7 +376,7 @@ mapping.
 
 
 Sickle
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+****************************************************************
 
 `Sickle <https://github.com/najoshi/sickle>`__ is a trimming tool which
 better the quality of NGS reads.
@@ -309,10 +400,69 @@ quality: Illumina, Solexa, Sanger.
     make 
     cp sickle $HOME/bin
 
+Check installation: 
+
+::
+
+    sickle --version
+
+Cutadapt
+****************************************************************
+
+`Cutadapt <http://cutadapt.readthedocs.io/en/stable/>`__ finds and removes adapter sequences, primers, poly-A tails and other types of unwanted sequence from your high-throughput sequencing reads.
+
+::
+
+    pip install --user --upgrade cutadapt
+    mv /root/.local/bin/cutadapt $HOME/bin
+
+Check installation:
+
+::
+
+    cutadapt --version
+
+
+TrimGalore
+****************************************************************
+
+In our workflows we use `TrimGalore <https://github.com/FelixKrueger/TrimGalore>`__, a wrapper around Cutadapt and FastQC. 
+It should be installed if you want to run cutadapt. 
+
+::
+
+    cutadapt --version                              # Check that cutadapt is installed
+    fastqc -v                                       # Check that FastQC is installed
+
+    cd $HOME/app_sources
+    curl -fsSL https://github.com/FelixKrueger/TrimGalore/archive/0.4.3.tar.gz -o trim_galore.tar.gz
+    tar xvzf trim_galore.tar.gz
+    mv TrimGalore-0.4.3/trim_galore $HOME/bin
+
+Check installation:
+
+::
+
+    trim_galore --version
+
+
+BBDuk
+****************************************************************
+
+- `SeqAnswers <http://seqanswers.com/forums/showthread.php?t=42776>`__
+
+- `SourceForge <https://sourceforge.net/projects/bbmap>`__
+
+::
+
+    cd $HOME/app_sources
+    wget https://sourceforge.net/projects/bbmap/files/BBMap_37.31.tar.gz
+    tar xvzf BBMap_37.31.tar.gz
+    cp `find bbmap/ -maxdepth 1 -executable -type f` $HOME/bin
 
 
 Alignment/mapping
-****************************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The point of mapping is to replace the reads obtained from the sequencing step onto a reference genome. 
 When the read is long enough, it can be mapped on the genome with a pretty good confidence, by tolerating a certain amount of so-called mismatches. 
@@ -322,14 +472,12 @@ We call "sequencing depth" the average number of reads mapped at each position o
 The bigger the sequencing depth, the better the quality of the alignment, and the better the downstream analyses. 
 
 BWA
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-BWA is designed for short reads alignment. 
-
+****************************************************************
 
 `BWA <http://bio-bwa.sourceforge.net/>`__ is a software package for
 mapping low-divergent sequences against a large reference genome, such
-as the human genome.
+as the human genome. It is designed for short reads alignment. 
+
 
 -  `Manual <http://bio-bwa.sourceforge.net/bwa.shtml>`__
 
@@ -341,8 +489,14 @@ Li H. and Durbin R. (2009). Fast and accurate short read alignment with Burrows-
 
     sudo apt-get install bwa
 
+Check installation:
+
+::
+
+    bwa
+
 Bowtie
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+****************************************************************
 
 Bowtie performs ungapped alignment, and is therefore not suitable for certain types of data, like RNA-seq data. 
 
@@ -354,9 +508,23 @@ Bowtie performs ungapped alignment, and is therefore not suitable for certain ty
     unzip bowtie-1.1.1-linux-x86_64.zip
     cp `find bowtie-1.1.1/ -maxdepth 1 -executable -type f` $HOME/bin
 
+Check installation:
+
+::
+
+     bowtie --help
 
 Bowtie2
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+****************************************************************
+
+"`Bowtie 2 <http://bowtie-bio.sourceforge.net>`__ is an ultrafast and memory-efficient tool for aligning sequencing reads to long reference sequences. 
+It is particularly good at aligning reads of about 50 up to 100s or 1,000s of characters to relatively long (e.g. mammalian) genomes. 
+Bowtie 2 indexes the genome with an FM Index (based on the Burrows-Wheeler Transform or BWT) to keep its memory footprint small: 
+for the human genome, its memory footprint is typically around 3.2 gigabytes of RAM. 
+Bowtie 2 supports gapped, local, and paired-end alignment modes. 
+Multiple processors can be used simultaneously to achieve greater alignment speed. 
+Bowtie 2 outputs alignments in SAM format, enabling interoperation with a large number of other tools (e.g. SAMtools, GATK) that use SAM. 
+Bowtie 2 is distributed under the GPLv3 license, and it runs on the command line under Windows, Mac OS X and Linux."
 
 `General
 documentation <http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml>`__
@@ -365,6 +533,11 @@ documentation <http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml>`__
 
 `Downloads <https://sourceforge.net/projects/bowtie-bio/files/bowtie2/>`__
 
+Reference:
+
+Langmead B, Trapnell C, Pop M, L Salzberg S. Ultrafast and memory-efficient alignment of short DNA sequences to the human genome. Genome Biology 200910:R25. DOI: 10.1186/gb-2009-10-3-r25
+
+
 ::
 
     cd $HOME/app_sources
@@ -372,17 +545,76 @@ documentation <http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml>`__
     unzip bowtie2-2.2.6-linux-x86_64.zip
     cp `find bowtie2-2.2.6/ -maxdepth 1 -executable -type f` $HOME/bin
 
+Check installation:
+
+::
+
+     bowtie2 --version
+
+Subread-align
+****************************************************************
+
+`The Subread package <http://subread.sourceforge.net/>`__ comprises a suite of software programs for processing next-gen sequencing read data including:
+
+    Subread: a general-purpose read aligner which can align both genomic DNA-seq and RNA-seq reads. It can also be used to discover genomic mutations including short indels and structural variants.
+    Subjunc: a read aligner developed for aligning RNA-seq reads and for the detection of exon-exon junctions. Gene fusion events can be detected as well.
+    featureCounts: a software program developed for counting reads to genomic features such as genes, exons, promoters and genomic bins.
+    exactSNP: a SNP caller that discovers SNPs by testing signals against local background noises
+
+Reference:
+
+Liao Y, Smyth GK and Shi W. The Subread aligner: fast, accurate and scalable read mapping by seed-and-vote. Nucleic Acids Research, 41(10):e108, 2013
+
+
+::
+
+	cd $HOME/app_sources
+	wget -nc https://sourceforge.net/projects/subread/files/subread-1.5.2/subread-1.5.2-source.tar.gz
+	tar zxvf subread-1.5.2-source.tar.gz
+	cd subread-1.5.2-source/src
+	make -f Makefile.Linux
+	cd ../bin 
+	cp `find * -executable -type f` $HOME/bin
+
+Check installation: 
+
+::
+
+    subread-align --version
+
+Tophat
+****************************************************************
+
+`TopHat <https://ccb.jhu.edu/software/tophat/index.shtml>`__ is a fast splice junction mapper for RNA-Seq reads. 
+It aligns RNA-Seq reads to mammalian-sized genomes using the ultra high-throughput short read aligner Bowtie, 
+and then analyzes the mapping results to identify splice junctions between exons. 
+
+::
+
+	cd $HOME/app_sources
+	wget --no-clobber https://ccb.jhu.edu/software/tophat/downloads/tophat-2.0.14.Linux_x86_64.tar.gz
+	tar xvfz tophat-2.0.14.Linux_x86_64.tar.gz
+	cd tophat-2.0.14.Linux_x86_64
+	rm -Rf AUTHORS LICENSE README intervaltree/ sortedcontainers/
+	mv ./* $HOME/bin
+	cd ..; rm -Rf tophat-2.0.14.Linux_x86_64*
+
+Check installation:
+
+::
+
+     tophat --version
 
 Peak-calling
-****************************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The following tools can be used to perform ChIP-seq peak-calling.
 
 
-HOMER
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Homer
+****************************************************************
 
-Required in order to run the demo workflow "ChIP-seq" on dataset GSE20870 (in the tutorials section). 
+Required in order to run the `tutorials <http://gene-regulation.readthedocs.io/en/latest/tutorials.html#>`__. 
 
 `Web page <http://homer.salk.edu/>`__
 
@@ -408,47 +640,19 @@ To get a list of available packages:
 To install packages, simply use the -install option and the name(s) of
 the package(s).
 
+However, Homer can also work with custom genomes in FASTA format and gene
+annotations in GTF format. Thus the Gene-regulation workflows don't require to install any genome. 
+
+Check installation: 
+
 ::
 
-    perl  $HOME/bin/HOMER/configureHomer.pl -install mouse # (to download the mouse promoter set)
-    perl  $HOME/bin/HOMER/configureHomer.pl -install mm8   # (to download the mm8 version of the mouse genome)
-    perl  $HOME/bin/HOMER/configureHomer.pl -install hg19  # (to download the hg19 version of the human genome)
-
-Supported organisms:
-
-+-----------------+--------------------+
-| Organism        | Assembly           |
-+=================+====================+
-| Human           | hg17, hg18, hg19   |
-+-----------------+--------------------+
-| Mouse           | mm8, mm9, mm10     |
-+-----------------+--------------------+
-| Rat             | rn4, rn5           |
-+-----------------+--------------------+
-| Frog            | xenTro2, xenTro3   |
-+-----------------+--------------------+
-| Zebrafish       | danRer7            |
-+-----------------+--------------------+
-| Drosophila      | dm3                |
-+-----------------+--------------------+
-| C. elegans      | ce6, ce10          |
-+-----------------+--------------------+
-| S. cerevisiae   | sacCer2, sacCer3   |
-+-----------------+--------------------+
-| S. pombe        | ASM294v1           |
-+-----------------+--------------------+
-| Arabidopsis     | tair10             |
-+-----------------+--------------------+
-| Rice            | msu6               |
-+-----------------+--------------------+
-
-HOMER can also work with custom genomes in FASTA format and gene
-annotations in GTF format.
+    findMotifs.pl
 
 MACS 1.4
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+****************************************************************
 
-Required in order to run the demo workflow "ChIP-seq" on dataset GSE20870 (in the tutorials section). 
+Required in order to run the demo workflow "ChIP-seq" on dataset GSE20870 (in the  `tutorials <http://gene-regulation.readthedocs.io/en/latest/tutorials.html#>`__ section). 
 
 
 -  `Documentation <http://liulab.dfci.harvard.edu/MACS/00README.html>`__
@@ -457,17 +661,22 @@ Required in order to run the demo workflow "ChIP-seq" on dataset GSE20870 (in th
 ::
 
     cd $HOME/app_sources
-    wget "https://github.com/downloads/taoliu/MACS/MACS-1.4.3.tar.gz"
-    tar -xvzf MACS-1.4.3.tar.gz
-    cd MACS-1.4.3
+    wget "https://github.com/downloads/taoliu/MACS/MACS-1.4.2.tar.gz"
+    tar -xvzf MACS-1.4.2.tar.gz
+    cd MACS-1.4.2
     sudo python setup.py install
+
+Check installaiton: 
+
+::
+
     macs14 --version
 
 
-MACS2
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+MACS 2
+****************************************************************
 
-Required in order to run the demo workflow "ChIP-seq" on dataset GSE20870 (in the tutorials section). 
+Required in order to run the `tutorials <http://gene-regulation.readthedocs.io/en/latest/tutorials.html#>`__. 
 
 -  `Webpage <https://github.com/taoliu/MACS/>`__
 
@@ -476,15 +685,21 @@ Required in order to run the demo workflow "ChIP-seq" on dataset GSE20870 (in th
     sudo apt-get install python-numpy
     sudo pip install MACS2
 
+Check installation: 
+
+::
+
+    macs2 --version
+
 bPeaks
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+****************************************************************
 
 Peak-caller developped specifically for yeast, can be useful in order to
 process small genomes only.
 
-It is currently not used in demo workflows, and is therefore not m adatory to run the tutorials. 
+It is currently not used in demo workflows, and is therefore not mandatory to run the tutorials. 
 
-Available as an R library.
+Available as an R package.
 
 `Web page <http://bpeaks.gene-networks.net/>`__
 
@@ -493,16 +708,24 @@ Available as an R library.
     install.packages("bPeaks")
     library(bPeaks)
 
+SPP
+****************************************************************
 
-SPP R package
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This peak-caller is used in the ChIP-seq study case GSE20870.  
 
-The installation of this peak-caller is optional, as it is not currently published and maintained properly. 
+- Method 1: git 
 
-It is therefore not used in our demo workflows. 
+See `github page <https://github.com/hms-dbmi/spp>`__.
+
+Commands in R:
+
+::
+
+    require(devtools)
+    devtools::install_github('hms-dbmi/spp', build_vignettes = FALSE)
 
 
-- In R
+- Method 2: Bioconductor [deprecated]
 
 ::
 
@@ -511,7 +734,7 @@ It is therefore not used in our demo workflows.
     install.packages("caTools")
     install.packages("spp")
 
-- In commandline
+- Method 3: commandline [deprecated]
 
 ::
 
@@ -520,25 +743,16 @@ It is therefore not used in our demo workflows.
     wget -nc http://compbio.med.harvard.edu/Supplements/ChIP-seq/spp_1.11.tar.gz
     sudo R CMD INSTALL spp_1.11.tar.gz
 
-- Using git (I haven't tried this one but it looks more recent) (see `github page <https://github.com/hms-dbmi/spp>`__)
-
-::
-
-    require(devtools)
-    devtools::install_github('hms-dbmi/spp', build_vignettes = FALSE)
-
-
-I also wrote a little protocol a while ago. 
-Here's the procedure on Ubuntu 14.04, in this very order:
+- Method 4: the ultimate protocol for Ubuntu 14.04
 
 In unix shell:
 
 ::
 
     # unix libraries
-    apt-get update
-    apt-get -y install r-base
-    apt-get -y install libboost-dev zlibc zlib1g-dev
+    sudo apt-get update
+    sudo apt-get -y install r-base
+    sudo apt-get -y install libboost-dev zlibc zlib1g-dev
 
 In R shell:
 
@@ -553,8 +767,15 @@ In unix shell:
 ::
 
     # spp
+    cd $HOME/app_sources
     wget http://compbio.med.harvard.edu/Supplements/ChIP-seq/spp_1.11.tar.gz
     sudo R CMD INSTALL spp_1.11.tar.gz
+
+Check installation in R:
+
+::
+
+     library(spp)
 
 A few links:
 
@@ -570,12 +791,22 @@ A few links:
    `here <http://seqanswers.com/forums/archive/index.php/t-22653.html>`__.
 -  Good luck!
 
+Mosaics
+****************************************************************
+
+This peak-caller is used in the ChIP-seq study case GSE20870.  
+
+Installation in R from Bioconductor:
+
+:: 
+
+    source("https://bioconductor.org/biocLite.R")
+    biocLite("mosaics")
+
 SWEMBL
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+****************************************************************
 
-The installation of this peak-caller is optional, as it is not currently published and maintained properly. 
-
-It is therefore not used in our demo workflows. 
+This peak-caller is used in the ChIP-seq study case GSE20870.  
 
 
 -  `SWEMBL beginner's
@@ -583,24 +814,37 @@ It is therefore not used in our demo workflows.
 
 ::
 
+    git clone https://github.com/stevenwilder/SWEMBL.git
+    cd SWEMBL
+    make 
+    cp SWEMBL $(BIN_DIR)
+
+
+*Deprecated method*
+
+::
+
     cd $HOME/app_sources
-    wget "http://www.ebi.ac.uk/~swilder/SWEMBL/SWEMBL.3.3.1.tar.bz2"
-    bunzip2 -f SWEMBL.3.3.1.tar.bz2
-    tar xvf SWEMBL.3.3.1.tar
-    rm SWEMBL.3.3.1.tar
-    chown -R ubuntu-user SWEMBL.3.3.1
-    cd SWEMBL.3.3.1
+    wget "http://www.ebi.ac.uk/~swilder/SWEMBL/SWEMBL.3.3.1.tar.bz2" && \
+    bunzip2 -f SWEMBL.3.3.1.tar.bz2 && \
+    tar xvf SWEMBL.3.3.1.tar && \
+    rm SWEMBL.3.3.1.tar && \
+    chown -R ubuntu-user SWEMBL.3.3.1 && \
+    cd SWEMBL.3.3.1 && \
     make
 
-It seems there could be issues with C flags. To be investigated. 
+    # This method require a manual fix of C flags in makefile
+    # gcc main.c IO.c calc.c stack.c summit.c refcalc.c wiggle.c overlap.c -o SWEMBL -lz -lm
+
+
 
 Motif discovery, motif analysis
-****************************************************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 These software can be useful for the analysis of ChIP-seq peaks. 
 
 Regulatory Sequence Analysis Tools (RSAT)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+****************************************************************
 
 *see dedicated section*
 
@@ -616,7 +860,7 @@ l'analyse de données de ChIP-seq.
 
 
 MEME
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+****************************************************************
 
 `Link <http://meme.ebi.edu.au/meme/doc/meme-chip.html>`__
 
@@ -626,12 +870,19 @@ Suite logicielle spécialisée pour l'analyse de motifs cis-régulateurs,
 développée par l'équipe de Tim Bailey. Inclut des outils spécifiques
 pour l'analyse de données de ChIP-seq.
 
+RNA-seq
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Miscellaneous
+featureCounts
 ****************************************************************
 
+Liao Y, Smyth GK and Shi W. featureCounts: an efficient general-purpose program for assigning sequence reads to genomic features. Bioinformatics, 30(7):923-30, 2014
+
+Miscellaneous
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 SRA toolkit
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+****************************************************************
 
 This toolkit includes a number of programs, allowing the conversion of
 ``*.sra`` files. ``fastq-dump`` translates ``*.sra`` files to
@@ -667,7 +918,7 @@ command, but likely it won't be the most recent release:
       fastq-dump : 2.1.7
 
 Samtools
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+****************************************************************
 
 SAM (Sequence Alignment/Map) format is a generic format for storing
 large nucleotide sequence alignments.
@@ -686,7 +937,7 @@ to process such files.
     sudo make install
 
 Bedtools
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+****************************************************************
 
 The `bedtools <http://bedtools.readthedocs.org/en/latest/>`__ utilities
 are a swiss-army knife of tools for a wide-range of genomics analysis
@@ -712,7 +963,7 @@ or get the latest version:
 
 
 Bedops
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+****************************************************************
 
 ::
 
@@ -724,7 +975,7 @@ Bedops
     cp bedops/bin/* $HOME/bin
 
 Deeptools
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+****************************************************************
 
 ::
 
@@ -734,12 +985,12 @@ Deeptools
     python setup.py install
 
 Picard tools 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+****************************************************************
 
 *todo*
 
 Other
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+****************************************************************
 
 -  `MICSA <http://bioinfo-out.curie.fr/software.html>`__: peak-calling &
    motifs discovery
