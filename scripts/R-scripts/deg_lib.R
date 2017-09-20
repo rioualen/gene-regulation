@@ -645,37 +645,74 @@ count.boxplot <- function(count.table,
 ################################################################
 ## Draw a heatmap with the inter-sample correlation matrix.
 count.correl.heatmap <- function(count.table, 
-                                 main="Correlation between raw counts",
+                                 main=NULL,
                                  plot.file=NULL,
-                                 log.transform=FALSE, # Perform a log transformation of the values before plotting
+                                 score = "cor", ## Supported: PCC (Pearson Correlation Coefficient) or SERE (handled by SARTools)
+                                 cor.method = "pearson", ## Passed to cor()
+                                 log.transform=TRUE, # Perform a log transformation of the values before plotting. Only done for PCC since SERE requires raw counts.
                                  epsilon=0.1, # Add an epsilon to zero values before log transformation, in order to -Inf values
+                                 gray.palette=TRUE,
                                  ...
                                  ) {
   
   
-  ## Adapt boxplot size to the number of samples and label sizes
-  margin <- max(nchar(names(count.table)))/3+5
-
-  if (log.transform) {
-    range(count.table)
-    count.table[count.table==0] <- epsilon
-    count.table <- log10(count.table)
+  ## Adapt margins to the number of samples and label sizes
+  sample.names <- names(count.table)
+  if (is.null(sample.names)) {
+    margin <- 5
+  } else {
+    margin <- max(nchar(sample.names))/3+5
   }
-  count.cor <- as.matrix(cor(count.table))
+
+  ## Compute comparison score
+  if (score == "SERE") {
+    # lane.totals <- colSums(count.table)
+    # SERE.table <- SERE_fun(
+    #   observed = as.matrix(count.table), 
+    #   laneTotals = lane.totals
+    # )
+    library(SARTools)
+    SERE.table <- tabSERE(as.matrix(count.table))
+    SERE.table <- SERE.table/100 ## SARTools returns scores multiplied by 100
+    count.cor <- max(SERE.table) - SERE.table ## Invert SERE to get a similarity rather than dissimilarity score
+    # count.cor <- SERE.table
+  } else if (score == "cor") {
+    if (log.transform) {
+      range(count.table)
+      count.table[count.table==0] <- epsilon
+      count.table <- log10(count.table)
+    }
+    count.cor <- as.matrix(cor(count.table, method=cor.method))
+  } else {
+    stop("count.correl.heatmap(): ", 
+         score, 
+         " is not a valid score. Supported: cor, SERE. ")
+  }
   
-  ## Define a color palette for heatmaps. I like this Red-Blue palette because 
-  ## - it suggests a subjective feeling of warm (high correlation)/cold (low correlation)
-  ## - it can be seen by people suffering from red–green color blindness.
-  cols.heatmap <- rev(colorRampPalette(brewer.pal(9,"RdBu"))(100))
-  
-  ## Use a grayscale color  
-#
-  cols.heatmap <- gray.colors(100, start = 1, end = 0, gamma = 3, alpha = NULL)
+  ## Define a color palette for heatmaps. 
+  if (gray.palette) {
+    ## Use a grayscale color  
+    cols.heatmap <- gray.colors(100, start = 1, end = 0, gamma = 3, alpha = NULL)
+  } else {
+    ## I like this Red-Blue palette because 
+    ## - it suggests a subjective feeling of warm (high correlation)/cold (low correlation)
+    ## - it can be seen by people suffering from red–green color blindness.
+    cols.heatmap <- rev(colorRampPalette(brewer.pal(9,"RdBu"))(100))
+  } 
 
   ## Sample-wise library sizes
   if (!is.null(plot.file)) {
     message("Generating plot", plot.file)
     pdf(file=plot.file, width=8, height=boxplot.height)
+  }
+  
+  # Define main title
+  if (is.null(main)) {
+    if (score == "SERE") {
+      main <- paste(score, "scor")
+    } else {
+      main <- paste(cor.method, " correlation")
+    }
   }
   
   hm <- heatmap.2(count.cor,  scale="none", trace="none", 
@@ -949,3 +986,33 @@ edger.analysis <- function(dir.figures=NULL) {
   # View(edger.result.table)
   return (edger.result.table)
 }
+
+# SERE code from the authors of the article
+# Not convenient, since it computes the score for a matrix as a whole, whereas we need it for each pair of samples. 
+# We therefore use SARTools::tabSERE()
+# #-----------------------------------------------------------------------------
+# #
+# #-----------------------------------------------------------------------------
+# 
+# SERE_fun <- function(observed, laneTotals, TH=1) {
+#   #calculate lambda and expected values
+#   total <- sum(laneTotals)
+#   fullObserved <- observed[rowSums(observed)>TH,];
+#   fullLambda <- rowSums(fullObserved)/total;
+#   fullLhat <- fullLambda > 0;
+#   fullExpected<- outer(fullLambda, laneTotals);
+#   
+#   #keep values
+#   fullKeep <- which(rowSums(fullExpected) > 0);
+#   
+#   #calculate degrees of freedom (nrow*(ncol -1) >> number of parameters - number calculated parameter (lamda is calculated >> thus minus 1)
+#   #calculate pearson and deviance for all values
+#   oeFull <- rowSums((fullObserved[fullKeep,] - fullExpected[fullKeep,])^2/ fullExpected[fullKeep,]) # test for over dispersion
+#   dfFull <- ncol(observed)*length(fullKeep) - sum(fullLhat!=0);
+#   devFull <- rowSums( fullObserved[fullKeep,] * log(ifelse(fullObserved[fullKeep,]==0,1,fullObserved[fullKeep,])/fullExpected[fullKeep,]))
+#   return(sqrt(sum(oeFull)/dfFull));
+# }
+# 
+# #-----------------------------------------------------------------------------
+# #-----------------------------------------------------------------------------
+# 
